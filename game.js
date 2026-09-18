@@ -913,7 +913,8 @@
     dom.notebook.hidden = false;
     dom.scrim.hidden = false;
     dom.btnNotebook.setAttribute("aria-expanded", "true");
-    dom.btnNotebookClose.focus();
+    dom.btnNotebookClose.focus({ preventScroll: true });
+    dom.nbBody.scrollTop = 0;          // after focus: older engines ignore preventScroll and scroll anyway
   }
   function closeNotebook() {
     dom.notebook.hidden = true;
@@ -936,8 +937,11 @@
       }, action.label));
     });
     dom.modal.hidden = false;
+    // The card scrolls, and the action buttons are its last child. Focusing a button without
+    // preventScroll makes the browser reveal it, which opened long panels ("How to play") at the end.
     const first = dom.modalActions.querySelector("button");
-    if (first) first.focus();
+    if (first) first.focus({ preventScroll: true });
+    if (dom.modalCard) dom.modalCard.scrollTop = 0;   // after focus, for engines without preventScroll
   }
   function closeModal() {
     dom.modal.hidden = true;
@@ -1469,7 +1473,12 @@
       dom.resStats.appendChild(el("dd", { text: pair[1] }));
     });
     dom.resolution.hidden = false;
-    dom.btnResContinue.focus();
+    dom.btnResContinue.focus({ preventScroll: true });
+    // Both resets are needed: styles.css puts the scrolling on .resolution-card on desktop and on
+    // .resolution on phones. After focus, for engines that ignore preventScroll.
+    if (dom.resCard) dom.resCard.scrollTop = 0;
+    dom.resBody.scrollTop = 0;
+    dom.resolution.scrollTop = 0;
   }
 
   function confirmNewShift() {
@@ -1645,6 +1654,8 @@
     dom.modalTitle = $("modal-title");
     dom.modalBody = $("modal-body");
     dom.modalActions = $("modal-actions");
+    dom.modalCard = document.querySelector(".modal-card");
+    dom.resCard = document.querySelector(".resolution-card");
     dom.toast = $("toast");
   }
 

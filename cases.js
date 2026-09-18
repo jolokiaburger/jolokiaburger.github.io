@@ -57,7 +57,7 @@ window.NEON_TIDES = (function () {
   /* ------------------------------------------------------------------ */
   var meta = {
     title: "Neon Tides",
-    version: "2.1.0",
+    version: "2.2.0",
     startClock: "23:40",   // the shift begins here
     dawnClock: "06:00",    // Frostline's truck leaves; endings mention it if you are late
     fuelMax: 6,
