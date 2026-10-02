@@ -7,19 +7,19 @@
    Map of this file
    ----------------
    1. constants & tiny helpers        el(), $(), clocks
-   2. seeds                           hashSeed(), pickVariantIndex()
-   3. building & validating a case    buildCase(), validateCase()
+   2. seeds                           hashSeed(), pickVariantIndex() (pinned seeds first)
+   3. building & validating a case    buildCase(), mergeConfrontation(), validateCase()
    4. state                           newState(), setState()
    5. conditions & text               conditionHolds(), expandLines()
-   6. progress                        computeStage(), currentObjective()
+   6. progress                        currentObjective(), syncSceneClasses()
    7. travel & the ferry              travelTo(), beginCrossing(), positionFerry()
    8. actions                         locationActions(), performAction(), addClue()
    9. the confrontation               startConfrontation() … chooseEnding()
    10. rendering                      render() and the render* functions
-   11. notebook, modal, toast
-   12. saving                         saveGame(), readSave(), saveProblem()
-   13. settings, sound, motion
-   14. events & start-up              bindEvents(), init()
+   11. notebook, modal, toast, the phone sheet (focusEncounter(), updateActionsCue())
+   12. saving                         saveGame(), readSave(), saveProblem(), the case-file profile
+   13. settings, sound, motion        the boat radio, applyMood()
+   14. events & start-up              requestNewShift(), openCaseFiles(), bindEvents(), init()
    ========================================================================== */
 (function () {
   "use strict";
@@ -30,6 +30,7 @@
   const DATA = window.NEON_TIDES;
   const SAVE_KEY = "neon-tides:save:v1";
   const SETTINGS_KEY = "neon-tides:settings:v1";
+  const PROFILE_KEY = "neon-tides:profile:v1";   // which endings you have seen, per case; survives new shifts
   const SAVE_VERSION = 2;            // bumped when the saved shape changes; older saves are cleared
   const FERRY_MS = 2200;             // matches --ferry-ms in styles.css
 
@@ -91,7 +92,36 @@
     }
     return hash >>> 0;
   }
-  function pickVariantIndex(seed) { return hashSeed(normaliseSeed(seed)) % DATA.variants.length; }
+  // A case can pin seeds of its own (variant.seeds), so the seeds printed in the docs and on the title
+  // screen keep naming the same case however many cases are added. Every other seed is hashed.
+  function pickVariantIndex(seed) {
+    const text = normaliseSeed(seed);
+    for (let i = 0; i < DATA.variants.length; i++) {
+      if ((DATA.variants[i].seeds || []).indexOf(text) !== -1) return i;
+    }
+    return hashedIndex(text, DATA.variants.length);
+  }
+  // Unpinned seeds. With two cases this is exactly the 2.x rule (hash % 2). Every case added after that
+  // takes a fair one-in-n share of all seeds and never moves a seed between earlier cases, so a seed
+  // someone wrote down opens either the case it always did or a case newer than it. Plain
+  // `hash % n` would reshuffle seeds between old cases each time one is added. The rule depends on
+  // order: new cases are only ever appended to `variants`.
+  function hashedIndex(text, n) {
+    let index = hashSeed(text) % Math.min(n, 2);
+    for (let k = 3; k <= n; k++) {
+      if (mix32(hashSeed(text + "#" + k)) % k === 0) index = k - 1;
+    }
+    return index;
+  }
+  // FNV-1a multiplies by an odd prime, so its lowest bits mix poorly (bit 0 is just the parity of the
+  // odd character codes). The two-case rule has to keep that for compatibility; the steps for newer
+  // cases run the hash through MurmurHash3's finaliser first, so every bit counts.
+  function mix32(h) {
+    h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b);
+    h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35);
+    h ^= h >>> 16;
+    return h >>> 0;
+  }
   function randomSeed() {
     const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
     let out = "";
@@ -105,25 +135,57 @@
   /* ------------------------------------------------------------------ */
   /* 3 · BUILDING & VALIDATING A CASE                                    */
   /* ------------------------------------------------------------------ */
-  // A playable case = the shared world + one variant, merged.
+  // Every clue id an action can hand out, including the conditional ones in givesWhen.
+  function cluesGivenBy(action) {
+    const given = (action.gives || []).slice();
+    (action.givesWhen || []).forEach(function (g) { (g.gives || []).forEach(function (id) { given.push(id); }); });
+    return given;
+  }
+
+  // The confrontation is world defaults plus whatever the variant overrides. A case with its own lie
+  // (a different liar, other proofs, another place to confront them) overrides most of it.
+  function mergeConfrontation(base, own) {
+    const merged = Object.assign({}, base, own || {});
+    merged.challenge = Object.assign({}, base.challenge, (own && own.challenge) || {});
+    merged.stageLabels = Object.assign({}, base.stageLabels, (own && own.stageLabels) || {});
+    return merged;
+  }
+
+  // A playable case = the shared world + one variant, merged. variant.omit drops shared actions that
+  // belong to a different story (a case with its own lie has its own briefing, for example).
   function buildCase(variant) {
     const world = DATA.world;
+    const omit = variant.omit || [];
     const built = {
       id: variant.id,
       title: variant.title,
       tagline: variant.tagline,
       truth: variant.truth,
-      clues: Object.assign({}, world.clues, variant.clues),
+      allClues: Object.assign({}, world.clues, variant.clues),
+      ownClues: Object.keys(variant.clues || {}),
+      clues: {},
       scenes: variant.scenes,
       actions: {},
+      confrontation: mergeConfrontation(world.confrontation, variant.confrontation),
+      threads: variant.threads || world.threads,
+      objectives: variant.objectives || world.objectives,
+      sceneClasses: (world.sceneClasses || []).concat(variant.sceneClasses || []),
       responses: variant.responses,
       finalChoices: variant.finalChoices,
-      endings: variant.endings
+      endings: variant.endings,
+      omitted: omit.slice()
     };
     Object.keys(world.locations).forEach(function (loc) {
-      const shared = world.actions[loc] || [];
+      const shared = (world.actions[loc] || []).filter(function (a) { return omit.indexOf(a.id) === -1; });
       const own = (variant.actions && variant.actions[loc]) || [];
       built.actions[loc] = shared.concat(own);
+    });
+    // Only clues something in this case can hand out belong to it, so a shared clue from a story this
+    // case left out never counts towards "x of y clues" or settles a thread.
+    Object.keys(built.actions).forEach(function (loc) {
+      built.actions[loc].forEach(function (action) {
+        cluesGivenBy(action).forEach(function (id) { if (built.allClues[id]) built.clues[id] = built.allClues[id]; });
+      });
     });
     return built;
   }
@@ -132,14 +194,20 @@
   function validateCase(built) {
     const problems = [];
     const world = DATA.world;
+    const conf = built.confrontation;
     const clueIds = Object.keys(built.clues);
     function proving(tag) {
       return clueIds.filter(function (id) { return (built.clues[id].proves || []).indexOf(tag) !== -1; });
     }
-    if (proving("arrived").length === 0) problems.push("no clue proves 'arrived'");
-    if (proving("met").length === 0) problems.push("no clue proves 'met'");
+    const requires = conf.requires || [];
+    if (requires.length === 0) problems.push("the confrontation requires no proofs");
+    requires.forEach(function (tag) {
+      if (proving(tag).length === 0) problems.push("no clue proves '" + tag + "'");
+      if (requires.length > 1 && !(conf.challenge.missing && conf.challenge.missing[tag])) problems.push("missing challenge.missing." + tag);
+    });
+    if (!world.locations[conf.at]) problems.push("the confrontation happens at unknown place '" + conf.at + "'");
 
-    const explanations = world.confrontation.explanations;
+    const explanations = conf.explanations || [];
     const truth = explanations.filter(function (e) { return e.id === built.truth; })[0];
     if (!truth) problems.push("truth '" + built.truth + "' is not one of the explanations");
     else if (proving(truth.proof).length === 0) problems.push("no clue proves the true explanation (" + truth.proof + ")");
@@ -156,12 +224,17 @@
       (built.actions[loc] || []).forEach(function (action) {
         if (seen[action.id]) problems.push("duplicate action id '" + action.id + "' at " + loc);
         seen[action.id] = true;
-        const given = (action.gives || []).slice();
-        (action.givesWhen || []).forEach(function (g) { (g.gives || []).forEach(function (id) { given.push(id); }); });
-        given.forEach(function (id) { if (!built.clues[id]) problems.push("action " + action.id + " gives unknown clue '" + id + "'"); });
+        cluesGivenBy(action).forEach(function (id) { if (!built.allClues[id]) problems.push("action " + action.id + " gives unknown clue '" + id + "'"); });
       });
     });
+    // A clue written for this case that nothing hands out is almost always a typo or a forgotten action.
+    built.ownClues.forEach(function (id) { if (!built.clues[id]) problems.push("clue '" + id + "' is never given by any action"); });
+    built.omitted.forEach(function (id) {
+      const known = Object.keys(world.actions).some(function (loc) { return world.actions[loc].some(function (a) { return a.id === id; }); });
+      if (!known) problems.push("omit names unknown shared action '" + id + "'");
+    });
 
+    if (!built.objectives || !built.objectives.length) problems.push("no objectives");
     if (!built.finalChoices || built.finalChoices.length === 0) problems.push("no final choices");
     (built.finalChoices || []).forEach(function (choice) {
       if (!built.endings || !built.endings[choice.ending]) problems.push("choice " + choice.id + " points to unknown ending '" + choice.ending + "'");
@@ -171,7 +244,17 @@
 
   function validateAll() {
     const report = {};
-    DATA.variants.forEach(function (v) { report[v.id] = validateCase(buildCase(v)); });
+    const pinned = {};
+    DATA.variants.forEach(function (v) {
+      report[v.id] = validateCase(buildCase(v));
+      // The case files open each case by its first pinned seed, so every case needs one.
+      if (!v.seeds || !v.seeds.length) report[v.id].push("no pinned seed (variant.seeds)");
+      (v.seeds || []).forEach(function (seed) {
+        if (pinned[seed]) report[v.id].push("seed '" + seed + "' is already pinned to " + pinned[seed]);
+        else pinned[seed] = v.id;
+        if (seed !== normaliseSeed(seed)) report[v.id].push("pinned seed '" + seed + "' must be trimmed lower case");
+      });
+    });
     return report;
   }
 
@@ -180,8 +263,9 @@
   /* ------------------------------------------------------------------ */
   let state = null;         // the saved game
   let activeCase = null;    // built from state.variantId
-  const transient = { travelling: null, timer: null, mode: "title" };
-  const settings = { station: "off", motion: "auto" };
+  const transient = { travelling: null, timer: null, mode: "title", sceneClasses: [], objective: null };
+  const settings = { station: "off", motion: "auto", coached: false };
+  const profile = { version: 1, cases: {} };   // cases[variantId] = { endings: [endingId, ...] }
   const storage = { ok: true, reason: "" };
   const dom = {};
 
@@ -224,6 +308,9 @@
   function cluesProving(tag) {
     return state.clues.filter(function (c) { return clueProves(c.id, tag); }).map(function (c) { return c.id; });
   }
+  // The proof tags of every explanation offered at the confrontation: a clue carrying one is a motive lead.
+  function motiveTags() { return activeCase.confrontation.explanations.map(function (e) { return e.proof; }); }
+  function motiveKnown() { return motiveTags().some(proven); }
 
   // Every field of a condition must hold. See the top of cases.js for the list.
   function conditionHolds(cond) {
@@ -238,6 +325,10 @@
     if (typeof cond.fuelBelow === "number" && !(state.fuel < cond.fuelBelow)) return false;
     if (typeof cond.resolved === "boolean" && state.resolved !== cond.resolved) return false;
     if (cond.ending && state.ending !== cond.ending) return false;
+    if (cond.proven && !cond.proven.every(proven)) return false;
+    if (cond.unproven && cond.unproven.some(proven)) return false;
+    if (typeof cond.motive === "boolean" && motiveKnown() !== cond.motive) return false;
+    if (typeof cond.confronting === "boolean" && !!state.confront !== cond.confronting) return false;
     return true;
   }
 
@@ -258,22 +349,25 @@
   /* ------------------------------------------------------------------ */
   /* 6 · PROGRESS                                                        */
   /* ------------------------------------------------------------------ */
-  function computeStage() {
-    if (state.resolved) return "resolved";
-    if (state.confront) return "confronting";
-    if (!state.flags.accepted) return "briefing";
-    const arrived = proven("arrived");
-    const met = proven("met");
-    const motive = proven("motive_protect") || proven("motive_sale");
-    if (arrived && met && motive) return "motive";
-    if (arrived && met) return "met";
-    if (met) return "metOnly";
-    if (arrived) return "arrived";
-    return "start";
-  }
+  // Objectives are an ordered list of { when: CONDITION, text }; the first rule that holds is shown.
+  // That keeps "what now?" in cases.js, where each case can phrase it for its own lie.
   function currentObjective() {
-    const objectives = DATA.world.objectives;
-    return objectives[computeStage()] || objectives.start;
+    const rules = activeCase.objectives;
+    for (let i = 0; i < rules.length; i++) {
+      if (conditionHolds(rules[i].when)) return rules[i].text;
+    }
+    return "";
+  }
+
+  // Classes on <body> that let the picture follow the story: the platform empties after the last train,
+  // a stool stands empty after one ending. Rules live in cases.js; styles.css draws the difference.
+  function syncSceneClasses() {
+    const next = state && activeCase && transient.mode === "play"
+      ? activeCase.sceneClasses.filter(function (rule) { return conditionHolds(rule.when); }).map(function (rule) { return rule.class; })
+      : [];
+    (transient.sceneClasses || []).forEach(function (name) { if (next.indexOf(name) === -1) document.body.classList.remove(name); });
+    next.forEach(function (name) { document.body.classList.add(name); });
+    transient.sceneClasses = next;
   }
 
   /* ------------------------------------------------------------------ */
@@ -298,7 +392,7 @@
   function canTravel(dest) {
     if (dest === state.location) return { ok: false, why: "moored here" };
     if (transient.travelling) return { ok: false, why: "under way" };
-    if (state.confront) return { ok: false, why: "at the counter" };
+    if (state.confront) return { ok: false, why: activeCase.confrontation.busyLabel };
     const cost = travelCost(state.location, dest);
     if (!cost) return { ok: false, why: "no route" };
     if (state.fuel < cost.fuel) return { ok: false, why: "needs " + cost.fuel + " fuel", cost: cost };
@@ -323,7 +417,7 @@
     saveGame();
     if (settings.station === "off" && !transient.hintedRadio) {
       transient.hintedRadio = true;
-      toast("Radio is off. Tune it (R) for engine sound and music.");
+      toast(touchFirst() ? "Radio is off. Tap the radio for engine sound and music." : "Radio is off. Tune it (R) for engine sound and music.");
     }
     beginCrossing(from, dest, minutes, check.cost.fuel);
   }
@@ -377,8 +471,9 @@
   function systemActions() {
     const out = [];
     const world = DATA.world;
-    if (state.location === "bar" && state.flags.accepted && !state.resolved && state.clues.length > 0) {
-      out.push({ id: "sys_confront", kind: "confront", label: world.confrontation.actionLabel || "Put your evidence on the counter", minutes: 0 });
+    const conf = activeCase.confrontation;
+    if (state.location === conf.at && state.flags.accepted && !state.resolved && state.clues.length > 0) {
+      out.push({ id: "sys_confront", kind: "confront", label: conf.actionLabel, minutes: 0 });
     }
     if (state.cans > 0 && !state.canArmed) {
       out.push({ id: "sys_drink", kind: "use", label: "Drink a " + world.drink.name + " — next crossing takes no time", minutes: 0 });
@@ -481,27 +576,36 @@
     const c = state.confront;
     const at = c.selected.indexOf(id);
     if (at !== -1) c.selected.splice(at, 1);
-    else if (c.selected.length < DATA.world.confrontation.maxEvidence) c.selected.push(id);
+    else if (c.selected.length < activeCase.confrontation.maxEvidence) c.selected.push(id);
     c.feedback = null;
     saveGame();
     renderKeepingFocus();
   }
+  // The lie breaks when the evidence on the counter covers every tag in confrontation.requires.
+  // Partly covered: the rebuttal for the first required tag still missing. Nothing relevant: "nothing".
   function submitEvidence() {
     const c = state.confront;
-    const challenge = DATA.world.confrontation.challenge;
-    const arrived = c.selected.some(function (id) { return clueProves(id, "arrived"); });
-    const met = c.selected.some(function (id) { return clueProves(id, "met"); });
-    if (arrived && met) { c.stage = "explain"; c.feedback = expandLines(challenge.success); }
-    else if (arrived) c.feedback = expandLines(challenge.arrivedOnly);
-    else if (met) c.feedback = expandLines(challenge.metOnly);
-    else c.feedback = expandLines(challenge.nothing);
+    const conf = activeCase.confrontation;
+    const challenge = conf.challenge;
+    const shown = conf.requires.filter(function (tag) {
+      return c.selected.some(function (id) { return clueProves(id, tag); });
+    });
+    if (shown.length === conf.requires.length) {
+      c.stage = "explain";
+      c.feedback = expandLines(challenge.success);
+    } else if (shown.length === 0) {
+      c.feedback = expandLines(challenge.nothing);
+    } else {
+      const missing = conf.requires.filter(function (tag) { return shown.indexOf(tag) === -1; })[0];
+      c.feedback = expandLines(challenge.missing[missing]);
+    }
     saveGame();
     render();
     focusEncounter();
   }
   function submitExplanation() {
     const c = state.confront;
-    const conf = DATA.world.confrontation;
+    const conf = activeCase.confrontation;
     const explanation = conf.explanations.filter(function (e) { return e.id === c.explanation; })[0];
     if (!explanation || !c.support) return;
     if (explanation.id !== activeCase.truth) {
@@ -525,6 +629,7 @@
     state.confront = null;
     state.lastResult = null;
     saveGame();
+    recordEnding(state.variantId, choice.ending);
     render();
     showResolution();
   }
@@ -534,12 +639,15 @@
   /* ------------------------------------------------------------------ */
   function render() {
     if (!state) return;
+    syncSceneClasses();
     renderInstruments();
     renderHarbour();
     renderChips();
     renderEncounter();
     renderNotebook();
     updateScrollHint();
+    updateActionsCue();
+    applyMood();
   }
   // Fades the bottom of the story text while there is more to scroll (desktop panel).
   function updateScrollHint() {
@@ -547,23 +655,34 @@
     const more = body.scrollHeight - body.clientHeight - body.scrollTop > 6;
     body.classList.toggle("has-more", more);
   }
+  // Ticking a piece of evidence rebuilds the list; the reader stays where they were in it.
   function renderKeepingFocus() {
     const focusedId = document.activeElement && document.activeElement.id;
+    const sheetTop = dom.encounter.scrollTop;
+    const bodyTop = dom.encBody.scrollTop;
     render();
+    dom.encounter.scrollTop = sheetTop;
+    dom.encBody.scrollTop = bodyTop;
     if (focusedId && $(focusedId)) $(focusedId).focus({ preventScroll: true });
+    updateScrollHint();
+    updateActionsCue();
   }
 
   function setMode(mode) {
     transient.mode = mode;
     document.body.setAttribute("data-mode", mode);
+    syncSceneClasses();                 // the title screen always shows the harbour as it starts
     syncAspect();
     dom.titleOverlay.hidden = mode !== "title";
-    if (mode !== "title") dom.resolution.hidden = true;
+    // Every change of mode clears the ending card (showResolution() runs after setMode when it is
+    // needed). Leaving it up let it cover the title screen after "New shift…" from the card itself.
+    dom.resolution.hidden = true;
   }
   // The picture normally fits inside its frame ("meet"). On a phone's tall title screen it
   // fills the frame instead ("slice") so the noodle bar stays large behind the title.
   function syncAspect() {
-    const phone = window.matchMedia("(max-width: 899px)").matches;
+    // Portrait only: a landscape phone's title frame is wide, and the bar crop would cut the sign.
+    const phone = window.matchMedia("(max-width: 899px) and (orientation: portrait)").matches;
     const phoneTitle = transient.mode === "title" && phone;
     dom.svg.setAttribute("preserveAspectRatio", phoneTitle ? "xMidYMid slice" : "xMidYMid meet");
     // On a phone's title screen, frame the noodle bar (x 567–1207) instead of the whole harbour.
@@ -587,13 +706,24 @@
     dom.instCan.className = "inst-value" + (state.canArmed ? " armed" : "");
     dom.instCanSub.textContent = state.canArmed ? "armed: next crossing 0 min" : (state.cans > 0 ? "skips one crossing's time" : "none in hand");
 
-    dom.instObjective.textContent = currentObjective();
+    // A new objective glows for a moment, so "what now?" is noticed when it changes.
+    const objective = currentObjective();
+    if (dom.instObjective.textContent !== objective) {
+      dom.instObjective.textContent = objective;
+      dom.instObjectiveCell.title = objective;
+      if (transient.objective) {
+        dom.instObjectiveCell.classList.remove("updated");
+        void dom.instObjectiveCell.offsetWidth;       // restart the animation
+        dom.instObjectiveCell.classList.add("updated");
+      }
+    }
+    transient.objective = objective;
   }
 
   function costText(dest) {
     const check = canTravel(dest);
     if (dest === state.location) return "moored here";
-    if (state.confront) return "at the counter";
+    if (state.confront) return activeCase.confrontation.busyLabel;      // "at the counter", "under the floodlight"
     const cost = travelCost(state.location, dest);
     if (!cost) return "";
     const minutes = travelMinutes(cost);
@@ -614,12 +744,23 @@
     });
   }
 
-  // Phone layout: big buttons under the picture (hidden on desktop by CSS).
+  // Big buttons under the picture (phones, and touch screens at desktop widths; CSS decides).
+  // An affordable crossing shows its fuel as amber pips, like the gauge, so four chips fit in one
+  // row on a phone; anything else (moored here, needs fuel) is said in words.
   function renderChips() {
     dom.chips.innerHTML = "";
     Object.keys(DATA.world.locations).forEach(function (dest) {
       const loc = DATA.world.locations[dest];
       const check = canTravel(dest);
+      const cost = travelCost(state.location, dest);
+      const pips = [];
+      if (cost) for (let i = 0; i < cost.fuel; i++) pips.push(el("i", { class: "pip" }));
+      const costNode = check.ok
+        ? el("span", { class: "chip-cost" }, [
+            el("span", { class: "chip-pips", "aria-hidden": "true" }, pips),
+            el("span", { class: "chip-time", text: travelMinutes(cost) + " min" })
+          ])
+        : el("span", { class: "chip-cost plain", text: costText(dest) });   // a block, so a long word can ellipsise
       const chip = el("button", {
         class: "chip", type: "button",
         "data-current": dest === state.location ? "true" : "false",
@@ -628,7 +769,7 @@
         onclick: function () { travelTo(dest); }
       }, [
         el("span", { class: "chip-name", text: loc.short }),
-        el("span", { class: "chip-cost", text: costText(dest) })
+        costNode
       ]);
       dom.chips.appendChild(chip);
     });
@@ -639,13 +780,14 @@
     const actions = dom.encActions;
     body.innerHTML = "";
     actions.innerHTML = "";
+    dom.encCoach.innerHTML = "";
 
     if (transient.travelling) {
       const trip = transient.travelling;
       const to = DATA.world.locations[trip.to];
       dom.encKicker.textContent = "Under way";
       dom.encTitle.textContent = "Crossing to " + to.name;
-      body.appendChild(el("p", { class: "narration", text: to.approach }));
+      renderLines(body, approachLines(trip.to));
       body.appendChild(el("p", { class: "notice", text: (trip.fuel ? "−" + trip.fuel + " fuel · " : "") + "+" + trip.minutes + " min" }));
       return;
     }
@@ -655,17 +797,43 @@
     dom.encTitle.textContent = loc.title;
 
     if (state.confront) { renderConfrontation(body, actions); return; }
+    // The card lives outside the story's aria-live region, so a screen reader doesn't re-read it
+    // with every result.
+    if (touchFirst() && !settings.coached) dom.encCoach.appendChild(coachCard());
     if (state.lastResult) renderResult(body, state.lastResult);
     else renderScene(body);
     renderActions(actions);
   }
 
+  // First shift on a touch screen: one card that says how the screen works, until it is dismissed.
+  // (The help text describes the same thing; nobody opens the help text first.)
+  function coachCard() {
+    return el("div", { class: "coach", role: "note" }, [
+      el("p", { class: "coach-title", text: "How this works" }),
+      el("p", { text: "Tap a place in the picture, or one of the four buttons under it, to cross the harbour. What you can do where you are is listed under the story, with what it costs." }),
+      el("button", { class: "btn btn-small", type: "button", onclick: function () { settings.coached = true; saveSettings(); render(); focusFirstChoice(); } }, "Got it")
+    ]);
+  }
+  // When the control that had focus disappears (the card's button, the cue), focus moves to the first
+  // choice instead of falling back to <body>.
+  function focusFirstChoice() {
+    const first = visibleActionButtons()[0];
+    if (first) first.focus({ preventScroll: true });
+  }
+
   function renderScene(container) {
     const scene = activeCase.scenes[state.location];
     const first = (state.visited[state.location] || 1) <= 1;
-    const items = expandLines(first ? scene.first : scene.again);
-    if (items.length === 0 && !first) items.push({ type: "p", text: DATA.world.locations[state.location].approach });
+    let items = expandLines(first ? scene.first : scene.again);
+    if (items.length === 0 && !first) items = approachLines(state.location);
     renderLines(container, items);
+  }
+
+  // A place's approach text is one line, or a list of entries with conditions (the metro's terminus
+  // is dark after the last train). The clock has already moved to the arrival time when it is read.
+  function approachLines(locId) {
+    const approach = DATA.world.locations[locId].approach;
+    return expandLines(Array.isArray(approach) ? approach : [approach]);
   }
 
   function renderResult(container, result) {
@@ -718,6 +886,7 @@
       type: "button",
       disabled: opts.disabled ? true : null,
       "data-key": opts.key || null,
+      "data-label": opts.label,
       onclick: opts.onClick
     }, [
       el("span", { class: "act-label" }, [opts.key ? el("span", { class: "key", text: opts.key }) : null, opts.label]),
@@ -737,47 +906,55 @@
       .concat(sys.filter(function (a) { return a.kind !== "confront"; }));
 
     if (here.length || confront.length) {
-      container.appendChild(el("p", { class: "action-group-label", text: DATA.world.locations[state.location].short }));
+      const local = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: DATA.world.locations[state.location].short })]);
       here.concat(confront).forEach(function (action) {
         const minutes = actionMinutes(action);
-        container.appendChild(actionButton({
+        local.appendChild(actionButton({
           kind: action.kind, label: action.label, key: nextKey(),
           costs: costBadges(minutes, action.fuel, action.costLabel && minutes > 0 ? "+" + minutes + " min · " + action.costLabel : null),
           onClick: function () { performAction(action.id); }
         }));
       });
+      container.appendChild(local);
     }
 
-    container.appendChild(el("p", { class: "action-group-label", text: "Ferry" }));
+    // On phones the chips above the sheet are the travel buttons, so a Ferry group holding nothing
+    // but crossings is marked and hidden there (styles.css 13b).
+    const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
     Object.keys(DATA.world.locations).forEach(function (dest) {
       if (dest === state.location) return;
       const loc = DATA.world.locations[dest];
       const check = canTravel(dest);
       const cost = travelCost(state.location, dest);
-      container.appendChild(actionButton({
-        kind: "travel", label: "Cast off for " + loc.short, key: nextKey(),
+      ferry.appendChild(actionButton({
+        // hidden in the phone shell (the chips travel), so they take no number there
+        kind: "travel", label: "Cast off for " + loc.short, key: phoneShell() ? null : nextKey(),
         disabled: !check.ok,
         costs: costBadges(travelMinutes(cost), cost.fuel, state.canArmed ? "0 min · " + DATA.world.drink.name : null),
         onClick: function () { travelTo(dest); }
       }));
       if (!check.ok && check.why.indexOf("needs") === 0) {
-        container.appendChild(el("p", { class: "act-why", text: "Not enough fuel. Refuel at Landing 3, or radio the tug if you are stuck." }));
+        ferry.appendChild(el("p", { class: "act-why", text: "Not enough fuel. Refuel at Landing 3, or radio the tug if you are stuck." }));
       }
     });
     ferryActions.forEach(function (action) {
       const minutes = actionMinutes(action);
-      container.appendChild(actionButton({
+      ferry.appendChild(actionButton({
         kind: action.kind === "use" ? "use" : "system", label: action.label, key: nextKey(),
         costs: costBadges(minutes, action.fuel, action.costLabel && minutes > 0 ? "+" + minutes + " min · " + action.costLabel : null),
         onClick: function () { performAction(action.id); }
       }));
     });
+    container.appendChild(ferry);
+    if (!here.length && !confront.length && !ferryActions.length) {
+      container.appendChild(el("p", { class: "act-none", text: "Nothing more to do here for now. Cross the harbour with the buttons under the picture." }));
+    }
   }
 
   function renderConfrontation(body, actions) {
     const c = state.confront;
-    const conf = DATA.world.confrontation;
-    body.appendChild(el("p", { class: "stage-label", text: c.stage === "select" ? "The counter · evidence" : c.stage === "explain" ? "The counter · explanation" : "The counter · decision" }));
+    const conf = activeCase.confrontation;
+    body.appendChild(el("p", { class: "stage-label", text: conf.stageLabels[c.stage] }));
 
     if (c.stage === "select") {
       renderLines(body, expandLines(conf.intro));
@@ -796,9 +973,9 @@
         ]));
       });
       body.appendChild(list);
-      body.appendChild(el("p", { class: "evidence-counter", text: c.selected.length + " / " + conf.maxEvidence + " on the counter" }));
-      actions.appendChild(actionButton({ kind: "confront", label: "Put it on the counter", disabled: c.selected.length === 0, costs: costBadges(0), onClick: submitEvidence }));
-      actions.appendChild(actionButton({ kind: "system", label: "Step back from the counter", costs: costBadges(0), onClick: stepBack }));
+      body.appendChild(el("p", { class: "evidence-counter", text: c.selected.length + " / " + conf.maxEvidence + " " + conf.counterLabel }));
+      actions.appendChild(actionButton({ kind: "confront", label: conf.submitLabel, disabled: c.selected.length === 0, costs: costBadges(0), onClick: submitEvidence }));
+      actions.appendChild(actionButton({ kind: "system", label: conf.stepBackLabel, costs: costBadges(0), onClick: stepBack }));
       return;
     }
 
@@ -814,7 +991,7 @@
         ]));
       });
       body.appendChild(theories);
-      body.appendChild(el("p", { class: "notice", text: "…and the one clue that supports it:" }));
+      body.appendChild(el("p", { class: "notice", text: conf.supportPrompt }));
       const supports = el("div", { class: "evidence-list", role: "radiogroup", "aria-label": "Supporting clue" });
       state.clues.forEach(function (entry) {
         const clue = activeCase.clues[entry.id];
@@ -825,18 +1002,21 @@
         ]));
       });
       body.appendChild(supports);
-      const accuse = actionButton({ kind: "confront", label: "Make the accusation", disabled: !(c.explanation && c.support), costs: costBadges(0), onClick: submitExplanation });
+      const accuse = actionButton({ kind: "confront", label: conf.accuseLabel, disabled: !(c.explanation && c.support), costs: costBadges(0), onClick: submitExplanation });
       accuse.id = "btn-accuse";
       actions.appendChild(accuse);
-      actions.appendChild(actionButton({ kind: "system", label: "Step back from the counter", costs: costBadges(0), onClick: stepBack }));
+      actions.appendChild(actionButton({ kind: "system", label: conf.stepBackLabel, costs: costBadges(0), onClick: stepBack }));
       return;
     }
 
     // stage === "choice"
     if (c.feedback) renderLines(body, c.feedback);
     body.appendChild(el("p", { class: "notice", text: conf.choicePrompt }));
+    // A choice that names the dawn ("until the dawn truck") can say something else once dawn has gone.
+    const late = state.clock >= DAWN_CLOCK;
     activeCase.finalChoices.forEach(function (choice, i) {
-      actions.appendChild(actionButton({ kind: "choice", label: choice.label, key: String(i + 1), costs: costBadges(0), onClick: function () { chooseEnding(choice.id); } }));
+      const label = late && choice.lateLabel ? choice.lateLabel : choice.label;
+      actions.appendChild(actionButton({ kind: "choice", label: label, key: String(i + 1), costs: costBadges(0), onClick: function () { chooseEnding(choice.id); } }));
     });
   }
   function syncAccuseButton() {
@@ -863,11 +1043,15 @@
     ]));
 
     const threads = el("ul", { class: "threads" });
-    DATA.world.threads.forEach(function (thread) {
-      const tags = Array.isArray(thread.proof) ? thread.proof : [thread.proof];
-      const settledBy = tags.reduce(function (acc, tag) { return acc.concat(cluesProving(tag)); }, []);
+    activeCase.threads.forEach(function (thread) {
+      // A "leads" thread with no proof of its own counts clues for any explanation on offer.
+      const tags = thread.proof ? (Array.isArray(thread.proof) ? thread.proof : [thread.proof]) : motiveTags();
+      const settledBy = tags.reduce(function (acc, tag) {
+        cluesProving(tag).forEach(function (id) { if (acc.indexOf(id) === -1) acc.push(id); });
+        return acc;
+      }, []);
       let status = "open";
-      if (thread.id === "why") {
+      if (thread.leads) {
         status = settledBy.length ? settledBy.length + (settledBy.length === 1 ? " lead" : " leads") : "no leads yet";
       } else if (settledBy.length) {
         status = "settled · " + activeCase.clues[settledBy[0]].title;
@@ -956,13 +1140,69 @@
     toastTimer = setTimeout(function () { dom.toast.classList.remove("show"); }, 2800);
   }
 
+  // Phones get the fixed shell (styles.css 13b) only where dvh exists; older engines keep the
+  // scrolling layout, where the page itself moves to the story.
+  const SHELL_SUPPORTED = !!(window.CSS && CSS.supports && CSS.supports("height", "100dvh"));
+  function phoneLayout() { return window.matchMedia("(max-width: 899px)").matches; }
+  function phoneShell() { return SHELL_SUPPORTED && phoneLayout(); }
+
+  // After every action the reader starts at the top of what just happened.
   function focusEncounter() {
-    if (window.matchMedia("(max-width: 899px)").matches) {
+    if (phoneShell()) {
+      dom.encounter.scrollTop = 0;            // the sheet scrolls; the page never does
+    } else if (phoneLayout()) {
       dom.encounter.scrollIntoView({ block: "start", behavior: motionReduced() ? "auto" : "smooth" });
     } else {
       dom.encBody.scrollTop = 0;
       dom.encActions.scrollTop = 0;
     }
+    updateActionsCue();
+  }
+
+  // Phones: "N choices below" floats over the sheet while the first choice is out of view. At the
+  // counter it names the one thing to press instead ("Put it on the counter").
+  function visibleActionButtons() {
+    return Array.prototype.filter.call(dom.encActions.querySelectorAll(".action-btn"), function (b) { return b.offsetParent !== null; });
+  }
+  function updateActionsCue() {
+    const cue = dom.actionsCue;
+    let show = false;
+    if (phoneShell() && state && transient.mode === "play" && !transient.travelling && dom.resolution.hidden) {
+      const buttons = visibleActionButtons();
+      if (buttons.length) {
+        show = buttons[0].getBoundingClientRect().top > dom.encounter.getBoundingClientRect().bottom - 24;
+        if (show) {
+          const naming = state.confront && state.confront.stage !== "choice";
+          cue.textContent = naming ? buttons[0].getAttribute("data-label") : buttons.length + (buttons.length === 1 ? " choice below" : " choices below");
+        }
+      }
+    }
+    cue.hidden = !show;
+  }
+  function scrollToActions() {
+    const sheet = dom.encounter;
+    const top = sheet.scrollTop + dom.encActions.getBoundingClientRect().top - sheet.getBoundingClientRect().top - 10;
+    sheet.scrollTo({ top: top, behavior: motionReduced() ? "auto" : "smooth" });
+    focusFirstChoice();
+  }
+
+  // On a phone the objective is one truncated line that opens on a tap; there it is also a real
+  // control for keyboards and screen readers. Elsewhere it is plain text, always shown in full.
+  function syncObjectiveControl() {
+    const cell = dom.instObjectiveCell;
+    if (phoneShell()) {
+      cell.setAttribute("role", "button");
+      cell.setAttribute("tabindex", "0");
+      cell.setAttribute("aria-expanded", cell.classList.contains("open") ? "true" : "false");
+    } else {
+      cell.removeAttribute("role");
+      cell.removeAttribute("tabindex");
+      cell.removeAttribute("aria-expanded");
+    }
+  }
+  function toggleObjective() {
+    dom.instObjectiveCell.classList.toggle("open");
+    syncObjectiveControl();
   }
 
   /* ------------------------------------------------------------------ */
@@ -1014,6 +1254,30 @@
     return null;
   }
 
+  // The case-file record lives under its own key, like the settings: a corrupt or erased save never
+  // takes it along, and a broken record is ignored rather than trusted.
+  function loadProfile() {
+    const raw = storageGet(PROFILE_KEY);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!parsed || parsed.version !== 1 || !parsed.cases || typeof parsed.cases !== "object") return;
+      Object.keys(parsed.cases).forEach(function (id) {
+        const variant = variantById(id);
+        const entry = parsed.cases[id];
+        if (!variant || !entry || !Array.isArray(entry.endings)) return;
+        profile.cases[id] = { endings: entry.endings.filter(function (e) { return !!variant.endings[e]; }) };
+      });
+    } catch (err) { /* ignore a broken record */ }
+  }
+  function saveProfile() { storageSet(PROFILE_KEY, JSON.stringify(profile)); }
+  function recordEnding(variantId, endingId) {
+    const entry = profile.cases[variantId] || (profile.cases[variantId] = { endings: [] });
+    if (entry.endings.indexOf(endingId) === -1) entry.endings.push(endingId);
+    saveProfile();
+  }
+  function endingsFound(variantId) { return profile.cases[variantId] ? profile.cases[variantId].endings : []; }
+
   /* ------------------------------------------------------------------ */
   /* 13 · SETTINGS, SOUND, MOTION                                        */
   /* ------------------------------------------------------------------ */
@@ -1024,6 +1288,7 @@
       const parsed = JSON.parse(raw);
       settings.station = STATIONS.some(function (s) { return s.id === parsed.station; }) ? parsed.station : "off";
       settings.motion = MOTION_MODES.indexOf(parsed.motion) !== -1 ? parsed.motion : (parsed.reduceMotion ? "reduced" : "auto");
+      settings.coached = parsed.coached === true;
     } catch (err) { /* ignore a broken settings blob */ }
   }
   function saveSettings() { storageSet(SETTINGS_KEY, JSON.stringify(settings)); }
@@ -1081,7 +1346,7 @@
     const ctx = new Ctx();
     const rate = ctx.sampleRate;
     const master = ctx.createGain();
-    master.gain.value = 0.8;
+    master.gain.value = MASTER_GAIN;
     const compressor = ctx.createDynamicsCompressor();
     compressor.threshold.value = -16;
     compressor.ratio.value = 4;
@@ -1150,7 +1415,7 @@
       return;
     }
     const ctx = radio.ctx;
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") resumeAudio();
     stopMusic();
     if (!quiet) radioStatic(ctx.currentTime);
     radio.rainGain.gain.setTargetAtTime(station.id === "rain" ? 0.09 : 0.035, ctx.currentTime, 0.6);
@@ -1158,6 +1423,29 @@
     if (station.id === "basin") radio.stop = startBasinLoFi();
   }
   function stopMusic() { if (radio.stop) { radio.stop(); radio.stop = null; } }
+
+  // The music follows the night. Basin Lo-Fi's dull low-pass opens as the shift wears on towards dawn
+  // (about 3 kHz at the start of the shift, 7 kHz by the dawn truck), and the whole radio drops back
+  // a little while you stand at the counter, the way Mei turns the burner down. Called on every render;
+  // setTargetAtTime glides, so repeated calls are harmless.
+  const MASTER_GAIN = 0.8;
+  function nightProgress() {
+    if (!state) return 0;
+    return Math.max(0, Math.min(1, (state.clock - START_CLOCK) / (DAWN_CLOCK - START_CLOCK)));
+  }
+  function nightFilter() { return 3000 + nightProgress() * 4000; }
+  function applyMood() {
+    if (!radio.ctx || radio.ctx.state !== "running") return;
+    const t = radio.ctx.currentTime;
+    if (radio.basinFilter) radio.basinFilter.frequency.setTargetAtTime(nightFilter(), t, 2.5);
+    radio.master.gain.setTargetAtTime(state && state.confront ? MASTER_GAIN * 0.7 : MASTER_GAIN, t, 0.8);
+  }
+  // resume() is asynchronous: the mood is applied once the context actually runs again, or a render in
+  // the same moment would skip it (and leave the radio ducked after a confrontation, for example).
+  function resumeAudio() {
+    const resumed = radio.ctx.resume();
+    if (resumed && resumed.then) resumed.then(applyMood, function () { /* a refused resume waits for a gesture */ });
+  }
   function renderRadio() {
     if (!dom.radioName) return;
     const station = stationById(settings.station);
@@ -1182,7 +1470,7 @@
   function sfxReady() {
     if (settings.station === "off") return false;
     if (!ensureAudio()) return false;
-    if (radio.ctx.state === "suspended") radio.ctx.resume();
+    if (radio.ctx.state === "suspended") resumeAudio();
     return true;
   }
   function sfxCastOff(ms, tug) {
@@ -1319,8 +1607,10 @@
         next += rests[Math.floor(Math.random() * rests.length)];
       }
     }, 150);
-    const bowls = setInterval(function () { if (Math.random() < 0.7) bowl(ctx.currentTime + 0.05, [110, 146.83, 220][Math.floor(Math.random() * 3)], out); }, 11000);
-    const chimes = setInterval(function () { if (Math.random() < 0.5) chime(ctx.currentTime + Math.random() * 0.5, [880, 932.33, 1174.66, 1318.5][Math.floor(Math.random() * 4)], out); }, 2800);
+    // These two schedule against the clock "now", so they must skip while the context is suspended:
+    // its clock is frozen, and everything they queued would play at once on resume.
+    const bowls = setInterval(function () { if (ctx.state === "running" && Math.random() < 0.7) bowl(ctx.currentTime + 0.05, [110, 146.83, 220][Math.floor(Math.random() * 3)], out); }, 11000);
+    const chimes = setInterval(function () { if (ctx.state === "running" && Math.random() < 0.5) chime(ctx.currentTime + Math.random() * 0.5, [880, 932.33, 1174.66, 1318.5][Math.floor(Math.random() * 4)], out); }, 2800);
     bowl(ctx.currentTime + 0.2, 146.83, out);
     return function stop() {
       clearInterval(melody); clearInterval(bowls); clearInterval(chimes);
@@ -1334,8 +1624,9 @@
   function startBasinLoFi() {
     const ctx = radio.ctx;
     const out = ctx.createGain(); out.gain.value = 0;
-    const dull = ctx.createBiquadFilter(); dull.type = "lowpass"; dull.frequency.value = 4600; dull.Q.value = 0.6;
+    const dull = ctx.createBiquadFilter(); dull.type = "lowpass"; dull.frequency.value = nightFilter(); dull.Q.value = 0.6;
     out.connect(dull); dull.connect(radio.master);
+    radio.basinFilter = dull;              // applyMood() opens it as the night goes on
     out.gain.setTargetAtTime(0.9, ctx.currentTime, 1.2);
     const send = ctx.createGain(); send.gain.value = 0.3; send.connect(radio.reverb);
 
@@ -1404,6 +1695,7 @@
     }, 60);
     return function stop() {
       clearInterval(sequencer);
+      radio.basinFilter = null;
       out.gain.setTargetAtTime(0, ctx.currentTime, 0.3);
       setTimeout(function () { padOscs.forEach(function (o) { o.stop(); }); sweep.stop(); wobble.stop(); out.disconnect(); echo.disconnect(); }, 1500);
     };
@@ -1416,6 +1708,7 @@
     const seed = normaliseSeed(seedText) || randomSeed();
     const variant = DATA.variants[pickVariantIndex(seed)];
     setState(newState(seed, variant.id));
+    transient.objective = null;
     saveGame();
     setMode("play");
     positionFerry(state.location, null, false);
@@ -1425,6 +1718,9 @@
 
   function continueGame(saved) {
     setState(saved);
+    transient.objective = null;
+    // A case closed before the case files existed (2.x) still counts as found.
+    if (state.resolved && state.ending) recordEnding(state.variantId, state.ending);
     setMode("play");
     positionFerry(state.location, null, false);
     render();
@@ -1451,6 +1747,7 @@
     } else {
       dom.storageNote.textContent = "Progress autosaves in this browser after every action.";
     }
+    if (transient.dataProblem) dom.storageNote.textContent = transient.dataProblem + " — " + dom.storageNote.textContent;
   }
 
   function showResolution() {
@@ -1459,20 +1756,30 @@
     dom.resKicker.textContent = "Case closed · " + activeCase.title;
     dom.resTitle.textContent = ending.title;
     dom.resBody.innerHTML = "";
-    ending.lines.forEach(function (line) { dom.resBody.appendChild(el("p", { text: line })); });
+    // Ending lines may carry conditions like any other lines (a paragraph that only holds before the
+    // dawn truck, say). They are read at the moment the case closed, not at the clock now: after a
+    // case ends the ferry can still cross, and the ending must not change with it.
+    const clockNow = state.clock;
+    state.clock = state.endedAt;
+    const paragraphs = expandLines(ending.lines);
+    state.clock = clockNow;
+    paragraphs.forEach(function (item) { dom.resBody.appendChild(el("p", { text: item.text })); });
     if (ending.late && state.endedAt >= DAWN_CLOCK) dom.resBody.appendChild(el("p", { class: "epilogue", text: ending.late }));
     dom.resStats.innerHTML = "";
     const total = Object.keys(activeCase.clues).length;
+    const found = endingsFound(state.variantId).length;
     [
       ["Shift ended", formatClock(state.endedAt) + (state.endedAt >= DAWN_CLOCK ? " (after the dawn truck)" : " (before dawn)")],
       ["Fuel left", state.fuel + " / " + DATA.meta.fuelMax],
       ["Evidence", state.clues.length + " of " + total + " clues"],
+      ["Case file", found + " of " + activeCase.finalChoices.length + " endings found" + (found < activeCase.finalChoices.length ? " — the same seed replays this night" : "")],
       ["Seed", state.seed + " — replay it for the same case"]
     ].forEach(function (pair) {
       dom.resStats.appendChild(el("dt", { text: pair[0] }));
       dom.resStats.appendChild(el("dd", { text: pair[1] }));
     });
     dom.resolution.hidden = false;
+    updateActionsCue();                 // a cue computed a moment ago must not show through the card
     dom.btnResContinue.focus({ preventScroll: true });
     // Both resets are needed: styles.css puts the scrolling on .resolution-card on desktop and on
     // .resolution on phones. After focus, for engines that ignore preventScroll.
@@ -1516,21 +1823,74 @@
     openModal({ title: "Menu", body: list, actions: [{ label: "Close" }] });
   }
 
+  // Touch-first devices get touch wording: no keys to mention, nothing to hover, a dashboard instead of
+  // a strip "under the picture".
+  function touchFirst() { return window.matchMedia("(hover: none) and (pointer: coarse)").matches; }
+
   function openHelp() {
+    const touch = touchFirst();
+    const items = [
+      "Talking is free. Searching and crossing cost minutes; only labelled actions move the clock. Reading never does.",
+      "Clues go into the notebook" + (touch ? "" : " (N)") + " with their exact wording.",
+      "Somebody tonight is lying. When you can prove it, go back to them and put up to three pieces of evidence down: first the proofs that break the story, then the reason, and the one clue that supports it.",
+      DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
+      "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
+      "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor.",
+      "Every case is a seed, and the same seed always opens the same night. Case files on the title screen list them all, with the endings you have found.",
+      "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still."
+    ];
+    if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
     openModal({
       title: "How to play",
       body: [
-        el("p", { text: "Click a destination in the harbour (or the buttons under it) to cross the Basin. Every crossing shows its fuel and clock cost before you commit." }),
-        el("ul", {}, [
-          el("li", { text: "Talking is free. Searching and crossing cost minutes; only labelled actions move the clock. Reading never does." }),
-          el("li", { text: "Clues go into the notebook (N) with their exact wording." }),
-          el("li", { text: "Back at Suen's, put up to three pieces of evidence on the counter. To break Teo's story you must show Ari arrived and that Teo met them; then name the reason and the one clue that supports it." }),
-          el("li", { text: DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more." }),
-          el("li", { text: "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere." }),
-          el("li", { text: "The radio under the picture tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor." }),
-          el("li", { text: "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still." }),
-          el("li", { text: "Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels." })
-        ])
+        el("p", { text: touch
+          ? "Tap a place in the harbour picture, or one of the four buttons under it, to cross the Basin. What you can do where you are is listed under the story; every crossing and search shows its cost before you commit."
+          : "Click a destination in the harbour picture to cross the Basin. Every crossing shows its fuel and clock cost before you commit." }),
+        el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
+      ],
+      actions: [{ label: "Back" }]
+    });
+  }
+
+  // Starting a shift, from the title screen or a case file. An unfinished save is never erased silently.
+  function requestNewShift(seedText) {
+    const saved = readSave();
+    const valid = saved && !saved.invalid ? saved : null;
+    if (valid && !valid.resolved) {
+      openModal({
+        title: "Start a new shift?",
+        body: [el("p", { text: "A saved shift (seed " + valid.seed + ", clock " + formatClock(valid.clock) + ") will be erased." })],
+        actions: [{ label: "Keep it" }, { label: "Erase and start new", danger: true, onClick: function () { startNewGame(seedText); } }]
+      });
+      return;
+    }
+    startNewGame(seedText);
+  }
+
+  // One file per case, with a seed that always opens it. A case's title names its truth, so it stays
+  // hidden until you have closed that case at least once.
+  function openCaseFiles() {
+    const list = el("div", { class: "case-files" });
+    DATA.variants.forEach(function (variant, i) {
+      const seed = (variant.seeds || [])[0];             // validateAll() insists every case has one
+      const found = endingsFound(variant.id);
+      const total = variant.finalChoices.length;
+      const status = found.length === 0 ? "not yet closed"
+        : found.length + " of " + total + " endings · " + found.map(function (id) { return variant.endings[id].title; }).join(", ");
+      list.appendChild(el("article", { class: "case-file" + (found.length ? " solved" : "") + (found.length === total ? " complete" : "") }, [
+        el("p", { class: "case-file-no", text: "Case file " + (i < 9 ? "0" : "") + (i + 1) + " · seed " + seed }),
+        el("h3", { class: "case-file-title", text: found.length ? variant.title : "Unsolved" }),
+        found.length ? el("p", { class: "case-file-tag", text: variant.tagline }) : null,
+        el("p", { class: "case-file-status", text: status }),
+        el("button", { class: "btn btn-small", type: "button", "aria-label": (found.length ? "Play case file " : "Take case file ") + (i + 1) + ", seed " + seed,
+          onclick: function () { closeModal(); requestNewShift(seed); } }, found.length ? "Play it again" : "Take this case")
+      ]));
+    });
+    openModal({
+      title: "Case files",
+      body: [
+        el("p", { class: "muted", text: "Every night in the Basin is a seed. These are the ones on file; any other word you type as a seed opens one of them at random, and always the same one." }),
+        list
       ],
       actions: [{ label: "Back" }]
     });
@@ -1545,20 +1905,8 @@
       });
     });
 
-    dom.btnNew.addEventListener("click", function () {
-      const saved = readSave();
-      const valid = saved && !saved.invalid ? saved : null;
-      const seedText = dom.seedInput.value;
-      if (valid && !valid.resolved) {
-        openModal({
-          title: "Start a new shift?",
-          body: [el("p", { text: "A saved shift (seed " + valid.seed + ", clock " + formatClock(valid.clock) + ") will be erased." })],
-          actions: [{ label: "Keep it" }, { label: "Erase and start new", danger: true, onClick: function () { startNewGame(seedText); } }]
-        });
-        return;
-      }
-      startNewGame(seedText);
-    });
+    dom.btnNew.addEventListener("click", function () { requestNewShift(dom.seedInput.value); });
+    dom.btnCases.addEventListener("click", openCaseFiles);
     dom.seedInput.addEventListener("keydown", function (e) { if (e.key === "Enter") dom.btnNew.click(); });
     dom.btnContinue.addEventListener("click", function () {
       const saved = readSave();
@@ -1574,7 +1922,13 @@
     dom.modal.addEventListener("click", function (e) { if (e.target === dom.modal) closeModal(); });
 
     dom.encBody.addEventListener("scroll", updateScrollHint);
-    window.addEventListener("resize", function () { syncAspect(); updateScrollHint(); });
+    dom.encounter.addEventListener("scroll", updateActionsCue, { passive: true });
+    dom.actionsCue.addEventListener("click", scrollToActions);
+    dom.instObjectiveCell.addEventListener("click", toggleObjective);
+    dom.instObjectiveCell.addEventListener("keydown", function (e) {
+      if ((e.key === "Enter" || e.key === " ") && phoneShell()) { e.preventDefault(); toggleObjective(); }
+    });
+    window.addEventListener("resize", function () { syncAspect(); updateScrollHint(); updateActionsCue(); syncObjectiveControl(); });
     // Follow the system's reduced-motion setting if it changes while the game is open.
     if (motionQuery.addEventListener) motionQuery.addEventListener("change", applyMotionSetting);
     else if (motionQuery.addListener) motionQuery.addListener(applyMotionSetting);
@@ -1596,8 +1950,19 @@
       if (e.key === "r" || e.key === "R") { e.preventDefault(); cycleStation(); return; }
       if (/^[1-9]$/.test(e.key) && dom.modal.hidden && dom.notebook.hidden && dom.resolution.hidden) {
         const button = dom.encActions.querySelector('.action-btn[data-key="' + e.key + '"]');
-        if (button && !button.disabled) { e.preventDefault(); button.click(); }
+        if (button && !button.disabled && button.offsetParent !== null) { e.preventDefault(); button.click(); }
       }
+    });
+
+    // A phone that locks or switches apps hides the page. Suspend the radio with it and bring it back on
+    // return: Android never resumes an AudioContext by itself, and while the page is hidden the
+    // schedulers' timers are throttled to once a second, which made the music stutter. With the
+    // context suspended its clock stops too; the schedulers that read the clock wait for it, and the
+    // two that schedule "now" (Lantern FM's bowls and chimes) skip while it is not running.
+    document.addEventListener("visibilitychange", function () {
+      if (!radio.ctx) return;
+      if (document.hidden) radio.ctx.suspend();
+      else if (settings.station !== "off") resumeAudio();
     });
 
     // Sound that was on last time may only resume after a user gesture.
@@ -1616,6 +1981,7 @@
     dom.hotspots = Array.prototype.slice.call(document.querySelectorAll(".hotspot"));
     dom.titleOverlay = $("title-overlay");
     dom.btnNew = $("btn-new");
+    dom.btnCases = $("btn-cases");
     dom.btnContinue = $("btn-continue");
     dom.seedInput = $("seed-input");
     dom.storageNote = $("storage-note");
@@ -1635,6 +2001,8 @@
     dom.instCanLabel = $("inst-can-label");
     dom.instCanSub = $("inst-can-sub");
     dom.instObjective = $("inst-objective");
+    dom.instObjectiveCell = dom.instObjective.parentNode;
+    dom.actionsCue = $("actions-cue");
     dom.btnRadio = $("btn-radio");
     dom.radioName = $("radio-name");
     dom.radioSub = $("radio-sub");
@@ -1642,6 +2010,7 @@
     dom.encKicker = $("enc-kicker");
     dom.encTitle = $("enc-title");
     dom.encBody = $("enc-body");
+    dom.encCoach = $("enc-coach");
     dom.encActions = $("enc-actions");
     dom.notebook = $("notebook");
     dom.btnNotebook = $("btn-notebook");
@@ -1659,10 +2028,19 @@
     dom.toast = $("toast");
   }
 
+  // Served from a web host, the game can be installed to a home screen, where Android runs it with no
+  // URL bar at all. The manifest is linked only then: from file:// the browser would refuse to load it.
+  function linkManifest() {
+    if (location.protocol !== "http:" && location.protocol !== "https:") return;
+    document.head.appendChild(el("link", { rel: "manifest", href: "manifest.webmanifest" }));
+  }
+
   function init() {
+    linkManifest();
     cacheDom();
     dom.instCanLabel.textContent = DATA.world.drink.name;   // the drink is named in cases.js, not here
     loadSettings();
+    loadProfile();
     applyMotionSetting();
     renderRadio();
 
@@ -1671,7 +2049,8 @@
     const broken = Object.keys(report).filter(function (id) { return report[id].length; });
     if (broken.length) {
       broken.forEach(function (id) { console.error("Neon Tides: case '" + id + "' has problems:", report[id]); });
-      dom.storageNote.textContent = "Story data problem in cases.js: " + broken.map(function (id) { return id + " (" + report[id].join("; ") + ")"; }).join(" · ");
+      // Kept, so refreshTitle() shows it every time instead of writing over it.
+      transient.dataProblem = "Story data problem in cases.js: " + broken.map(function (id) { return id + " (" + report[id].join("; ") + ")"; }).join(" · ");
     }
 
     // Storage check: a corrupt or incompatible save is cleared, not crashed on.
@@ -1682,6 +2061,7 @@
     }
 
     bindEvents();
+    syncObjectiveControl();
     positionFerry("bar", null, false);
     showTitle();
   }
@@ -1700,6 +2080,9 @@
     submitEvidence: submitEvidence,
     submitExplanation: submitExplanation,
     chooseEnding: chooseEnding,
+    currentObjective: function () { return state ? currentObjective() : ""; },
+    getProfile: function () { return JSON.parse(JSON.stringify(profile)); },
+    openCaseFiles: openCaseFiles,
     readSave: readSave,
     formatClock: formatClock,
     parseClock: parseClock,

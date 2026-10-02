@@ -6,10 +6,10 @@ Everything in this folder was made for Neon Tides. Nothing was copied from anoth
 
 | Asset | Where it lives | Origin |
 | --- | --- | --- |
-| Harbour illustration (sky, banded moon, skyline, Line 9 viaduct and train, water grid and waves, four destinations, the KURAGE 33 tube sign with its neon jellyfish, ferry, jellyfish, rain) | inline SVG in `index.html` | Drawn by hand as SVG shapes, gradients and patterns for this project |
+| Harbour illustration (sky, banded moon, skyline, Line 9 viaduct and train, water grid and waves, four destinations, the KURAGE 33 tube sign with its neon jellyfish, ferry, jellyfish, rain, and the case-specific pieces: the Grey Kittiwake's masts, the wild green jelly, the stacked tank lids) | inline SVG in `index.html` | Drawn by hand as SVG shapes, gradients and patterns for this project |
 | Character portraits (Teo, Auntie Mei, Priya, Matte, Dex, Yumi, Old Lam, the radio) | `assets/portraits/*.svg` | Original SVG, same style |
-| Favicon (jellyfish) | `assets/favicon.svg` | Original SVG |
-| Story, characters, dialogue, place names, brands (Kurage 33, Tiger Volt, OX-9, Frostline, Meridian Private Aquaria, Bellwater Basin, Line 9) | `cases.js` | Written for this project. All people, companies, brands and places are fictional |
+| Favicon (jellyfish) and the home-screen icons rendered from it | `assets/favicon.svg`, `assets/*.png` | Original SVG; the PNGs are rendered from it by `tools/icons.mjs` |
+| Story, characters, dialogue, place names, brands (Kurage 33, Tiger Volt, OX-9, Frostline, Meridian Private Aquaria, Haldane Marine Credit, the Grey Kittiwake, tug Vidar, Bellwater Basin, Bell Reef, Line 9) | `cases.js` | Written for this project. All people, companies, brands, vessels and places are fictional |
 | Interface text and layout | `index.html`, `styles.css`, `game.js` | Original |
 | Boat radio: rain ambience, *Lantern FM*, *Basin Lo-Fi*, and the ferry's horn, engine, hull bump and bell | generated at runtime in `game.js` (the *BOAT RADIO* section) | Filtered noise, a Karplus-Strong plucked-string model and oscillator synthesis through the Web Audio API. Both stations and all effects are original procedural sounds; no recorded audio, samples or sound fonts are bundled |
 
@@ -17,10 +17,10 @@ Everything in this folder was made for Neon Tides. Nothing was copied from anoth
 
 No font files are bundled and none are downloaded. The stylesheet asks for fonts that already exist on the player's device and falls back gracefully:
 
-- Interface: Bahnschrift → Trebuchet MS → Segoe UI → system sans-serif
+- Interface: Bahnschrift → Trebuchet MS → Segoe UI → sans-serif-condensed (Android's Roboto Condensed) → system sans-serif
 - Story text: Georgia → Iowan Old Style → Palatino Linotype → serif
 - Clue text: Cascadia Mono → Consolas → SF Mono → Menlo → monospace
-- Signage in the picture: Impact → Arial Black → Bahnschrift → sans-serif
+- Signage in the picture: Impact → Arial Black → Bahnschrift → Arial Narrow → sans-serif-condensed → sans-serif (the KURAGE 33 sign is pinned to its width with `textLength`, so any fallback fits)
 
 ## Third-party code
 

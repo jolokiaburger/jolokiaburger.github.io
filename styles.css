@@ -28,7 +28,9 @@
   --paper-dim:    #c9bdd9;
   --ink:          #1a1030;
 
-  --font-ui:    "Bahnschrift", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  /* "sans-serif-condensed" is Android's name for Roboto Condensed, the nearest thing it has to
+     Bahnschrift; other systems skip it. */
+  --font-ui:    "Bahnschrift", "Trebuchet MS", "Segoe UI", "sans-serif-condensed", system-ui, sans-serif;
   --font-prose: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
   --font-mono:  "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
 
@@ -56,6 +58,13 @@ button { font: inherit; color: inherit; }
 code { font-family: var(--font-mono); font-size: 0.9em; color: var(--cyan); }
 kbd { font-family: var(--font-mono); font-size: 0.8em; border: 1px solid var(--surface-500); padding: 0 4px; }
 [hidden] { display: none !important; }
+/* Touch: no grey flash on tap, no double-tap zoom on controls, and an over-pull at the top of the
+   page must never reload the game. Hover styles live in @media (hover: hover) throughout, because
+   on a phone a tapped button otherwise keeps its hover look and seems permanently selected. */
+button, summary, .hotspot, .chip { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* a touch screen has no number keys to point at; a narrow window with a keyboard keeps the hints */
+@media (hover: none) and (pointer: coarse) { .action-btn .key { display: none; } }
+html, body { overscroll-behavior-y: none; }
 .noscript { padding: 2rem; font-family: var(--font-ui); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
@@ -129,20 +138,35 @@ body[data-mode="title"] #btn-notebook { visibility: hidden; }
 .harbour { display: block; width: 100%; height: 100%; }
 .harbour text { user-select: none; pointer-events: none; }
 .sign-text { font-family: var(--font-ui); font-weight: 600; }
-.neon-text { font-family: Impact, "Arial Black", "Bahnschrift", "Arial Narrow", sans-serif; font-size: 46px; letter-spacing: 5px; fill: none; paint-order: stroke; stroke-linejoin: round; stroke-linecap: round; }
+.neon-text { font-family: Impact, "Arial Black", "Bahnschrift", "Arial Narrow", "sans-serif-condensed", sans-serif; font-size: 46px; letter-spacing: 5px; fill: none; paint-order: stroke; stroke-linejoin: round; stroke-linecap: round; }
 .tube-cyan { stroke: #3df5ff; }
 .tube-orange { stroke: #ff7a3d; }
+.tube-channel { fill: #0a0620; fill-opacity: .72; stroke: none; }   /* the dark letter body behind the tubes */
 .tube-glow { stroke-width: 9; opacity: .32; }
 .tube-core { stroke-width: 2.6; }
 .tube-hot { stroke: #ffffff; stroke-width: .9; opacity: .9; }
 .neon-purple { fill: #c4b0ff; }
 .cold-text { fill: #dffbff; }
-.stencil { font-family: Impact, "Arial Black", "Bahnschrift", sans-serif; font-size: 16px; fill: #dfe8f6; opacity: .92; letter-spacing: 1px; }
+.stencil { font-family: Impact, "Arial Black", "Bahnschrift", "sans-serif-condensed", sans-serif; font-size: 16px; fill: #dfe8f6; opacity: .92; letter-spacing: 1px; }
+/* The picture follows the story. game.js sets these classes on <body> from sceneClasses in cases.js;
+   .case-art pieces are drawn only for the case or moment that needs them. */
+.case-art { display: none; }
+body.after-last-train #train, body.after-last-train #dex, body.after-last-train #platform-passenger { display: none; }
+body.teo-gone #teo-figure { display: none; }
+body.matte-gone #matte { display: none; }
+body.crate17-gone #crate-17 { display: none; }
+body.crate17-gone #crate-08 { transform: translateY(44px); }     /* lifted off 17, put down where 17 stood */
+body.crate17-gone #tank-lids, body.matte-bandaged #matte-bandage, body.wild-jelly #wild-jelly, body.kittiwake #kittiwake { display: inline; }
 .ferry { will-change: transform; }
 .ferry.facing-left .ferry-body { transform: scaleX(-1); }
 .ferry.facing-left .ferry-name { display: none; }
 .ferry .wake { transition: opacity .4s; }
-body.travelling .ferry .wake { opacity: .55; }
+body.travelling .ferry .wake { opacity: .6; }
+/* under way, the wake's dashes run outward from the hull and the spray under it breathes */
+@keyframes wake-run { to { stroke-dashoffset: -26; } }
+@keyframes spray { 0%, 100% { opacity: .1; } 50% { opacity: .26; } }
+body.travelling .ferry .wake path { stroke-dasharray: 16 10; animation: wake-run .55s linear infinite; }
+body.travelling .ferry .wake .spray { animation: spray .9s ease-in-out infinite; }
 
 /* 6 · HOTSPOTS (clickable destinations inside the picture) --------------- */
 .hotspot { cursor: pointer; outline: none; }
@@ -152,13 +176,15 @@ body.travelling .ferry .wake { opacity: .55; }
   fill: none; stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 7;
   opacity: 0; transition: opacity .18s;
 }
-.hotspot:hover .hs-outline, .hotspot:focus-visible .hs-outline { opacity: .85; }
+.hotspot:focus-visible .hs-outline { opacity: .85; }
+@media (hover: hover) { .hotspot:hover .hs-outline { opacity: .85; } }
 .hotspot[data-current="true"] .hs-outline { stroke: var(--amber); }
 .hs-tag-bg { fill: rgba(7, 5, 26, .86); stroke: var(--surface-300); stroke-width: 1.5; transition: fill .18s, stroke .18s; }
-.hotspot:hover .hs-tag-bg { fill: rgba(138, 92, 255, .3); stroke: var(--cyan); }
+@media (hover: hover) { .hotspot:hover .hs-tag-bg { fill: rgba(138, 92, 255, .3); stroke: var(--cyan); } }
 .hotspot:focus-visible .hs-tag-bg { stroke: var(--cyan); stroke-width: 3; }
-.hs-tag-name { font-family: var(--font-ui); font-weight: 700; font-size: 11.5px; letter-spacing: .12em; fill: var(--paper); }
-.hs-tag-cost { font-family: var(--font-mono); font-size: 9.5px; fill: var(--cyan); }
+/* in picture units: at a 1440-wide desktop the picture is drawn at about 0.67, so 13.5 reads as 9px */
+.hs-tag-name { font-family: var(--font-ui); font-weight: 700; font-size: 13.5px; letter-spacing: .1em; fill: var(--paper); }
+.hs-tag-cost { font-family: var(--font-mono); font-size: 11px; fill: var(--cyan); }
 .hotspot[data-current="true"] .hs-tag-bg { stroke: var(--amber); }
 .hotspot[data-current="true"] .hs-tag-cost { fill: var(--amber-bright); }
 .hotspot[aria-disabled="true"]:not([data-current="true"]) .hs-tag-cost { fill: var(--coral); }
@@ -204,7 +230,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .radio-name::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--surface-500); flex: 0 0 auto; }
 .radio-btn[data-on="true"] .radio-name::before { background: var(--magenta); box-shadow: 0 0 8px var(--magenta); animation: radio-led 1.6s ease-in-out infinite; }
 .radio-sub { font-size: 11.5px; color: var(--paper-dim); white-space: nowrap; }
-.radio-btn:hover .radio-name { color: var(--amber-bright); }
+@media (hover: hover) { .radio-btn:hover .radio-name { color: var(--amber-bright); } }
 .radio-btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 @keyframes radio-led { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
 
@@ -236,9 +262,23 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .notice.warn { color: var(--amber-bright); border-color: var(--amber-deep); }
 .notice.bad { color: var(--coral); border-color: var(--coral); }
 .stage-label { font-family: var(--font-ui); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); }
+/* the first-shift card on touch screens */
+.encounter-coach:empty { display: none; }
+.coach { display: grid; gap: 7px; padding: 11px 13px 12px; border: 1px solid var(--amber-deep); background: rgba(255, 122, 61, .08); font-family: var(--font-ui); font-size: 14.5px; line-height: 1.45; }
+.coach .coach-title { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--amber); }
+.encounter-body .coach p { color: var(--paper); }
+.coach .btn { justify-self: start; }
+.act-none { display: none; font-family: var(--font-ui); font-size: 13.5px; color: var(--paper-dim); }
+/* a changed objective glows for a moment */
+@keyframes objective-flash {
+  0%   { background-color: rgba(255, 176, 74, .28); box-shadow: inset 3px 0 0 var(--amber); }
+  100% { background-color: rgba(255, 176, 74, 0);   box-shadow: inset 3px 0 0 rgba(255, 176, 74, 0); }
+}
+.inst-objective.updated { animation: objective-flash 2.2s ease-out; }
 
 .encounter-actions { display: flex; flex-direction: column; gap: 8px; flex: 0 0 auto; max-height: 58%; overflow-y: auto; border-top: var(--hairline); padding-top: 12px; scrollbar-width: thin; scrollbar-color: var(--surface-500) transparent; }
 .encounter-actions:empty { display: none; }
+.action-group { display: flex; flex-direction: column; gap: 8px; }
 .action-group-label { font-family: var(--font-ui); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--surface-300); margin: 6px 0 -2px; }
 .action-btn {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -249,11 +289,11 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
   cursor: pointer;
   transition: border-color .12s, background .12s;
 }
-.action-btn:hover { border-color: var(--amber); background: #24195a; }
+@media (hover: hover) { .action-btn:hover { border-color: var(--amber); background: #24195a; } }
 .action-btn:active { background: var(--surface-900); transform: translateY(1px); }
 .action-btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 .action-btn[disabled] { cursor: not-allowed; opacity: .55; }
-.action-btn[disabled]:hover { border-color: var(--surface-500); background: var(--surface-800); }
+@media (hover: hover) { .action-btn[disabled]:hover { border-color: var(--surface-500); background: var(--surface-800); } }
 .action-btn .act-label { flex: 1 1 auto; }
 .action-btn .act-costs { display: flex; gap: 6px; flex: 0 0 auto; }
 .cost { font-family: var(--font-mono); font-size: 12px; padding: 2px 6px; border: 1px solid var(--surface-500); color: var(--cyan); white-space: nowrap; }
@@ -262,10 +302,10 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .cost.warn { color: var(--coral); border-color: var(--coral); }
 .action-btn.kind-travel { border-color: var(--surface-500); }
 .action-btn.kind-confront { border-color: var(--magenta); }
-.action-btn.kind-confront:hover { border-color: var(--coral); background: #3a1540; }
+@media (hover: hover) { .action-btn.kind-confront:hover { border-color: var(--coral); background: #3a1540; } }
 .action-btn.kind-system { background: transparent; border-style: dashed; }
 .action-btn.kind-choice { border-color: var(--amber-deep); }
-.action-btn.kind-choice:hover { border-color: var(--amber-bright); }
+@media (hover: hover) { .action-btn.kind-choice:hover { border-color: var(--amber-bright); } }
 .action-btn .key { font-family: var(--font-mono); font-size: 11px; color: var(--surface-300); margin-right: 8px; }
 .act-why { font-family: var(--font-ui); font-size: 12.5px; color: var(--paper-dim); margin: -4px 0 4px 2px; }
 
@@ -275,7 +315,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
   display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start;
   padding: 8px 10px; background: rgba(246, 233, 216, .06); border: 1px solid var(--surface-700); cursor: pointer;
 }
-.evidence-item:hover { border-color: var(--amber); }
+@media (hover: hover) { .evidence-item:hover { border-color: var(--amber); } }
 .evidence-item input { width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--amber); cursor: pointer; }
 .evidence-item input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 .evidence-item .ev-title { display: block; font-family: var(--font-ui); font-size: 14px; letter-spacing: .04em; text-transform: uppercase; color: var(--amber-bright); }
@@ -292,16 +332,16 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
   border: var(--border); padding: 9px 14px; cursor: pointer;
   transition: border-color .12s, background .12s, color .12s;
 }
-.btn:hover { border-color: var(--amber); color: var(--amber-bright); background: #24195a; }
+@media (hover: hover) { .btn:hover { border-color: var(--amber); color: var(--amber-bright); background: #24195a; } }
 .btn:active { transform: translateY(1px); background: var(--surface-900); }
 .btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
 .btn-primary { background: var(--amber); color: var(--ink); border-color: var(--amber-bright); font-weight: 700; }
-.btn-primary:hover { background: var(--amber-bright); color: var(--ink); border-color: #fff1cc; }
+@media (hover: hover) { .btn-primary:hover { background: var(--amber-bright); color: var(--ink); border-color: #fff1cc; } }
 .btn-ghost { background: transparent; border-color: var(--surface-700); }
 .btn-small { padding: 6px 10px; font-size: 12.5px; }
 .btn-danger { border-color: var(--coral); }
-.btn-danger:hover { border-color: var(--magenta); color: var(--coral); background: #3a1540; }
+@media (hover: hover) { .btn-danger:hover { border-color: var(--magenta); color: var(--coral); background: #3a1540; } }
 
 /* 10 · NOTEBOOK (paper drawer) --------------------------------------------- */
 .scrim { position: fixed; inset: 0; background: rgba(5, 3, 15, .62); z-index: 30; }
@@ -319,7 +359,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 }
 .notebook-head h2 { font-family: var(--font-ui); font-size: 18px; letter-spacing: .2em; text-transform: uppercase; }
 .notebook .btn { background: transparent; color: var(--ink); border-color: var(--ink); }
-.notebook .btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+@media (hover: hover) { .notebook .btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); } }
 .notebook-body {
   flex: 1 1 auto; overflow-y: auto; padding: 18px 22px 40px;
   background-image: repeating-linear-gradient(transparent 0 27px, rgba(26, 16, 48, .10) 27px 28px);
@@ -348,13 +388,30 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .modal-body ul { margin: 0; padding-left: 20px; }
 .modal-body li { margin-bottom: 4px; }
 .modal-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; justify-content: flex-end; }
+/* Case files: one card per case; a title only once you have closed it */
+.case-files { display: flex; flex-direction: column; gap: 8px; }
+.case-file { display: grid; gap: 3px; padding: 9px 12px 11px; border: var(--hairline); border-left: 4px solid var(--surface-500); background: rgba(246, 233, 216, .03); }
+.case-file.solved { border-left-color: var(--amber); }
+.case-file.complete { border-left-color: var(--cyan); }
+.case-file-no { font-family: var(--font-mono); font-size: 12px; color: var(--surface-300); }
+.case-file-title { margin: 0; font-family: var(--font-ui); font-size: 17px; letter-spacing: .04em; color: var(--paper); }
+.case-file:not(.solved) .case-file-title { color: var(--paper-dim); }
+.modal-body .case-file-tag { font-size: 14.5px; color: var(--paper-dim); }
+.case-file-status { font-family: var(--font-ui); font-size: 12.5px; letter-spacing: .03em; color: var(--amber-bright); }
+.case-file:not(.solved) .case-file-status { color: var(--surface-300); }
+.case-file .btn { justify-self: start; margin-top: 5px; }
 .menu-list { display: flex; flex-direction: column; gap: 8px; }
 .menu-list .btn { text-align: left; display: flex; justify-content: space-between; }
 .menu-list .btn .val { color: var(--cyan); font-family: var(--font-mono); text-transform: none; letter-spacing: 0; }
+/* Toasts drop in under the top bar, over the picture's sky: at the bottom they covered the objective
+   line on desktop and the actions on phones. width: max-content because with left: 50% the
+   shrink-to-fit width is only half the viewport (195px on a 390px phone). */
 .toast {
-  position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px);
+  position: fixed; left: 50%; top: calc(var(--topbar-h) + 12px); transform: translateX(-50%) translateY(-10px);
+  width: max-content; max-width: min(560px, calc(100vw - 24px));
   z-index: 60; padding: 8px 14px; background: #07051a; border: 1px solid var(--surface-300);
-  font-family: var(--font-ui); font-size: 13.5px; letter-spacing: .04em; color: var(--paper);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .55);
+  font-family: var(--font-ui); font-size: 13.5px; letter-spacing: .04em; color: var(--paper); text-align: center;
   opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -381,6 +438,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .title-tag { margin: 12px 0 18px; max-width: 46ch; font-size: 17px; color: var(--paper); text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
 .title-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
 .title-actions .btn-primary { padding: 12px 20px; font-size: 15px; }
+.title-actions .btn-title { padding: 12px 18px; font-size: 15px; background: rgba(7, 5, 26, .72); }
 .seed-box { font-family: var(--font-ui); font-size: 13.5px; color: var(--paper-dim); }
 .seed-box summary { cursor: pointer; letter-spacing: .08em; text-transform: uppercase; padding: 6px 0; width: max-content; }
 .seed-box summary:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
@@ -406,6 +464,34 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .res-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
 /* 13 · PHONES & NARROW WINDOWS ------------------------------------------- */
+/* Destination chips: big touch targets with the costs on them. Shown on phones, and on touch
+   screens at desktop widths, where the labels inside the picture are too small to read. */
+.chip {
+  display: grid; grid-template-rows: auto auto; gap: 3px; align-content: center; text-align: left;
+  padding: 7px 9px; min-height: 52px; min-width: 0;
+  background: var(--surface-800); border: var(--border); cursor: pointer;
+  font-family: var(--font-ui); color: var(--paper);
+}
+.chip .chip-name { font-size: 12.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--paper); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .chip-cost { display: flex; align-items: center; gap: 6px; min-width: 0; font-family: var(--font-mono); font-size: 11.5px; color: var(--cyan); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .chip-cost.plain { display: block; }      /* words only: a block, so text-overflow can ellipsise */
+.chip-pips { display: inline-flex; gap: 2px; flex: 0 0 auto; }
+.chip-pips .pip { display: block; width: 5px; height: 10px; background: var(--amber); box-shadow: 0 0 4px rgba(255, 176, 74, .5); }
+.chip:active { transform: translateY(1px); background: var(--surface-900); }
+.chip:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.chip[disabled] { opacity: .55; cursor: not-allowed; }
+.chip[disabled] .chip-cost { color: var(--coral); }
+.chip[data-current="true"] { opacity: 1; cursor: default; border-color: var(--amber); background: rgba(255, 176, 74, .09); }
+.chip[data-current="true"] .chip-cost { color: var(--amber-bright); }
+@media (hover: hover) { .chip:not([disabled]):hover { border-color: var(--amber); } }
+@media (min-width: 900px) and (pointer: coarse) {
+  .dock-chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 6px 8px 0; background: #0a0720; border-top: var(--hairline); }
+  body[data-mode="title"] .dock-chips { display: none; }
+}
+
+/* The scrolling phone layout. Engines that know dvh replace it with the fixed shell in 13b; this
+   stays for older ones (Chrome < 108, Safari < 15.4), where a non-scrolling page would clip the
+   bottom of the story under the URL bar with no way to reach it. */
 @media (max-width: 899px) {
   :root { --topbar-h: 48px; }
   .app { display: block; height: auto; border: none; }
@@ -414,39 +500,25 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
   .brand-neon { font-size: 16px; }
   .harbour-column { display: block; }
   .harbour-frame { aspect-ratio: 18 / 10; height: auto; }
-  /* svh, never dvh or vh. dvh re-resolves while Android's URL bar retracts, which walked the
-     bottom-anchored title menu up and down on every scroll gesture; vh IS the large viewport, so a
-     vh fallback keeps the same bug. Engines without svh (Chrome < 108) fall back to the ordinary
-     18:10 picture: shorter, but stable. */
-  body[data-mode="title"] .harbour-frame { aspect-ratio: 18 / 10; height: auto; height: calc(100svh - var(--topbar-h)); }
+  /* Never aspect-ratio together with a height: with width auto the ratio then computes the WIDTH
+     from the height (1084px wide on a 390px phone, and the browser zoomed out to fit it). The title
+     frame gets a fixed pixel height here; vh would be the large viewport and jitter (MOBILE.md §3). */
+  body[data-mode="title"] .harbour-frame { aspect-ratio: auto; height: 600px; }
   .harbour { width: 100%; height: 100%; }
   .hs-tag { display: none; }              /* labels move to the chips below */
   .hs-outline { display: none; }
+  .hotspot:active .hs-outline { display: inline; opacity: .9; }   /* a tap in the picture still shows where */
   .dock-chips {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
     padding: 8px 8px 0; background: #0a0720;
   }
-  .chip {
-    display: grid; grid-template-rows: auto auto; gap: 2px; text-align: left;
-    padding: 9px 10px; min-height: 52px;
-    background: var(--surface-800); border: var(--border); cursor: pointer;
-    font-family: var(--font-ui);
-  }
-  .chip .chip-name { font-size: 12.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--paper); line-height: 1.15; }
-  .chip .chip-cost { font-family: var(--font-mono); font-size: 11.5px; color: var(--cyan); }
-  .chip:hover { border-color: var(--amber); }
-  .chip:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
-  .chip[data-current="true"] { border-color: var(--amber); }
-  .chip[data-current="true"] .chip-cost { color: var(--amber-bright); }
-  .chip[disabled] { opacity: .55; cursor: not-allowed; }
-  .chip[disabled] .chip-cost { color: var(--coral); }
   .instruments { grid-template-columns: 1fr 1fr; padding: 8px 8px 8px; gap: 6px; background: #0a0720; border-top: none; }
   .inst { border: var(--hairline); padding: 6px 10px 5px; }
   .inst-value { font-size: 18px; }
   .inst-sub { display: none; }
   .inst-objective { grid-column: 1 / -1; grid-template-rows: auto auto; }
   .inst-objective-text { font-size: 14px; }
-  .encounter { border-left: none; border-top: var(--border); overflow: visible; }
+  .encounter { border-left: none; border-top: var(--border); overflow: visible; scroll-margin-top: var(--topbar-h); }   /* not under the sticky top bar */
   .encounter-inner { padding: 18px 16px 40px; min-height: 60vh; height: auto; }
   .encounter-body { overflow: visible; padding-right: 0; }
   .encounter-body.has-more { -webkit-mask-image: none; mask-image: none; }
@@ -474,6 +546,110 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 @media (min-width: 900px) and (max-height: 640px) {
   .inst-sub { display: none; }
   .inst-value { font-size: 18px; }
+}
+
+/* 13b · THE PHONE SHELL --------------------------------------------------
+   The phone obeys the desktop's contract: the document never scrolls. The picture, the chips and a
+   slim dashboard stay put; the story and its choices scroll in one sheet below them. Because the page
+   never scrolls, Android never retracts its URL bar, so nothing on screen can jump — and inside the
+   shell dvh is exactly the visible height, which svh would undershoot (MOBILE.md §8). The travel
+   buttons are hidden here: the chips above the sheet already are the travel buttons. */
+@supports (height: 100dvh) {
+  @media (max-width: 899px) {
+    html, body { overflow: hidden; overscroll-behavior: none; }
+    .app { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+    .topbar { position: relative; flex: 0 0 auto; }
+    .harbour-column { display: flex; flex-direction: column; flex: 0 0 auto; }
+    .harbour-frame { flex: 0 0 auto; aspect-ratio: 18 / 10; height: auto; max-height: 31dvh; }
+    body[data-mode="title"] .harbour-column { flex: 1 1 auto; min-height: 0; }
+    body[data-mode="title"] .harbour-frame { flex: 1 1 auto; aspect-ratio: auto; height: auto; max-height: none; min-height: 0; }
+
+    .dock-chips { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; padding: 6px 6px 0; }
+    .chip { min-height: 48px; padding: 6px 5px 6px 6px; }
+    .chip .chip-name { font-size: 11px; letter-spacing: 0; }      /* "METRO QUAY" must fit a 360px phone */
+    .chip .chip-cost { font-size: 11px; gap: 5px; }
+
+    .instruments { grid-template-columns: auto auto auto minmax(0, 1fr); gap: 5px; padding: 6px; }
+    .inst { padding: 4px 8px 4px; grid-template-rows: auto auto; }
+    .inst-label { font-size: 9.5px; letter-spacing: .12em; }
+    .inst-value { font-size: 16px; }
+    .fuel-gauge { height: 18px; gap: 2px; }
+    .fuel-seg { width: 7px; height: 13px; }
+    .radio-name { font-size: 13px; gap: 6px; }
+    .radio-sub { display: none; }
+    /* the objective: one line, tap to read the rest */
+    .inst-objective { grid-column: 1 / -1; display: block; padding: 5px 9px; cursor: pointer; }
+    .inst-objective .inst-label { display: none; }
+    .inst-objective-text { display: block; font-size: 13.5px; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inst-objective-text::before { content: "Now · "; font-family: var(--font-ui); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+    .inst-objective.open .inst-objective-text { white-space: normal; }
+
+    /* the sheet */
+    .encounter { flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; border-top: var(--border); }
+    .encounter-inner { height: auto; min-height: 0; padding: 12px 14px 28px; gap: 12px; }
+    .encounter-head { padding-bottom: 9px; }
+    .loc-kicker { font-size: 11px; }
+    .loc-title { font-size: 19px; }
+    .encounter-body { overflow: visible; }
+    .encounter-actions { max-height: none; overflow: visible; padding-bottom: 6px; }
+    .action-btn { padding: 11px 12px; font-size: 15px; }
+    .action-btn .act-costs { flex-direction: row; gap: 4px; }
+    .cost { font-size: 11px; padding: 2px 5px; }
+    .action-btn.kind-travel, .act-why, .action-group.only-travel { display: none; }
+    .act-none { display: block; }
+
+    /* "choices below" — floats over the bottom of the sheet while the first choice is out of view */
+    .actions-cue {
+      position: fixed; left: 50%; bottom: 14px; z-index: 25; transform: translateX(-50%);
+      display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; min-height: 40px;
+      font-family: var(--font-ui); font-size: 13.5px; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--ink); background: var(--amber); border: 1px solid var(--amber-bright);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, .6), 0 0 0 4px rgba(5, 3, 15, .55);
+      cursor: pointer;
+    }
+    .actions-cue::before { content: ""; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--ink); }
+
+    .title-overlay { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+    .title-card { margin-top: auto; }       /* bottom-anchored, but overflow scrolls instead of clipping the logo */
+    .title-actions { gap: 8px; }
+    .title-actions .btn-primary { padding: 12px 15px; }   /* Start and Case files share a row at 360px */
+    .title-actions .btn-title { padding: 12px 14px; }
+    .brand-neon { white-space: nowrap; }
+    body[data-mode="title"] #btn-notebook { display: none; }   /* hidden, but still taking width, it wrapped the brand */
+    .notebook { height: 88dvh; }
+
+    /* Safe areas: viewport-fit=cover lets an installed app draw under the status bar, a notch and the
+       home indicator. env() is 0 everywhere else, so these cost nothing on other screens. */
+    .topbar { height: calc(var(--topbar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);
+              padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+    .encounter-inner { padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+    .actions-cue { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+    .toast { top: calc(var(--topbar-h) + env(safe-area-inset-top, 0px) + 12px); }
+    .notebook-body { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+  }
+
+  @media (max-width: 370px) {
+    .chip .chip-cost { font-size: 10px; }        /* "moored here" on a 360px phone */
+    .brand-neon { font-size: 14.5px; letter-spacing: .12em; }
+    .topbar-actions .btn { padding: 8px 11px; }
+  }
+
+  /* Landscape phones: the picture and dashboard on the left, the sheet on the right. */
+  @media (max-width: 899px) and (orientation: landscape) {
+    .app { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+    .topbar { grid-column: 1 / -1; }
+    .harbour-column { grid-column: 1; grid-row: 2; min-height: 0; overflow: hidden; }
+    .harbour-frame { flex: 1 1 auto; min-height: 0; aspect-ratio: auto; max-height: none; }
+    .encounter { grid-column: 2; grid-row: 2; border-top: none; border-left: var(--hairline); }
+    body[data-mode="title"] .app { grid-template-columns: 1fr; }
+    body[data-mode="title"] .harbour-column { grid-column: 1 / -1; }
+    .title-neon { font-size: clamp(34px, 13dvh, 72px); }
+    .title-tag { font-size: 14.5px; margin: 6px 0 10px; }
+    .actions-cue { left: auto; right: calc(14px + env(safe-area-inset-right, 0px)); transform: none; }
+    .toast { left: 26%; max-width: calc(52vw - 24px); }   /* over the picture, not the sheet's heading */
+    .harbour-column { padding-left: env(safe-area-inset-left, 0px); }   /* a notch on the left in landscape */
+    .encounter { padding-right: env(safe-area-inset-right, 0px); }
+  }
 }
 
 /* 14 · ANIMATION (cheap, few elements) & REDUCED MOTION ------------------ */
@@ -533,8 +709,22 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 @keyframes tentacle-sway { from { transform: skewX(-7deg); } to { transform: skewX(7deg); } }
 @keyframes vend-flicker { 0%, 46%, 50%, 79%, 83%, 100% { opacity: .85; } 47% { opacity: .55; } 80% { opacity: .65; } }
 @keyframes moon-breathe { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
-.jelly .bell { transform-box: fill-box; transform-origin: 50% 100%; animation: bell-pulse 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
-.jelly .glow { animation: glow-breathe 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+/* Inside a <use> copy, selectors match the ORIGINAL element in <defs>, never the copy's place in the
+   picture — so ".jelly .bell" can never match. Target the symbol itself; --d still arrives per copy,
+   because custom properties inherit from the <use> element. */
+#sym-jelly .bell { transform-box: fill-box; transform-origin: 50% 100%; animation: bell-pulse 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+#sym-jelly .glow { animation: glow-breathe 3.2s ease-in-out infinite; animation-delay: var(--d, 0s); }
+/* wild ones pulse slower (Old Lam again), and the straggler under Pier 9 circles in the eddy */
+#sym-jelly-wild .bell { transform-box: fill-box; transform-origin: 50% 100%; animation: bell-pulse 5.4s ease-in-out infinite; animation-delay: var(--d, 0s); }
+#sym-jelly-wild .glow { animation: glow-breathe 5.4s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes eddy {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(26px, -9px) rotate(6deg); }
+  50%  { transform: translate(44px, 4px) rotate(0deg); }
+  75%  { transform: translate(18px, 14px) rotate(-6deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+#wild-jelly > use { animation: eddy 17s ease-in-out infinite; }
 .wave { animation: wave-drift 7s linear infinite; animation-delay: var(--d, 0s); }
 .grid { animation: grid-pulse 6s ease-in-out infinite; }
 .buzz { animation: tube-buzz 2.7s steps(1, end) infinite; }
@@ -580,7 +770,8 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 body.reduce-motion .jelly > use, body.reduce-motion .tentacles, body.reduce-motion .steam, body.reduce-motion .refl,
 body.reduce-motion .blink, body.reduce-motion .twinkle, body.reduce-motion .fan path, body.reduce-motion .ferry-bob,
 body.reduce-motion .hs-dot, body.reduce-motion .neon, body.reduce-motion .rain-rect, body.reduce-motion .train,
-body.reduce-motion .jelly .bell, body.reduce-motion .jelly .glow, body.reduce-motion .wave, body.reduce-motion .grid, body.reduce-motion .buzz,
+body.reduce-motion #sym-jelly .bell, body.reduce-motion #sym-jelly .glow, body.reduce-motion .wave,
+body.reduce-motion #sym-jelly-wild .bell, body.reduce-motion #sym-jelly-wild .glow, body.reduce-motion .grid, body.reduce-motion .buzz,
 body.reduce-motion .neon .tube-glow, body.reduce-motion .lantern > use, body.reduce-motion .neon-tentacles, body.reduce-motion .vend-glow,
 body.reduce-motion .moon-glow, body.reduce-motion .radio-name::before,
 body.reduce-motion .fog-far, body.reduce-motion .fog-near, body.reduce-motion .rain-layer, body.reduce-motion .rain-heavy, body.reduce-motion .lightning,
@@ -590,5 +781,18 @@ body.reduce-motion .fog-far, body.reduce-motion .fog-near, body.reduce-motion .l
 body.reduce-motion .rain-layer { opacity: 1; }
 body.reduce-motion .steam { opacity: .35; }
 body.reduce-motion .rain-rect { opacity: .22; }
+body.reduce-motion .inst-objective.updated, body.reduce-motion .ferry .wake path, body.reduce-motion .ferry .wake .spray { animation: none; }
 body.reduce-motion #ferry { transition: none; }
 body.reduce-motion .toast { transition: none; }
+
+/* 14b · THE PHONE ANIMATION BUDGET ----------------------------------------
+   On a phone the picture is about 200px tall: glints, window twinkles, wave lines, mast lights and
+   the water's shimmer shrink below a pixel or two, yet every one of them still costs a frame
+   (102 concurrent animations measured 38 fps idle at 6x CPU throttle; MOBILE.md §5). They rest on
+   phones. The jellies, rain, train, neon, lanterns, fog and the ferry — what you can actually see —
+   keep moving. This block must stay AFTER the base animation rules, or it is overridden and inert. */
+@media (max-width: 899px) {
+  .refl, .glints .twinkle, #far-windows .twinkle, .wave, .grid, .puff, .led-pulse, .blink,
+  .vend-glow, .fluoro, .flood, .tank-glow { animation: none; }
+  .letterbox-only { display: none; }     /* phone frames are 18:10 or wider (the 31dvh cap, landscape): seen rarely, and never worth the frames */
+}
