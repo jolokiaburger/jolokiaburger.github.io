@@ -18,11 +18,11 @@ Nothing is downloaded while you play. Tested in Chromium-based browsers (Edge, d
 
 | Input | What it does |
 | --- | --- |
-| Mouse | Click a destination in the harbour picture to cross. Click an action in the story panel. |
+| Mouse | The picture shows the quay you are moored at and pulls back to the whole harbour while you cross. People and things with a dashed ring can be clicked: that does what the matching choice under the story does, for the same cost. Cast off with the Ferry buttons in the story panel, or click a neighbouring quay where it shows at the edge of the picture. |
 | Touch | Tap a place in the picture, or one of the four destination buttons under it (the amber pips are the fuel it costs). Your choices are listed under the story; when they are out of sight, a *choices below* button takes you there. Tap the objective line to read all of it. |
 | Keyboard | `Tab` moves between controls, `Enter` or `Space` activates. `1`–`9` choose the numbered actions. `N` opens the notebook, `M` the menu, `R` tunes the radio, `Esc` closes panels. |
 | Radio | The dial under the picture (or `R`) tunes between **Off**, **Rain only**, **Lantern FM** (ambient plucked strings on a pentatonic scale) and **Basin Lo-Fi** (hypnotic techno at 104 bpm, which opens up as the night goes on). The music is generated in the browser as you listen; nothing is downloaded, and it starts only after you tune. Off by default. While the radio is on (any station), the ferry also sounds its horn and engine when you cast off and rings its bell when you moor; **Off** silences those too. |
-| Menu | Notebook, radio, reduced motion, how to play, return to title (keeps your save), new shift (asks for confirmation). |
+| Menu | Notebook, radio, reduced motion, camera (close, the standard: the quay you are moored at, the whole harbour while you cross; or wide, the whole harbour all the time, also `index.html?camera=wide`), how to play, return to title (keeps your save), new shift (asks for confirmation). |
 
 ## The harbour
 
@@ -38,6 +38,9 @@ Nothing is downloaded while you play. Tested in Chromium-based browsers (Edge, d
 - **Tiger Volt** is the night shift's energy drink. Drink a can and your next crossing takes no clock time. Mei gives you one; the vending machine at the Metro Quay has another.
 - Out of fuel? Refuel at Landing 3. Stuck elsewhere with an empty tank? Radio the harbour tug.
 - Some evidence only exists later in the night, and one witness leaves on the last train at 01:40. Waiting is an explicit, labelled action.
+- **Show a clue.** "Show Priya something from the notebook" lets you hold any clue you have up to a witness; they answer the clue itself, or shrug. Free, and worth doing.
+- **Show a clue.** "Show Priya something from the notebook" lets you hold any clue you have up to a witness; they answer the clue itself, or shrug. Free, and worth doing.
+- The notebook has a **timeline**: who was where, and when. Fill it in from what you read. The liar tests it against the evidence you put down, and the ending counts the lines you got right.
 - Somebody is lying. When you can prove it, go back to them and put **up to three** pieces of evidence down: first what breaks the story, then the explanation and the one clue that supports it; then decide what to do with the truth. Where you do that, and what breaks the story, depends on the case.
 - The dawn truck leaves at 06:00. It is a soft deadline: endings change tone if you are late, but nothing is ever locked away.
 
@@ -69,8 +72,8 @@ Progress autosaves in the browser (`localStorage`) after every action. Reopen `i
 | `MOBILE.md` | The phone build: what an Android play-test found, what was fixed, the measurements before and after, and what is still unverified. Read before changing any phone rule. |
 | `ROADMAP.md` | Future planning: three shapes a full game could take, versions, a feature catalogue graded easy to very hard, content costs, and effort estimates. |
 | `ROADMAP-ALTERNATIVES.md` | Alternative roadmap: market research (Asia first, rising trends, 2025–2026), twelve variations of the game with different gameplay and business models, regional playbooks and one recommendation. |
-| `neon-tides-next-steps*.pdf` | One-page summaries of the plan: the 18 September version and the 3.0 update. |
-| `tools/` | Optional test tooling (Node 22+ plus Edge or Chrome): a headless-browser harness, 212 automated checks, screenshot scenarios and the icon renderer. Not needed to play. |
+| `neon-tides-next-steps*.pdf` | One-page summaries of the plan: the 18 September version, the 3.0 update and the 3.3 update (`-v4`, the current one; its source is `tools/next-steps-v4.html`, printed by `node tools/print-next-steps.mjs`). |
+| `tools/` | Optional test tooling (Node 22+ plus Edge or Chrome): a headless-browser harness, 276 automated checks, screenshot scenarios and the icon renderer. Not needed to play. |
 | `LICENSE` | MIT for the code, CC BY 4.0 for artwork and story text. |
 | `.gitignore` | Keeps the generated ZIP, screenshots and local editor configuration out of version control. |
 

@@ -140,6 +140,7 @@ body[data-mode="title"] #btn-notebook { visibility: hidden; }
 .sign-text { font-family: var(--font-ui); font-weight: 600; }
 .neon-text { font-family: Impact, "Arial Black", "Bahnschrift", "Arial Narrow", "sans-serif-condensed", sans-serif; font-size: 46px; letter-spacing: 5px; fill: none; paint-order: stroke; stroke-linejoin: round; stroke-linecap: round; }
 .tube-cyan { stroke: #3df5ff; }
+.tube-cyan-shift { stroke: #8ae6ff; opacity: 0; }   /* the paler cyan the tubes drift towards; faded in by tube-hue */
 .tube-orange { stroke: #ff7a3d; }
 .tube-channel { fill: #0a0620; fill-opacity: .72; stroke: none; }   /* the dark letter body behind the tubes */
 .tube-glow { stroke-width: 9; opacity: .32; }
@@ -194,6 +195,24 @@ body.travelling .ferry .wake .spray { animation: spray .9s ease-in-out infinite;
 body.travelling .hotspot { pointer-events: none; }
 body[data-mode="title"] .hotspot { pointer-events: none; }
 body[data-mode="title"] .hs-tag { opacity: 0; }
+
+/* 6b · THINGS (3.3): drawn people and objects an action is tied to; game.js draws the marks ------ */
+.thing { cursor: pointer; outline: none; }
+.thing-hit { fill: transparent; }
+.thing-ring { fill: none; stroke: var(--amber); stroke-width: 2; stroke-dasharray: 6 5; opacity: .7; animation: thing-breathe 2.6s ease-in-out infinite; }
+.thing.kind-confront .thing-ring { stroke: var(--coral); }
+@keyframes thing-breathe { 0%, 100% { opacity: .45; } 50% { opacity: .95; } }   /* opacity only: never a paint property (MOBILE.md §12) */
+.thing:focus-visible .thing-ring { opacity: 1; animation: none; stroke: var(--amber-bright); stroke-dasharray: none; }
+@media (hover: hover) { .thing:hover .thing-ring { opacity: 1; animation: none; stroke: var(--amber-bright); } }
+.thing-tag-bg { fill: rgba(7, 5, 26, .88); stroke: var(--amber); stroke-width: 1.2; }
+.thing.kind-confront .thing-tag-bg { stroke: var(--coral); }
+.thing-tag-text { font-family: var(--font-ui); font-size: 14px; letter-spacing: .04em; }
+.thing-tag-name { font-weight: 700; fill: var(--paper); }
+.thing-tag-cost { font-family: var(--font-mono); font-size: 12px; fill: var(--amber-bright); }
+body.reduce-motion .thing-ring { animation: none; opacity: .85; }
+body.travelling .thing, body[data-mode="title"] .thing { display: none; }
+.action-btn.kind-show { border-color: var(--surface-500); }
+.action-btn.kind-show .act-label::before { content: "▸ "; color: var(--amber); }
 
 /* 7 · INSTRUMENTS (compact resource strip under the picture) -------------- */
 .instruments {
@@ -309,6 +328,13 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .action-btn .key { font-family: var(--font-mono); font-size: 11px; color: var(--surface-300); margin-right: 8px; }
 .act-why { font-family: var(--font-ui); font-size: 12.5px; color: var(--paper-dim); margin: -4px 0 4px 2px; }
 
+/* What the notebook's timeline says, shown at the counter (3.1) */
+.tl-summary-wrap { margin: 4px 0 10px; padding: 8px 12px; border: var(--hairline); background: rgba(7, 5, 26, .5); }
+.tl-summary-head { font-family: var(--font-ui); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+.tl-summary { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.tl-summary li { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14.5px; }
+.tl-summary .tl-when { font-size: 12.5px; color: var(--paper-dim); text-transform: none; letter-spacing: 0; align-self: center; }
+.tl-said.empty { color: var(--coral); font-style: italic; }
 /* Evidence picker (confrontation) */
 .evidence-list { display: flex; flex-direction: column; gap: 6px; }
 .evidence-item {
@@ -377,6 +403,22 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .clue-meta { font-family: var(--font-ui); font-size: 12px; color: #5b5668; }
 .nb-empty { font-style: italic; color: #5b5668; }
 .nb-loc-group { margin-bottom: 8px; }
+/* The night: the timeline the player fills in; tested at the counter (3.1) */
+.tl-intro { font-size: 14px; color: #5b5668; margin-bottom: 8px; }
+.tl-row { display: grid; gap: 4px; padding: 8px 0 11px; border-bottom: 1px dashed #c9bda6; }
+.tl-row:last-child { border-bottom: none; }
+.tl-when { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: #7a2456; }
+.tl-row.ready .tl-when { color: #1f6b4a; }
+.tl-q { font-size: 14.5px; }
+.tl-select {
+  width: 100%; min-height: 40px; padding: 6px 10px; margin-top: 2px;
+  font: inherit; font-size: 14.5px; color: var(--ink); background: #fffaf3; border: 1px solid #c9bda6; border-radius: 0;
+}
+.tl-select:focus-visible { outline: 3px solid #7a2456; outline-offset: 2px; }
+.tl-verdict { font-family: var(--font-ui); font-size: 12.5px; letter-spacing: .06em; }
+.tl-verdict.right { color: #1f6b4a; }
+.tl-verdict.wrong { color: #a0263a; }
+.tl-verdict.empty { color: #5b5668; }
 
 /* 11 · MODAL & TOAST ------------------------------------------------------- */
 .modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(5, 3, 15, .72); }
@@ -527,6 +569,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
   .action-btn { padding: 12px 12px; font-size: 15px; }
   .action-btn .act-costs { flex-direction: column; gap: 3px; align-items: flex-end; }
   .notebook { top: auto; left: 0; right: 0; height: 88vh; height: 88svh; width: 100%; box-shadow: 0 -14px 44px rgba(0, 0, 0, .65); }
+  .tl-select { min-height: 44px; font-size: 16px; }   /* 16px: iOS does not zoom the page on focus */
   .threads li { grid-template-columns: 1fr; gap: 2px; margin-bottom: 6px; }
   .title-overlay { padding: 16px; align-items: flex-start; justify-content: flex-end; gap: 10px; background: linear-gradient(to top, rgba(5, 3, 15, .94) 0%, rgba(5, 3, 15, .72) 38%, rgba(5, 3, 15, 0) 72%); }
   .title-neon { font-size: clamp(48px, 17vw, 84px); }
@@ -747,7 +790,10 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 @keyframes flood-flicker { 0%, 48%, 50%, 76%, 78%, 100% { opacity: .06; } 49% { opacity: .03; } 77% { opacity: .045; } }
 @keyframes fluoro { 0%, 33%, 35%, 37%, 100% { opacity: 1; } 34% { opacity: .5; } 36% { opacity: .7; } }
 @keyframes led-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-@keyframes tube-hue { 0%, 100% { stroke: #3df5ff; } 50% { stroke: #8ae6ff; } }
+/* Never animate fill, stroke or any other paint property inside the picture: a colour change cannot be
+   composited, so the whole SVG is repainted and re-rasterised every frame (measured: 343 of 354 ms/s
+   of raster on a phone title screen came from one stroke animation). Opacity and transform are free. */
+@keyframes tube-hue { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 .fog-far { animation: fog-far 80s linear infinite; }
 .fog-near { animation: fog-near 110s linear infinite; animation-delay: -30s; }
 .rain-layer { opacity: .5; transform-box: view-box; transform-origin: 50% 0; animation: rain-gust 38s ease-in-out infinite; }
@@ -759,7 +805,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .flood { animation: flood-flicker 7s steps(1, end) infinite; }
 .fluoro { animation: fluoro 6.3s steps(1, end) infinite; }
 .led-pulse { animation: led-pulse 2.4s ease-in-out infinite; animation-delay: var(--d, 0s); }
-.neon .tube-cyan.tube-core { animation: tube-hue 6s ease-in-out infinite; }
+.neon .tube-cyan-shift { animation: tube-hue 6s ease-in-out infinite; }
 .tank-glow { animation: glow-breathe 4s ease-in-out infinite; animation-delay: var(--d, 0s); }
 #ferry { transition: transform var(--ferry-ms) cubic-bezier(.42, .02, .28, 1); }
 
@@ -776,7 +822,7 @@ body.reduce-motion .neon .tube-glow, body.reduce-motion .lantern > use, body.red
 body.reduce-motion .moon-glow, body.reduce-motion .radio-name::before,
 body.reduce-motion .fog-far, body.reduce-motion .fog-near, body.reduce-motion .rain-layer, body.reduce-motion .rain-heavy, body.reduce-motion .lightning,
 body.reduce-motion .beam, body.reduce-motion .far-boat, body.reduce-motion .puff, body.reduce-motion .flood, body.reduce-motion .fluoro,
-body.reduce-motion .led-pulse, body.reduce-motion .neon .tube-core, body.reduce-motion .tank-glow { animation: none !important; }
+body.reduce-motion .led-pulse, body.reduce-motion .neon .tube-cyan-shift, body.reduce-motion .tank-glow { animation: none !important; }
 body.reduce-motion .fog-far, body.reduce-motion .fog-near, body.reduce-motion .lightning, body.reduce-motion .far-boat, body.reduce-motion .rain-heavy { display: none; }
 body.reduce-motion .rain-layer { opacity: 1; }
 body.reduce-motion .steam { opacity: .35; }

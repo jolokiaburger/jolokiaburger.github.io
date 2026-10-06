@@ -40,11 +40,16 @@
      unproven: ["tag"]      no clue in the notebook carries any of the listed tags
      motive: true|false     some clue supports one of the explanations on offer
      confronting: true|false   the player is at the confrontation right now
+     timeline: "filled"|"unfilled"   every timeline line the counter tests has been filled in (or not)
 
    Actions
    -------
-   { id, kind, label, minutes, fuel, once, when, lines, gives, givesWhen, sets, effects, costLabel }
-     kind:     "talk" (free), "search", "use", "confront", "system"
+   { id, kind, label, minutes, fuel, once, when, lines, gives, givesWhen, sets, effects, costLabel, thing }
+     kind:     "talk" (free), "search", "use", "confront", "system", "show" (3.3, below)
+     thing:    the id of something drawn in the picture (a key of world.things). While the action is
+               on offer, that thing is marked in the picture and tapping it performs the action. If
+               several offered actions name one thing, the first in the list wins; the confrontation
+               (confrontation.thing) takes the thing only if nothing else has it.
      minutes:  clock cost. Talking is free; reading text never costs time.
      once:     true = disappears after it has been used
      when:     a CONDITION for the action to be offered at all
@@ -52,6 +57,13 @@
      givesWhen: [{ if: CONDITION, gives: [...] }] — clues added only if the condition holds then
      sets:     flags to set
      effects:  { fuel: +3, cans: +1, refuel: true, clockTo: "00:55" }
+
+   Showing a clue (3.3)
+   --------------------
+   { id, kind: "show", label, when, shows: { clueId: [ENTRY] | { lines, gives, sets } }, otherwise: [ENTRY] }
+     The player picks one clue they hold; the witness answers with shows[clueId], or `otherwise` for
+     anything not listed. Free of clock time, repeatable (the notebook marks what has been shown).
+     Variants list them under `showActions: { locationId: [ACTION] }`, merged after the actions.
 
    A variant (a case)
    ------------------
@@ -75,6 +87,16 @@
                  fixed clock times ("at ten past one") in endings: the player may close at any hour.
    seeds:        every case pins at least one. Add new cases at the END of `variants`, never in
                  between: unpinned seeds keep their case only while the order holds.
+   showActions:  { locationId: [show actions] } — see "Showing a clue" above
+   timeline:     the notebook's timeline — who was where, and when (3.1). Replaces world.timeline.
+                 [{ id, clock, place: locationId | where: "free text", question, answer: nameId,
+                    proof?: tag, wrong?: [ENTRY], clues?: [clueId] }]
+                 The player fills each line in from what they have read. A line whose `proof` is one of
+                 the confrontation's `requires` is tested at the counter after the evidence: left empty
+                 it gets challenge.timeline, filled wrong it gets the line's `wrong`. Every other line is
+                 only checked when the case closes (the ending card counts the lines right). `clues`
+                 are the clues that reveal the line; the notebook says a line is ready to fill in.
+                 Names come from world.timelineNames: [{ id, name }] (people, "nobody", a stranger).
    validateCase() in game.js checks all of it at start-up; the title screen lists any problem.
    ========================================================================== */
 
@@ -86,13 +108,44 @@ window.NEON_TIDES = (function () {
   /* ------------------------------------------------------------------ */
   var meta = {
     title: "Neon Tides",
-    version: "3.0.0",
+    version: "3.3.0",
     startClock: "23:40",   // the shift begins here
     dawnClock: "06:00",    // Frostline's truck leaves; endings mention it if you are late
     fuelMax: 6,
     startFuel: 3,          // accepting the job adds a fuel chit (+3)
     startCans: 0           // Mei hands you one can when you accept
   };
+
+  /* ------------------------------------------------------------------ */
+  /* THE NIGHT, as the notebook asks it (3.1)                            */
+  /* ------------------------------------------------------------------ */
+  // Teo's night: the three cases that share her lie share these lines and add their own. Lines with
+  // a `proof` are tested at the counter; the two here are the two proofs that break her story.
+  var teoTimeline = [
+    {
+      id: "tl_arrived", clock: "22:23", place: "landing",
+      question: "The mainland ferry is in, eleven minutes late. Whose co-op pass does Priya scan?",
+      answer: "ari", proof: "arrived", clues: ["arrival_tally"],
+      wrong: [
+        { who: "teo", text: "Read the tally again, skipper. Priya scans passes, not stories, and that isn't the name on it." },
+        { notice: "The 22:23 line in your timeline doesn't match the tally.", tone: "warn" }
+      ]
+    },
+    {
+      id: "tl_umbrella", clock: "22:38", place: "landing",
+      question: "Two figures leave the landing under one umbrella. Who walks beside the one in the courier jacket?",
+      answer: "teo", clues: ["priya_account"]
+    },
+    {
+      id: "tl_met", clock: "23:05", place: "pier",
+      question: "Run 4471 is closed at the dock office. Who signs it as dispatcher?",
+      answer: "teo", proof: "met", clues: ["run_sheet"],
+      wrong: [
+        { who: "teo", text: "Look at the run sheet. There are two names on it, and you've just told me the wrong one." },
+        { notice: "The 23:05 line in your timeline doesn't match the run sheet.", tone: "warn" }
+      ]
+    }
+  ];
 
   /* ------------------------------------------------------------------ */
   /* WORLD — shared by both cases                                        */
@@ -204,6 +257,7 @@ window.NEON_TIDES = (function () {
       { when: { resolved: true },                       text: "Case closed. Read the notebook, or start a new shift from the menu." },
       { when: { confronting: true },                    text: "Choose what to put on the counter." },
       { when: { notFlag: ["accepted"] },                text: "Hear Teo out at Kurage 33, then accept the job." },
+      { when: { proven: ["arrived", "met"], timeline: "unfilled" }, text: "You can prove Ari arrived and that Teo met them. Write the night down — the timeline in your notebook — then put it on the counter at Kurage 33." },
       { when: { proven: ["arrived", "met"], motive: true }, text: "You have enough to put on the counter. Confront Teo at Kurage 33." },
       { when: { proven: ["arrived", "met"] },           text: "Teo closed Ari's run at Pier 9 at 23:05. Find out why she is lying, then go back to Kurage 33." },
       { when: { proven: ["met"] },                      text: "Teo's signature closes Ari's run at Pier 9. Pin Ari to the Basin too — the tally at Landing 3 — and find out why she is lying." },
@@ -218,6 +272,32 @@ window.NEON_TIDES = (function () {
       { id: "met",     question: "Did Teo meet Ari tonight?", proof: "met" },
       { id: "why",     question: "Why is Teo lying?",         leads: true }
     ],
+
+    // Things drawn in the picture that an action can be tied to (action.thing): the id in index.html
+    // and the short name its tag shows. game.js marks a thing only while an action naming it is on offer.
+    things: {
+      "teo-figure": "Teo", "teo-stool": "The bag on the stool", "mei": "Mei", "lucky-cat": "The lucky cat", "tank": "The tank", "ferry": "The radio",
+      "booth": "Priya", "timetable-board": "Timetable board", "shelter": "The shelter", "boarding-lights": "Boarding lights",
+      "dex": "Dex", "yumi": "Yumi", "lam": "Old Lam", "vending": "Vending machine",
+      "matte": "Matte", "dock-office": "Dock office", "cargo": "Crate 17", "tank-lids": "Tank lids", "gate": "The gate"
+    },
+
+    // Who a timeline line can name. The order is the order in the notebook's list.
+    timelineNames: [
+      { id: "ari",      name: "Ari Bexell" },
+      { id: "teo",      name: "Teo Lindqvist-Goh" },
+      { id: "mei",      name: "Auntie Mei" },
+      { id: "priya",    name: "Priya Holm" },
+      { id: "matte",    name: "Matte Ruud" },
+      { id: "dex",      name: "Dex Amani" },
+      { id: "yumi",     name: "Yumi Osei-Tan" },
+      { id: "lam",      name: "Old Lam" },
+      { id: "garrow",   name: "Garrow, the Frostline foreman" },
+      { id: "bengt",    name: "Bengt, on the tug Vidar" },
+      { id: "nobody",   name: "Nobody" },
+      { id: "stranger", name: "Somebody you can't name" }
+    ],
+    timeline: teoTimeline,
 
     // Classes set on <body> while their condition holds, so the picture follows the night.
     // styles.css draws the difference; variants can add their own (variant.sceneClasses).
@@ -263,7 +343,7 @@ window.NEON_TIDES = (function () {
     actions: {
       bar: [
         {
-          id: "bar_accept", kind: "talk", label: "Accept the job", minutes: 0, once: true,
+          id: "bar_accept", thing: "teo-figure", kind: "talk", label: "Accept the job", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           sets: ["accepted"],
           effects: { fuel: 3, cans: 1 },
@@ -277,7 +357,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_ask_job", kind: "talk", label: "Ask Teo what she actually wants", minutes: 0, once: true,
+          id: "bar_ask_job", thing: "teo-figure", kind: "talk", label: "Ask Teo what she actually wants", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           lines: [
             { who: "teo", text: "I want to tell the office that somebody with a boat looked, so they stop calling me. That's what I want." },
@@ -301,7 +381,7 @@ window.NEON_TIDES = (function () {
       ],
       landing: [
         {
-          id: "landing_ask_priya", kind: "talk", label: "Ask Priya about the 22:10", minutes: 0, once: true,
+          id: "landing_ask_priya", thing: "booth", kind: "talk", label: "Ask Priya about the 22:10", minutes: 0, once: true,
           lines: [
             { who: "priya", text: "Eleven minutes late. Four off. One of them ran, which people do when they think the co-op is waiting." },
             { who: "priya", text: "I don't do faces. I do times. The tally's on the board if you want it in writing — everything's on the board." },
@@ -309,7 +389,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_read_board", kind: "search", label: "Read the tally on the timetable board", minutes: 10, once: true,
+          id: "landing_read_board", thing: "timetable-board", kind: "search", label: "Read the tally on the timetable board", minutes: 10, once: true,
           gives: ["arrival_tally"],
           lines: [
             "Behind the timetable glass, tonight's tally scrolls in Priya's square capitals across the LED board. You read it twice.",
@@ -317,7 +397,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_ask_teo", kind: "talk", label: "Ask Priya whether she saw Teo tonight", minutes: 0, once: true,
+          id: "landing_ask_teo", thing: "booth", kind: "talk", label: "Ask Priya whether she saw Teo tonight", minutes: 0, once: true,
           when: { has: ["arrival_tally"] },
           gives: ["priya_account"],
           lines: [
@@ -326,7 +406,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_wait", kind: "system", label: "Wait for the 00:40 to sail", minutes: 0, once: true,
+          id: "landing_wait", thing: "boarding-lights", kind: "system", label: "Wait for the 00:40 to sail", minutes: 0, once: true,
           when: { has: ["arrival_tally"], maxClock: "00:55" },
           effects: { clockTo: "00:55" },
           costLabel: "until 00:55",
@@ -348,7 +428,7 @@ window.NEON_TIDES = (function () {
       ],
       metro: [
         {
-          id: "metro_talk_yumi", kind: "talk", label: "Talk to the nurse by the vending machine", minutes: 0, once: true,
+          id: "metro_talk_yumi", thing: "yumi", kind: "talk", label: "Talk to the nurse by the vending machine", minutes: 0, once: true,
           gives: ["yumi_foreman"],
           lines: [
             { who: "yumi", text: "Night shift at the harbour clinic. I've stitched three Frostline hands this month; the cold makes people careless with knives." },
@@ -357,7 +437,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "metro_talk_lam", kind: "talk", label: "Sit with the old man by the water", minutes: 0, once: true,
+          id: "metro_talk_lam", thing: "lam", kind: "talk", label: "Sit with the old man by the water", minutes: 0, once: true,
           gives: ["lam_jellies"],
           lines: [
             "Old Lam doesn't look up from the water. Under it, a lantern jelly pulses cyan and drifts toward the pilings.",
@@ -366,7 +446,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "metro_vending", kind: "search", label: "Work the vending machine", minutes: 5, once: true,
+          id: "metro_vending", thing: "vending", kind: "search", label: "Work the vending machine", minutes: 5, once: true,
           effects: { cans: 1 },
           lines: [
             "You feed the machine a coin. It thinks about it, the way it thinks about everyone's coin.",
@@ -377,7 +457,7 @@ window.NEON_TIDES = (function () {
       ],
       pier: [
         {
-          id: "pier_ask_matte", kind: "talk", label: "Ask Matte about tonight's deliveries", minutes: 0, once: true,
+          id: "pier_ask_matte", thing: "matte", kind: "talk", label: "Ask Matte about tonight's deliveries", minutes: 0, once: true,
           sets: ["matte_talked"],
           lines: [
             { who: "matte", text: "Nothing came through this gate after ten. Frostline wants a sample case for the dawn truck; it isn't here; that's your co-op's problem." },
@@ -386,7 +466,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "pier_dock_office", kind: "search", label: "Check the dock office window", minutes: 10, once: true,
+          id: "pier_dock_office", thing: "dock-office", kind: "search", label: "Check the dock office window", minutes: 10, once: true,
           gives: ["run_sheet", "truck_schedule"],
           lines: [
             "The dock office is locked, but the outbound tray sits on the window ledge under the light where anyone could read it. Runs closed tonight: one.",
@@ -400,6 +480,7 @@ window.NEON_TIDES = (function () {
     /* ---- the confrontation: Teo's lie, shared by every case that doesn't bring its own ---- */
     confrontation: {
       at: "bar",                                   // where the liar is confronted
+      thing: "teo-figure",                         // tap Teo to put it on the counter, once you hold a clue
       actionLabel: "Put your evidence on the counter",
       submitLabel: "Put it on the counter",
       accuseLabel: "Make the accusation",
@@ -431,6 +512,11 @@ window.NEON_TIDES = (function () {
             { notice: "Teo met Ari — nearly proven. You still need to show Ari physically arrived.", tone: "" }
           ]
         },
+        // The paper is right but the notebook's timeline isn't filled in: say what happened first.
+        timeline: [
+          { who: "teo", text: "Paper's paper. Before it goes on my counter you tell me what happened tonight — who was where, and when. It's in that notebook or it isn't." },
+          { notice: "Fill in the timeline in your notebook, then put the evidence down again.", tone: "warn" }
+        ],
         success: [
           "Teo looks at the tally, then at the run sheet, then at the clock over the shelf. She takes the headset off and sets it on the counter, which you have never seen her do.",
           { who: "teo", text: "All right. I met them. Pier 9, five past eleven, two bowls of ramen going cold in a bag." },
@@ -512,6 +598,77 @@ window.NEON_TIDES = (function () {
   /* VARIANT A — THE KIND LIE                                            */
   /* Teo hid Ari after Ari discovered protected wild jellyfish in Crate 17 */
   /* ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------ */
+  /* SHOWING A CLUE (3.3): the three cases with Teo's lie share these     */
+  /* ------------------------------------------------------------------ */
+  // extra = { teo: { clueId: [ENTRY] }, priya: {...}, mei: {...} } adds a case's own responses.
+  function teoShows(extra) {
+    function merge(base, own) { return Object.assign({}, base, own || {}); }
+    return {
+      bar: [
+        {
+          id: "bar_show_teo", kind: "show", label: "Show Teo something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: merge({
+            arrival_tally: [
+              { who: "teo", text: "Priya logs the ferry late every night, and every night it's late. A pass got scanned. That's a turnstile talking, not a person." }
+            ],
+            run_sheet: [
+              { who: "teo", text: "My name is on forty of those a week. If you think this one means something, it goes on the counter, not under my nose." },
+              { notice: "Teo won't discuss paper away from the counter. Put it on the counter when you are ready.", tone: "" }
+            ],
+            priya_account: [
+              { who: "teo", text: "Priya does times, not faces. She said so herself. Two people and an umbrella. It rains here, skipper." }
+            ],
+            truck_schedule: [
+              { who: "teo", text: "Garrow's notice. No late loads. He's been pinning that up since before you had a boat." }
+            ]
+          }, extra.teo),
+          otherwise: [
+            "Teo reads it without touching it, then looks back at the radio.",
+            { who: "teo", text: "That's not for me." }
+          ]
+        },
+        {
+          id: "bar_show_mei", kind: "show", label: "Show Mei something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: merge({
+            arrival_tally: [
+              { who: "mei", text: "I don't read tallies. I read who comes in hungry. Nobody new came in hungry tonight." }
+            ],
+            run_sheet: [
+              { who: "mei", text: "Teo signs things. I sell things. Eat first." }
+            ]
+          }, extra.mei),
+          otherwise: [
+            "Mei glances at it the way she glances at a tab that isn't paid, and goes back to the broth."
+          ]
+        }
+      ],
+      landing: [
+        {
+          id: "landing_show_priya", kind: "show", label: "Show Priya something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: merge({
+            run_sheet: [
+              { who: "priya", text: "Lindqvist-Goh, 23:05, Pier 9. She walked past my booth at 22:38 and the next thing with her name on it is this. I do times. That's a time." }
+            ],
+            truck_schedule: [
+              { who: "priya", text: "Garrow pins one of those on my booth too. No late loads. The driver doesn't wait, and he doesn't read." }
+            ],
+            lam_jellies: [
+              { who: "priya", text: "Old Lam. He told me that too, once. I hadn't asked." }
+            ]
+          }, extra.priya),
+          otherwise: [
+            "Priya reads it the way she reads a crossword clue she doesn't like, and hands it back.",
+            { who: "priya", text: "Not my booth." }
+          ]
+        }
+      ]
+    };
+  }
+
   var kindLie = {
     id: "kind-lie",
     title: "The Kind Lie",
@@ -522,6 +679,32 @@ window.NEON_TIDES = (function () {
       { class: "teo-gone", when: { ending: "by_the_book" } }   // "Teo's stool is empty."
     ],
 
+    // The notebook's timeline: Teo's shared lines, then this night's own.
+    timeline: teoTimeline.concat([
+      {
+        id: "tl_message", clock: "23:12", place: "metro",
+        question: "A message lands in the rider group: \"Frostline saw me look. Getting out tonight.\" Who sends it?",
+        answer: "ari", clues: ["dex_message"]
+      },
+      {
+        id: "tl_sailed", clock: "00:52", place: "landing",
+        question: "The 00:40 to the mainland sails. Who is aboard on the dispatch account?",
+        answer: "ari", clues: ["departure_tally"]
+      }
+    ]),
+    // Showing a clue (3.3): the shared witnesses' answers, plus this night's own.
+    showActions: teoShows({
+      teo: {
+        dex_message: [ { who: "teo", text: "Dex." }, "A beat.", { who: "teo", text: "He was told to delete that." } ],
+        note_timetable: [ { who: "teo", text: "Where did you — put that away. Not here." } ]
+      },
+      priya: {
+        departure_tally: [ { who: "priya", text: "Mine. Fare on the dispatch account. I don't ask who pays; I write down who pays." } ]
+      },
+      mei: {
+        dispatch_bag: [ { who: "mei", text: "Two thirty-threes to go at ten to eleven. Teo never takes food away. I sold it anyway." } ]
+      }
+    }),
     clues: {
       note_timetable: {
         title: "Folded note behind the timetable",
@@ -582,7 +765,7 @@ window.NEON_TIDES = (function () {
     actions: {
       bar: [
         {
-          id: "bar_ask_ari", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
+          id: "bar_ask_ari", thing: "teo-figure", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             { who: "teo", text: "Ari Bexell. Twenty-six. Good on a boat, bad at sitting still. Two years with the co-op." },
@@ -591,7 +774,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_talk_mei", kind: "talk", label: "Talk to Mei", minutes: 0,
+          id: "bar_talk_mei", thing: "mei", kind: "talk", label: "Talk to Mei", minutes: 0,
           when: { resolved: false },
           lines: [
             { if: { lacks: ["arrival_tally"] }, lines: [
@@ -610,7 +793,7 @@ window.NEON_TIDES = (function () {
           givesWhen: [ { if: { has: ["arrival_tally"] }, gives: ["mei_bowls"] } ]
         },
         {
-          id: "bar_look", kind: "search", label: "Look around the bar", minutes: 10, once: true,
+          id: "bar_look", thing: "lucky-cat", kind: "search", label: "Look around the bar", minutes: 10, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Teo's is two milk teas, paid Thursdays.",
@@ -619,7 +802,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_bag", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["dispatch_bag"],
           lines: [
@@ -630,7 +813,7 @@ window.NEON_TIDES = (function () {
       ],
       landing: [
         {
-          id: "landing_shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
+          id: "landing_shelter", thing: "shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
           gives: ["note_timetable"],
           lines: [
             "The shelter's back light is broken; somebody has broken it recently, the glass is still on the bench.",
@@ -638,7 +821,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_departures", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
+          id: "landing_departures", thing: "timetable-board", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
           when: { minClock: "00:55" },
           gives: ["departure_tally"],
           lines: [
@@ -649,7 +832,7 @@ window.NEON_TIDES = (function () {
       ],
       metro: [
         {
-          id: "metro_talk_dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
+          id: "metro_talk_dex", thing: "dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
           when: { maxClock: "01:40" },
           gives: ["dex_message"],
           lines: [
@@ -662,7 +845,7 @@ window.NEON_TIDES = (function () {
       ],
       pier: [
         {
-          id: "pier_cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
+          id: "pier_cargo", thing: "cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
           gives: ["crate17_tags"],
           lines: [
             "Crate 17 sits under the floodlight, breathing cold. The manifest pocket says farmed. You lift the lid an inch.",
@@ -670,7 +853,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "pier_press_matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
+          id: "pier_press_matte", thing: "matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
           when: { has: ["run_sheet"] },
           gives: ["matte_threat"],
           lines: [
@@ -773,6 +956,32 @@ window.NEON_TIDES = (function () {
       { class: "teo-gone", when: { ending: "receipts" } }      // "Teo's stool is empty."
     ],
 
+    // The notebook's timeline: Teo's shared lines, then this night's own.
+    timeline: teoTimeline.concat([
+      {
+        id: "tl_launch", clock: "23:30", where: "Slip 4",
+        question: "A launch with no lights ties up at Slip 4 for a cash handover. Who carries Meridian's tank down the ladder?",
+        answer: "ari", clues: ["matte_launch", "dex_buyer", "buyers_card"]
+      },
+      {
+        id: "tl_sailed", clock: "00:52", place: "landing",
+        question: "The 00:40 to the mainland sails with one passenger and a bicycle. Who from the co-op is aboard?",
+        answer: "nobody", clues: ["departure_tally_b"]
+      }
+    ]),
+    // Showing a clue (3.3): the shared witnesses' answers, plus this night's own.
+    showActions: teoShows({
+      teo: {
+        envelope: [ { who: "teo", text: "Don't count it at the counter. That's what it says, isn't it. Then don't." } ],
+        mei_tab: [ { who: "teo", text: "Mei talks. Mei always talks." } ]
+      },
+      priya: {
+        departure_tally_b: [ { who: "priya", text: "One drunk and a bicycle. I wrote the bicycle down too." } ]
+      },
+      mei: {
+        envelope: [ { who: "mei", text: "Fish on the envelope. I've seen that fish. I didn't like it then either." } ]
+      }
+    }),
     clues: {
       buyers_card: {
         title: "Card behind the timetable",
@@ -833,7 +1042,7 @@ window.NEON_TIDES = (function () {
     actions: {
       bar: [
         {
-          id: "bar_ask_ari", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
+          id: "bar_ask_ari", thing: "teo-figure", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             { who: "teo", text: "Ari Bexell. Twenty-six. Good on a boat, bad with money. Two years with the co-op." },
@@ -842,7 +1051,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_talk_mei", kind: "talk", label: "Talk to Mei", minutes: 0,
+          id: "bar_talk_mei", thing: "mei", kind: "talk", label: "Talk to Mei", minutes: 0,
           when: { resolved: false },
           lines: [
             { if: { lacks: ["arrival_tally"] }, lines: [
@@ -861,7 +1070,7 @@ window.NEON_TIDES = (function () {
           givesWhen: [ { if: { has: ["arrival_tally"] }, gives: ["mei_tab"] } ]
         },
         {
-          id: "bar_look", kind: "search", label: "Look around the bar", minutes: 10, once: true,
+          id: "bar_look", thing: "lucky-cat", kind: "search", label: "Look around the bar", minutes: 10, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Teo's says three months, underlined twice — and tonight, a thick line through it.",
@@ -870,7 +1079,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_bag", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["envelope"],
           lines: [
@@ -881,7 +1090,7 @@ window.NEON_TIDES = (function () {
       ],
       landing: [
         {
-          id: "landing_shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
+          id: "landing_shelter", thing: "shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
           gives: ["buyers_card"],
           lines: [
             "The shelter's back light is out. Somebody has been sitting in the dark end; the bench is dry there.",
@@ -889,7 +1098,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_departures", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
+          id: "landing_departures", thing: "timetable-board", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
           when: { minClock: "00:55" },
           gives: ["departure_tally_b"],
           lines: [
@@ -900,7 +1109,7 @@ window.NEON_TIDES = (function () {
       ],
       metro: [
         {
-          id: "metro_talk_dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
+          id: "metro_talk_dex", thing: "dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
           when: { maxClock: "01:40" },
           gives: ["dex_buyer"],
           lines: [
@@ -913,7 +1122,7 @@ window.NEON_TIDES = (function () {
       ],
       pier: [
         {
-          id: "pier_cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
+          id: "pier_cargo", thing: "cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
           gives: ["crate17_short"],
           lines: [
             "Crate 17 sits under the floodlight. The manifest pocket says six tanks. You count five.",
@@ -921,7 +1130,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "pier_press_matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
+          id: "pier_press_matte", thing: "matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
           when: { has: ["run_sheet"] },
           gives: ["matte_launch"],
           lines: [
@@ -1027,6 +1236,32 @@ window.NEON_TIDES = (function () {
       { class: "kittiwake", when: { maxClock: "06:00", resolved: false } }
     ],
 
+    // The notebook's timeline: Teo's shared lines, then this night's own.
+    timeline: teoTimeline.concat([
+      {
+        id: "tl_pier_end", clock: "23:20", place: "pier",
+        question: "After the signatures, somebody stands at the end of Pier 9 for a quarter of an hour, looking at the Kittiwake's lights. Who?",
+        answer: "ari", clues: ["matte_mole"]
+      },
+      {
+        id: "tl_mole", clock: "05:40", where: "Outer mole",
+        question: "The Grey Kittiwake takes on ice at the outer mole. Who reports aboard as deckhand?",
+        answer: "ari", clues: ["crew_advance", "mole_note", "dex_slow_ferry"]
+      }
+    ]),
+    // Showing a clue (3.3): the shared witnesses' answers, plus this night's own.
+    showActions: teoShows({
+      teo: {
+        crew_advance: [ { who: "teo", text: "Witness. That's all I did. I witnessed." } ],
+        mole_note: [ { who: "teo", text: "Don't put it on the radio. Ari wrote that. Listen to Ari." } ]
+      },
+      priya: {
+        departure_tally_c: [ { who: "priya", text: "Three, none of them yours. I'd have noticed a courier jacket." } ]
+      },
+      mei: {
+        mei_stool: [ { who: "mei", text: "I said that. I'll say it again in the spring." } ]
+      }
+    }),
     clues: {
       mole_note: {
         title: "Final notice behind the timetable",
@@ -1093,7 +1328,7 @@ window.NEON_TIDES = (function () {
     actions: {
       bar: [
         {
-          id: "bar_ask_ari", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
+          id: "bar_ask_ari", thing: "teo-figure", kind: "talk", label: "Ask Teo about Ari", minutes: 0, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             { who: "teo", text: "Ari Bexell. Twenty-six. Good on a boat, good with a load, bad at saying no to anybody who needs something. Two years with the co-op." },
@@ -1102,7 +1337,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_talk_mei", kind: "talk", label: "Talk to Mei", minutes: 0,
+          id: "bar_talk_mei", thing: "mei", kind: "talk", label: "Talk to Mei", minutes: 0,
           when: { resolved: false },
           lines: [
             { if: { lacks: ["arrival_tally"] }, lines: [
@@ -1121,7 +1356,7 @@ window.NEON_TIDES = (function () {
           givesWhen: [ { if: { has: ["arrival_tally"] }, gives: ["mei_stool"] } ]
         },
         {
-          id: "bar_look", kind: "search", label: "Look around the bar", minutes: 10, once: true,
+          id: "bar_look", thing: "lucky-cat", kind: "search", label: "Look around the bar", minutes: 10, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Ari's has been paid every Friday for a year, always the same small amount, never quite enough to close it. Tonight it's stamped PAID in Mei's red ink.",
@@ -1130,7 +1365,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_bag", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["crew_advance"],
           lines: [
@@ -1141,7 +1376,7 @@ window.NEON_TIDES = (function () {
       ],
       landing: [
         {
-          id: "landing_shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
+          id: "landing_shelter", thing: "shelter", kind: "search", label: "Check the shelter", minutes: 10, once: true,
           gives: ["mole_note"],
           lines: [
             "The shelter's back light is broken. On the bench under it, somebody has left the dry outline of a person who sat there a long time.",
@@ -1149,7 +1384,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_departures", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
+          id: "landing_departures", thing: "timetable-board", kind: "search", label: "Read the departure tally", minutes: 10, once: true,
           when: { minClock: "00:55" },
           gives: ["departure_tally_c"],
           lines: [
@@ -1160,7 +1395,7 @@ window.NEON_TIDES = (function () {
       ],
       metro: [
         {
-          id: "metro_talk_dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
+          id: "metro_talk_dex", thing: "dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
           when: { maxClock: "01:40" },
           gives: ["dex_slow_ferry"],
           lines: [
@@ -1171,7 +1406,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "metro_ask_lam_boats", kind: "talk", label: "Ask Old Lam about the boats on the mole", minutes: 0, once: true,
+          id: "metro_ask_lam_boats", thing: "lam", kind: "talk", label: "Ask Old Lam about the boats on the mole", minutes: 0, once: true,
           when: { has: ["lam_jellies"], maxClock: "06:00" },
           gives: ["lam_kittiwake"],
           lines: [
@@ -1183,7 +1418,7 @@ window.NEON_TIDES = (function () {
       ],
       pier: [
         {
-          id: "pier_cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
+          id: "pier_cargo", thing: "cargo", kind: "search", label: "Check the numbered cargo", minutes: 10, once: true,
           gives: ["crate17_c"],
           lines: [
             "Crate 17 sits under the floodlight, breathing cold. You lift the lid an inch, then all the way.",
@@ -1191,7 +1426,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "pier_press_matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
+          id: "pier_press_matte", thing: "matte", kind: "talk", label: "Show Matte the run sheet", minutes: 0, once: true,
           when: { has: ["run_sheet"] },
           gives: ["matte_mole"],
           lines: [
@@ -1317,6 +1552,7 @@ window.NEON_TIDES = (function () {
 
     confrontation: {
       at: "pier",
+      thing: "matte",
       actionLabel: "Put it to Matte under the floodlight",
       submitLabel: "Show Matte",
       busyLabel: "under the floodlight",
@@ -1344,6 +1580,10 @@ window.NEON_TIDES = (function () {
             { notice: "Matte left the gate — proven. You still need to show that no boat came.", tone: "" }
           ]
         },
+        timeline: [
+          { who: "matte", text: "You've got paper. I've got a fence. Tell me where everybody was at ten to eleven, in order, and then show me." },
+          { notice: "Fill in the timeline in your notebook, then show Matte again.", tone: "warn" }
+        ],
         success: [
           "Matte reads what you've shown him, then reads it again, then looks at the bandage on his hand for long enough that the floodlight buzzes twice.",
           { who: "matte", text: "There was no boat." },
@@ -1366,6 +1606,7 @@ window.NEON_TIDES = (function () {
       { when: { resolved: true },                               text: "Case closed. Read the notebook, or start a new shift from the menu." },
       { when: { confronting: true },                            text: "Choose what to show Matte." },
       { when: { notFlag: ["accepted"] },                        text: "Hear Teo out under the awning at Kurage 33, then take the job." },
+      { when: { proven: ["no_boat", "not_at_gate"], timeline: "unfilled" }, text: "No boat came, and Matte wasn't at his gate. Write it down — the timeline in your notebook — then put it to him under the floodlight at Pier 9." },
       { when: { proven: ["no_boat", "not_at_gate"], motive: true }, text: "You can break Matte's story. Put it to him under the floodlight at Pier 9." },
       { when: { proven: ["no_boat", "not_at_gate"] },           text: "No boat came, and Matte wasn't at his gate. Find out what really happened to Crate 17, then go back to Pier 9." },
       { when: { proven: ["not_at_gate"] },                      text: "Matte wasn't at his gate when he says he saw the boat. Now prove there was no boat at all — somebody in the Basin watches every hull." },
@@ -1379,6 +1620,86 @@ window.NEON_TIDES = (function () {
       { id: "why",  question: "Why is Matte lying?",                     leads: true }
     ],
 
+    // Another night, another timeline. Two "nobody" lines are the proofs that break Matte's story.
+    timeline: [
+      {
+        id: "tl_mole", clock: "22:40", where: "Outer mole",
+        question: "Tug Vidar stands by at the outer mole from twenty to eleven. Who sits out there watching the Basin?",
+        answer: "bengt", clues: ["bengt_radio", "movements_log"]
+      },
+      {
+        id: "tl_ebb", clock: "22:40", where: "Slip ladder, Pier 9",
+        question: "The ebb turns. Somebody puts six tanks down the ladder and tips them into the tide. Who?",
+        answer: "matte", clues: ["crate_slot", "gatehouse", "lam_ebb"]
+      },
+      {
+        id: "tl_gate", clock: "22:50", place: "pier",
+        question: "Matte says he stood at the gate and watched the launch. Who is actually at the gate at ten to eleven?",
+        answer: "nobody", proof: "not_at_gate", clues: ["gate_log", "yumi_stitch", "gatehouse"],
+        wrong: [
+          { who: "matte", text: "Somebody at the gate? Then the badge log is wrong, and the clinic is wrong, and I'm the only one who's right. Read it again." },
+          { notice: "The 22:50 gate line in your timeline doesn't match the gate log.", tone: "warn" }
+        ]
+      },
+      {
+        id: "tl_boat", clock: "22:50", where: "The Basin",
+        question: "A launch with no lights comes alongside Pier 9, says Matte. Who brings a hull across the Basin at ten to eleven?",
+        answer: "nobody", proof: "no_boat", clues: ["movements_log", "bengt_radio"],
+        wrong: [
+          { who: "matte", text: "Then Priya's radar is wrong and Bengt's eyes are wrong. Which of them do you want to go and tell?" },
+          { notice: "The 22:50 water line in your timeline doesn't match the movements log.", tone: "warn" }
+        ]
+      },
+      {
+        id: "tl_clinic", clock: "23:00", where: "Harbour clinic",
+        question: "Yumi stitches a cut palm at the top of the metro stairs. Whose hand?",
+        answer: "matte", clues: ["yumi_stitch", "gatehouse"]
+      }
+    ],
+
+    // Showing a clue (3.3): the shared witnesses' answers, plus this night's own.
+    showActions: {
+      pier: [
+        {
+          id: "ebb_show_matte", kind: "show", label: "Show Matte something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: {
+            gate_log: [ { who: "matte", text: "That's my badge. Out at 22:47, in at 23:24. The launch was at ten to. I was at the gate before and after. Boats are quick." } ],
+            movements_log: [ { who: "matte", text: "Priya's repeater sees what has an engine running. A launch drifting in on the ebb with its engine off is a shadow to it." } ],
+            bengt_radio: [ { who: "matte", text: "Bengt sleeps on that tug. Everyone knows it." } ],
+            loss_report: [ { who: "matte", text: "Garrow wrote what I told him. That's how reports work." } ],
+            lam_jellies: [ { who: "matte", text: "Old Lam tells that story to anyone who sits down." } ],
+            crate_slot: [ { who: "matte", text: "Wiped dry. Yes. I'm tidy." }, "He looks at the bandage on his hand, then at the water." ],
+            yumi_stitch: [ { who: "matte", text: "I caught it on the gate." } ]
+          },
+          otherwise: [ "Matte reads it under the floodlight, hands it back, and says nothing at all." ]
+        }
+      ],
+      metro: [
+        {
+          id: "ebb_show_yumi", kind: "show", label: "Show Yumi something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: {
+            gate_log: [ { who: "yumi", text: "Out at 22:47, on my table at 23:00. Thirteen minutes from Pier 9 to the top of these stairs with a hand like that. He wasn't strolling." } ],
+            crate_slot: [ { who: "yumi", text: "Blood on the third rung. Right palm. Yes. That's the cut I closed." } ],
+            matte_story: [ { who: "yumi", text: "At the gate the whole time. Then who was bleeding on my table?" } ]
+          },
+          otherwise: [ "Yumi looks at it for exactly as long as it takes to be polite.", { who: "yumi", text: "I do hands. Ask me about hands." } ]
+        }
+      ],
+      landing: [
+        {
+          id: "ebb_show_priya", kind: "show", label: "Show Priya something from the notebook", minutes: 0,
+          when: { flag: ["accepted"], resolved: false },
+          shows: {
+            matte_story: [ { who: "priya", text: "A launch with no lights, at ten to eleven. Not on my repeater. My repeater doesn't care about lights; it cares about hulls." } ],
+            loss_report: [ { who: "priya", text: "Vessel suspected: ferry Tern. Garrow should read my log before he writes his." } ],
+            gate_log: [ { who: "priya", text: "Out, in. That's a timetable. I like timetables." } ]
+          },
+          otherwise: [ { who: "priya", text: "Not a time. I do times." } ]
+        }
+      ]
+    },
     clues: {
       matte_story: {
         title: "Matte's account of the boat",
@@ -1487,7 +1808,7 @@ window.NEON_TIDES = (function () {
     actions: {
       bar: [
         {
-          id: "ebb_accept", kind: "talk", label: "Take the job", minutes: 0, once: true,
+          id: "ebb_accept", thing: "teo-figure", kind: "talk", label: "Take the job", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           sets: ["accepted"],
           effects: { fuel: 3, cans: 1 },
@@ -1501,7 +1822,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_ask_teo", kind: "talk", label: "Ask Teo what Frostline is saying", minutes: 0, once: true,
+          id: "ebb_ask_teo", thing: "teo-figure", kind: "talk", label: "Ask Teo what Frostline is saying", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           lines: [
             { who: "teo", text: "Garrow came to count Crate 17 for the dawn truck at half eleven and found 08 on the deck and 17 gone. Matte told him about the launch. Garrow looked at the Basin, saw one boat with its lights on under Mei's awning, and picked up the phone." },
@@ -1510,7 +1831,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_radio_bengt", kind: "talk", label: "Ask Teo to raise the tug on her radio", minutes: 0, once: true,
+          id: "ebb_radio_bengt", thing: "ferry", kind: "talk", label: "Ask Teo to raise the tug on her radio", minutes: 0, once: true,
           when: { flag: ["accepted"], resolved: false },
           gives: ["bengt_radio"],
           lines: [
@@ -1521,7 +1842,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_talk_mei", kind: "talk", label: "Talk to Mei", minutes: 0,
+          id: "ebb_talk_mei", thing: "mei", kind: "talk", label: "Talk to Mei", minutes: 0,
           when: { resolved: false },
           lines: [
             { if: { unproven: ["not_at_gate"] }, lines: [
@@ -1541,7 +1862,7 @@ window.NEON_TIDES = (function () {
           givesWhen: [ { if: { proven: ["not_at_gate"] }, gives: ["mei_tank"] } ]
         },
         {
-          id: "ebb_tank", kind: "search", label: "Look at Mei's jellyfish tank", minutes: 5, once: true,
+          id: "ebb_tank", thing: "tank", kind: "search", label: "Look at Mei's jellyfish tank", minutes: 5, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             "Mei's lantern jellies are the blue of a gas flame turned low, pulsing quick and even, the way farmed ones do. A card taped to the glass says FROM THE MAINLAND · PLEASE DON'T TAP.",
@@ -1564,7 +1885,7 @@ window.NEON_TIDES = (function () {
       ],
       landing: [
         {
-          id: "ebb_ask_priya", kind: "talk", label: "Ask Priya about a launch with no lights", minutes: 0, once: true,
+          id: "ebb_ask_priya", thing: "booth", kind: "talk", label: "Ask Priya about a launch with no lights", minutes: 0, once: true,
           lines: [
             { who: "priya", text: "A launch. With no lights. At ten to eleven." },
             "She doesn't look up from the crossword. Her pencil fills in a word that might be RADAR.",
@@ -1572,7 +1893,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_movements", kind: "search", label: "Read the movements log in the booth", minutes: 10, once: true,
+          id: "ebb_movements", thing: "timetable-board", kind: "search", label: "Read the movements log in the booth", minutes: 10, once: true,
           gives: ["movements_log"],
           lines: [
             "Priya turns the log book round on the counter and taps the page with her pencil, once, the way people tap a sum they have checked twice.",
@@ -1583,7 +1904,7 @@ window.NEON_TIDES = (function () {
       ],
       metro: [
         {
-          id: "ebb_yumi_hands", kind: "talk", label: "Ask Yumi about the Frostline hands she stitches", minutes: 0, once: true,
+          id: "ebb_yumi_hands", thing: "yumi", kind: "talk", label: "Ask Yumi about the Frostline hands she stitches", minutes: 0, once: true,
           when: { has: ["yumi_foreman"] },
           gives: ["yumi_stitch"],
           lines: [
@@ -1594,7 +1915,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_lam_tide", kind: "talk", label: "Ask Old Lam about tonight's tide", minutes: 0, once: true,
+          id: "ebb_lam_tide", thing: "lam", kind: "talk", label: "Ask Old Lam about tonight's tide", minutes: 0, once: true,
           when: { has: ["lam_jellies"] },
           gives: ["lam_ebb"],
           lines: [
@@ -1604,7 +1925,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
+          id: "ebb_dex", thing: "dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
           when: { maxClock: "01:40" },
           gives: ["dex_green"],
           lines: [
@@ -1616,7 +1937,7 @@ window.NEON_TIDES = (function () {
       ],
       pier: [
         {
-          id: "ebb_matte_story", kind: "talk", label: "Ask Matte what he saw", minutes: 0, once: true,
+          id: "ebb_matte_story", thing: "matte", kind: "talk", label: "Ask Matte what he saw", minutes: 0, once: true,
           sets: ["matte_told"],
           gives: ["matte_story"],
           lines: [
@@ -1627,7 +1948,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_dock_office", kind: "search", label: "Check the dock office window", minutes: 10, once: true,
+          id: "ebb_dock_office", thing: "dock-office", kind: "search", label: "Check the dock office window", minutes: 10, once: true,
           gives: ["gate_log", "loss_report", "truck_schedule"],
           lines: [
             "The dock office is locked, but the night's paperwork sits on the window ledge under the light, where anyone could read it.",
@@ -1635,7 +1956,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_slip", kind: "search", label: "Look over the slip ladder", minutes: 10, once: true,
+          id: "ebb_slip", thing: "tank-lids", kind: "search", label: "Look over the slip ladder", minutes: 10, once: true,
           gives: ["crate_slot"],
           lines: [
             "The slip ladder goes down the side of the pier into black water. Crate 17's empty pallet has been pushed right to the edge, as if somebody worked from here.",
@@ -1643,7 +1964,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_gatehouse", kind: "search", label: "Look in the gatehouse while Matte walks the fence", minutes: 5, once: true,
+          id: "ebb_gatehouse", thing: "gate", kind: "search", label: "Look in the gatehouse while Matte walks the fence", minutes: 5, once: true,
           when: { flag: ["matte_told"], resolved: false },
           gives: ["gatehouse"],
           lines: [

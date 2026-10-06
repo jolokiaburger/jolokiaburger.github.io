@@ -52,6 +52,23 @@
     appendChildren(node, children);
     return node;
   }
+  // The same, for elements inside the picture.
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs, children) {
+    const node = document.createElementNS(SVG_NS, tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (key) {
+        const value = attrs[key];
+        if (value === null || value === undefined || value === false) return;
+        if (key === "class") node.setAttribute("class", value);
+        else if (key === "text") node.textContent = value;
+        else if (key.indexOf("on") === 0 && typeof value === "function") node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value === true ? "" : value);
+      });
+    }
+    appendChildren(node, children);
+    return node;
+  }
   function appendChildren(node, children) {
     if (children === undefined || children === null) return;
     if (Array.isArray(children)) { children.forEach(function (c) { appendChildren(node, c); }); return; }
@@ -169,6 +186,9 @@
       confrontation: mergeConfrontation(world.confrontation, variant.confrontation),
       threads: variant.threads || world.threads,
       objectives: variant.objectives || world.objectives,
+      timeline: variant.timeline || world.timeline || [],
+      names: world.timelineNames || [],
+      things: world.things || {},
       sceneClasses: (world.sceneClasses || []).concat(variant.sceneClasses || []),
       responses: variant.responses,
       finalChoices: variant.finalChoices,
@@ -178,7 +198,8 @@
     Object.keys(world.locations).forEach(function (loc) {
       const shared = (world.actions[loc] || []).filter(function (a) { return omit.indexOf(a.id) === -1; });
       const own = (variant.actions && variant.actions[loc]) || [];
-      built.actions[loc] = shared.concat(own);
+      const shows = (variant.showActions && variant.showActions[loc]) || [];   // 3.3: showing a clue
+      built.actions[loc] = shared.concat(own, shows);
     });
     // Only clues something in this case can hand out belong to it, so a shared clue from a story this
     // case left out never counts towards "x of y clues" or settles a thread.
@@ -206,6 +227,7 @@
       if (requires.length > 1 && !(conf.challenge.missing && conf.challenge.missing[tag])) problems.push("missing challenge.missing." + tag);
     });
     if (!world.locations[conf.at]) problems.push("the confrontation happens at unknown place '" + conf.at + "'");
+    if (conf.thing && !built.things[conf.thing]) problems.push("the confrontation names unknown thing '" + conf.thing + "'");
 
     const explanations = conf.explanations || [];
     const truth = explanations.filter(function (e) { return e.id === built.truth; })[0];
@@ -225,6 +247,14 @@
         if (seen[action.id]) problems.push("duplicate action id '" + action.id + "' at " + loc);
         seen[action.id] = true;
         cluesGivenBy(action).forEach(function (id) { if (!built.allClues[id]) problems.push("action " + action.id + " gives unknown clue '" + id + "'"); });
+        // 3.3: a thing must be a drawn, named thing; a show action needs answers for real clues and a fallback
+        if (action.thing && !built.things[action.thing]) problems.push("action " + action.id + " names unknown thing '" + action.thing + "'");
+        if (action.thing && typeof document !== "undefined" && !document.getElementById(action.thing)) problems.push("action " + action.id + "'s thing '" + action.thing + "' is not drawn in the picture");
+        if (action.kind === "show") {
+          if (!action.shows || typeof action.shows !== "object") problems.push("show action " + action.id + " has no 'shows'");
+          else Object.keys(action.shows).forEach(function (id) { if (!built.clues[id]) problems.push("show action " + action.id + " answers unknown clue '" + id + "'"); });
+          if (!action.otherwise) problems.push("show action " + action.id + " has no 'otherwise'");
+        }
       });
     });
     // A clue written for this case that nothing hands out is almost always a typo or a forgotten action.
@@ -233,6 +263,26 @@
       const known = Object.keys(world.actions).some(function (loc) { return world.actions[loc].some(function (a) { return a.id === id; }); });
       if (!known) problems.push("omit names unknown shared action '" + id + "'");
     });
+
+    // The timeline (3.1): every line names a known person, is at a known place, has a clock and a
+    // question; a line the counter tests carries a rebuttal and a tag some clue proves; every required
+    // tag has a line to be tested; the clues a line names exist in this case.
+    const names = built.names.map(function (n) { return n.id; });
+    const lineIds = {};
+    built.timeline.forEach(function (row) {
+      if (lineIds[row.id]) problems.push("duplicate timeline line '" + row.id + "'");
+      lineIds[row.id] = true;
+      if (names.indexOf(row.answer) === -1) problems.push("timeline line '" + row.id + "' answers with unknown name '" + row.answer + "'");
+      if (!row.question || !row.clock) problems.push("timeline line '" + row.id + "' needs a clock and a question");
+      if (row.place && !world.locations[row.place]) problems.push("timeline line '" + row.id + "' is at unknown place '" + row.place + "'");
+      if (row.proof && proving(row.proof).length === 0) problems.push("timeline line '" + row.id + "' needs proof '" + row.proof + "', which no clue gives");
+      if (row.proof && requires.indexOf(row.proof) !== -1 && !row.wrong) problems.push("timeline line '" + row.id + "' is tested at the counter but has no 'wrong' rebuttal");
+      (row.clues || []).forEach(function (id) { if (!built.clues[id]) problems.push("timeline line '" + row.id + "' names unknown clue '" + id + "'"); });
+    });
+    requires.forEach(function (tag) {
+      if (!built.timeline.some(function (row) { return row.proof === tag; })) problems.push("no timeline line for required proof '" + tag + "'");
+    });
+    if (built.timeline.length && !conf.challenge.timeline) problems.push("missing challenge.timeline");
 
     if (!built.objectives || !built.objectives.length) problems.push("no objectives");
     if (!built.finalChoices || built.finalChoices.length === 0) problems.push("no final choices");
@@ -263,8 +313,8 @@
   /* ------------------------------------------------------------------ */
   let state = null;         // the saved game
   let activeCase = null;    // built from state.variantId
-  const transient = { travelling: null, timer: null, mode: "title", sceneClasses: [], objective: null };
-  const settings = { station: "off", motion: "auto", coached: false };
+  const transient = { travelling: null, timer: null, mode: "title", sceneClasses: [], objective: null, camera: null, cameraFrame: 0 };
+  const settings = { station: "off", motion: "auto", coached: false, camera: "close" };
   const profile = { version: 1, cases: {} };   // cases[variantId] = { endings: [endingId, ...] }
   const storage = { ok: true, reason: "" };
   const dom = {};
@@ -281,6 +331,9 @@
       canArmed: false,               // a can has been drunk; the next crossing is free of clock time
       flags: {},
       clues: [],                     // { id, foundAt, where }
+      timeline: {},                  // lineId -> nameId: what the notebook's timeline says (3.1)
+      shown: {},                     // showActionId -> [clueId]: what has been held up to whom (3.3)
+      hinted: [],                    // timeline lines the notebook has already pointed at
       used: {},                      // actionId -> times used
       visited: { bar: 1 },
       lastResult: null,              // what the encounter panel is showing
@@ -293,6 +346,9 @@
   }
   function setState(next) {
     state = next;
+    if (!state.timeline) state.timeline = {};   // saves from before 3.1
+    if (!state.hinted) state.hinted = [];
+    if (!state.shown) state.shown = {};
     activeCase = buildCase(variantById(state.variantId));
   }
 
@@ -329,7 +385,39 @@
     if (cond.unproven && cond.unproven.some(proven)) return false;
     if (typeof cond.motive === "boolean" && motiveKnown() !== cond.motive) return false;
     if (typeof cond.confronting === "boolean" && !!state.confront !== cond.confronting) return false;
+    if (cond.timeline === "filled" && !timelineFilled()) return false;
+    if (cond.timeline === "unfilled" && timelineFilled()) return false;
     return true;
+  }
+
+  // The notebook's timeline (3.1): lines the player fills in with a name. Lines whose proof the
+  // confrontation requires are tested at the counter; the rest only when the case closes.
+  function timelineRows() { return activeCase.timeline; }
+  function timelineName(id) {
+    const entry = activeCase.names.filter(function (n) { return n.id === id; })[0];
+    return entry ? entry.name : "";
+  }
+  function timelineWhere(row) { return row.where || (row.place ? DATA.world.locations[row.place].short : ""); }
+  function timelineVerdict(row) {
+    const answer = state.timeline[row.id];
+    if (!answer) return "empty";
+    return answer === row.answer ? "right" : "wrong";
+  }
+  function timelineTested() {
+    const required = activeCase.confrontation.requires || [];
+    return timelineRows().filter(function (row) { return row.proof && required.indexOf(row.proof) !== -1; });
+  }
+  function timelineFilled() { return timelineTested().every(function (row) { return !!state.timeline[row.id]; }); }
+  function timelineScore() {
+    const rows = timelineRows();
+    return { right: rows.filter(function (row) { return timelineVerdict(row) === "right"; }).length, total: rows.length };
+  }
+  function setTimelineAnswer(rowId, nameId) {
+    if (!state || state.resolved) return;
+    if (!timelineRows().some(function (row) { return row.id === rowId; })) return;
+    if (nameId && !activeCase.names.some(function (n) { return n.id === nameId; })) return;
+    if (nameId) state.timeline[rowId] = nameId; else delete state.timeline[rowId];
+    saveGame();
   }
 
   // Story entries -> flat list of { type: "p" | "speech" | "notice", ... }
@@ -423,10 +511,12 @@
   }
 
   function beginCrossing(from, dest, minutes, fuel) {
+    transient.showing = null;
     transient.travelling = { from: from, to: dest, minutes: minutes, fuel: fuel };
     document.body.classList.add("travelling");
     positionFerry(dest, from, true);
     render();
+    syncAspect(true);                        // a close camera pulls back for the crossing
     const wait = motionReduced() ? 80 : FERRY_MS;
     sfxCastOff(wait, fuel === 0);            // a crossing that cost no fuel is the tug towing us
     clearTimeout(transient.timer);
@@ -437,6 +527,7 @@
     document.body.classList.remove("travelling");
     sfxMoor();
     render();
+    syncAspect(true);                        // and glides in on the quay once moored
     focusEncounter();
   }
 
@@ -497,6 +588,12 @@
 
     const action = locationActions().filter(function (a) { return a.id === actionId; })[0];
     if (!action) return;
+    if (action.kind === "show") {           // pick the clue first (renderShowPicker); performShow() does the rest
+      transient.showing = action.id;
+      render();
+      focusEncounter();
+      return;
+    }
 
     // Text reflects the moment of speaking, so expand it before anything changes.
     const lines = expandLines(action.lines);
@@ -514,7 +611,42 @@
     });
 
     state.lastResult = { label: action.label, lines: lines, clues: newClues };
+    // A clue that reveals a line of the timeline: point at the notebook once per line, so the timeline
+    // is never a surprise at the counter.
+    const revealed = timelineRows().filter(function (row) {
+      return !state.timeline[row.id] && state.hinted.indexOf(row.id) === -1 && (row.clues || []).some(function (id) { return newClues.indexOf(id) !== -1; });
+    });
+    revealed.forEach(function (row) { state.hinted.push(row.id); });
     saveGame();
+    render();
+    focusEncounter();
+    if (revealed.length) toast("Notebook: the timeline has " + (revealed.length === 1 ? "a line" : revealed.length + " lines") + " you can fill in now.");
+  }
+
+  // Showing a clue (3.3): the witness answers the clue they are shown, or with `otherwise`. Free of
+  // clock time and repeatable; the picker marks what has been shown to whom.
+  function performShow(actionId, clueId) {
+    const action = locationActions().filter(function (a) { return a.id === actionId && a.kind === "show"; })[0];
+    if (!action || !hasClue(clueId)) return;
+    const response = action.shows[clueId];
+    const entries = !response ? action.otherwise : (Array.isArray(response) ? response : response.lines);
+    const lines = expandLines(entries);
+    const newClues = [];
+    if (response && !Array.isArray(response)) {
+      (response.sets || []).forEach(function (flag) { state.flags[flag] = true; });
+      (response.gives || []).forEach(function (id) { if (addClue(id)) newClues.push(id); });
+    }
+    state.used[action.id] = (state.used[action.id] || 0) + 1;
+    if (!state.shown[action.id]) state.shown[action.id] = [];
+    if (state.shown[action.id].indexOf(clueId) === -1) state.shown[action.id].push(clueId);
+    transient.showing = null;
+    state.lastResult = { label: action.label.replace(/ something.*$/, "") + ": " + activeCase.clues[clueId].title, lines: lines, clues: newClues };
+    saveGame();
+    render();
+    focusEncounter();
+  }
+  function cancelShow() {
+    transient.showing = null;
     render();
     focusEncounter();
   }
@@ -591,8 +723,12 @@
       return c.selected.some(function (id) { return clueProves(id, tag); });
     });
     if (shown.length === conf.requires.length) {
-      c.stage = "explain";
-      c.feedback = expandLines(challenge.success);
+      // The paper is right. Now the notebook must say what happened: the first tested line that is not
+      // right is asked for (empty) or rebutted (wrong), in the order of the night.
+      const line = timelineTested().filter(function (row) { return timelineVerdict(row) !== "right"; })[0];
+      if (line && timelineVerdict(line) === "empty") c.feedback = expandLines(challenge.timeline);
+      else if (line) c.feedback = expandLines(line.wrong);
+      else { c.stage = "explain"; c.feedback = expandLines(challenge.success); }
     } else if (shown.length === 0) {
       c.feedback = expandLines(challenge.nothing);
     } else {
@@ -642,6 +778,7 @@
     syncSceneClasses();
     renderInstruments();
     renderHarbour();
+    renderThings();
     renderChips();
     renderEncounter();
     renderNotebook();
@@ -670,6 +807,7 @@
 
   function setMode(mode) {
     transient.mode = mode;
+    transient.showing = null;
     document.body.setAttribute("data-mode", mode);
     syncSceneClasses();                 // the title screen always shows the harbour as it starts
     syncAspect();
@@ -678,16 +816,65 @@
     // needed). Leaving it up let it cover the title screen after "New shift…" from the card itself.
     dom.resolution.hidden = true;
   }
-  // The picture normally fits inside its frame ("meet"). On a phone's tall title screen it
-  // fills the frame instead ("slice") so the noodle bar stays large behind the title.
-  function syncAspect() {
-    // Portrait only: a landscape phone's title frame is wide, and the bar crop would cut the sign.
-    const phone = window.matchMedia("(max-width: 899px) and (orientation: portrait)").matches;
-    const phoneTitle = transient.mode === "title" && phone;
-    dom.svg.setAttribute("preserveAspectRatio", phoneTitle ? "xMidYMid slice" : "xMidYMid meet");
-    // On a phone's title screen, frame the noodle bar (x 567–1207) instead of the whole harbour.
-    dom.svg.setAttribute("viewBox", phoneTitle ? "567 0 640 800" : "0 0 1440 800");
+  // The camera. "close", the standard since 3.2.1, glides in on the quay the Tern is moored at and
+  // pulls back to the whole harbour for every crossing, so the quay fills a phone's small frame and the
+  // things drawn on it are big enough to be looked at; the title screen always shows the whole harbour
+  // (fitted, "meet", except a portrait phone's title, which fills the frame, "slice", with the bar and
+  // the moon). "wide" (Menu → Camera, or index.html?camera=wide) is the picture as it was before 3.2:
+  // the whole harbour all the time. The viewBox cannot be transitioned in CSS, so it is tweened by
+  // hand; during the 0.9 s glide the picture repaints every frame, which is the price of doing it this
+  // way (a still picture repaints nothing: MOBILE.md §12).
+  const CAMERA_MODES = ["wide", "close"];
+  const CAMERA_MS = 900;
+  const FULL_VIEW = { x: 0, y: 0, w: 1440, h: 800 };
+  const TITLE_CROP = { x: 567, y: 0, w: 640, h: 800 };
+  const QUAY_W = 760, QUAY_H = 800 * 760 / 1440, QUAY_Y = 215;   // a quay in the picture's own 18:10: sign glow to waterline
+  const QUAY_X = { landing: 0, metro: 130, bar: 507, pier: 680 };  // the crop's left edge, clamped to the picture
+  function portraitPhone() { return window.matchMedia("(max-width: 899px) and (orientation: portrait)").matches; }
+  function cameraTarget() {
+    if (transient.mode === "title") return portraitPhone() ? TITLE_CROP : FULL_VIEW;
+    if (settings.camera === "close" && state && !transient.travelling && QUAY_X[state.location] !== undefined) {
+      return { x: QUAY_X[state.location], y: QUAY_Y, w: QUAY_W, h: QUAY_H };
+    }
+    return FULL_VIEW;
   }
+  function sameView(a, b) { return !!a && !!b && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h; }
+  function viewBoxOf(v) { return [v.x, v.y, v.w, v.h].map(function (n) { return Math.round(n * 100) / 100; }).join(" "); }
+  function syncAspect(animate) {
+    // Portrait only: a landscape phone's title frame is wide, and the bar crop would cut the sign.
+    const phoneTitle = transient.mode === "title" && portraitPhone();
+    dom.svg.setAttribute("preserveAspectRatio", phoneTitle ? "xMidYMid slice" : "xMidYMid meet");
+    moveCamera(cameraTarget(), !!animate);
+  }
+  function moveCamera(target, animate) {
+    const from = transient.camera || FULL_VIEW;
+    cancelAnimationFrame(transient.cameraFrame);
+    if (!animate || motionReduced() || sameView(from, target)) {
+      transient.camera = target;
+      dom.svg.setAttribute("viewBox", viewBoxOf(target));
+      renderThings();                      // hit areas are sized against the camera
+      return;
+    }
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / CAMERA_MS);
+      const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;   // ease in, ease out
+      transient.camera = t < 1
+        ? { x: from.x + (target.x - from.x) * e, y: from.y + (target.y - from.y) * e, w: from.w + (target.w - from.w) * e, h: from.h + (target.h - from.h) * e }
+        : target;
+      dom.svg.setAttribute("viewBox", viewBoxOf(transient.camera));
+      if (t < 1) transient.cameraFrame = requestAnimationFrame(step);
+      else renderThings();                 // hit areas are sized against the finished camera
+    }
+    transient.cameraFrame = requestAnimationFrame(step);
+  }
+  function setCamera(mode) {
+    if (CAMERA_MODES.indexOf(mode) === -1) return;
+    settings.camera = mode;
+    saveSettings();
+    syncAspect(true);
+  }
+  function cycleCamera() { setCamera(CAMERA_MODES[(CAMERA_MODES.indexOf(settings.camera) + 1) % CAMERA_MODES.length]); }
 
   function renderInstruments() {
     dom.instClock.textContent = formatClock(state.clock);
@@ -747,6 +934,88 @@
   // Big buttons under the picture (phones, and touch screens at desktop widths; CSS decides).
   // An affordable crossing shows its fuel as amber pips, like the gauge, so four chips fit in one
   // row on a phone; anything else (moored here, needs fuel) is said in words.
+  // Things (3.3): while an action naming a drawn thing is on offer, that thing gets a ring and a tag in
+  // the picture, and tapping it performs the action. The hit area is at least 44 css px on any screen.
+  // Geometry is read from the drawn element in screen space and mapped back into the picture's units,
+  // so transformed groups (the ferry) and case art (hidden when display:none) come out right.
+  function renderThings() {
+    const layer = dom.things;
+    if (!layer) return;
+    layer.innerHTML = "";
+    if (!state || transient.mode !== "play" || transient.travelling || state.confront) return;
+    const bound = {};
+    const order = [];
+    locationActions().forEach(function (action) {
+      if (action.thing && !bound[action.thing]) { bound[action.thing] = action; order.push(action.thing); }
+    });
+    const conf = activeCase.confrontation;
+    systemActions().forEach(function (action) {
+      if (action.kind === "confront" && conf.thing && !bound[conf.thing]) { bound[conf.thing] = action; order.push(conf.thing); }
+    });
+    const ctm = dom.svg.getScreenCTM();
+    if (!ctm || !ctm.a) return;
+    const inverse = ctm.inverse();
+    const minUnits = 44 / ctm.a;
+    function toPicture(x, y) { const p = dom.svg.createSVGPoint(); p.x = x; p.y = y; return p.matrixTransform(inverse); }
+    // A thing's box is the union of its drawn shapes. Decorative emitters (steam, frost, exhaust) are
+    // left out: their CSS animations scale about the picture's origin and would drag the box across the
+    // quay. Hidden case art is left out too. If nothing is left, the element's own box is used.
+    const DECOR = ".steam, .puff, .frost, .exhaust, .case-art";
+    function thingBox(node) {
+      let box = null;
+      Array.prototype.forEach.call(node.querySelectorAll("rect, path, circle, ellipse, line, polygon, polyline, text, use"), function (shape) {
+        const decor = shape.closest(DECOR);
+        if (decor && node.contains(decor)) return;
+        const r = shape.getBoundingClientRect();
+        if (!r.width && !r.height) return;
+        box = box ? { left: Math.min(box.left, r.left), top: Math.min(box.top, r.top), right: Math.max(box.right, r.right), bottom: Math.max(box.bottom, r.bottom) }
+                  : { left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+      });
+      if (box) return box;
+      const r = node.getBoundingClientRect();
+      return r.width || r.height ? { left: r.left, top: r.top, right: r.right, bottom: r.bottom } : null;
+    }
+    const placedTags = [];
+    function tagClear(tag) { return !placedTags.some(function (t) { return tag.x < t.x + t.w && tag.x + tag.w > t.x && tag.y < t.y + t.h && tag.y + tag.h > t.y; }); }
+    order.forEach(function (thingId) {
+      const node = $(thingId);
+      if (!node) return;
+      const r = thingBox(node);
+      if (!r) return;                                           // not drawn tonight (case art)
+      const a = toPicture(r.left, r.top), b = toPicture(r.right, r.bottom);
+      let x = a.x - 6, y = a.y - 6, w = b.x - a.x + 12, h = b.y - a.y + 12;
+      if (w < minUnits) { x -= (minUnits - w) / 2; w = minUnits; }
+      if (h < minUnits) { y -= (minUnits - h) / 2; h = minUnits; }
+      const action = bound[thingId];
+      const minutes = actionMinutes(action);
+      const cost = minutes > 0 ? "+" + minutes + " min" : "0 min";
+      const name = activeCase.things[thingId] || thingId;
+      const label = name + " · " + cost;
+      const width = Math.max(70, label.length * 7.4 + 18);
+      // the tag sits above the ring; if that overlaps a tag already placed, it goes below, then higher up
+      const view = transient.camera || FULL_VIEW;
+      let tag = { x: Math.min(Math.max(x + w / 2 - width / 2, view.x + 4), view.x + view.w - width - 4), y: y - 24, w: width, h: 22 };   // kept inside the picture
+      if (!tagClear(tag)) tag.y = y + h + 2;
+      if (!tagClear(tag)) tag.y = y - 48;
+      placedTags.push(tag);
+      const g = svgEl("g", { class: "thing kind-" + action.kind, role: "button", tabindex: "0", "data-thing": thingId, "data-action": action.id,
+        "aria-label": action.label + " (" + cost + ")",
+        onclick: function () { performAction(action.id); },
+        onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); performAction(action.id); } } }, [
+        svgEl("rect", { class: "thing-hit", x: x, y: y, width: w, height: h }),
+        svgEl("rect", { class: "thing-ring", x: x, y: y, width: w, height: h, rx: 4 }),
+        svgEl("g", { class: "thing-tag", transform: "translate(" + (tag.x + width / 2) + " " + (tag.y + 11) + ")" }, [
+          svgEl("rect", { class: "thing-tag-bg", x: -width / 2, y: -11, width: width, height: 22 }),
+          svgEl("text", { class: "thing-tag-text", x: 0, y: 4.5, "text-anchor": "middle" }, [
+            svgEl("tspan", { class: "thing-tag-name", text: name }),
+            svgEl("tspan", { class: "thing-tag-cost", text: " · " + cost })
+          ])
+        ])
+      ]);
+      layer.appendChild(g);
+    });
+  }
+
   function renderChips() {
     dom.chips.innerHTML = "";
     Object.keys(DATA.world.locations).forEach(function (dest) {
@@ -810,7 +1079,7 @@
   function coachCard() {
     return el("div", { class: "coach", role: "note" }, [
       el("p", { class: "coach-title", text: "How this works" }),
-      el("p", { text: "Tap a place in the picture, or one of the four buttons under it, to cross the harbour. What you can do where you are is listed under the story, with what it costs." }),
+      el("p", { text: "The picture shows the quay you are moored at; people and things with a dashed ring can be tapped. Tap one of the four buttons under it to cross the harbour. Everything you can do is also listed under the story, with what it costs." }),
       el("button", { class: "btn btn-small", type: "button", onclick: function () { settings.coached = true; saveSettings(); render(); focusFirstChoice(); } }, "Got it")
     ]);
   }
@@ -899,6 +1168,24 @@
     let key = 0;
     function nextKey() { key += 1; return key <= 9 ? String(key) : null; }
 
+    // Showing a clue: the choices give way to the clues held, until one is picked or the notebook is put away.
+    const showing = transient.showing && locationActions().filter(function (a) { return a.id === transient.showing && a.kind === "show"; })[0];
+    if (showing) {
+      const group = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: showing.label + " · which clue?" })]);
+      if (!state.clues.length) group.appendChild(el("p", { class: "act-none", text: "Nothing in the notebook yet." }));
+      state.clues.forEach(function (entry) {
+        const clue = activeCase.clues[entry.id];
+        const shownBefore = (state.shown[showing.id] || []).indexOf(entry.id) !== -1;
+        group.appendChild(actionButton({
+          kind: "show", label: clue.title + (shownBefore ? " · shown" : ""), key: nextKey(), costs: costBadges(0),
+          onClick: function () { performShow(showing.id, entry.id); }
+        }));
+      });
+      group.appendChild(actionButton({ kind: "system", label: "Put the notebook away", key: nextKey(), costs: costBadges(0), onClick: cancelShow }));
+      container.appendChild(group);
+      return;
+    }
+
     const here = locationActions().filter(function (a) { return a.kind !== "system"; });
     const sys = systemActions();
     const confront = sys.filter(function (a) { return a.kind === "confront"; });
@@ -958,6 +1245,20 @@
 
     if (c.stage === "select") {
       renderLines(body, expandLines(conf.intro));
+      // What the notebook's timeline says about the lines the liar will test, so the link between the
+      // notebook and the counter is visible here.
+      const tested = timelineTested();
+      if (tested.length) {
+        const list = el("ul", { class: "tl-summary" });
+        tested.forEach(function (row) {
+          const answer = state.timeline[row.id];
+          list.appendChild(el("li", {}, [
+            el("span", { class: "tl-when", text: row.clock + " · " + timelineWhere(row) }),
+            el("span", { class: "tl-said" + (answer ? "" : " empty"), text: answer ? timelineName(answer) : "not filled in" })
+          ]));
+        });
+        body.appendChild(el("div", { class: "tl-summary-wrap" }, [el("p", { class: "tl-summary-head", text: "Your notebook's timeline says" }), list]));
+      }
       if (c.feedback) renderLines(body, c.feedback);
       body.appendChild(el("p", { class: "notice", text: conf.selectPrompt }));
       const list = el("div", { class: "evidence-list", role: "group", "aria-label": "Evidence" });
@@ -1042,6 +1343,41 @@
       el("p", { class: "nb-objective", text: currentObjective() })
     ]));
 
+    const rows = timelineRows();
+    if (rows.length) {
+      const filled = rows.filter(function (row) { return !!state.timeline[row.id]; }).length;
+      const section = el("section", { class: "nb-section nb-timeline" }, [
+        el("h3", { text: "The night (" + filled + " of " + rows.length + " filled in)" }),
+        el("p", { class: "tl-intro", text: state.resolved
+          ? "How the night went, against what you wrote down."
+          : "Who was where, and when. Fill it in from what you have read; it is tested at the counter alongside the evidence." })
+      ]);
+      rows.forEach(function (row) {
+        const answer = state.timeline[row.id] || "";
+        const ready = !answer && !state.resolved && (row.clues || []).some(hasClue);
+        const selectId = "tl-" + row.id;
+        const select = el("select", { id: selectId, class: "tl-select", "aria-label": row.clock + ", " + timelineWhere(row) + ": " + row.question,
+          disabled: state.resolved ? true : null,
+          onchange: function (e) { setTimelineAnswer(row.id, e.target.value); renderNotebookKeepingPlace(selectId); } });
+        select.appendChild(el("option", { value: "", text: "— who? —" }));
+        activeCase.names.forEach(function (n) { select.appendChild(el("option", { value: n.id, text: n.name, selected: answer === n.id ? true : null })); });
+        const line = el("div", { class: "tl-row" + (ready ? " ready" : ""), "data-line": row.id }, [
+          el("p", { class: "tl-when", text: row.clock + " · " + timelineWhere(row) + (ready ? " · ready to fill in" : "") }),
+          el("p", { class: "tl-q", text: row.question }),
+          select
+        ]);
+        if (state.resolved) {
+          const verdict = timelineVerdict(row);
+          line.appendChild(el("p", { class: "tl-verdict " + verdict, text:
+            verdict === "right" ? "Right: " + timelineName(row.answer) :
+            verdict === "wrong" ? "Wrong. It was " + timelineName(row.answer) + "." :
+            "Left blank. It was " + timelineName(row.answer) + "." }));
+        }
+        section.appendChild(line);
+      });
+      body.appendChild(section);
+    }
+
     const threads = el("ul", { class: "threads" });
     activeCase.threads.forEach(function (thread) {
       // A "leads" thread with no proof of its own counts clues for any explanation on offer.
@@ -1090,10 +1426,22 @@
     ]));
   }
 
+  // Filling in a timeline line re-renders everything (the objective may change); the reader stays
+  // where they were in the drawer and keeps the control they used.
+  function renderNotebookKeepingPlace(focusId) {
+    const top = dom.nbBody.scrollTop;
+    render();
+    dom.nbBody.scrollTop = top;
+    const node = $(focusId);
+    if (node) node.focus({ preventScroll: true });
+  }
+
   let lastFocus = null;
   function openNotebook() {
     lastFocus = document.activeElement;
     renderNotebook();
+    dom.toast.classList.remove("show");   // a "line you can fill in" toast must not cover the drawer's head
+    clearTimeout(toastTimer);
     dom.notebook.hidden = false;
     dom.scrim.hidden = false;
     dom.btnNotebook.setAttribute("aria-expanded", "true");
@@ -1250,6 +1598,8 @@
     if (!Array.isArray(obj.clues) || !obj.flags || !obj.used || !obj.visited) return "missing fields";
     const built = buildCase(variant);
     if (obj.clues.some(function (c) { return !c || !built.clues[c.id]; })) return "unknown clue";
+    if (obj.timeline && (typeof obj.timeline !== "object" || Array.isArray(obj.timeline))) return "bad timeline";
+    if (obj.shown && (typeof obj.shown !== "object" || Array.isArray(obj.shown))) return "bad shown";
     if (obj.ending && !built.endings[obj.ending]) return "unknown ending";
     return null;
   }
@@ -1289,6 +1639,7 @@
       settings.station = STATIONS.some(function (s) { return s.id === parsed.station; }) ? parsed.station : "off";
       settings.motion = MOTION_MODES.indexOf(parsed.motion) !== -1 ? parsed.motion : (parsed.reduceMotion ? "reduced" : "auto");
       settings.coached = parsed.coached === true;
+      settings.camera = CAMERA_MODES.indexOf(parsed.camera) !== -1 ? parsed.camera : "close";
     } catch (err) { /* ignore a broken settings blob */ }
   }
   function saveSettings() { storageSet(SETTINGS_KEY, JSON.stringify(settings)); }
@@ -1772,6 +2123,7 @@
       ["Shift ended", formatClock(state.endedAt) + (state.endedAt >= DAWN_CLOCK ? " (after the dawn truck)" : " (before dawn)")],
       ["Fuel left", state.fuel + " / " + DATA.meta.fuelMax],
       ["Evidence", state.clues.length + " of " + total + " clues"],
+      ["Timeline", timelineScore().right + " of " + timelineScore().total + " lines right"],
       ["Case file", found + " of " + activeCase.finalChoices.length + " endings found" + (found < activeCase.finalChoices.length ? " — the same seed replays this night" : "")],
       ["Seed", state.seed + " — replay it for the same case"]
     ].forEach(function (pair) {
@@ -1813,6 +2165,8 @@
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleStation(); openMenu(); } }, ["Radio", el("span", { class: "val", text: stationById(settings.station).name })]));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleMotion(); openMenu(); } }, ["Motion", el("span", { class: "val", text: motionLabel() })]));
     list.appendChild(el("p", { class: "muted", text: motionSummary() }));
+    list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleCamera(); openMenu(); } }, ["Camera", el("span", { class: "val", text: settings.camera === "close" ? "close · the quay you're at" : "wide · the whole harbour" })]));
+    list.appendChild(el("p", { class: "muted", text: "Close follows the Tern: the quay you are moored at, and the whole harbour while you cross. Wide shows the whole harbour all the time." }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: openHelp }, ["How to play"]));
     if (state) {
       list.appendChild(el("div", { class: "muted", text: "Case seed: " + state.seed + " — the same seed always gives the same case." }));
@@ -1833,6 +2187,8 @@
       "Talking is free. Searching and crossing cost minutes; only labelled actions move the clock. Reading never does.",
       "Clues go into the notebook" + (touch ? "" : " (N)") + " with their exact wording.",
       "Somebody tonight is lying. When you can prove it, go back to them and put up to three pieces of evidence down: first the proofs that break the story, then the reason, and the one clue that supports it.",
+      "Things you can act on are marked in the picture with a dashed ring and a label: " + (touch ? "tap" : "click") + " one and it does what the matching choice under the story does, for the same cost. \"Show … something from the notebook\" lets you hold a clue up to a witness and hear what they make of it.",
+      "The notebook's timeline asks who was where, and when. Fill it in from what you have read: the liar tests it against the paper you put down, and the ending card counts the lines you got right.",
       DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
       "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
       "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor.",
@@ -1844,8 +2200,8 @@
       title: "How to play",
       body: [
         el("p", { text: touch
-          ? "Tap a place in the harbour picture, or one of the four buttons under it, to cross the Basin. What you can do where you are is listed under the story; every crossing and search shows its cost before you commit."
-          : "Click a destination in the harbour picture to cross the Basin. Every crossing shows its fuel and clock cost before you commit." }),
+          ? "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Tap one of the four buttons under it to cross the Basin. What you can do where you are is listed under the story; every crossing and search shows its cost before you commit."
+          : "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Cast off with the Ferry buttons under the story, or click a neighbouring quay where it shows at the edge of the picture. Every crossing shows its fuel and clock cost before you commit." }),
         el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
       ],
       actions: [{ label: "Back" }]
@@ -1928,7 +2284,7 @@
     dom.instObjectiveCell.addEventListener("keydown", function (e) {
       if ((e.key === "Enter" || e.key === " ") && phoneShell()) { e.preventDefault(); toggleObjective(); }
     });
-    window.addEventListener("resize", function () { syncAspect(); updateScrollHint(); updateActionsCue(); syncObjectiveControl(); });
+    window.addEventListener("resize", function () { syncAspect(); renderThings(); updateScrollHint(); updateActionsCue(); syncObjectiveControl(); });
     // Follow the system's reduced-motion setting if it changes while the game is open.
     if (motionQuery.addEventListener) motionQuery.addEventListener("change", applyMotionSetting);
     else if (motionQuery.addListener) motionQuery.addListener(applyMotionSetting);
@@ -1977,6 +2333,7 @@
 
   function cacheDom() {
     dom.svg = $("harbour");
+    dom.things = $("things");
     dom.ferry = $("ferry");
     dom.hotspots = Array.prototype.slice.call(document.querySelectorAll(".hotspot"));
     dom.titleOverlay = $("title-overlay");
@@ -2040,6 +2397,10 @@
     cacheDom();
     dom.instCanLabel.textContent = DATA.world.drink.name;   // the drink is named in cases.js, not here
     loadSettings();
+    // index.html?camera=wide (or close) sets the camera from the address; it is remembered like a
+    // menu choice.
+    const asked = /[?&]camera=(wide|close)\b/.exec(location.search);
+    if (asked) { settings.camera = asked[1]; saveSettings(); }
     loadProfile();
     applyMotionSetting();
     renderRadio();
@@ -2080,6 +2441,12 @@
     submitEvidence: submitEvidence,
     submitExplanation: submitExplanation,
     chooseEnding: chooseEnding,
+    setTimelineAnswer: setTimelineAnswer,
+    setCamera: setCamera,
+    performShow: performShow,
+    things: function () { return Array.prototype.slice.call(document.querySelectorAll("#things .thing")).map(function (t) { return { thing: t.getAttribute("data-thing"), action: t.getAttribute("data-action"), rect: t.querySelector(".thing-hit").getBoundingClientRect() }; }); },
+    camera: function () { return { mode: settings.camera, viewBox: dom.svg.getAttribute("viewBox") }; },
+    timelineScore: function () { return state ? timelineScore() : null; },
     currentObjective: function () { return state ? currentObjective() : ""; },
     getProfile: function () { return JSON.parse(JSON.stringify(profile)); },
     openCaseFiles: openCaseFiles,
