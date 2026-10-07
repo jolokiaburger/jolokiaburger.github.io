@@ -1,13 +1,13 @@
 Neon Tides is released under two licences, depending on the kind of file.
 
 1. CODE — MIT License
-   Applies to: game.js, styles.css, index.html (markup and structure), tools/*.mjs,
-   and the data structure of cases.js.
+   Applies to: game.js, market.js, styles.css, index.html (markup and structure),
+   tools/*.mjs, and the data structures of cases.js and trade.js.
 
 2. ARTWORK AND STORY — Creative Commons Attribution 4.0 International (CC BY 4.0)
    Applies to: the harbour illustration (the inline SVG in index.html), the portraits
-   and favicon in assets/, and all story text in cases.js (dialogue, clue wording,
-   scene descriptions, endings), as well as the prose of the documentation files.
+   and favicon in assets/, and all story text in cases.js and trade.js (dialogue, clue
+   and rumour wording, scene descriptions, endings, the morning wire), as well as the prose of the documentation files.
 
 If you are unsure which licence applies to a file, treat the text you read on
 screen as CC BY 4.0 and the code that shows it as MIT.

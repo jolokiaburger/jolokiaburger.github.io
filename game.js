@@ -14,6 +14,7 @@
    6. progress                        currentObjective(), syncSceneClasses()
    7. travel & the ferry              travelTo(), beginCrossing(), positionFerry()
    8. actions                         locationActions(), performAction(), addClue()
+   8b. the gold night                 trade.js + market.js: startTradeNight(), sitDown(), buyGold()
    9. the confrontation               startConfrontation() … chooseEnding()
    10. rendering                      render() and the render* functions
    11. notebook, modal, toast, the phone sheet (focusEncounter(), updateActionsCue())
@@ -28,6 +29,8 @@
   /* 1 · CONSTANTS & TINY HELPERS                                        */
   /* ------------------------------------------------------------------ */
   const DATA = window.NEON_TIDES;
+  const TRADE = window.NEON_TIDES_TRADE;   // the gold night: story and market data (trade.js)
+  const MARKET = window.NeonMarket;        // pricing and gold lots, no DOM (market.js)
   const SAVE_KEY = "neon-tides:save:v1";
   const SETTINGS_KEY = "neon-tides:settings:v1";
   const PROFILE_KEY = "neon-tides:profile:v1";   // which endings you have seen, per case; survives new shifts
@@ -305,6 +308,7 @@
         if (seed !== normaliseSeed(seed)) report[v.id].push("pinned seed '" + seed + "' must be trimmed lower case");
       });
     });
+    if (TRADE) report["night:" + TRADE.meta.id] = validateTrade();
     return report;
   }
 
@@ -349,7 +353,7 @@
     if (!state.timeline) state.timeline = {};   // saves from before 3.1
     if (!state.hinted) state.hinted = [];
     if (!state.shown) state.shown = {};
-    activeCase = buildCase(variantById(state.variantId));
+    activeCase = state.kind === "trade" ? buildTradeNight() : buildCase(variantById(state.variantId));
   }
 
   /* ------------------------------------------------------------------ */
@@ -387,6 +391,15 @@
     if (typeof cond.confronting === "boolean" && !!state.confront !== cond.confronting) return false;
     if (cond.timeline === "filled" && !timelineFilled()) return false;
     if (cond.timeline === "unfilled" && timelineFilled()) return false;
+    // the gold night (trade.js): the hidden truth, relationships, what has been heard, world events
+    if (cond.truth && cond.truth.indexOf(state.truth) === -1) return false;
+    if (cond.rel && !Object.keys(cond.rel).every(function (id) { return relOf(id) >= cond.rel[id]; })) return false;
+    if (cond.relBelow && !Object.keys(cond.relBelow).every(function (id) { return relOf(id) < cond.relBelow[id]; })) return false;
+    if (cond.heard && !cond.heard.every(heard)) return false;
+    if (cond.heardAny && !cond.heardAny.some(heard)) return false;
+    if (cond.notHeard && cond.notHeard.some(heard)) return false;
+    if (cond.happened && !cond.happened.every(function (id) { return MARKET.eventHappened(TRADE, state.truth, id, state.clock); })) return false;
+    if (typeof cond.goldAtLeast === "number" && goldHeld() < cond.goldAtLeast) return false;
     return true;
   }
 
@@ -496,12 +509,14 @@
     }
     const from = state.location;
     const minutes = travelMinutes(check.cost);
+    const before = state.clock;
     state.fuel -= check.cost.fuel;
     state.clock += minutes;
     state.canArmed = false;
     state.location = dest;
     state.visited[dest] = (state.visited[dest] || 0) + 1;
     state.lastResult = null;
+    if (isTrade()) { advanceMarket(before); observeMarket(); }   // the board you moor at, read on arrival
     saveGame();
     if (settings.station === "off" && !transient.hintedRadio) {
       transient.hintedRadio = true;
@@ -560,6 +575,7 @@
 
   // Actions the game itself adds: the confrontation, the drink, the tug.
   function systemActions() {
+    if (isTrade()) return tradeSystemActions();
     const out = [];
     const world = DATA.world;
     const conf = activeCase.confrontation;
@@ -582,6 +598,7 @@
 
   function performAction(actionId) {
     if (transient.travelling) return;
+    if (isTrade()) { performTradeAction(actionId); return; }
     if (actionId === "sys_confront") { startConfrontation(); return; }
     if (actionId === "sys_drink") { drinkCan(); return; }
     if (actionId === "sys_tug") { radioTug(); return; }
@@ -679,12 +696,369 @@
   function radioTug() {
     const from = state.location;
     const tug = DATA.world.tug;
+    const before = state.clock;
     state.clock += tug.minutes;
     state.location = "landing";
     state.visited.landing = (state.visited.landing || 0) + 1;
     state.lastResult = { label: tug.label, lines: expandLines(tug.lines), clues: [] };
+    if (isTrade()) { advanceMarket(before); observeMarket(); }
     saveGame();
     beginCrossing(from, "landing", tug.minutes, 0);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 8b · THE GOLD NIGHT                                                 */
+  /* A shift where the player trades physical gold on what they hear.    */
+  /* trade.js holds the text and numbers, market.js prices them; this    */
+  /* section keeps the state and reuses travel, actions, lines, things,  */
+  /* saves and the notebook from the investigations.                     */
+  /* ------------------------------------------------------------------ */
+  function isTrade() { return !!state && state.kind === "trade"; }
+  function relOf(id) { return (state.rel && state.rel[id]) || 0; }
+  function heard(id) { return !!state.rumors && state.rumors.some(function (r) { return r.id === id; }); }
+  function goldHeld() { return state.gold ? MARKET.lots.total(state.gold) : 0; }
+  function grams(n) { return (Math.round(n * 100) / 100) + " g"; }
+  function fill(text, vars) {
+    return String(text || "").replace(/\{(\w+)\}/g, function (all, key) { return vars[key] !== undefined ? String(vars[key]) : all; });
+  }
+  function tradeQuote(loc) { return MARKET.quote(TRADE, state.truth, state.seed, loc || state.location, state.clock); }
+  const REL_MAX = 3;
+
+  // The night has the shape the shared renderers expect from a case, with nothing to confront.
+  function buildTradeNight() {
+    const world = DATA.world;
+    const built = {
+      kind: "trade", id: TRADE.meta.id, title: TRADE.meta.title, truth: null,
+      allClues: {}, ownClues: [], clues: {}, scenes: TRADE.scenes, actions: {},
+      confrontation: { at: null, requires: [], explanations: [], challenge: {}, stageLabels: {}, busyLabel: "" },
+      threads: [], objectives: [], timeline: [], names: [],
+      things: Object.assign({}, world.things, TRADE.things),
+      sceneClasses: (TRADE.sceneClasses || []).slice(),
+      responses: {}, finalChoices: [], endings: {}, omitted: []
+    };
+    Object.keys(world.locations).forEach(function (loc) { built.actions[loc] = (TRADE.actions[loc] || []).slice(); });
+    return built;
+  }
+
+  function newTradeState(seed) {
+    const clock = parseClock(TRADE.meta.startClock);
+    const lots = TRADE.meta.startGold.map(function (lot) { return Object.assign({ at: clock }, lot); });
+    const truth = MARKET.pickTruth(TRADE, seed);
+    const start = MARKET.quote(TRADE, truth, seed, "bar", clock);
+    return {
+      version: SAVE_VERSION,
+      kind: "trade",
+      seed: seed,
+      variantId: TRADE.meta.id,
+      truth: truth,                  // hidden; fixed here and never recomputed
+      location: "bar",
+      clock: clock,
+      fuel: TRADE.meta.startFuel,
+      cans: 0, canArmed: false,
+      credits: TRADE.meta.startCredits,
+      spent: 0,                      // credits spent on orders and fuel (not on gold)
+      gold: lots,                   // lots: { grams, cost, karat, purity, provenance, where, at }
+      trades: [],                    // { kind: buy|sell, grams, price, total, basis?, at, where }
+      rumors: [],                    // { id, at, where }: what the notebook has written down
+      rel: {},                       // personId -> 0..3, never shown as a number
+      convos: [],                    // conversations already had
+      ambience: {},                  // placeId -> ambience lines played
+      seen: {},                      // placeId -> { buy, sell, at }: the last board you read there
+      fired: [],                     // { id, at }: events the clock has passed (debug, the morning)
+      marketNote: null,              // "the board has changed since…", for the screen now
+      start: { credits: TRADE.meta.startCredits, grams: MARKET.lots.total(lots), sell: start.sell, worth: MARKET.worth(TRADE.meta.startCredits, lots, start.sell) },
+      finish: null,
+      flags: {}, clues: [], timeline: {}, shown: {}, hinted: [], used: {},
+      visited: { bar: 1 },
+      lastResult: null, confront: null,
+      resolved: false, ending: null, endedAt: null,
+      startedAt: new Date().toISOString()
+    };
+  }
+
+  function startTradeNight(seedText) {
+    const seed = normaliseSeed(seedText) || randomSeed();
+    setState(newTradeState(seed));
+    transient.objective = null;
+    observeMarket();                     // the first board is read, nothing has moved yet
+    saveGame();
+    setMode("play");
+    positionFerry(state.location, null, false);
+    render();
+    toast("Night shift · seed " + seed);
+    debugMarket("start");
+  }
+
+  // The trade data must hang together before anyone plays it. Returns a list of problems.
+  function validateTrade() {
+    const problems = [];
+    const world = DATA.world;
+    const truthIds = TRADE.truths.map(function (t) { return t.id; });
+    const places = Object.keys(world.locations);
+    const seeds = {};
+    TRADE.truths.forEach(function (t) {
+      if (!t.seeds || !t.seeds.length) problems.push("truth '" + t.id + "' has no pinned seed");
+      (t.seeds || []).forEach(function (s) {
+        if (seeds[s]) problems.push("seed '" + s + "' is pinned twice");
+        seeds[s] = true;
+        if (s !== normaliseSeed(s)) problems.push("pinned seed '" + s + "' must be trimmed lower case");
+      });
+    });
+    if (!TRADE.market.dealers.bar) problems.push("Kurage 33 needs a dealer: the night is valued at its scale");
+    Object.keys(TRADE.market.dealers).forEach(function (loc) {
+      const d = TRADE.market.dealers[loc];
+      if (!world.locations[loc]) problems.push("dealer at unknown place '" + loc + "'");
+      if (d.thing && typeof document !== "undefined" && !document.getElementById(d.thing)) problems.push("dealer thing '" + d.thing + "' is not drawn in the picture");
+      if (!d.sellText) problems.push("dealer at " + loc + " has no sellText");
+      if (!d.buyOnly && !d.buyText) problems.push("dealer at " + loc + " has no buyText");
+      (d.truths || []).forEach(function (t) { if (truthIds.indexOf(t) === -1) problems.push("dealer at " + loc + " names unknown truth '" + t + "'"); });
+    });
+    const eventIds = {};
+    TRADE.events.forEach(function (e) {
+      if (eventIds[e.id]) problems.push("duplicate event '" + e.id + "'");
+      eventIds[e.id] = true;
+      Object.keys(e.truths || {}).forEach(function (t) {
+        if (truthIds.indexOf(t) === -1) problems.push("event '" + e.id + "' names unknown truth '" + t + "'");
+        (e.truths[t].mods || []).forEach(function (m) {
+          const locs = m.loc === "*" ? [] : (Array.isArray(m.loc) ? m.loc : [m.loc]);
+          locs.concat(m.except || []).forEach(function (l) { if (!world.locations[l]) problems.push("event '" + e.id + "' moves unknown place '" + l + "'"); });
+          if (typeof m.pct !== "number") problems.push("event '" + e.id + "' has a modifier without pct");
+        });
+      });
+    });
+    Object.keys(TRADE.rumors).forEach(function (id) {
+      const r = TRADE.rumors[id];
+      if (!r.note) problems.push("rumor '" + id + "' has no note");
+      if (r.source !== "you" && !world.characters[r.source] && !TRADE.characters[r.source]) problems.push("rumor '" + id + "' has unknown source '" + r.source + "'");
+      if (!world.locations[r.origin]) problems.push("rumor '" + id + "' comes from unknown place '" + r.origin + "'");
+      Object.keys(r.truth || {}).forEach(function (t) { if (truthIds.indexOf(t) === -1) problems.push("rumor '" + id + "' names unknown truth '" + t + "'"); });
+      if (r.relatedEvent && !eventIds[r.relatedEvent]) problems.push("rumor '" + id + "' names unknown event '" + r.relatedEvent + "'");
+    });
+    function checkHears(owner, item) {
+      (item.hears || []).forEach(function (id) { if (!TRADE.rumors[id]) problems.push(owner + " hears unknown rumor '" + id + "'"); });
+      (item.hearsWhen || []).forEach(function (g) { (g.hears || []).forEach(function (id) { if (!TRADE.rumors[id]) problems.push(owner + " hears unknown rumor '" + id + "'"); }); });
+    }
+    const things = Object.assign({}, world.things, TRADE.things);
+    const orders = {};
+    places.forEach(function (loc) {
+      if (!TRADE.scenes[loc] || !TRADE.scenes[loc].first) problems.push("missing night scene text for " + loc);
+      const seen = {};
+      (TRADE.actions[loc] || []).forEach(function (a) {
+        if (seen[a.id]) problems.push("duplicate night action '" + a.id + "' at " + loc);
+        seen[a.id] = true;
+        if (["talk", "order", "search", "system"].indexOf(a.kind) === -1) problems.push("night action " + a.id + " has unknown kind '" + a.kind + "'");
+        if (a.cost !== undefined && !(typeof a.cost === "number" && a.cost >= 0)) problems.push("night action " + a.id + " has a bad cost");
+        if (a.thing && !things[a.thing]) problems.push("night action " + a.id + " names unknown thing '" + a.thing + "'");
+        if (a.thing && typeof document !== "undefined" && !document.getElementById(a.thing)) problems.push("night action " + a.id + "'s thing '" + a.thing + "' is not drawn");
+        if (a.sitting) orders[loc + ":" + a.sitting] = true;
+        checkHears("night action " + a.id, a);
+      });
+    });
+    const convoIds = {};
+    TRADE.conversations.forEach(function (c) {
+      if (convoIds[c.id]) problems.push("duplicate conversation '" + c.id + "'");
+      convoIds[c.id] = true;
+      if (!world.locations[c.at]) problems.push("conversation '" + c.id + "' at unknown place '" + c.at + "'");
+      if (!c.via || !c.via.length) problems.push("conversation '" + c.id + "' has no via");
+      (c.via || []).forEach(function (v) { if (!orders[c.at + ":" + v]) problems.push("conversation '" + c.id + "' waits for an order nobody can place there ('" + v + "')"); });
+      checkHears("conversation " + c.id, c);
+    });
+    TRADE.ambience.forEach(function (a, i) { if (!world.locations[a.at] || !a.text) problems.push("ambience line " + i + " is incomplete"); });
+    Object.keys(TRADE.people).forEach(function (id) { if (!world.characters[id] && !TRADE.characters[id]) problems.push("people names unknown person '" + id + "'"); });
+    if (!TRADE.ending || !TRADE.ending.byTruth) problems.push("no morning wire");
+    truthIds.forEach(function (t) { if (!TRADE.ending.byTruth[t]) problems.push("no morning wire for truth '" + t + "'"); });
+    return problems;
+  }
+
+  function applyRel(rel) {
+    if (!rel) return;
+    Object.keys(rel).forEach(function (id) { state.rel[id] = Math.max(0, Math.min(REL_MAX, relOf(id) + rel[id])); });
+  }
+  function hearRumor(id, into) {
+    if (!TRADE.rumors[id] || heard(id)) return;
+    state.rumors.push({ id: id, at: state.clock, where: state.location });
+    into.push(id);
+  }
+  function hearsOf(item, into) {
+    (item.hears || []).forEach(function (id) { hearRumor(id, into); });
+    (item.hearsWhen || []).forEach(function (g) { if (conditionHolds(g.if)) (g.hears || []).forEach(function (id) { hearRumor(id, into); }); });
+  }
+
+  // The clock moved: note every event whose time has come (not only the ones just crossed, so a clock
+  // set from the console or a save from an older build catches up). Prices need no update: they are
+  // read at the minute.
+  function advanceMarket(before) {
+    MARKET.eventsBetween(TRADE, state.truth, -Infinity, state.clock).forEach(function (e) {
+      if (!state.fired.some(function (f) { return f.id === e.id; })) state.fired.push({ id: e.id, at: parseClock(e.at) });
+    });
+    debugMarket("clock " + formatClock(before) + " → " + formatClock(state.clock));
+  }
+  // Reading the board where you are: if it moved since you last read it here, say so once.
+  function observeMarket() {
+    state.marketNote = null;
+    const q = tradeQuote();
+    if (!q) return;
+    const prev = state.seen[state.location];
+    if (prev && Math.abs(q.sell - prev.sell) >= 2 && q.dealer.moved) {
+      state.marketNote = fill(q.dealer.moved, { time: formatClock(prev.at), old: prev.sell, new: q.sell });
+    }
+    state.seen[state.location] = { buy: q.buy, sell: q.sell, at: state.clock };
+  }
+
+  // Sitting with an order: the first conversation here that waits for it and holds, else a small moment.
+  function sitDown(order) {
+    const here = state.location;
+    const heardNow = [];
+    const convo = TRADE.conversations.filter(function (c) {
+      return c.at === here && c.via.indexOf(order) !== -1 && state.convos.indexOf(c.id) === -1 && conditionHolds(c.when);
+    })[0];
+    if (convo) {
+      const lines = expandLines(convo.lines);   // read before its own flags change
+      state.convos.push(convo.id);
+      (convo.sets || []).forEach(function (flag) { state.flags[flag] = true; });
+      applyRel(convo.rel);
+      hearsOf(convo, heardNow);
+      return { lines: lines, heard: heardNow };
+    }
+    const pool = TRADE.ambience.filter(function (a) { return a.at === here && a.via.indexOf(order) !== -1 && conditionHolds(a.when); });
+    if (!pool.length) return { lines: [], heard: [] };
+    const n = state.ambience[here] || 0;
+    state.ambience[here] = n + 1;
+    return { lines: [{ type: "p", text: pool[n % pool.length].text }], heard: [] };
+  }
+
+  function tradeSystemActions() {
+    const out = [];
+    if (state.resolved) return out;
+    const q = tradeQuote();
+    if (q) out.push({ id: "sys_scale", kind: "trade", label: q.dealer.name, thing: q.dealer.thing, minutes: 0 });
+    if (state.location !== "landing" && state.fuel < cheapestExit(state.location)) {
+      out.push({ id: "sys_tug", kind: "system", label: DATA.world.tug.label, minutes: DATA.world.tug.minutes });
+    }
+    if (state.clock >= parseClock(TRADE.meta.turnInFrom)) {
+      out.push({ id: "sys_turn_in", kind: "system", label: "Turn in aboard the Tern (end the night)", minutes: 0 });
+    }
+    return out;
+  }
+
+  function performTradeAction(actionId) {
+    if (actionId === "sys_scale") { focusGold(); return; }
+    if (actionId === "sys_turn_in") { endTradeNight(); return; }
+    if (actionId === "sys_tug") { radioTug(); return; }
+    if (state.resolved) return;
+    const action = locationActions().filter(function (a) { return a.id === actionId; })[0];
+    if (!action) return;
+    const cost = action.cost || 0;
+    if (cost > state.credits) { toast("Not enough credits for that."); return; }
+    const lines = expandLines(action.lines);   // the moment of speaking, before anything changes
+    const before = state.clock;
+    state.credits -= cost;
+    state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
+    state.clock += actionMinutes(action);
+    if (action.fuel) state.fuel = Math.max(0, state.fuel - action.fuel);
+    state.used[action.id] = (state.used[action.id] || 0) + 1;
+    (action.sets || []).forEach(function (flag) { state.flags[flag] = true; });
+    applyEffects(action.effects);
+    applyRel(action.rel);
+    const heardNow = [];
+    hearsOf(action, heardNow);
+    advanceMarket(before);
+    if (action.sitting) {
+      const sat = sitDown(action.sitting);
+      sat.lines.forEach(function (line) { lines.push(line); });
+      sat.heard.forEach(function (id) { heardNow.push(id); });
+    }
+    observeMarket();
+    state.lastResult = { label: action.label, lines: lines, clues: [], heard: heardNow };
+    saveGame();
+    render();
+    focusEncounter();
+  }
+
+  // Trading takes no clock time. The buttons keep focus, so a few grams can be bought in a row.
+  function buyGold(amount) {
+    if (!isTrade() || state.resolved || transient.travelling) return false;
+    const q = tradeQuote();
+    if (!q || q.buyOnly) return false;
+    const g = Math.max(0, Math.floor(amount));
+    const total = g * q.buy;
+    if (!g || total > state.credits) { toast("Not enough credits for that."); return false; }
+    state.credits -= total;
+    state.gold = MARKET.lots.buy(state.gold, g, q.buy, { where: state.location, at: state.clock, provenance: q.dealer.provenance || "" });
+    state.trades.push({ kind: "buy", grams: g, price: q.buy, total: total, at: state.clock, where: state.location });
+    observeMarket();
+    state.lastResult = { label: "Bought " + grams(g) + " · " + q.dealer.name, lines: [{ type: "p", text: fill(q.dealer.buyText, { grams: grams(g), total: total + " cr", price: q.buy }) }], clues: [], heard: [] };
+    saveGame();
+    renderKeepingFocus();
+    return true;
+  }
+  function sellGold(amount) {
+    if (!isTrade() || state.resolved || transient.travelling) return false;
+    const q = tradeQuote();
+    if (!q) return false;
+    const g = Math.min(goldHeld(), amount);
+    if (!(g > 0)) return false;
+    const sold = MARKET.lots.sell(state.gold, g);
+    const total = Math.round(sold.sold * q.sell);
+    state.gold = sold.lots;
+    state.credits += total;
+    state.trades.push({ kind: "sell", grams: sold.sold, price: q.sell, total: total, basis: sold.basis, at: state.clock, where: state.location });
+    observeMarket();
+    state.lastResult = { label: "Sold " + grams(sold.sold) + " · " + q.dealer.name, lines: [{ type: "p", text: fill(q.dealer.sellText, { grams: grams(sold.sold), total: total + " cr", price: q.sell }) }], clues: [], heard: [] };
+    saveGame();
+    renderKeepingFocus();
+    return true;
+  }
+  // Tapping a scale in the picture brings the gold controls into view.
+  function focusGold() {
+    const group = $("gold-group");
+    if (!group) return;
+    group.scrollIntoView({ block: "nearest", behavior: motionReduced() ? "auto" : "smooth" });
+    const first = group.querySelector(".action-btn:not([disabled])");
+    if (first) first.focus({ preventScroll: true });
+    group.classList.remove("pulse");
+    void group.offsetWidth;
+    group.classList.add("pulse");
+  }
+
+  // Turning in ends the night: the board at Kurage 33 values what you hold, the morning wire says what happened.
+  function endTradeNight() {
+    if (!isTrade()) return;
+    if (state.resolved) { showResolution(); return; }
+    const q = MARKET.quote(TRADE, state.truth, state.seed, "bar", state.clock);
+    state.resolved = true;
+    state.ending = "night";
+    state.endedAt = state.clock;
+    state.lastResult = null;
+    state.finish = { credits: state.credits, grams: goldHeld(), sell: q.sell, worth: MARKET.worth(state.credits, state.gold, q.sell) };
+    saveGame();
+    render();
+    showResolution();
+    debugMarket("turned in");
+  }
+
+  // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
+  // NeonTides.trade.debug() returns it; ?debug=market logs it whenever the clock moves.
+  function tradeDebug() {
+    if (!isTrade()) return null;
+    const prices = {};
+    Object.keys(DATA.world.locations).forEach(function (loc) {
+      const b = MARKET.breakdown(TRADE, state.truth, state.seed, loc, state.clock);
+      const q = tradeQuote(loc);
+      prices[loc] = { mid: b.mid, buy: q ? q.buy : null, sell: q ? q.sell : null, dealer: q ? q.dealer.name : null, local: b.localPct, events: b.events, noise: b.noisePct };
+    });
+    return {
+      truth: state.truth, clock: formatClock(state.clock), fired: state.fired.map(function (f) { return f.id + " @" + formatClock(f.at); }),
+      prices: prices,
+      rumors: state.rumors.map(function (r) { const def = TRADE.rumors[r.id]; return { id: r.id, heard: formatClock(r.at), source: def.source, truth: (def.truth || {})[state.truth] || "n/a", effect: def.effect }; }),
+      rel: Object.assign({}, state.rel), credits: state.credits, gold: goldHeld(), average: MARKET.lots.average(state.gold)
+    };
+  }
+  function debugMarket(why) {
+    if (!transient.debugMarket || !isTrade()) return;
+    const d = tradeDebug();
+    console.debug("[market] " + why + " · truth " + d.truth + " · " + d.clock + " · fired: " + (d.fired.join(", ") || "none"));
+    if (console.table) console.table(d.prices);
   }
 
   /* ------------------------------------------------------------------ */
@@ -776,6 +1150,8 @@
   function render() {
     if (!state) return;
     syncSceneClasses();
+    syncTradeMode();
+    renderGoldBoard();
     renderInstruments();
     renderHarbour();
     renderThings();
@@ -811,6 +1187,7 @@
     document.body.setAttribute("data-mode", mode);
     syncSceneClasses();                 // the title screen always shows the harbour as it starts
     syncAspect();
+    syncTradeMode();
     dom.titleOverlay.hidden = mode !== "title";
     // Every change of mode clears the ending card (showResolution() runs after setMode when it is
     // needed). Leaving it up let it cover the title screen after "New shift…" from the card itself.
@@ -890,25 +1267,38 @@
   }
   function cycleHints() { setHints(hintsOn() ? "off" : "on"); }
 
+  // body.trade-mode: the gold night is being played (styles.css shows Mei's gold board, relabels the
+  // dashboard on phones). The title screen never has it.
+  function syncTradeMode() {
+    document.body.classList.toggle("trade-mode", transient.mode === "play" && isTrade());
+  }
+  // Mei's gold board in the picture shows tonight's numbers while you are at Kurage 33, and the
+  // numbers you last read there while you are not: the picture never tells you more than you know.
+  function renderGoldBoard() {
+    if (!dom.boardBuy || !isTrade()) return;
+    const live = state.location === "bar" && !transient.travelling ? tradeQuote("bar") : null;
+    const shown = live || state.seen.bar;
+    dom.boardBuy.textContent = shown ? "B " + shown.buy : "B —";
+    dom.boardSell.textContent = shown ? "S " + shown.sell : "S —";
+  }
+
   function renderInstruments() {
     dom.instClock.textContent = formatClock(state.clock);
+    renderFuel();
+    if (isTrade()) { renderTradeInstruments(); return; }
+    dom.instCanLabel.textContent = DATA.world.drink.name;
+    dom.instObjectiveLabel.textContent = "Objective";
     dom.instClock.classList.toggle("late", state.clock >= DAWN_CLOCK);
     dom.instDawn.textContent = state.clock >= DAWN_CLOCK ? "the dawn truck has gone" : "dawn truck " + DATA.meta.dawnClock;
-
-    dom.fuelGauge.innerHTML = "";
-    for (let i = 0; i < DATA.meta.fuelMax; i++) {
-      const seg = el("span", { class: "fuel-seg" + (i < state.fuel ? " on" : "") + (i < state.fuel && state.fuel <= 1 ? " low" : "") });
-      dom.fuelGauge.appendChild(seg);
-    }
-    dom.fuelGauge.setAttribute("aria-label", "fuel " + state.fuel + " of " + DATA.meta.fuelMax);
-    dom.instFuelText.textContent = state.fuel + " / " + DATA.meta.fuelMax;
 
     dom.instCan.textContent = "×" + state.cans;
     dom.instCan.className = "inst-value" + (state.canArmed ? " armed" : "");
     dom.instCanSub.textContent = state.canArmed ? "armed: next crossing 0 min" : (state.cans > 0 ? "skips one crossing's time" : "none in hand");
 
     // A new objective glows for a moment, so "what now?" is noticed when it changes.
-    const objective = currentObjective();
+    setObjectiveText(currentObjective());
+  }
+  function setObjectiveText(objective) {
     if (dom.instObjective.textContent !== objective) {
       dom.instObjective.textContent = objective;
       dom.instObjectiveCell.title = objective;
@@ -919,6 +1309,41 @@
       }
     }
     transient.objective = objective;
+  }
+  // On the gold night the dashboard carries the purse and the board where you are instead of the
+  // drink and an objective. Nothing tells you what to do; the cell glows when the board changes.
+  function renderTradeInstruments() {
+    dom.instClock.classList.remove("late");
+    dom.instDawn.textContent = state.resolved ? "turned in" : "rain on the Basin";
+    dom.instCanLabel.textContent = "Purse";
+    // phones hide the sub line, so the grams ride in the label there (styles.css 13b)
+    dom.instCanLabel.appendChild(el("span", { class: "phone-only", text: " · " + grams(goldHeld()) }));
+    dom.instCan.textContent = state.credits + " cr";
+    dom.instCan.className = "inst-value";
+    dom.instCanSub.textContent = grams(goldHeld()) + " of gold";
+    dom.instObjectiveLabel.textContent = "Gold, per gram";
+    setObjectiveText(goldBoardText());
+  }
+  function goldBoardText() {
+    if (transient.travelling) return "Under way";
+    const here = DATA.world.locations[state.location].short;
+    const q = tradeQuote();
+    if (q) return q.buyOnly ? here + " · the desk pays " + q.sell : here + " · buy " + q.buy + " · sell " + q.sell;
+    let last = null;
+    Object.keys(state.seen).forEach(function (loc) { if (!last || state.seen[loc].at > state.seen[last].at) last = loc; });
+    if (!last) return here + " · no scale here";
+    const s = state.seen[last];
+    return here + " · no scale here · " + DATA.world.locations[last].short + " at " + formatClock(s.at) + ": " + (s.buy ? s.buy + " / " : "") + s.sell;
+  }
+
+  function renderFuel() {
+    dom.fuelGauge.innerHTML = "";
+    for (let i = 0; i < DATA.meta.fuelMax; i++) {
+      const seg = el("span", { class: "fuel-seg" + (i < state.fuel ? " on" : "") + (i < state.fuel && state.fuel <= 1 ? " low" : "") });
+      dom.fuelGauge.appendChild(seg);
+    }
+    dom.fuelGauge.setAttribute("aria-label", "fuel " + state.fuel + " of " + DATA.meta.fuelMax);
+    dom.instFuelText.textContent = state.fuel + " / " + DATA.meta.fuelMax;
   }
 
   function costText(dest) {
@@ -964,7 +1389,9 @@
     });
     const conf = activeCase.confrontation;
     systemActions().forEach(function (action) {
-      if (action.kind === "confront" && conf.thing && !bound[conf.thing]) { bound[conf.thing] = action; order.push(conf.thing); }
+      // a system action may name its own thing (a scale on the gold night); the confrontation uses conf.thing
+      const thing = action.thing || (action.kind === "confront" ? conf.thing : null);
+      if (thing && !bound[thing]) { bound[thing] = action; order.push(thing); }
     });
     const ctm = dom.svg.getScreenCTM();
     if (!ctm || !ctm.a) return;
@@ -1001,10 +1428,9 @@
       if (w < minUnits) { x -= (minUnits - w) / 2; w = minUnits; }
       if (h < minUnits) { y -= (minUnits - h) / 2; h = minUnits; }
       const action = bound[thingId];
-      const minutes = actionMinutes(action);
-      const cost = minutes > 0 ? "+" + minutes + " min" : "0 min";
+      const cost = thingCost(action);
       const name = activeCase.things[thingId] || thingId;
-      const label = name + " · " + cost;
+      const label = cost ? name + " · " + cost : name;
       const width = Math.max(70, label.length * 7.4 + 18);
       // the tag sits above the ring; if that overlaps a tag already placed, it goes below, then higher up
       const view = transient.camera || FULL_VIEW;
@@ -1013,7 +1439,7 @@
       if (!tagClear(tag)) tag.y = y - 48;
       placedTags.push(tag);
       const g = svgEl("g", { class: "thing kind-" + action.kind, role: "button", tabindex: "0", "data-thing": thingId, "data-action": action.id,
-        "aria-label": action.label + " (" + cost + ")",
+        "aria-label": action.label + (cost ? " (" + cost + ")" : ""),
         onclick: function () { performAction(action.id); },
         onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); performAction(action.id); } } }, [
         svgEl("rect", { class: "thing-hit", x: x, y: y, width: w, height: h }),
@@ -1022,12 +1448,22 @@
           svgEl("rect", { class: "thing-tag-bg", x: -width / 2, y: -11, width: width, height: 22 }),
           svgEl("text", { class: "thing-tag-text", x: 0, y: 4.5, "text-anchor": "middle" }, [
             svgEl("tspan", { class: "thing-tag-name", text: name }),
-            svgEl("tspan", { class: "thing-tag-cost", text: " · " + cost })
+            cost ? svgEl("tspan", { class: "thing-tag-cost", text: " · " + cost }) : null
           ])
         ])
       ]);
       layer.appendChild(g);
     });
+  }
+  // What a thing's tag says it costs. The investigations always name the minutes ("0 min"); the
+  // gold night names credits and minutes only when there are any.
+  function thingCost(action) {
+    const minutes = actionMinutes(action);
+    if (!isTrade()) return minutes > 0 ? "+" + minutes + " min" : "0 min";
+    const parts = [];
+    if (action.cost) parts.push(action.cost + " cr");
+    if (minutes > 0) parts.push("+" + minutes + " min");
+    return parts.join(" · ");
   }
 
   function renderChips() {
@@ -1083,9 +1519,11 @@
     // The card lives outside the story's aria-live region, so a screen reader doesn't re-read it
     // with every result.
     if (touchFirst() && !settings.coached) dom.encCoach.appendChild(coachCard());
+    if (isTrade() && state.marketNote) body.appendChild(el("p", { class: "notice market-note", text: state.marketNote }));
     if (state.lastResult) renderResult(body, state.lastResult);
     else renderScene(body);
-    renderActions(actions);
+    if (isTrade()) renderTradeActions(actions);
+    else renderActions(actions);
   }
 
   // First shift on a touch screen: one card that says how the screen works, until it is dismissed.
@@ -1129,6 +1567,117 @@
         clue.text
       ]));
     });
+    // The gold night: what was just written into the notebook, as it was heard. Never interpreted.
+    (result.heard || []).forEach(function (id) {
+      container.appendChild(el("div", { class: "clue-found rumor-found" }, [
+        el("span", { class: "clue-found-label", text: "In your notebook · " + rumorSource(id) }),
+        TRADE.rumors[id].note
+      ]));
+    });
+  }
+  function rumorSource(id) {
+    const def = TRADE.rumors[id];
+    const entry = (state.rumors || []).filter(function (r) { return r.id === id; })[0];
+    const place = DATA.world.locations[(entry && entry.where) || def.origin].short;
+    if (def.source === "you") return "What you saw, " + place;
+    const who = DATA.world.characters[def.source];
+    return (who ? who.name : def.source) + ", " + place;
+  }
+
+  // The gold night's choices: what you can do here (talk, order, look), the scale if there is one,
+  // and the ferry. Free actions carry no cost badge at all; credits and minutes show when they're spent.
+  function tradeBadges(minutes, fuel, cost) {
+    const badges = [];
+    if (cost) badges.push(el("span", { class: "cost credits", text: cost + " cr" }));
+    if (fuel) badges.push(el("span", { class: "cost fuel", text: fuel + " fuel" }));
+    if (minutes > 0) badges.push(el("span", { class: "cost", text: "+" + minutes + " min" }));
+    return badges.length ? el("span", { class: "act-costs" }, badges) : null;
+  }
+  function renderTradeActions(container) {
+    let key = 0;
+    function nextKey() { key += 1; return key <= 9 ? String(key) : null; }
+
+    if (state.resolved) {
+      const done = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: "Morning" })]);
+      done.appendChild(actionButton({ kind: "choice", label: "Read the morning wire again", key: nextKey(), onClick: showResolution }));
+      done.appendChild(actionButton({ kind: "choice", label: "Start another night", key: nextKey(), onClick: function () { startTradeNight(""); } }));
+      container.appendChild(done);
+      return;
+    }
+
+    const here = locationActions().filter(function (a) { return a.kind !== "system"; });
+    if (here.length) {
+      const local = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: DATA.world.locations[state.location].short })]);
+      here.forEach(function (action) {
+        local.appendChild(actionButton({
+          kind: action.kind, label: action.label, key: nextKey(),
+          disabled: (action.cost || 0) > state.credits,
+          costs: tradeBadges(actionMinutes(action), action.fuel, action.cost),
+          onClick: function () { performAction(action.id); }
+        }));
+      });
+      container.appendChild(local);
+    }
+
+    const gold = renderGoldGroup(nextKey);
+    if (gold) container.appendChild(gold);
+
+    const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
+    const ferryActions = locationActions().filter(function (a) { return a.kind === "system"; }).concat(sys);
+    const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
+    Object.keys(DATA.world.locations).forEach(function (dest) {
+      if (dest === state.location) return;
+      const loc = DATA.world.locations[dest];
+      const check = canTravel(dest);
+      const cost = travelCost(state.location, dest);
+      ferry.appendChild(actionButton({
+        kind: "travel", label: "Cast off for " + loc.short, key: phoneShell() ? null : nextKey(),
+        disabled: !check.ok,
+        costs: tradeBadges(travelMinutes(cost), cost.fuel, 0),
+        onClick: function () { travelTo(dest); }
+      }));
+      if (!check.ok && check.why.indexOf("needs") === 0) {
+        ferry.appendChild(el("p", { class: "act-why", text: "Not enough fuel. Refuel at Landing 3, or radio the tug if you are stuck." }));
+      }
+    });
+    ferryActions.forEach(function (action) {
+      ferry.appendChild(actionButton({
+        kind: "system", label: action.label, key: nextKey(),
+        disabled: (action.cost || 0) > state.credits,
+        costs: tradeBadges(actionMinutes(action), action.fuel, action.cost),
+        onClick: function () { performAction(action.id); }
+      }));
+    });
+    container.appendChild(ferry);
+  }
+  // The scale where you are: its two numbers, what you hold, and a few sizes of trade.
+  function renderGoldGroup(nextKey) {
+    const q = tradeQuote();
+    if (!q) return null;
+    const held = goldHeld();
+    const avg = MARKET.lots.average(state.gold);
+    const group = el("div", { class: "action-group gold-group", id: "gold-group" }, [
+      el("p", { class: "action-group-label", text: "Gold · " + q.dealer.name }),
+      el("p", { class: "gold-quote" }, q.buyOnly
+        ? ["The desk pays ", el("b", { text: String(q.sell) }), " cr a gram"]
+        : ["Buy ", el("b", { text: String(q.buy) }), " · Sell ", el("b", { text: String(q.sell) }), " cr a gram"]),
+      el("p", { class: "gold-hold", text: "You hold " + grams(held) + (held ? ", paid " + Math.round(avg) + " a gram on average" : "") + " · " + state.credits + " cr in your purse" })
+    ]);
+    function tradeButton(id, kind, label, badge, disabled, onClick) {
+      const button = actionButton({ kind: kind, label: label, key: nextKey(), disabled: disabled,
+        costs: el("span", { class: "act-costs" }, [el("span", { class: "cost credits", text: badge })]), onClick: onClick });
+      button.id = id;
+      return button;
+    }
+    if (!q.buyOnly) {
+      const afford = Math.floor(state.credits / q.buy);
+      group.appendChild(tradeButton("trade-buy-1", "buy", "Buy 1 g", "−" + q.buy + " cr", afford < 1, function () { buyGold(1); }));
+      const big = Math.min(5, afford);
+      if (big > 1) group.appendChild(tradeButton("trade-buy-n", "buy", "Buy " + big + " g" + (big < 5 ? " (all you can afford)" : ""), "−" + big * q.buy + " cr", false, function () { buyGold(big); }));
+    }
+    group.appendChild(tradeButton("trade-sell-1", "sell", "Sell 1 g", "+" + q.sell + " cr", held < 1, function () { sellGold(1); }));
+    if (held > 1) group.appendChild(tradeButton("trade-sell-all", "sell", "Sell all " + grams(held), "+" + Math.round(held * q.sell) + " cr", false, function () { sellGold(held); }));
+    return group;
   }
 
   function renderLines(container, items) {
@@ -1347,7 +1896,80 @@
   /* ------------------------------------------------------------------ */
   /* 11 · NOTEBOOK, MODAL, TOAST                                         */
   /* ------------------------------------------------------------------ */
+  // The gold night's notebook: what you heard (in their words, who and when), your gold, the boards
+  // you have read, and the people you have met, as impressions rather than numbers.
+  function renderTradeNotebook() {
+    dom.notebookCount.textContent = String(state.rumors.length);
+    dom.notebookCount.setAttribute("aria-label", "notes");
+    const body = dom.nbBody;
+    body.innerHTML = "";
+
+    const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Heard (" + state.rumors.length + ")" })]);
+    if (!state.rumors.length) {
+      heardSection.appendChild(el("p", { class: "nb-empty", text: "Nothing written down yet. What people tell you goes here, in their words, with who said it and when. Whether it's true is up to you." }));
+    }
+    state.rumors.slice().reverse().forEach(function (entry) {
+      const def = TRADE.rumors[entry.id];
+      const old = def.expires && state.clock > parseClock(def.expires);
+      heardSection.appendChild(el("article", { class: "clue rumor" + (old ? " old" : "") }, [
+        el("p", { class: "clue-meta rumor-meta", text: formatClock(entry.at) + " — " + rumorSource(entry.id) + (old ? " · a while ago now" : "") }),
+        el("p", { class: "rumor-note", text: def.note })
+      ]));
+    });
+    body.appendChild(heardSection);
+
+    const held = goldHeld();
+    const goldSection = el("section", { class: "nb-section" }, [
+      el("h3", { text: "Gold" }),
+      el("p", { class: "nb-gold", text: grams(held) + (held ? " · paid " + Math.round(MARKET.lots.average(state.gold)) + " cr a gram on average" : "") + " · " + state.credits + " cr" })
+    ]);
+    state.gold.forEach(function (lot) {
+      goldSection.appendChild(el("article", { class: "clue" }, [
+        el("p", { class: "clue-title", text: grams(lot.grams) + " · " + lot.karat + "k · " + lot.cost + " cr a gram" }),
+        lot.provenance ? el("p", { class: "clue-meta", text: lot.provenance }) : null
+      ]));
+    });
+    if (state.trades.length) {
+      const list = el("ul", { class: "nb-trades" });
+      state.trades.forEach(function (t) {
+        list.appendChild(el("li", { text: formatClock(t.at) + " · " + DATA.world.locations[t.where].short + " · " + (t.kind === "buy" ? "bought " : "sold ") + grams(t.grams) + " at " + t.price + " (" + t.total + " cr)" }));
+      });
+      goldSection.appendChild(list);
+    }
+    body.appendChild(goldSection);
+
+    const seenIds = Object.keys(state.seen);
+    if (seenIds.length) {
+      const list = el("ul", { class: "nb-trades" });
+      Object.keys(DATA.world.locations).forEach(function (loc) {
+        const s = state.seen[loc];
+        if (!s) return;
+        list.appendChild(el("li", { text: DATA.world.locations[loc].short + " · read at " + formatClock(s.at) + " · " + (s.buy ? "buy " + s.buy + " / " : "") + "sell " + s.sell }));
+      });
+      body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Boards you have read" }), list]));
+    }
+
+    const met = Object.keys(TRADE.people).filter(function (id) {
+      return state.flags["met_" + id] || state.rumors.some(function (r) { return TRADE.rumors[r.id].source === id; });
+    });
+    if (met.length) {
+      const peopleSection = el("section", { class: "nb-section" }, [el("h3", { text: "People" })]);
+      met.forEach(function (id) {
+        const lines = expandLines(TRADE.people[id]).map(function (item) { return item.text; });
+        peopleSection.appendChild(el("p", { class: "nb-person", text: lines.join(" ") }));
+      });
+      body.appendChild(peopleSection);
+    }
+
+    body.appendChild(el("section", { class: "nb-section" }, [
+      el("h3", { text: "Shift" }),
+      el("p", { class: "clue-meta", text: "Seed " + state.seed + " · started " + TRADE.meta.startClock + " · now " + formatClock(state.clock) + (storage.ok ? "" : " · saving unavailable") })
+    ]));
+  }
+
   function renderNotebook() {
+    if (isTrade()) { renderTradeNotebook(); return; }
+    dom.notebookCount.setAttribute("aria-label", "clues");
     dom.notebookCount.textContent = String(state.clues.length);
     const body = dom.nbBody;
     body.innerHTML = "";
@@ -1606,6 +2228,7 @@
     if (!obj || typeof obj !== "object") return "not an object";
     if (obj.version !== SAVE_VERSION) return "incompatible version " + obj.version;
     if (typeof obj.seed !== "string") return "missing seed";
+    if (obj.kind === "trade") return tradeSaveProblem(obj);
     const variant = variantById(obj.variantId);
     if (!variant) return "unknown case '" + obj.variantId + "'";
     if (!DATA.world.locations[obj.location]) return "unknown location";
@@ -1616,6 +2239,19 @@
     if (obj.timeline && (typeof obj.timeline !== "object" || Array.isArray(obj.timeline))) return "bad timeline";
     if (obj.shown && (typeof obj.shown !== "object" || Array.isArray(obj.shown))) return "bad shown";
     if (obj.ending && !built.endings[obj.ending]) return "unknown ending";
+    return null;
+  }
+  // A saved gold night: the same care, against trade.js instead of a case.
+  function tradeSaveProblem(obj) {
+    if (!TRADE || obj.variantId !== TRADE.meta.id) return "unknown night '" + obj.variantId + "'";
+    if (!TRADE.truths.some(function (t) { return t.id === obj.truth; })) return "unknown night state";
+    if (!DATA.world.locations[obj.location]) return "unknown location";
+    if ([obj.clock, obj.fuel, obj.credits].some(function (n) { return typeof n !== "number" || !isFinite(n); })) return "bad numbers";
+    if (!Array.isArray(obj.gold) || obj.gold.some(function (lot) { return !lot || typeof lot.grams !== "number" || typeof lot.cost !== "number"; })) return "bad gold";
+    if (!Array.isArray(obj.rumors) || obj.rumors.some(function (r) { return !r || !TRADE.rumors[r.id]; })) return "unknown rumor";
+    if (!Array.isArray(obj.trades) || !Array.isArray(obj.convos) || !Array.isArray(obj.fired) || !Array.isArray(obj.clues)) return "missing fields";
+    if (!obj.flags || !obj.used || !obj.visited || !obj.rel || !obj.seen || !obj.ambience || !obj.start) return "missing fields";
+    if (obj.resolved && !obj.finish) return "missing fields";
     return null;
   }
 
@@ -2087,7 +2723,7 @@
     setState(saved);
     transient.objective = null;
     // A case closed before the case files existed (2.x) still counts as found.
-    if (state.resolved && state.ending) recordEnding(state.variantId, state.ending);
+    if (!isTrade() && state.resolved && state.ending) recordEnding(state.variantId, state.ending);
     setMode("play");
     positionFerry(state.location, null, false);
     render();
@@ -2117,7 +2753,50 @@
     if (transient.dataProblem) dom.storageNote.textContent = transient.dataProblem + " — " + dom.storageNote.textContent;
   }
 
+  // The gold night's morning: the harbour wire says what really happened, then what you hold now
+  // against what you came ashore with, both valued at Mei's scale.
+  function showTradeResolution() {
+    const end = TRADE.ending;
+    const own = end.byTruth[state.truth];
+    const s = state.start, f = state.finish;
+    dom.resKicker.textContent = end.kicker;
+    dom.resTitle.textContent = own.title;
+    dom.resBody.innerHTML = "";
+    own.wire.forEach(function (text) { dom.resBody.appendChild(el("p", { class: "wire", text: text })); });
+    const clockNow = state.clock;
+    state.clock = state.endedAt;               // read at the moment you turned in, like the cases' endings
+    const closing = expandLines(end.closing);
+    state.clock = clockNow;
+    closing.forEach(function (item) { dom.resBody.appendChild(el("p", { text: item.text })); });
+    dom.resBody.appendChild(el("p", { class: "epilogue", text: "You came ashore with " + s.credits + " cr and " + grams(s.grams) + " of gold, " + s.worth + " cr at Mei's prices then. You turn in with " + f.credits + " cr and " + grams(f.grams) + ", " + f.worth + " cr at Mei's prices now." }));
+    const net = f.worth - s.worth;
+    // What the same gold would be worth had you only held it: separates the harbour's drift from your choices.
+    const idle = Math.round(s.credits + s.grams * f.sell) - s.worth;
+    function signed(n) { return (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n) + " cr"; }
+    dom.resStats.innerHTML = "";
+    [
+      ["Turned in", formatClock(state.endedAt)],
+      ["The night", signed(net) + ", valued at Mei's scale"],
+      ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
+      ["Spent ashore", (state.spent || 0) + " cr on noodles, tea and fuel"],
+      ["Credits", s.credits + " → " + f.credits],
+      ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
+      ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],
+      ["Heard", state.rumors.length + " of " + Object.keys(TRADE.rumors).length + " things worth writing down"],
+      ["Seed", state.seed + " — the same seed is the same night"]
+    ].forEach(function (pair) {
+      dom.resStats.appendChild(el("dt", { text: pair[0] }));
+      dom.resStats.appendChild(el("dd", { text: pair[1] }));
+    });
+    dom.btnResContinue.textContent = "Look around";
+    dom.btnResNew.textContent = "Another night";
+    revealResolution();
+  }
+
   function showResolution() {
+    if (isTrade()) { showTradeResolution(); return; }
+    dom.btnResContinue.textContent = "Continue";
+    dom.btnResNew.textContent = "New shift…";
     const ending = activeCase.endings[state.ending];
     if (!ending) return;
     dom.resKicker.textContent = "Case closed · " + activeCase.title;
@@ -2146,6 +2825,9 @@
       dom.resStats.appendChild(el("dt", { text: pair[0] }));
       dom.resStats.appendChild(el("dd", { text: pair[1] }));
     });
+    revealResolution();
+  }
+  function revealResolution() {
     dom.resolution.hidden = false;
     updateActionsCue();                 // a cue computed a moment ago must not show through the card
     dom.btnResContinue.focus({ preventScroll: true });
@@ -2176,17 +2858,19 @@
   function openMenu() {
     const list = el("div", { class: "menu-list" });
     if (state && transient.mode === "play") {
-      list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { closeModal(); openNotebook(); } }, ["Notebook", el("span", { class: "val", text: state.clues.length + " clues" })]));
+      list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { closeModal(); openNotebook(); } }, ["Notebook", el("span", { class: "val", text: isTrade() ? state.rumors.length + " notes" : state.clues.length + " clues" })]));
     }
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleStation(); openMenu(); } }, ["Radio", el("span", { class: "val", text: stationById(settings.station).name })]));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleMotion(); openMenu(); } }, ["Motion", el("span", { class: "val", text: motionLabel() })]));
     list.appendChild(el("p", { class: "muted", text: motionSummary() }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleCamera(); openMenu(); } }, ["Camera", el("span", { class: "val", text: settings.camera === "close" ? "close · the quay you're at" : "wide · the whole harbour" })]));
     list.appendChild(el("p", { class: "muted", text: "Close follows the Tern: the quay you are moored at, and the whole harbour while you cross. Wide shows the whole harbour all the time." }));
-    list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleHints(); openMenu(); } }, ["Hints", el("span", { class: "val", text: hintsOn() ? "on · marks in the notebook" : "off · hard mode, no marks" })]));
-    list.appendChild(el("p", { class: "muted", text: hintsOn()
-      ? "The notebook says which threads your evidence settles and which lines of the night you can fill in. Turn hints off for a night where you have to work that out yourself."
-      : "Nothing in the notebook says what you have settled or which lines are ready; the liar at the counter still tells you what is missing. Turn hints on to see the marks again." }));
+    if (!isTrade() || transient.mode !== "play") {   // hints belong to the investigations' notebook
+      list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleHints(); openMenu(); } }, ["Hints", el("span", { class: "val", text: hintsOn() ? "on · marks in the notebook" : "off · hard mode, no marks" })]));
+      list.appendChild(el("p", { class: "muted", text: hintsOn()
+        ? "The notebook says which threads your evidence settles and which lines of the night you can fill in. Turn hints off for a night where you have to work that out yourself."
+        : "Nothing in the notebook says what you have settled or which lines are ready; the liar at the counter still tells you what is missing. Turn hints on to see the marks again." }));
+    }
     list.appendChild(el("button", { class: "btn", type: "button", onclick: openHelp }, ["How to play"]));
     if (state) {
       list.appendChild(el("div", { class: "muted", text: "Case seed: " + state.seed + " — the same seed always gives the same case." }));
@@ -2201,7 +2885,34 @@
   // a strip "under the picture".
   function touchFirst() { return window.matchMedia("(hover: none) and (pointer: coarse)").matches; }
 
+  // How to play on the gold night: what the numbers are, what sitting down is for, and nothing about
+  // what to believe.
+  function openTradeHelp() {
+    const touch = touchFirst();
+    const items = [
+      "Gold is money in the Basin, kept when the banks fail, and it is also what the wet machines run on: contacts, sensors, radios, drones. Every scale chalks two numbers a gram: what you pay to buy, and what you get when you sell.",
+      "Prices move when the harbour does: boats come in, desks open, stories get round. Nobody will tell you which way.",
+      "Food and tea cost a few credits and some time. Sitting down is how you hear things; leaving at once saves both, and you may miss something.",
+      "What you hear goes into the notebook" + (touch ? "" : " (N)") + " as it was said, with who said it, where and when. Whether it's true is up to you. Going to look for yourself costs fuel and time, and the news may be old by the time you get there.",
+      "Scales are at Kurage 33 and Landing 3. Trading takes no time. " + (touch ? "Tap" : "Click") + " a ringed thing in the picture to do what the matching choice does.",
+      "Crossings cost fuel and minutes; refuel at Landing 3. Out of fuel elsewhere, radio the harbour tug.",
+      "From " + TRADE.meta.turnInFrom + " you can turn in aboard the Tern. The morning wire says what really happened, and Mei's scale says what your night was worth.",
+      "Every night is a seed; the same seed is the same night. The four investigations from before are under Case files on the title screen.",
+      "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it."
+    ];
+    if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
+    openModal({
+      title: "How to play",
+      body: [
+        el("p", { text: "You run the night ferry Tern, with a little gold, a few hundred credits and most of a tank. The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross." }),
+        el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
+      ],
+      actions: [{ label: "Back" }]
+    });
+  }
+
   function openHelp() {
+    if (isTrade() && transient.mode === "play") { openTradeHelp(); return; }
     const touch = touchFirst();
     const items = [
       "Talking is free. Searching and crossing cost minutes; only labelled actions move the clock. Reading never does.",
@@ -2229,19 +2940,21 @@
     });
   }
 
-  // Starting a shift, from the title screen or a case file. An unfinished save is never erased silently.
-  function requestNewShift(seedText) {
+  // Starting a shift, from the title screen (the gold night) or a case file (an investigation). An
+  // unfinished save is never erased silently.
+  function requestNewShift(seedText, starter) {
+    const start = starter || startNewGame;
     const saved = readSave();
     const valid = saved && !saved.invalid ? saved : null;
     if (valid && !valid.resolved) {
       openModal({
         title: "Start a new shift?",
         body: [el("p", { text: "A saved shift (seed " + valid.seed + ", clock " + formatClock(valid.clock) + ") will be erased." })],
-        actions: [{ label: "Keep it" }, { label: "Erase and start new", danger: true, onClick: function () { startNewGame(seedText); } }]
+        actions: [{ label: "Keep it" }, { label: "Erase and start new", danger: true, onClick: function () { start(seedText); } }]
       });
       return;
     }
-    startNewGame(seedText);
+    start(seedText);
   }
 
   // One file per case, with a seed that always opens it. A case's title names its truth, so it stays
@@ -2282,7 +2995,7 @@
       });
     });
 
-    dom.btnNew.addEventListener("click", function () { requestNewShift(dom.seedInput.value); });
+    dom.btnNew.addEventListener("click", function () { requestNewShift(dom.seedInput.value, startTradeNight); });
     dom.btnCases.addEventListener("click", openCaseFiles);
     dom.seedInput.addEventListener("keydown", function (e) { if (e.key === "Enter") dom.btnNew.click(); });
     dom.btnContinue.addEventListener("click", function () {
@@ -2311,7 +3024,8 @@
     else if (motionQuery.addListener) motionQuery.addListener(applyMotionSetting);
 
     dom.btnResContinue.addEventListener("click", function () { dom.resolution.hidden = true; render(); });
-    dom.btnResNew.addEventListener("click", confirmNewShift);
+    // After a gold night the card offers another night straight away; the closed night has nothing to lose.
+    dom.btnResNew.addEventListener("click", function () { if (isTrade() && state.resolved) startTradeNight(""); else confirmNewShift(); });
 
     document.addEventListener("keydown", function (e) {
       const typing = e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
@@ -2380,6 +3094,9 @@
     dom.instCanSub = $("inst-can-sub");
     dom.instObjective = $("inst-objective");
     dom.instObjectiveCell = dom.instObjective.parentNode;
+    dom.instObjectiveLabel = dom.instObjectiveCell.querySelector(".inst-label");
+    dom.boardBuy = $("gold-board-buy");
+    dom.boardSell = $("gold-board-sell");
     dom.actionsCue = $("actions-cue");
     dom.btnRadio = $("btn-radio");
     dom.radioName = $("radio-name");
@@ -2417,6 +3134,9 @@
     linkManifest();
     cacheDom();
     dom.instCanLabel.textContent = DATA.world.drink.name;   // the drink is named in cases.js, not here
+    // The gold night's extra speakers join the cast for speech bubbles; the investigations never name them.
+    Object.keys(TRADE.characters).forEach(function (id) { if (!DATA.world.characters[id]) DATA.world.characters[id] = TRADE.characters[id]; });
+    transient.debugMarket = /[?&]debug=market\b/.test(location.search);
     loadSettings();
     // index.html?camera=wide (or close) sets the camera from the address; it is remembered like a
     // menu choice.
@@ -2483,7 +3203,18 @@
       stations: STATIONS,
       state: function () { return { station: settings.station, hasContext: !!radio.ctx, contextState: radio.ctx ? radio.ctx.state : null, sfxPlayed: radio.sfxPlayed }; }
     },
-    storage: storage
+    storage: storage,
+    // the gold night: start it, act in it, and look behind the board (debug() shows the hidden truth)
+    trade: {
+      start: startTradeNight,
+      buy: buyGold,
+      sell: sellGold,
+      turnIn: endTradeNight,
+      quote: function (loc, clock) { return state && isTrade() ? MARKET.breakdown(TRADE, state.truth, state.seed, loc || state.location, clock === undefined ? state.clock : (typeof clock === "string" ? parseClock(clock) : clock)) : null; },
+      debug: tradeDebug,
+      validate: validateTrade,
+      data: TRADE
+    }
   };
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

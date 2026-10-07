@@ -932,6 +932,16 @@
   <rect x="682" y="546" width="410" height="3" fill="#c7d3e6" opacity="0.35"/>
   <rect x="682" y="549" width="410" height="13" fill="url(#halftone)"/>
   <ellipse cx="892" cy="548" rx="150" ry="5" fill="#ff7a3d" opacity="0.16"/>
+  <!-- Mei's gold board (the gold night only, body.trade-mode): a sandwich board on the quay, chalked
+       with what she sells a gram for and what she pays. game.js writes the two numbers. -->
+  <g id="gold-board" class="trade-art">
+    <path d="M1020 546 l 4 -44 M1044 546 l -4 -44" stroke="#5a3a1e" stroke-width="2"/>
+    <rect x="1017" y="498" width="30" height="40" rx="1.5" fill="#101626" stroke="#c98a3c" stroke-width="1.5"/>
+    <rect x="1020" y="501" width="24" height="34" fill="url(#halftone)" opacity="0.25"/>
+    <text x="1032" y="507.5" class="board-head" text-anchor="middle">GOLD · g</text>
+    <text id="gold-board-buy" x="1032" y="520" class="board-num" text-anchor="middle">B —</text>
+    <text id="gold-board-sell" x="1032" y="532" class="board-num" text-anchor="middle">S —</text>
+  </g>
   <!-- stools; a can on a stool means the seat is taken -->
   <use href="#sym-stool" x="752" y="546"/>
   <use href="#sym-stool" x="812" y="546"/>
@@ -1252,9 +1262,9 @@
       <!-- Title overlay (shown while data-mode="title") -->
       <div id="title-overlay" class="title-overlay">
         <div class="title-card">
-          <p class="title-kicker">A night-ferry investigation</p>
+          <p class="title-kicker">A night-ferry noir</p>
           <h1 class="title-neon"><span class="t1">NEON</span><span class="t2">TIDES</span></h1>
-          <p class="title-tag">Rain on black water. A courier who never arrived. One ferry still running.</p>
+          <p class="title-tag">Rain on black water. Gold in every pocket. Everybody heard something.</p>
           <div class="title-actions">
             <button id="btn-continue" class="btn btn-primary" type="button" hidden>Continue shift</button>
             <button id="btn-new" class="btn btn-primary" type="button">Start night shift</button>
@@ -1264,9 +1274,9 @@
         <div class="title-foot">
           <details class="seed-box">
             <summary>Seed (optional)</summary>
-            <label class="seed-label" for="seed-input">Case seed</label>
-            <input id="seed-input" class="seed-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="leave blank for a random case">
-            <p class="hint">The same seed always gives the same case. <em>Case files</em> lists a seed for every case, starting with <code>high-tide</code>.</p>
+            <label class="seed-label" for="seed-input">Night seed</label>
+            <input id="seed-input" class="seed-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="leave blank for a random night">
+            <p class="hint">The same seed always gives the same night. <em>Case files</em> holds the four investigations, each with its own seed, starting with <code>high-tide</code>.</p>
           </details>
           <p id="storage-note" class="storage-note" role="status"></p>
         </div>
@@ -1370,6 +1380,8 @@
 <noscript><p class="noscript">Neon Tides needs JavaScript. Open index.html in any modern browser with scripts enabled.</p></noscript>
 
 <script src="cases.js"></script>
+<script src="trade.js"></script>
+<script src="market.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
