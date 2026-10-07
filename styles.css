@@ -402,6 +402,7 @@ body.travelling .thing, body[data-mode="title"] .thing { display: none; }
 .clue-text { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.5; background: #fffaf3; border: 1px solid #c9bda6; padding: 9px 12px; margin: 5px 0 4px; white-space: pre-wrap; color: var(--ink); }
 .clue-meta { font-family: var(--font-ui); font-size: 12px; color: #5b5668; }
 .nb-empty { font-style: italic; color: #5b5668; }
+.nb-nohints { font-size: 13.5px; font-style: italic; color: #5b5668; margin: 8px 0 0; }
 .nb-loc-group { margin-bottom: 8px; }
 /* The night: the timeline the player fills in; tested at the counter (3.1) */
 .tl-intro { font-size: 14px; color: #5b5668; margin-bottom: 8px; }

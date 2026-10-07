@@ -314,7 +314,7 @@
   let state = null;         // the saved game
   let activeCase = null;    // built from state.variantId
   const transient = { travelling: null, timer: null, mode: "title", sceneClasses: [], objective: null, camera: null, cameraFrame: 0 };
-  const settings = { station: "off", motion: "auto", coached: false, camera: "close" };
+  const settings = { station: "off", motion: "auto", coached: false, camera: "close", hints: "on" };
   const profile = { version: 1, cases: {} };   // cases[variantId] = { endings: [endingId, ...] }
   const storage = { ok: true, reason: "" };
   const dom = {};
@@ -620,7 +620,7 @@
     saveGame();
     render();
     focusEncounter();
-    if (revealed.length) toast("Notebook: the timeline has " + (revealed.length === 1 ? "a line" : revealed.length + " lines") + " you can fill in now.");
+    if (revealed.length && hintsOn()) toast("Notebook: the timeline has " + (revealed.length === 1 ? "a line" : revealed.length + " lines") + " you can fill in now.");
   }
 
   // Showing a clue (3.3): the witness answers the clue they are shown, or with `otherwise`. Free of
@@ -875,6 +875,20 @@
     syncAspect(true);
   }
   function cycleCamera() { setCamera(CAMERA_MODES[(CAMERA_MODES.indexOf(settings.camera) + 1) % CAMERA_MODES.length]); }
+
+  // Hints (3.4). On, the notebook says which threads the evidence settles ("settled · the arrival
+  // tally") and which timeline lines a clue has just made answerable ("ready to fill in", with a
+  // toast). Off is the hard mode: the same notebook without those marks, so the timeline is a real
+  // deduction. The counter's rebuttals and the ending card's count are not hints and stay.
+  const HINT_MODES = ["on", "off"];
+  function hintsOn() { return settings.hints !== "off"; }
+  function setHints(mode) {
+    if (HINT_MODES.indexOf(mode) === -1) return;
+    settings.hints = mode;
+    saveSettings();
+    if (state && transient.mode === "play") render();
+  }
+  function cycleHints() { setHints(hintsOn() ? "off" : "on"); }
 
   function renderInstruments() {
     dom.instClock.textContent = formatClock(state.clock);
@@ -1354,7 +1368,7 @@
       ]);
       rows.forEach(function (row) {
         const answer = state.timeline[row.id] || "";
-        const ready = !answer && !state.resolved && (row.clues || []).some(hasClue);
+        const ready = hintsOn() && !answer && !state.resolved && (row.clues || []).some(hasClue);
         const selectId = "tl-" + row.id;
         const select = el("select", { id: selectId, class: "tl-select", "aria-label": row.clock + ", " + timelineWhere(row) + ": " + row.question,
           disabled: state.resolved ? true : null,
@@ -1392,12 +1406,13 @@
       } else if (settledBy.length) {
         status = "settled · " + activeCase.clues[settledBy[0]].title;
       }
-      threads.appendChild(el("li", {}, [
-        el("span", { text: thread.question }),
-        el("span", { class: "status" + (settledBy.length ? " done" : ""), text: status })
-      ]));
+      threads.appendChild(el("li", {}, hintsOn()
+        ? [el("span", { text: thread.question }), el("span", { class: "status" + (settledBy.length ? " done" : ""), text: status })]
+        : [el("span", { text: thread.question })]));
     });
-    body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Threads" }), threads]));
+    const threadsSection = el("section", { class: "nb-section" }, [el("h3", { text: "Threads" }), threads]);
+    if (!hintsOn()) threadsSection.appendChild(el("p", { class: "nb-nohints", text: "Hints are off: the notebook does not say what your evidence settles, or which lines you can fill in yet." }));
+    body.appendChild(threadsSection);
 
     const evidence = el("section", { class: "nb-section" }, [el("h3", { text: "Evidence (" + state.clues.length + ")" })]);
     if (state.clues.length === 0) {
@@ -1640,6 +1655,7 @@
       settings.motion = MOTION_MODES.indexOf(parsed.motion) !== -1 ? parsed.motion : (parsed.reduceMotion ? "reduced" : "auto");
       settings.coached = parsed.coached === true;
       settings.camera = CAMERA_MODES.indexOf(parsed.camera) !== -1 ? parsed.camera : "close";
+      settings.hints = parsed.hints === "off" ? "off" : "on";
     } catch (err) { /* ignore a broken settings blob */ }
   }
   function saveSettings() { storageSet(SETTINGS_KEY, JSON.stringify(settings)); }
@@ -2167,6 +2183,10 @@
     list.appendChild(el("p", { class: "muted", text: motionSummary() }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleCamera(); openMenu(); } }, ["Camera", el("span", { class: "val", text: settings.camera === "close" ? "close · the quay you're at" : "wide · the whole harbour" })]));
     list.appendChild(el("p", { class: "muted", text: "Close follows the Tern: the quay you are moored at, and the whole harbour while you cross. Wide shows the whole harbour all the time." }));
+    list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleHints(); openMenu(); } }, ["Hints", el("span", { class: "val", text: hintsOn() ? "on · marks in the notebook" : "off · hard mode, no marks" })]));
+    list.appendChild(el("p", { class: "muted", text: hintsOn()
+      ? "The notebook says which threads your evidence settles and which lines of the night you can fill in. Turn hints off for a night where you have to work that out yourself."
+      : "Nothing in the notebook says what you have settled or which lines are ready; the liar at the counter still tells you what is missing. Turn hints on to see the marks again." }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: openHelp }, ["How to play"]));
     if (state) {
       list.appendChild(el("div", { class: "muted", text: "Case seed: " + state.seed + " — the same seed always gives the same case." }));
@@ -2189,6 +2209,7 @@
       "Somebody tonight is lying. When you can prove it, go back to them and put up to three pieces of evidence down: first the proofs that break the story, then the reason, and the one clue that supports it.",
       "Things you can act on are marked in the picture with a dashed ring and a label: " + (touch ? "tap" : "click") + " one and it does what the matching choice under the story does, for the same cost. \"Show … something from the notebook\" lets you hold a clue up to a witness and hear what they make of it.",
       "The notebook's timeline asks who was where, and when. Fill it in from what you have read: the liar tests it against the paper you put down, and the ending card counts the lines you got right.",
+      "The notebook marks the threads your evidence settles and the lines you can fill in. Menu → Hints turns those marks off for a harder night; the liar's rebuttals at the counter stay.",
       DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
       "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
       "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor.",
@@ -2401,6 +2422,8 @@
     // menu choice.
     const asked = /[?&]camera=(wide|close)\b/.exec(location.search);
     if (asked) { settings.camera = asked[1]; saveSettings(); }
+    const askedHints = /[?&]hints=(on|off)\b/.exec(location.search);
+    if (askedHints) { settings.hints = askedHints[1]; saveSettings(); }
     loadProfile();
     applyMotionSetting();
     renderRadio();
@@ -2443,6 +2466,8 @@
     chooseEnding: chooseEnding,
     setTimelineAnswer: setTimelineAnswer,
     setCamera: setCamera,
+    setHints: setHints,
+    hints: function () { return settings.hints; },
     performShow: performShow,
     things: function () { return Array.prototype.slice.call(document.querySelectorAll("#things .thing")).map(function (t) { return { thing: t.getAttribute("data-thing"), action: t.getAttribute("data-action"), rect: t.querySelector(".thing-hit").getBoundingClientRect() }; }); },
     camera: function () { return { mode: settings.camera, viewBox: dom.svg.getAttribute("viewBox") }; },
