@@ -544,6 +544,7 @@
     render();
     syncAspect(true);                        // and glides in on the quay once moored
     focusEncounter();
+    checkDawn();                             // a crossing can carry a gold night into dawn
   }
 
   // Moves the boat in the picture. CSS animates the transform unless animate=false.
@@ -721,7 +722,10 @@
   function fill(text, vars) {
     return String(text || "").replace(/\{(\w+)\}/g, function (all, key) { return vars[key] !== undefined ? String(vars[key]) : all; });
   }
-  function tradeQuote(loc) { return MARKET.quote(TRADE, state.truth, state.seed, loc || state.location, state.clock); }
+  // The player's own trades are passed in, so the quote carries their weight on the price and what the
+  // dealer still has to sell or will still take (4.0.1).
+  function tradeQuote(loc) { return MARKET.quote(TRADE, state.truth, state.seed, loc || state.location, state.clock, state.trades); }
+  function dawnClock() { return parseClock(TRADE.meta.dawnClock || "06:00"); }
   const REL_MAX = 3;
 
   // The night has the shape the shared renderers expect from a case, with nothing to confront.
@@ -866,6 +870,14 @@
     TRADE.ambience.forEach(function (a, i) { if (!world.locations[a.at] || !a.text) problems.push("ambience line " + i + " is incomplete"); });
     Object.keys(TRADE.people).forEach(function (id) { if (!world.characters[id] && !TRADE.characters[id]) problems.push("people names unknown person '" + id + "'"); });
     if (!TRADE.ending || !TRADE.ending.byTruth) problems.push("no morning wire");
+    if (!TRADE.meta.dawnClock) problems.push("meta.dawnClock is missing: the night must end by itself");
+    if (!TRADE.ending.reflections || !TRADE.ending.reflections.length) problems.push("no reflections for the morning card");
+    Object.keys(TRADE.market.dealers).forEach(function (loc) {
+      const d = TRADE.market.dealers[loc];
+      if (!d.depth) problems.push("dealer at " + loc + " has no depth: your own trades would never move his price");
+      if (!d.buyOnly && d.stock === undefined) problems.push("dealer at " + loc + " has no stock: he could sell you gold without end");
+      if (d.buyOnly && d.limit === undefined) problems.push("dealer at " + loc + " has no limit: he could buy your gold without end");
+    });
     truthIds.forEach(function (t) { if (!TRADE.ending.byTruth[t]) problems.push("no morning wire for truth '" + t + "'"); });
     return problems;
   }
@@ -973,6 +985,11 @@
     saveGame();
     render();
     focusEncounter();
+    checkDawn();
+  }
+  // At dawn the night ends by itself (4.0.1); the last thing you did stays on screen under the card.
+  function checkDawn() {
+    if (isTrade() && !state.resolved && !transient.travelling && state.clock >= dawnClock()) endTradeNight(true);
   }
 
   // Trading takes no clock time. The buttons keep focus, so a few grams can be bought in a row.
@@ -980,14 +997,19 @@
     if (!isTrade() || state.resolved || transient.travelling) return false;
     const q = tradeQuote();
     if (!q || q.buyOnly) return false;
-    const g = Math.max(0, Math.floor(amount));
+    if (q.canBuy < 1) { toast(q.dealer.soldOut || "Nothing left to sell you here."); return false; }
+    const g = Math.max(0, Math.min(Math.floor(amount), q.canBuy));
     const total = g * q.buy;
     if (!g || total > state.credits) { toast("Not enough credits for that."); return false; }
     state.credits -= total;
     state.gold = MARKET.lots.buy(state.gold, g, q.buy, { where: state.location, at: state.clock, provenance: q.dealer.provenance || "" });
     state.trades.push({ kind: "buy", grams: g, price: q.buy, total: total, at: state.clock, where: state.location });
     observeMarket();
-    state.lastResult = { label: "Bought " + grams(g) + " · " + q.dealer.name, lines: [{ type: "p", text: fill(q.dealer.buyText, { grams: grams(g), total: total + " cr", price: q.buy }) }], clues: [], heard: [] };
+    const after = tradeQuote();
+    const lines = [{ type: "p", text: fill(q.dealer.buyText, { grams: grams(g), total: total + " cr", price: q.buy }) }];
+    if (after.canBuy < 1 && q.dealer.soldOut) lines.push({ type: "p", text: q.dealer.soldOut });
+    else if (after.canBuy <= 5 && q.dealer.lowStock) lines.push({ type: "p", text: q.dealer.lowStock });
+    state.lastResult = { label: "Bought " + grams(g) + " · " + q.dealer.name, lines: lines, clues: [], heard: [] };
     saveGame();
     renderKeepingFocus();
     return true;
@@ -996,7 +1018,8 @@
     if (!isTrade() || state.resolved || transient.travelling) return false;
     const q = tradeQuote();
     if (!q) return false;
-    const g = Math.min(goldHeld(), amount);
+    if (q.canSell <= 0) { toast(q.dealer.full || "They won't take any more from you tonight."); return false; }
+    const g = Math.min(goldHeld(), amount, q.canSell);
     if (!(g > 0)) return false;
     const sold = MARKET.lots.sell(state.gold, g);
     const total = Math.round(sold.sold * q.sell);
@@ -1004,7 +1027,9 @@
     state.credits += total;
     state.trades.push({ kind: "sell", grams: sold.sold, price: q.sell, total: total, basis: sold.basis, at: state.clock, where: state.location });
     observeMarket();
-    state.lastResult = { label: "Sold " + grams(sold.sold) + " · " + q.dealer.name, lines: [{ type: "p", text: fill(q.dealer.sellText, { grams: grams(sold.sold), total: total + " cr", price: q.sell }) }], clues: [], heard: [] };
+    const lines = [{ type: "p", text: fill(q.dealer.sellText, { grams: grams(sold.sold), total: total + " cr", price: q.sell }) }];
+    if (tradeQuote().canSell <= 0 && q.dealer.full) lines.push({ type: "p", text: q.dealer.full });
+    state.lastResult = { label: "Sold " + grams(sold.sold) + " · " + q.dealer.name, lines: lines, clues: [], heard: [] };
     saveGame();
     renderKeepingFocus();
     return true;
@@ -1022,19 +1047,54 @@
   }
 
   // Turning in ends the night: the board at Kurage 33 values what you hold, the morning wire says what happened.
-  function endTradeNight() {
+  function endTradeNight(atDawn) {
     if (!isTrade()) return;
     if (state.resolved) { showResolution(); return; }
+    // valued at Mei's board as it stands for anyone, without the weight of the player's own trades
     const q = MARKET.quote(TRADE, state.truth, state.seed, "bar", state.clock);
     state.resolved = true;
     state.ending = "night";
     state.endedAt = state.clock;
-    state.lastResult = null;
+    if (atDawn !== true) state.lastResult = null;
     state.finish = { credits: state.credits, grams: goldHeld(), sell: q.sell, worth: MARKET.worth(state.credits, state.gold, q.sell) };
+    setEndFlags(atDawn === true);
     saveGame();
     render();
     showResolution();
     debugMarket("turned in");
+  }
+
+  // What the player did, as flags the morning card's reflections read (trade.js ending.reflections).
+  function setEndFlags(atDawn) {
+    const f = state.flags;
+    const desk = parseClock("01:00");
+    function heardAt(id) { const r = state.rumors.filter(function (x) { return x.id === id; })[0]; return r ? r.at : null; }
+    const teoAt = heardAt("r_frostline"), meiAt = heardAt("r_vault");
+    const buys = state.trades.filter(function (t) { return t.kind === "buy"; });
+    const sells = state.trades.filter(function (t) { return t.kind === "sell"; });
+    f.end_dawn = atDawn;
+    f.end_held = state.trades.length === 0;
+    f.end_bought_on_teo = teoAt !== null && buys.some(function (t) { return t.at < desk && t.at >= teoAt; });
+    f.end_sold_on_mei = meiAt !== null && sells.some(function (t) { return t.at < desk && t.at >= meiAt; });
+    f.end_bought_late = buys.some(function (t) { return t.where === "bar" && t.at >= parseClock("01:20"); });
+    f.end_sold_to_oduya = sells.some(function (t) { return t.where === "landing"; });
+    f.end_bought_at_hatch = buys.some(function (t) { return t.where === "landing"; });
+    f.end_sold_at_desk = sells.some(function (t) { return t.where === "pier"; });
+    f.end_both_queues = f.end_bought_at_hatch && f.end_sold_at_desk;
+    const deskDealer = TRADE.market.dealers.pier;
+    const soldAtDesk = sells.filter(function (t) { return t.where === "pier"; }).reduce(function (n, t) { return n + t.grams; }, 0);
+    f.end_hit_limit = !!(deskDealer && deskDealer.limit) && soldAtDesk >= deskDealer.limit;
+    f.end_missed_correction = state.truth === "vault" && teoAt !== null && !heard("r_pulled") && buys.length > 0;
+    const choices = tradeChoicesResult();
+    f.end_beat_idle = !f.end_held && choices >= 10;
+    f.end_lost_to_idle = !f.end_held && choices <= -10;
+    f.end_never_left = Object.keys(state.visited).every(function (loc) { return loc === "bar"; });
+    f.end_looked = ["r_seen_gilt", "r_seen_bars", "r_seen_twelve", "r_matte_lit", "r_matte_dark"].some(heard);
+  }
+  // What the trades themselves made against holding the opening gold, with food and fuel left out.
+  function tradeChoicesResult() {
+    const s = state.start, f = state.finish;
+    return Math.round(f.worth + (state.spent || 0) - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1045,7 +1105,8 @@
     Object.keys(DATA.world.locations).forEach(function (loc) {
       const b = MARKET.breakdown(TRADE, state.truth, state.seed, loc, state.clock);
       const q = tradeQuote(loc);
-      prices[loc] = { mid: b.mid, buy: q ? q.buy : null, sell: q ? q.sell : null, dealer: q ? q.dealer.name : null, local: b.localPct, events: b.events, noise: b.noisePct };
+      prices[loc] = { mid: b.mid, buy: q ? q.buy : null, sell: q ? q.sell : null, dealer: q ? q.dealer.name : null, local: b.localPct, events: b.events, noise: b.noisePct,
+        yourWeight: q ? q.impact : null, canBuy: q ? q.canBuy : null, canSell: q ? q.canSell : null };
     });
     return {
       truth: state.truth, clock: formatClock(state.clock), fired: state.fired.map(function (f) { return f.id + " @" + formatClock(f.at); }),
@@ -1314,7 +1375,9 @@
   // drink and an objective. Nothing tells you what to do; the cell glows when the board changes.
   function renderTradeInstruments() {
     dom.instClock.classList.remove("late");
-    dom.instDawn.textContent = state.resolved ? "turned in" : "rain on the Basin";
+    dom.instDawn.textContent = state.resolved ? "the night is over"
+      : state.clock >= parseClock(TRADE.meta.firstLight || "05:00") ? "first light at " + (TRADE.meta.dawnClock || "06:00")
+      : "rain on the Basin";
     dom.instCanLabel.textContent = "Purse";
     // phones hide the sub line, so the grams ride in the label there (styles.css 13b)
     dom.instCanLabel.appendChild(el("span", { class: "phone-only", text: " · " + grams(goldHeld()) }));
@@ -1669,14 +1732,19 @@
       button.id = id;
       return button;
     }
+    // a dealer running low, sold out, or with his fill of your gold says so (4.0.1)
+    if (q.buyOnly && q.dealer.limitNote) group.appendChild(el("p", { class: "gold-hold", text: q.canSell <= 0 ? q.dealer.full : q.dealer.limitNote }));
+    if (!q.buyOnly && q.canBuy < 1 && q.dealer.soldOut) group.appendChild(el("p", { class: "gold-hold", text: q.dealer.soldOut }));
+    else if (!q.buyOnly && q.canBuy <= 5 && q.dealer.lowStock) group.appendChild(el("p", { class: "gold-hold", text: q.dealer.lowStock }));
     if (!q.buyOnly) {
-      const afford = Math.floor(state.credits / q.buy);
+      const afford = Math.min(Math.floor(state.credits / q.buy), q.canBuy);
       group.appendChild(tradeButton("trade-buy-1", "buy", "Buy 1 g", "−" + q.buy + " cr", afford < 1, function () { buyGold(1); }));
       const big = Math.min(5, afford);
-      if (big > 1) group.appendChild(tradeButton("trade-buy-n", "buy", "Buy " + big + " g" + (big < 5 ? " (all you can afford)" : ""), "−" + big * q.buy + " cr", false, function () { buyGold(big); }));
+      if (big > 1) group.appendChild(tradeButton("trade-buy-n", "buy", "Buy " + big + " g" + (big < 5 ? (q.canBuy <= big ? " (all there is)" : " (all you can afford)") : ""), "−" + big * q.buy + " cr", false, function () { buyGold(big); }));
     }
-    group.appendChild(tradeButton("trade-sell-1", "sell", "Sell 1 g", "+" + q.sell + " cr", held < 1, function () { sellGold(1); }));
-    if (held > 1) group.appendChild(tradeButton("trade-sell-all", "sell", "Sell all " + grams(held), "+" + Math.round(held * q.sell) + " cr", false, function () { sellGold(held); }));
+    const sellable = Math.min(held, q.canSell);
+    group.appendChild(tradeButton("trade-sell-1", "sell", "Sell 1 g", "+" + q.sell + " cr", sellable < 1, function () { sellGold(1); }));
+    if (sellable > 1) group.appendChild(tradeButton("trade-sell-all", "sell", (sellable < held ? "Sell " : "Sell all ") + grams(sellable) + (sellable < held ? " (all they'll take)" : ""), "+" + Math.round(sellable * q.sell) + " cr", false, function () { sellGold(sellable); }));
     return group;
   }
 
@@ -2762,11 +2830,15 @@
     dom.resKicker.textContent = end.kicker;
     dom.resTitle.textContent = own.title;
     dom.resBody.innerHTML = "";
+    if (state.flags.end_dawn && end.dawnLine) dom.resBody.appendChild(el("p", { class: "epilogue", text: end.dawnLine }));
     own.wire.forEach(function (text) { dom.resBody.appendChild(el("p", { class: "wire", text: text })); });
     const clockNow = state.clock;
     state.clock = state.endedAt;               // read at the moment you turned in, like the cases' endings
+    // what you did, read back: the first three reflections that hold, most specific first
+    const reflections = expandLines(end.reflections || []).slice(0, 3);
     const closing = expandLines(end.closing);
     state.clock = clockNow;
+    reflections.forEach(function (item) { dom.resBody.appendChild(el("p", { class: "reflection", text: item.text })); });
     closing.forEach(function (item) { dom.resBody.appendChild(el("p", { text: item.text })); });
     dom.resBody.appendChild(el("p", { class: "epilogue", text: "You came ashore with " + s.credits + " cr and " + grams(s.grams) + " of gold, " + s.worth + " cr at Mei's prices then. You turn in with " + f.credits + " cr and " + grams(f.grams) + ", " + f.worth + " cr at Mei's prices now." }));
     const net = f.worth - s.worth;
@@ -2775,9 +2847,10 @@
     function signed(n) { return (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n) + " cr"; }
     dom.resStats.innerHTML = "";
     [
-      ["Turned in", formatClock(state.endedAt)],
+      [state.flags.end_dawn ? "Dawn" : "Turned in", formatClock(state.endedAt)],
       ["The night", signed(net) + ", valued at Mei's scale"],
       ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
+      ["Your trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food and fuel aside" : "none"],
       ["Spent ashore", (state.spent || 0) + " cr on noodles, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],

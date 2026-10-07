@@ -1,7 +1,7 @@
 {
   "name": "Neon Tides",
   "short_name": "Neon Tides",
-  "description": "A night-ferry investigation in a rain-soaked neon harbour.",
+  "description": "A night-ferry noir: trade gold on rumours in a rain-soaked neon harbour.",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",

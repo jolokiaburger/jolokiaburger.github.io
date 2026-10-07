@@ -17,6 +17,10 @@
      noise   modest, smooth value noise from the seed (knots every few minutes), so the
              board breathes a little without ever moving on its own by much
 
+   and then the player's own weight (4.0.1): buying from a dealer raises his asking price, selling to
+   him lowers his bid (impact()), and a dealer has only so much to sell and will only take so much
+   (available()). Both are read from the player's trades, so prices stay a pure function.
+
    game.js calls quote() and breakdown(); NeonTides.trade.debug() prints them.
    ========================================================================== */
 (function () {
@@ -132,12 +136,61 @@
     };
   }
 
-  // What a dealer here offers right now, or null when nobody here deals in gold.
-  function quote(def, truth, seed, loc, clock) {
+  // The player's own trades lean on a dealer (4.0.1). Buying from him raises his asking price, selling
+  // to him lowers his bid; each gram counts 1/depth percent and fades with a half-life. Only the side
+  // you trade on moves, so buying and selling back at one scale can never make money, and carrying
+  // gold between two scales pays less with every load. trades: [{ kind, grams, at, where }].
+  function impact(def, trades, loc, clock) {
+    const dealer = dealerAt(def, loc);
+    const out = { buyPct: 0, sellPct: 0 };
+    if (!dealer || !dealer.depth || !trades) return out;
+    const half = def.market.impactHalfLifeMin || 90;
+    trades.forEach(function (t) {
+      if (t.where !== loc || t.at > clock) return;
+      const pct = (t.grams / dealer.depth) * Math.pow(0.5, (clock - t.at) / half);
+      if (t.kind === "buy") out.buyPct += pct; else out.sellPct += pct;
+    });
+    out.buyPct = Math.round(out.buyPct * 100) / 100;
+    out.sellPct = Math.round(out.sellPct * 100) / 100;
+    return out;
+  }
+
+  // What a dealer will still trade tonight (4.0.1): `stock` is the grams he has to sell you (a number,
+  // or per truth, from `stockFrom`; `stockBefore` until then), `limit` the grams he will buy from you.
+  // Infinity where the data sets no bound.
+  function available(def, truth, loc, clock, trades) {
+    const dealer = dealerAt(def, loc);
+    if (!dealer) return { buy: 0, sell: 0 };
+    let stock = Infinity;
+    if (dealer.stock !== undefined) {
+      const after = typeof dealer.stock === "number" ? dealer.stock : (dealer.stock[truth] || 0);
+      stock = dealer.stockFrom && clock < minutesOf(dealer.stockFrom) ? (dealer.stockBefore || 0) : after;
+    }
+    let bought = 0, sold = 0;
+    (trades || []).forEach(function (t) {
+      if (t.where !== loc) return;
+      if (t.kind === "buy") bought += t.grams; else sold += t.grams;
+    });
+    return {
+      buy: Math.max(0, stock - bought),                                   // grams you can still buy here
+      sell: dealer.limit === undefined ? Infinity : Math.max(0, dealer.limit - sold)   // grams he will still take
+    };
+  }
+
+  // What a dealer here offers right now, or null when nobody here deals in gold. Pass the player's
+  // trades to include their own weight on the price and the dealer's remaining stock and appetite.
+  function quote(def, truth, seed, loc, clock, trades) {
     const dealer = dealerAt(def, loc);
     if (!dealerOpen(dealer, truth, clock)) return null;
     const b = breakdown(def, truth, seed, loc, clock);
-    return { loc: loc, dealer: dealer, mid: b.mid, buy: dealer.buyOnly ? null : b.buy, sell: b.sell, buyOnly: !!dealer.buyOnly };
+    const lean = impact(def, trades, loc, clock);
+    const left = available(def, truth, loc, clock, trades);
+    return {
+      loc: loc, dealer: dealer, mid: b.mid,
+      buy: dealer.buyOnly ? null : Math.ceil(b.mid * (1 + dealer.spread / 200) * (1 + lean.buyPct / 100)),
+      sell: Math.floor(b.mid * (1 - dealer.spread / 200) * (1 - lean.sellPct / 100)),
+      buyOnly: !!dealer.buyOnly, impact: lean, canBuy: dealer.buyOnly ? 0 : left.buy, canSell: left.sell
+    };
   }
 
   // Events that start in (from, to]: the clock just moved across them.
@@ -190,6 +243,8 @@
     pickTruth: pickTruth,
     breakdown: breakdown,
     quote: quote,
+    impact: impact,
+    available: available,
     dealerAt: dealerAt,
     dealerOpen: dealerOpen,
     eventsBetween: eventsBetween,

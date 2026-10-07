@@ -70,6 +70,8 @@ window.NEON_TIDES_TRADE = (function () {
     title: "Two Rumours",
     startClock: "23:40",
     turnInFrom: "01:30",     // the night can be ended from here on ("Turn in aboard the Tern")
+    dawnClock: "06:00",      // the night ends by itself here (4.0.1); the morning card says so
+    firstLight: "05:00",     // from here the dashboard says dawn is coming
     startCredits: 480,
     startFuel: 4,
     fuelMax: 6,
@@ -91,11 +93,20 @@ window.NEON_TIDES_TRADE = (function () {
     unit: "g",
     noisePct: 0.7,           // smooth wobble, at most this many percent either way
     noiseKnotMin: 20,
+    impactHalfLifeMin: 90,   // how fast a dealer forgets your weight on his price (4.0.1)
     local: { bar: 0, landing: -1.5, metro: 0.5, pier: 1 },
     dealers: {
       // buyText / sellText / moved: {grams} {total} {price} {time} {old} {new} are filled in by game.js
+      // depth: grams that move this dealer's price 1% against you (your buying raises his ask, your
+      //        selling lowers his bid; it fades with market.impactHalfLifeMin)
+      // stock: grams he has to sell you tonight (a number, or per truth from stockFrom; stockBefore until then)
+      // limit: grams he will buy from you tonight
+      // lowStock / soldOut / full: lines for when those run low or out
       bar: {
         name: "Mei's scale", spread: 4.5, thing: "gold-board", accepts: "any",
+        depth: 15, stock: 30,
+        lowStock: "Mei taps the scale tin. \"That's nearly the last of what I keep in the shop.\"",
+        soldOut: "Mei shakes her head. \"I'm a noodle shop. That was all the gold I had for selling.\"",
         provenance: "Bought across the counter at Kurage 33. Mei's scale, Mei's waxed paper.",
         buyText: "Mei weighs out {grams} on the brass scale, folds it into waxed paper and slides it across the counter. {total} goes into the cash tin under the bao.",
         sellText: "Mei weighs your {grams} twice, once on the scale and once in her palm, and counts {total} into your hand.",
@@ -103,6 +114,9 @@ window.NEON_TIDES_TRADE = (function () {
       },
       landing: {
         name: "The exchange hatch", spread: 6, thing: "booth", accepts: "any",
+        depth: 10, stockBefore: 8, stockFrom: "00:20", stock: { order: 20, vault: 150, both: 45 },
+        lowStock: "Oduya looks into his tray. \"That's about the last of it, friend.\"",
+        soldOut: "Oduya spreads his gloves on the sill. \"Sold through. Come back when the divers do.\"",
         provenance: "Bought at the Landing 3 exchange hatch. Oduya says it's from the Harbour Savings wreck; there's no assay stamp.",
         buyText: "Oduya pushes {grams} through the hatch in a twist of oilcloth, still cold from the sea. {total}, and he counts it with his gloves on.",
         sellText: "Oduya drops your {grams} into a tray without looking at it and pushes {total} back through the hatch.",
@@ -110,6 +124,9 @@ window.NEON_TIDES_TRADE = (function () {
       },
       pier: {
         name: "Frostline buying desk", spread: 3, thing: "dock-office", buyOnly: true, from: "01:00", truths: ["order", "both"], accepts: "any",
+        depth: 12, limit: 30,
+        limitNote: "THIRTY GRAMS A SELLER, the card under the window says.",
+        full: "The clerk shakes his head before you open your hand. Thirty grams a seller, and you've sold yours.",
         sellText: "The Frostline clerk weighs your {grams}, scratches it once on a black stone, and pays {total} in clean notes without a word.",
         moved: "The desk's price has changed since {time}: {old} → {new} a gram."
       }
@@ -830,6 +847,42 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       }
     },
+    // The night ended itself at dawn (4.0.1): one line before the wire.
+    dawnLine: "First light found you still at it. Nights in the Basin end the way the ferries do: on time, whether you're ready or not.",
+    // What you did, read back to you (4.0.1). game.js sets these flags when the night ends:
+    //   end_dawn            the clock ran into dawn
+    //   end_held            no trades at all
+    //   end_bought_on_teo   bought before 01:00, after hearing Teo's Frostline rumour
+    //   end_sold_on_mei     sold before 01:00, after hearing Mei's vault rumour
+    //   end_bought_late     bought at Mei's after 01:20, once the Basin had heard about the desk
+    //   end_sold_to_oduya / end_bought_at_hatch / end_sold_at_desk   where you traded
+    //   end_both_queues     bought at the hatch and sold at the desk
+    //   end_hit_limit       sold the desk all it would take from you
+    //   end_missed_correction   heard Teo's rumour, never heard her correction, and bought (vault)
+    //   end_beat_idle / end_lost_to_idle   your trades (food and fuel aside) beat or lost to holding by 10+ cr
+    //   end_never_left      never untied from Kurage 33
+    //   end_looked          saw the tarp or asked Matte
+    // The first three that hold are shown, in this order: most specific first.
+    reflections: [
+      { if: { truth: ["order"], flag: ["end_both_queues"] }, text: "You bought at Oduya's hatch and sold at Frostline's window. On a night when the vault was trays and the desk was real, that was the whole trick." },
+      { if: { truth: ["order"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word before the desk opened. On Pier 9 they'd call that reading the weather." },
+      { if: { truth: ["order"], flag: ["end_sold_on_mei"] }, text: "You sold on Mei's vault. The vault was display trays; somewhere Hollis is laughing at the same joke." },
+      { if: { truth: ["order"], flag: ["end_sold_to_oduya"] }, text: "Oduya bought your gold at the hatch and had sold it on to Frostline by four. He sends no thanks." },
+      { if: { truth: ["vault"], flag: ["end_sold_on_mei"] }, text: "You sold before the bars came ashore. Mei will tell the story bigger than it was, and for once she'll be right." },
+      { if: { truth: ["vault"], flag: ["end_missed_correction"] }, text: "Teo knew by half past twelve that the order was pulled. She tells things like that to people she trusts." },
+      { if: { truth: ["vault"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word. Her word was a day old by the time you heard it, and so was the price you paid." },
+      { if: { truth: ["vault"], flag: ["end_sold_to_oduya"] }, text: "You sold to Oduya. He was right about the gulls, and so, it turns out, were you." },
+      { if: { truth: ["both"], flag: ["end_both_queues"] }, text: "You stood in both queues: cheap bars at the hatch, a dear desk on Pier 9. That was the whole night, and you found it." },
+      { if: { truth: ["both"], flag: ["end_sold_on_mei"] }, text: "You sold to the first story you heard. There were two, and both were true." },
+      { if: { truth: ["both"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word. It was good; there was just more to the night than her word." },
+      { if: { truth: ["order", "both"], flag: ["end_bought_late"] }, text: "You bought after the whole Basin had heard about the desk. The price you paid had the news in it already." },
+      { if: { flag: ["end_hit_limit"] }, text: "The desk would take only thirty grams from anyone. Frostline wanted the whole Basin's gold, a little from everybody." },
+      { if: { flag: ["end_beat_idle"] }, text: "Your trades did better than sitting still would have. Mei noticed; she notices everything." },
+      { if: { flag: ["end_lost_to_idle"] }, text: "Sitting still would have done better tonight. Every trader in the Basin has a night like that, Mei says, and most of them have it twice." },
+      { if: { flag: ["end_never_left"] }, text: "You never untied the Tern. Everything you know about tonight, you heard at one counter." },
+      { if: { flag: ["end_looked"], notFlag: ["end_never_left"] }, text: "You went to see for yourself, which is the one habit Old Lam says the sea respects." },
+      { if: { flag: ["end_held"] }, text: "You held what you had and let the night happen to it." }
+    ],
     // read with the night's conditions, at the moment you turned in
     closing: [
       { if: { truth: ["order", "both"] }, text: "Frostline declined to say what thirty kilograms of high-purity gold is for. A spokesman mentioned sensors." },

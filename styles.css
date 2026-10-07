@@ -347,6 +347,7 @@ body.travelling .thing, body[data-mode="title"] .thing { display: none; }
 .market-note { color: var(--amber-bright); border-color: var(--amber-deep); }
 .rumor-found { border-left-color: var(--amber-deep); font-family: var(--font-prose); font-size: 15px; }
 .rumor-found .clue-found-label { color: #8a4a12; }
+.res-body .reflection { font-style: italic; color: var(--amber-bright); }
 .res-body .wire { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.55; color: var(--paper); }
 
 /* What the notebook's timeline says, shown at the counter (3.1) */
