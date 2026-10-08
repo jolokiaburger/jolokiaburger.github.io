@@ -12,10 +12,10 @@ const saved=new Map();
 const context=vm.createContext({console,window:{},document:{readyState:'loading',addEventListener(){},getElementById(id){return ids.has(id)?{}:null;}},location:{protocol:'file:',search:''},setTimeout(){return 1;},clearTimeout(){},setInterval(){return 1;},clearInterval(){},URLSearchParams});
 context.window.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
 context.window.matchMedia=()=>({matches:false,addEventListener(){}});
-for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js'])vm.runInContext(read(name),context,{filename:name});
+for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit,
+  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel,
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -194,4 +194,98 @@ R.visit('bar','01:40');check(!R.casualActions().some(a=>a.casual==='hollis'),'Ho
 for(const source of ['cases.js','trade.js','dialogue.js'])check(!/\bTeo\b|\bVale\b|T\.V\./.test(read(source)),'old display name removed consistently');
 check(read('cases.js').includes('WITNESS: R. Minato'),'witness signature follows renamed courier');
 check(read('cases.js').includes('checked — R.M.'),'log initials follow renamed courier');
+// The complete market lead: each seeded dispatch, both choices, and persistent chat.
+const M=context.window.NeonMarket;
+for(const seed of ['frost-order','vault-light','two-tides'])for(const reward of ['contract','report']){
+ api.trade.start(seed);api.travelTo('market');
+ const st=R.state(), opening=api.trade.debug().prices.market;
+ const protectedState=()=>json({clock:st.clock,credits:st.credits,fuel:st.fuel,gold:st.gold,rumors:st.rumors});
+ const freeBefore=protectedState();
+ for(const id of ['nm_visit_gold','nm_visit_food','nm_visit_repair','nm_visit_lane'])api.performAction(id);
+ equal(protectedState(),freeBefore,'browsing never purchases or advances time');
+ for(const id of ['nao','kenji']){
+  const lines=[];
+  for(let i=0;i<8;i++){api.performAction('chat_'+id);const text=st.lastResult.lines[0].text;if(i)check(text!==lines[i-1],'market chats do not repeat consecutively');lines.push(text);}
+  equal(new Set(lines.slice(0,5)).size,5,'market character has five distinct casual replies');
+ }
+ equal(protectedState(),freeBefore,'new character chats cannot farm rewards');
+ const mealCash=st.credits,mealTime=st.clock;
+ api.performAction('market_skewers');equal(st.credits,mealCash-9,'Nao skewers price');equal(st.clock,mealTime+10,'Nao meal takes ten minutes');
+ check(st.rumors.some(r=>r.id==='r_market_guess'),'a meal supplies a sourced uncertain lead');
+ const beforeJob=json(st);api.performAction('nm_manifest');equal(json(st),beforeJob,'manifest requires accepting dispatch lead');
+ api.performAction('nm_notice');check(st.flags.nm_job,'market job accepted');
+ const beforeSearch=st.clock;api.performAction('nm_manifest');equal(st.clock,beforeSearch+5,'checking manifest costs five minutes');
+ const origin=st.truth==='vault'?'landing':'yard';const other=origin==='landing'?'yard':'landing';
+ api.travelTo(other);const unverified=json(st);api.performAction('nm_dispatch_'+other);equal(json(st),unverified,'wrong dispatch origin cannot verify lead');
+ api.travelTo(origin);api.performAction('nm_dispatch_'+origin);check(st.flags.nm_verified,'actual dispatcher confirms route');
+ check(st.rumors.some(r=>r.id==='r_market_confirmed_'+origin),'checked lead recorded in notebook');
+ api.performAction(origin==='yard'?'yard_refuel':'landing_refuel');api.travelTo('market');equal(st.location,'market','verified route returns by real crossing');
+ const beforeMeal=st.credits;api.performAction('market_tea');equal(st.credits,beforeMeal-6,'tea is a separate paid order');
+ check(st.convos.includes('nm_food_verified'),'return meal responds to checked dispatch');
+ const reload=api.readSave();equal(R.saveProblem(reload),null,'market save validates');R.setState(reload);const restored=R.state();
+ const cash=restored.credits,held=M.lots.total(restored.gold);const bid=api.trade.debug().prices.market.sell;
+ api.performAction('nm_'+reward);check(restored.flags.nm_done,'market lead closes');
+ if(reward==='contract'){
+  check(R.marketActionLabel(R.activeCase().actions.market.find(a=>a.id==='nm_contract')).includes(String(2*(bid+4))+' cr now'),'contract label previews the actual payout');
+  equal(M.lots.total(restored.gold),held-2,'repair order consumes two real grams');
+  equal(restored.credits,cash+2*(bid+4),'repair order pays displayed bid plus premium');
+  equal(restored.trades.at(-1).contract,'nm_contract','repair order recorded as a trade');
+  equal(api.trade.debug().prices.market.canSell,16,'order counts against dealer buying cap');
+  equal(restored.rewardCredits||0,0,'sale is not counted as courier reward');
+ }else{
+  equal(restored.credits,cash+25,'courier fee is twenty-five credits');equal(M.lots.total(restored.gold),held,'courier fee leaves gold untouched');
+  equal(restored.rewardCredits,25,'fee recorded separately from trading');
+ }
+ const finished=json(restored);api.performAction('nm_contract');api.performAction('nm_report');equal(json(restored),finished,'market choices mutually exclusive and unrepeatable');
+ // The restock is independent of quest completion and never refreshes buying capacity.
+ const arrival=restored.truth==='vault'?'03:00':'02:00';R.visit('market',arrival);
+ check(api.trade.debug().prices.market.canBuy>opening.canBuy,'arrival adds real sale stock');
+ equal(api.trade.debug().prices.market.canSell,reward==='contract'?16:18,'arrival does not reset buying allowance');
+ api.performAction('market_tea');check(restored.convos.includes('nm_food_after'),'meal recognises completed market lead');
+ api.trade.turnIn();check(Number.isFinite(R.tradeChoicesResult()),'market night produces finite result');
+}
+// Supply changes match their own event component, not a promise about the whole gold market.
+for(const [truth,time,amount] of [['order','02:00',16],['both','02:00',12],['vault','03:00',12]]){
+ const at=M.parseClock(time), seed=T.truths.find(t=>t.id===truth).seeds[0];
+ const before=M.available(T,truth,'market',at-1,[]);const after=M.available(T,truth,'market',at,[]);
+ equal(after.buy,before.buy+amount,'shipment adds configured grams at its exact minute');
+ equal(M.available(T,truth,'market',at,[{where:'market',kind:'buy',grams:12,at:at-10}]).buy,amount,'restock preserves previous purchases');
+ const short=M.breakdown(T,truth,seed,'market',M.parseClock('01:00')).events.filter(e=>e.event.startsWith('market_')).reduce((n,e)=>n+e.pct,0);
+ const eased=M.breakdown(T,truth,seed,'market',at+15).events.filter(e=>e.event.startsWith('market_')).reduce((n,e)=>n+e.pct,0);
+ check(eased<short,'delivery eases local shortage modifier');
+ equal(M.available(T,truth,'market',at,[{where:'market',kind:'sell',grams:18,at:at-10}]).sell,0,'restock cannot refresh buying allowance');
+ if(truth==='vault')equal(M.available(T,truth,'market',M.parseClock('02:00'),[]).buy,12,'late dispatch has no two-o-clock restock');
+}
+api.trade.start('two-tides');R.visit('market','01:00');R.state().flags.nm_verified=true;
+R.state().gold=[];const noGold=json(R.state());check(!R.tradeActionAffordable(R.activeCase().actions.market.find(a=>a.id==='nm_contract')),'order button disabled without gold');api.performAction('nm_contract');equal(json(R.state()),noGold,'repair order cannot sell nonexistent gold');
+api.performAction('nm_report');check(R.state().flags.nm_report_done,'no-gold skipper can finish through courier work');
+api.trade.start('two-tides');R.visit('market','01:00');R.state().flags.nm_verified=true;api.performAction('nm_report');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'courier fee excluded from trading performance');
+api.trade.start('two-tides');R.visit('market','01:00');R.state().flags.nm_verified=true;
+R.state().trades.push({where:'market',kind:'sell',grams:17,price:90,total:1530,at:R.state().clock});
+const capped=json(R.state());check(!R.tradeActionAffordable(R.activeCase().actions.market.find(a=>a.id==='nm_contract')),'order button disabled at buying cap');api.performAction('nm_contract');equal(json(R.state()),capped,'order cannot exceed remaining buying allowance');
+api.performAction('nm_report');check(R.state().flags.nm_done,'capped seller retains courier alternative');
+api.trade.start('frost-order');R.visit('market','01:00');R.state().fuel=5;
+const canTime=R.state().clock,canCash=R.state().credits;api.performAction('nm_fuel');equal(R.state().fuel,6,'reserve can adds one fuel');equal(R.state().credits,canCash-6,'reserve can costs six credits');equal(R.state().clock,canTime+5,'reserve can takes five minutes');
+const oneCan=json(R.state());api.performAction('nm_fuel');equal(json(R.state()),oneCan,'reserve fuel cannot be farmed');
+api.trade.start('frost-order');R.visit('market','01:00');R.state().fuel=4;R.state().credits=5;
+const unaffordable=json(R.state());api.performAction('nm_fuel');equal(json(R.state()),unaffordable,'reserve fuel cannot overdraw purse');
+api.trade.start('vault-light');R.visit('market','03:29');check(R.casualActions().some(a=>a.casual==='kenji'),'Kenji present before closing');
+R.visit('market','03:30');check(!R.casualActions().some(a=>a.casual==='kenji'),'Kenji leaves exactly at closing');
+for(const id of ['nm_visit_repair','nm_contract','nm_fuel','market_skewers','nm_bench'])check(!R.locationActions().some(a=>a.id===id),'closed bench and grill actions unavailable');
+check(R.locationActions().some(a=>a.id==='nm_late_bun'),'late food replaces grill');check(R.locationActions().some(a=>a.id==='market_tea'),'late tea remains available');
+const latePrice=R.state().credits;api.performAction('nm_late_bun');equal(R.state().credits,latePrice-8,'late bun and tea price');check(R.state().convos.includes('nm_food_late'),'late sitting acknowledges closed bench');
+check(!R.state().rumors.some(r=>r.id==='r_market_guess'),'new late visitor does not hear stale early gossip');
+for(const [seed,wait,to] of [['frost-order','nm_wait_early','02:00'],['vault-light','nm_wait_late','03:00']]){
+ api.trade.start(seed);R.visit('market','01:20');R.state().flags.nm_verified=true;const cash=R.state().credits;api.performAction(wait);equal(R.state().clock,M.parseClock(to),'explicit wait reaches checked arrival');equal(R.state().credits,cash,'waiting does not silently order food');check(R.state().fired.some(e=>e.id.startsWith('market_')&&e.id!=='market_delay'),'waiting fires dispatch event');
+}
+for(const id of ['market-scale','market-lane','market-wall','exp-nao','exp-kenji'])check(ids.has(id),'market target exists in illustration');
+check(read('index.html').indexOf('night-market.js')<read('index.html').indexOf('src="game.js"'),'market data loads before engine');
+const scene=fs.readFileSync(path.join(root,'assets/scenes/lantern-market.webp'));
+equal(scene.toString('ascii',8,12),'WEBP','market scene is local WebP');equal(scene.readUInt16LE(26)&0x3fff,1440,'market scene width');equal(scene.readUInt16LE(28)&0x3fff,800,'market scene height');check(scene.length<500000,'market scene stays under 500 KB');
+for(const id of ['sora','nao','kenji']){
+ const asset=fs.readFileSync(path.join(root,'assets/sprites/'+id+'-market.webp'));
+ equal(asset.toString('ascii',8,12),'WEBP','sprite is WebP');equal(asset.toString('ascii',12,16),'VP8X','sprite has extended WebP header');check((asset[20]&16)!==0,'sprite preserves alpha channel');equal(asset.readUIntLE(24,3)+1,240,'sprite width');equal(asset.readUIntLE(27,3)+1,360,'sprite height');check(asset.length<60000,'sprite stays under 60 KB');
+}
+for(const match of read('index.html').matchAll(/<image[^>]+href="([^"]+)"/g))check(fs.existsSync(path.join(root,match[1])),'scene image reference shipped');
+api.trade.start('frost-order');R.visit('market','03:30');R.state().flags.nm_verified=true;check(api.currentObjective().includes('closed'),'objective updates after repair deadline');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

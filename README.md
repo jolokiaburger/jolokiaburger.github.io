@@ -40,3 +40,9 @@ The destination buttons scroll sideways on phones. Existing saves continue witho
 
 Conversations include Next/Previous and Read full exchange. Open People for free casual chats with varied replies. See `ADVENTURE.md` for the implementation and run `node tools/adventure-checks.mjs` for engine checks.
 
+
+## Explore the Lantern Night Market
+
+Browse Sora's gold scale, Nao Mizuno's food counter and Kenji Arata's repair bench in the illustrated arcade. Browsing is free; food, tea and searches show their costs before you choose. Follow the overdue gold launch from a courier's rumour to the current manifest and its dispatcher, then choose a small gold order or a courier payment. Deliveries replenish the gold tray on their actual schedules. Later in the night the repair bench and grill close, but tea and gold remain available until dawn.
+
+The market includes contextual conversations and varied free chats. Existing lighthouse progress and saves continue. See `NIGHT-MARKET.md` for the rules, source files and spoiler-marked test routes.

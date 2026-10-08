@@ -166,6 +166,11 @@
       const after = typeof dealer.stock === "number" ? dealer.stock : (dealer.stock[truth] || 0);
       stock = dealer.stockFrom && clock < minutesOf(dealer.stockFrom) ? (dealer.stockBefore || 0) : after;
     }
+    // Scheduled replenishment is cumulative and deterministic. Purchases already made
+    // still count against the tray; selling gold never manufactures new dealer stock.
+    (dealer.stockArrivals || []).forEach(function (arrival) {
+      if (clock >= minutesOf(arrival.at) && (!arrival.truths || arrival.truths.indexOf(truth) !== -1)) stock += arrival.grams;
+    });
     let bought = 0, sold = 0;
     (trades || []).forEach(function (t) {
       if (t.where !== loc) return;
@@ -254,3 +259,4 @@
     worth: worth
   };
 })();
+

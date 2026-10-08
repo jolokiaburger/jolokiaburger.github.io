@@ -936,6 +936,18 @@ body.reduce-motion .toast { transition: none; }
 
 /* 16 · Beyond the breakwater. One row preserves the fixed phone shell's height. */
 .exp-scene { display: none; pointer-events: none; }
+.market-arrival-parcels, .market-arrived-notice, .market-closed-bench, .market-player-wish { display: none; }
+body.market-restocked .market-arrival-parcels, body.market-restocked .market-arrived-notice,
+body.market-late-watch .market-closed-bench, body.market-wish .market-player-wish { display: inline; }
+body.market-restocked .market-late-notice, body.market-late-watch #exp-kenji { display: none; }
+.market-directory { margin: 0 0 14px; padding: 12px; border: 1px solid #777762; border-radius: 10px; background: #202d32; }
+.market-status { margin: 5px 0 10px; font-size: 12px; line-height: 1.5; color: #d7c8a4; }
+.market-stalls { display: flex; flex-wrap: wrap; gap: 7px; }
+.market-stall { flex: 1 1 125px; min-height: 44px; padding: 9px 10px; border: 1px solid #65736f; border-radius: 7px; background: #29393d; color: #efe7d4; font: inherit; font-size: 13px; cursor: pointer; }
+.market-stall[aria-pressed="true"] { background: #554b35; border-color: #d8bd7b; color: #fff1c9; }
+.market-stall:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.market-stall:disabled { opacity: .55; cursor: default; }
+@media (hover: hover) { .market-stall:hover:not(:disabled) { border-color: #d8bd7b; } }
 body[data-mode="play"][data-location="market"]:not(.travelling) .exp-market,
 body[data-mode="play"][data-location="yard"]:not(.travelling) .exp-yard,
 body[data-mode="play"][data-location="island"]:not(.travelling) .exp-island { display: inline; }

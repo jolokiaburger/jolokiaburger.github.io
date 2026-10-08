@@ -351,6 +351,7 @@
   }
   function setState(next) {
     state = next;
+    transient.marketSpot = null;
     if (!state.timeline) state.timeline = {};   // saves from before 3.1
     if (!state.hinted) state.hinted = [];
     if (!state.shown) state.shown = {};
@@ -526,6 +527,7 @@
     state.clock += minutes;
     state.canArmed = false;
     state.location = dest;
+    transient.marketSpot = null;
     state.visited[dest] = (state.visited[dest] || 0) + 1;
     state.lastResult = null;
     if (isTrade()) { advanceMarket(before); observeMarket(); }   // the board you moor at, read on arrival
@@ -602,7 +604,8 @@
       return { id: "chat_" + id, casual: id, kind: "talk", minutes: 0,
         label: id === "radio" ? "Check in with Bengt · Channel 9" : "Chat with " + person.name,
         // Moving characters bind to the figure at their current quay.
-        thing: (CHAT[id].thingsByPlace && CHAT[id].thingsByPlace[state.location]) || CHAT[id].thing };
+        thing: (CHAT[id].thingsByPlace && CHAT[id].thingsByPlace[state.location]) || CHAT[id].thing,
+        marketSpot: CHAT[id].marketSpot };
     });
   }
   function nextCasual(id) {
@@ -621,6 +624,7 @@
   function actionLines(action) {
     if (action.casual) return nextCasual(action.casual);
     const lines = expandLines(action.lines);
+    if (action.directory) return lines;
     // Preserve the first reading of each distinct story response. Once read, the same
     // repeatable Talk action offers small talk; changed evidence unlocks its new response.
     const speaker = lines.find(function (line) { return line.type === "speech" && CHAT[line.who]; });
@@ -943,6 +947,10 @@
       if (!d.depth) problems.push("dealer at " + loc + " has no depth: your own trades would never move his price");
       if (!d.buyOnly && d.stock === undefined) problems.push("dealer at " + loc + " has no stock: he could sell you gold without end");
       if (d.buyOnly && d.limit === undefined) problems.push("dealer at " + loc + " has no limit: he could buy your gold without end");
+      (d.stockArrivals || []).forEach(function (arrival) {
+        if (!/^\d{2}:\d{2}$/.test(arrival.at) || !Number.isFinite(arrival.grams) || arrival.grams <= 0) problems.push("dealer at " + loc + " has an invalid stock arrival");
+        (arrival.truths || []).forEach(function (truth) { if (truthIds.indexOf(truth) === -1) problems.push("dealer at " + loc + " has a stock arrival for unknown truth '" + truth + "'"); });
+      });
     });
     truthIds.forEach(function (t) { if (!TRADE.ending.byTruth[t]) problems.push("no morning wire for truth '" + t + "'"); });
     return problems;
@@ -1028,7 +1036,19 @@
     if (!action) return;
     const cost = action.cost || 0;
     if (cost > state.credits) { toast("Not enough credits for that."); return; }
+    // A repair order is a real sale, not an adventure cash reward. Freeze this quote
+    // before any action changes the clock or flags, and share the dealer's buying cap.
+    const sale = action.goldSale, quote = sale ? tradeQuote() : null;
+    if (sale && (!quote || goldHeld() < sale.grams || quote.canSell < sale.grams)) {
+      toast(goldHeld() < sale.grams ? "Kenji needs two grams. Keep exploring, or report to Sora for the courier fee." : "Sora's buying allowance cannot cover this order. You can still take the courier fee.");
+      return;
+    }
     const lines = actionLines(action);   // the moment of speaking, before anything changes
+    if (action.marketBrowse) transient.marketSpot = action.marketBrowse;
+    if (action.marketBrowse === "gold") {
+      const board = tradeQuote();
+      if (board) lines.push({ type: "p", text: "Current board · Buy " + board.buy + " cr/g · Sell " + board.sell + " cr/g · " + grams(board.canBuy) + " available to buy · " + grams(board.canSell) + " buying allowance remains." });
+    }
     const before = state.clock;
     state.credits -= cost;
     state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
@@ -1038,6 +1058,14 @@
     (action.sets || []).forEach(function (flag) { state.flags[flag] = true; });
     applyEffects(action.effects);
     applyRel(action.rel);
+    if (sale) {
+      const sold = MARKET.lots.sell(state.gold, sale.grams);
+      const price = quote.sell + sale.premium, total = Math.round(sold.sold * price);
+      state.gold = sold.lots;
+      state.credits += total;
+      state.trades.push({ kind: "sell", grams: sold.sold, price: price, total: total, basis: sold.basis, at: state.clock, where: state.location, contract: action.id });
+      lines.push({ type: "p", text: "Sold " + grams(sold.sold) + " at " + price + " cr/g · Received " + total + " cr. This uses two grams of Sora's eighteen-gram buying allowance." });
+    }
     const heardNow = [];
     hearsOf(action, heardNow);
     advanceMarket(before);
@@ -1337,6 +1365,8 @@
   function portraitPhone() { return window.matchMedia("(max-width: 899px) and (orientation: portrait)").matches; }
   function cameraTarget() {
     if (transient.mode === "title") return portraitPhone() ? TITLE_CROP : FULL_VIEW;
+    // The market is an illustrated arcade: all three stalls must remain in view.
+    if (state && state.location === "market") return FULL_VIEW;
     if (settings.camera === "close" && state && !transient.travelling && QUAY_X[state.location] !== undefined) {
       return { x: QUAY_X[state.location], y: QUAY_Y, w: QUAY_W, h: QUAY_H };
     }
@@ -1662,7 +1692,7 @@
   function coachCard() {
     return el("div", { class: "coach", role: "note" }, [
       el("p", { class: "coach-title", text: "Welcome aboard" }),
-      el("p", { text: "The picture shows the quay you are moored at; people and things with a dashed ring can be tapped. Tap one of the four buttons under it to cross the harbour. Everything you can do is also listed under the story, with what it costs." }),
+      el("p", { text: "The picture shows the quay you are moored at; people and things with a dashed ring can be tapped. Use the destination buttons under it to cross the harbour. Everything you can do is also listed under the story, with what it costs." }),
       el("button", { class: "btn btn-small", type: "button", onclick: function () { settings.coached = true; saveSettings(); render(); focusFirstChoice(); } }, "Got it")
     ]);
   }
@@ -1737,11 +1767,15 @@
     }
 
     // Gold stays at the top. Optional chats are folded so they never bury a trade.
-    const gold = renderGoldGroup(nextKey);
+    const market = state.location === "market";
+    const spot = transient.marketSpot || "all";
+    if (market) renderMarketDirectory(container, spot);
+    const gold = !market || spot === "all" || spot === "gold" ? renderGoldGroup(nextKey) : null;
     container.appendChild(el("p", { class: "expedition-lead", text: currentObjective() }));
     if (gold) container.appendChild(gold);
-    else container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
-    const here = locationActions().filter(function (a) { return a.kind !== "system"; });
+    else if (!market) container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
+    const visible = function (a) { return !a.directory && (!market || spot === "all" || !a.marketSpot || a.marketSpot === spot); };
+    const here = locationActions().filter(function (a) { return a.kind !== "system" && visible(a); });
     [
       { label: "Explore & follow leads", match: function (a) { return !a.casual && a.kind !== "order"; } },
       { label: "Food, tea & stories", match: function (a) { return a.kind === "order"; } },
@@ -1753,8 +1787,8 @@
       local.appendChild(el(group.folded ? "summary" : "p", { class: "action-group-label", text: group.label }));
       available.forEach(function (action) {
         local.appendChild(actionButton({
-          kind: action.casual ? "chat" : action.kind, label: action.label,
-          key: group.folded ? null : nextKey(), disabled: (action.cost || 0) > state.credits,
+          kind: action.casual ? "chat" : action.kind, label: marketActionLabel(action),
+          key: group.folded ? null : nextKey(), disabled: !tradeActionAffordable(action),
           costs: tradeBadges(actionMinutes(action), action.fuel, action.cost),
           onClick: function () { performAction(action.id); }
         }));
@@ -1767,7 +1801,7 @@
     });
 
     const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
-    const ferryActions = locationActions().filter(function (a) { return a.kind === "system"; }).concat(sys);
+    const ferryActions = locationActions().filter(function (a) { return a.kind === "system" && visible(a); }).concat(sys);
     const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
     Object.keys(DATA.world.locations).filter(locationAvailable).forEach(function (dest) {
       if (dest === state.location) return;
@@ -1793,6 +1827,35 @@
       }));
     });
     container.appendChild(ferry);
+  }
+  function tradeActionAffordable(action) {
+    if ((action.cost || 0) > state.credits) return false;
+    if (!action.goldSale) return true;
+    const q = tradeQuote();
+    return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
+  }
+  function marketActionLabel(action) {
+    if (!action.goldSale) return action.label;
+    const q = tradeQuote();
+    return action.label + (q ? " · " + (action.goldSale.grams * (q.sell + action.goldSale.premium)) + " cr now" : "");
+  }
+  function renderMarketDirectory(container, spot) {
+    const directory = el("div", { class: "market-directory", role: "group", "aria-label": "Browse the Night Market" });
+    directory.appendChild(el("p", { class: "action-group-label", text: "Lantern Market · Pick a stall" }));
+    directory.appendChild(el("p", { class: "market-status", text: state.clock >= parseClock("03:30")
+      ? "Late watch · Tea and gold until dawn · Repair bench closed"
+      : "Gold scale · Hot food · Repairs · A delivery to trace" }));
+    const buttons = el("div", { class: "market-stalls" });
+    [{ spot: "all", label: "All stalls" }, { spot: "gold", label: "Sora · Gold", id: "nm_visit_gold" }, { spot: "food", label: "Nao · Food & tea", id: "nm_visit_food" }, { spot: "repair", label: "Kenji · Repairs", id: "nm_visit_repair" }, { spot: "lane", label: "Delivery lane", id: "nm_visit_lane" }].forEach(function (entry) {
+      const closed = entry.spot === "repair" && state.clock >= parseClock("03:30");
+      buttons.appendChild(el("button", { type: "button", class: "market-stall", disabled: closed, "aria-pressed": entry.spot === spot ? "true" : "false", onclick: function () {
+        if (entry.id) performAction(entry.id);
+        else { transient.marketSpot = null; render(); focusEncounter(); }
+      } }, closed ? "Kenji · Closed" : entry.label));
+    });
+    directory.appendChild(buttons);
+    if (spot === "repair" && state.clock < parseClock("03:30")) directory.appendChild(el("p", { class: "market-help", text: "Kenji's order needs 2 g and at least 2 g of Sora's remaining buying allowance. You can report the delivery for 25 cr instead. His bench closes at 03:30." }));
+    container.appendChild(directory);
   }
   // The scale where you are: its two numbers, what you hold, and a few sizes of trade.
   function renderGoldGroup(nextKey) {

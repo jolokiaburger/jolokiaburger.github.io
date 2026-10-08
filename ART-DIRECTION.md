@@ -2,7 +2,7 @@
 
 The current game uses an original cast illustrated with grounded adult proportions, fine ink linework, subtle expressions, muted workwear and warm night-shift light. The requested manga was a mood reference; no panels or existing character designs were used as game assets. The harbour keeps its neon signs while character clothing, stall paint and dialogue frames become more restrained.
 
-All thirteen portraits were generated with the built-in image-generation tool. Source PNGs were exported to 512 × 512 WebP at quality 84 for the game. The complete portrait set is 350,052 bytes. Each speaking character uses the same larger portrait presentation (112 px on desktop, 80 px on phones). The small harbour figures are original native SVG illustrations, with matching clothing and hair, authored separately for readability at map scale.
+All fifteen portraits were generated with the built-in image-generation tool. Source PNGs were exported to 512 × 512 WebP at quality 84 for the game. The complete portrait set is 436,648 bytes. Each speaking character uses the same larger portrait presentation (112 px on desktop, 80 px on phones). The small harbour figures are original native SVG illustrations, with matching clothing and hair, authored separately for readability at map scale.
 
 Internal character IDs and saves stay compatible. Oduya now has his own figure. Hollis's figures follow his arrival/departure schedule, and Rei appears at Pier 9 from 01:30. Bengt is heard by radio and has a portrait rather than a new physical quay location.
 
@@ -94,3 +94,11 @@ Aki Hoshimi, Japanese nonbinary adult age 33, straight dark shoulder-length hair
 
 The complete cast and native SVG scene crops were visually inspected. Engine checks cover all portrait assets and WebP dimensions, character availability, map target IDs and both old and expanded gameplay. Interactive browser layout and real phone testing remain unverified.
 
+
+## Night Market art
+
+The Lantern Market now uses `assets/scenes/lantern-market.webp`, an original 1440 × 800 arcade illustration. Two new portraits, `assets/portraits/nao-manga.webp` and `assets/portraits/kenji-manga.webp`, use the same 512 × 512 presentation. Three full-body transparent sprites at `assets/sprites/{sora,nao,kenji}-market.webp` match those characters' own portraits. All six images were generated with the built-in image-generation tool; scene/portrait exports use WebP quality 84, sprite exports preserve transparency. All images are shipped locally; the game makes no image-service calls.
+
+The exact prompt set is recorded in `tools/night-market-art-prompts.json`. Portraits are original character designs. Sprite references are Sora's existing game portrait and the new Nao/Kenji portraits, inspected before generation. No third-party manga panels or character images were used. The native SVG stall targets, signs, dispatch notices, parcels and wish star in `index.html` remain editable code.
+
+Nao Mizuno is a 29-year-old food-stall keeper in a cream work shirt and faded terracotta apron. Kenji Arata is a 47-year-old mechanic in moss-gray workwear, with stubble and glasses pushed onto his head. Sora remains the market's gold host. The scene uses fine ink contours, painterly amber lantern light, cool harbour shadows and wet wood; the smaller sprites share that treatment.

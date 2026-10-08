@@ -32,8 +32,14 @@ Run `node tools/adventure-checks.mjs` for the full engine checks, including all 
 
 ## Current character art
 
-All thirteen speaking characters now use grounded adult manga portraits from `assets/portraits/*-manga.webp`. The earlier Rei and Mei SVG portraits remain as previous versions. The full set is 350,052 bytes; each asset is 512 × 512. The enlarged portrait treatment is shared by the full cast (112 px desktop, 80 px phones). `ART-DIRECTION.md` records the visual direction, character briefs, generation prompts and asset provenance.
+All fifteen speaking characters now use grounded adult manga portraits from `assets/portraits/*-manga.webp`. The earlier Rei and Mei SVG portraits remain as previous versions. The portrait set is 436,648 bytes; each asset is 512 × 512. The enlarged portrait treatment is shared by the full cast (112 px desktop, 80 px phones). `ART-DIRECTION.md` records the visual direction, character briefs, generation prompts and asset provenance.
 
 Teo's display name remains Rei Minato. Internal `teo` IDs, flags, clues, evidence requirements and save keys are unchanged. The scene figures now use natural adult silhouettes, muted workwear, individual hair and fine outlines. Oduya is visible near the landing hatch. Hollis appears at Landing 3 from 00:20–00:40, then the bar from 00:45–01:40. Rei appears at Pier 9 from 01:30. Picture chat targets follow the character's current location. Bengt remains a radio contact, with his own portrait.
 
 Dialogue frames and expansion stall paint use warmer, quieter colours alongside the harbour's established neon lighting. Portraits and native scene crops were visually inspected. Interactive browser layout and real phone play-testing remain unverified.
+
+## Complete Night Market location
+
+`night-market.js` extends the market after `expansion.js`, retaining the lighthouse action IDs. Sora, Nao and Kenji have distinct stalls, an illustrated arcade, matching market sprites and portrait dialogue. `game.js` adds a free directory inside the scrolling choices panel; choosing a stall filters its actions. The full market scene remains visible in both camera modes. `styles.css` keeps the fixed phone shell unchanged.
+
+The overdue launch has a seeded dispatch route, verifiable journal leads, actual stock replenishment and a small local price event. `market.js` sums scheduled arrivals without resetting purchases or buying caps. Kenji's limited order is a real two-gram sale with a displayed payout; Sora's courier alternative is a one-time adventure reward. Meals recognise investigation progress and the late watch; Kenji and the grill close at 03:30. Rules, balance assumptions and manual testing: `NIGHT-MARKET.md`.
