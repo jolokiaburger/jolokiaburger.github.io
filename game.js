@@ -3243,12 +3243,17 @@
     const valid = saved && !saved.invalid ? saved : null;
     dom.btnContinue.hidden = !valid;
     if (valid) {
-      dom.btnContinue.textContent = "Continue your journey · " + formatClock(valid.clock) + (valid.resolved ? " · closed" : "");
+      dom.btnContinue.textContent = valid.kind === "trade"
+        ? (valid.resolved ? "Read " : "Continue ") + "Night " + (valid.night || 1) + (valid.resolved ? " morning report" : " · " + formatClock(valid.clock))
+        : (valid.resolved ? "Read your case ending" : "Continue investigation · " + formatClock(valid.clock));
     }
     if (!storage.ok) {
       dom.storageNote.textContent = "Saving is unavailable here (private mode or blocked storage). You can still play; progress won't survive a reload.";
     } else if (valid) {
-      dom.storageNote.textContent = "A saved shift was found in this browser.";
+      dom.storageNote.textContent = valid.kind === "trade" && valid.resolved && valid.night !== 2
+        ? "Your first night is saved. Open its morning report to continue to Night Two with your earnings and choices."
+        : valid.kind === "trade" && valid.night === 2 ? "Your second night is saved, including the people and choices you carried forward."
+        : "Your journey is saved in this browser.";
     } else {
       dom.storageNote.textContent = "Progress autosaves in this browser after every action.";
     }
@@ -3413,7 +3418,7 @@
       "Scales are at Kurage 33 and Landing 3. Trading takes no time. " + (touch ? "Tap" : "Click") + " a ringed thing in the picture to do what the matching choice does.",
       "Crossings cost fuel and minutes; refuel at Landing 3. Out of fuel elsewhere, radio the harbour tug.",
       "From " + TRADE.meta.turnInFrom + " you can turn in aboard the Tern. The morning wire says what really happened, and Mei's scale says what your night was worth.",
-      "Every night is a seed; the same seed is the same night. Four mystery adventures await under Harbour adventures on the title screen.",
+      "Every night is a seed; the same seed is the same night. Four mystery adventures await under Case files on the title screen.",
       "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
@@ -3440,7 +3445,7 @@
       DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
       "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
       "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. Menu → Harbour sounds enables soft ferry, trading and market effects independently of the radio. Effects volume has three levels.",
-      "Every case is a seed, and the same seed always opens the same night. Harbour adventures on the title screen lists the mysteries and endings you have found.",
+      "Every case is a seed, and the same seed always opens the same night. Case files on the title screen lists the mysteries and endings you have found.",
       "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
@@ -3493,7 +3498,7 @@
       ]));
     });
     openModal({
-      title: "Harbour adventures",
+      title: "Case files · Investigations",
       body: [
         el("p", { class: "muted", text: "Every night in the Basin is a seed. These are the ones on file; any other word you type as a seed opens one of them at random, and always the same one." }),
         list

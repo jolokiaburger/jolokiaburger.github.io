@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#07051a">
-<meta name="description" content="Neon Tides — a lantern-lit harbour adventure. Meet colourful characters, follow rumours and trade gold across Bellwater Basin.">
+<meta name="description" content="Neon Tides — two nights of gold trading, warm conversations and small adventures in a rain-soaked neon harbour. Carry your earnings and friendships into Night Two.">
 <title>Neon Tides</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -1398,21 +1398,34 @@
       <!-- Title overlay (shown while data-mode="title") -->
       <div id="title-overlay" class="title-overlay">
         <div class="title-card">
-          <p class="title-kicker">A harbour full of adventure</p>
+          <p class="title-kicker">A cosy trading adventure after dark</p>
           <h1 class="title-neon"><span class="t1">NEON</span><span class="t2">TIDES</span></h1>
-          <p class="title-tag">Two nights beneath the lanterns. Find your people. Carry a little adventure home.</p>
+          <p class="title-tag">Trade gold. Follow the lanterns.<br>Find your people.</p>
+          <p class="title-intro">Captain the <em>Tern</em> through a rain-soaked neon harbour. Buy and sell, carry a little cargo, and share food, tea and stories with the people along your route.</p>
+          <div class="title-chapter">Two connected nights <span aria-hidden="true">·</span> About 10–15 minutes each</div>
           <div class="title-actions">
             <button id="btn-continue" class="btn btn-primary" type="button" hidden>Continue your journey</button>
-            <button id="btn-new" class="btn btn-primary" type="button">Begin your trading adventure</button>
-            <button id="btn-cases" class="btn btn-title" type="button">Harbour adventures</button>
+            <button id="btn-new" class="btn btn-primary" type="button">Start Night One</button>
+            <button id="btn-cases" class="btn btn-title" type="button">Case files · Investigations</button>
           </div>
+          <div class="title-cast" aria-label="Faces of Bellwater Basin">
+            <figure><img src="assets/portraits/mei-manga.webp" width="56" height="56" alt="" decoding="async"><figcaption><strong>Mei</strong><span>A warm bowl & a good lead</span></figcaption></figure>
+            <figure><img src="assets/portraits/sora-manga.webp" width="56" height="56" alt="" decoding="async"><figcaption><strong>Sora</strong><span>Gold beneath the lanterns</span></figcaption></figure>
+            <figure><img src="assets/portraits/nao-manga.webp" width="56" height="56" alt="" decoding="async"><figcaption><strong>Nao</strong><span>A new recipe, a new beginning</span></figcaption></figure>
+          </div>
+          <details class="title-story">
+            <summary>Your two-night journey</summary>
+            <p><strong>Night One · Find your footing.</strong> Listen to harbour rumours, compare gold prices, explore the market and help Nao open her breakfast counter.</p>
+            <p><strong>Night Two · A Lantern for Tomorrow.</strong> Carry your earnings and relationships forward. Choose Nao’s festival recipe, trade sealed rice cargo and see how the harbour remembers your help.</p>
+            <p>Stay for a meal, chat without spending a credit, or take the long way home. Gentle harbour sounds and lo-fi radio are waiting in the Menu, off until you choose them.</p>
+          </details>
         </div>
         <div class="title-foot">
           <details class="seed-box">
             <summary>Seed (optional)</summary>
             <label class="seed-label" for="seed-input">Night seed</label>
             <input id="seed-input" class="seed-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="leave blank for a random night">
-            <p class="hint">The same seed always gives the same night. <em>Harbour adventures</em> holds the four investigations, each with its own seed, starting with <code>high-tide</code>.</p>
+            <p class="hint">The same seed repeats the market situations across both nights. Your choices shape the journey. <em>Case files</em> contains four separate investigations, starting with <code>high-tide</code>.</p>
           </details>
           <p id="storage-note" class="storage-note" role="status"></p>
         </div>

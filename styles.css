@@ -1011,3 +1011,51 @@ body.night-two .n2-festival-prop, body.n2-rice-delivered .n2-rice-prop { display
 body.night-two .nao-breakfast-batch { display: none; }
 
 .breakfast-progress summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; color: #f1d59e; font-size: 14px; }
+
+/* The title introduces the current two-night trading story. Its own overlay
+   scrolls at short heights; gameplay's fixed phone shell is unchanged. */
+.title-overlay { pointer-events: auto; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; justify-content: flex-start; gap: 20px; background: linear-gradient(90deg, #101d29e8, #101d2994 48%, #101d290f); }
+.title-card { flex: 0 0 auto; width: min(620px, 100%); padding: 22px; border: 1px solid #d5bd8752; border-radius: 16px; background: linear-gradient(145deg, #172933ed, #202a30de); box-shadow: 0 18px 60px #070e1645; }
+.title-neon { font-size: clamp(46px, 5.8vw, 82px); }
+.title-neon .t2 { color: #f2cf9a; text-shadow: 0 0 8px #e9b76e77, 0 0 32px #d9934e38; }
+.title-kicker { font-size: 11px; letter-spacing: .15em; color: #b3ddcc; }
+.title-tag { margin: 14px 0 10px; font-size: 23px; font-weight: 600; line-height: 1.3; color: #f8ead1; }
+.title-intro { margin: 0 0 12px; max-width: 49ch; font-size: 14px; line-height: 1.6; color: #d5e0df; }
+.title-chapter { margin-bottom: 16px; font-family: var(--font-ui); font-size: 12px; color: #e4c998; }
+.title-chapter span { padding: 0 5px; }
+.title-actions .btn-primary { background: #e6bd7e; color: #18272e; border-color: #f1d6aa; }
+.title-actions .btn-primary:hover { background: #f4d6a6; }
+.title-actions .btn-title { background: #23383ccf; border-color: #859b9577; color: #dfebdf; }
+.title-cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid #a8b9a73b; }
+.title-cast figure { margin: 0; display: flex; gap: 8px; align-items: center; min-width: 0; }
+.title-cast img { flex: 0 0 auto; width: 56px; height: 56px; object-fit: cover; border: 1px solid #d4b48b77; border-radius: 9px; background: #2b3439; }
+.title-cast strong { display: block; font-size: 13px; color: #f3d7b0; }
+.title-cast span { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; color: #b9cbc8; }
+.title-story { margin-top: 12px; max-width: 55ch; color: #ccdbd6; font-size: 13px; line-height: 1.6; }
+.title-story summary { min-height: 44px; align-content: center; cursor: pointer; color: #b9ddd1; }
+.title-story summary:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; border-radius: 3px; }
+.title-story p { margin: 8px 0; }
+.title-foot { flex: 0 0 auto; max-width: 620px; padding: 0 4px; }
+@media (max-width: 899px) {
+  .title-overlay { padding: 16px; gap: 14px; background: linear-gradient(180deg, #101d2940, #101d29c4 32%, #101d29f2); }
+  .title-card { margin-top: 0; padding: 16px; border-radius: 12px; }
+  .title-neon { font-size: clamp(44px, 13vw, 64px); }
+  .title-kicker { font-size: 10px; letter-spacing: .1em; }
+  .title-tag { font-size: 20px; margin: 12px 0 8px; }
+  .title-intro { font-size: 13px; line-height: 1.5; }
+  .title-chapter { font-size: 11px; margin-bottom: 12px; }
+  .title-actions { flex-direction: column; align-items: stretch; }
+  .title-actions .btn { width: 100%; min-height: 44px; font-size: 13px; padding: 10px 12px; }
+  .title-cast { margin-top: 14px; padding-top: 12px; gap: 8px; }
+  .title-cast figure { flex-direction: column; align-items: flex-start; gap: 5px; }
+  .title-cast img { width: 44px; height: 44px; }
+  .title-cast strong { font-size: 12px; }
+  .title-cast span { font-size: 10px; }
+  .title-story { font-size: 12px; margin-top: 8px; }
+}
+@media (max-width: 899px) and (orientation: landscape) {
+  .title-neon { flex-direction: row; gap: .2em; font-size: clamp(34px, 10dvh, 48px); }
+  .title-cast figure { flex-direction: row; align-items: center; }
+  .title-actions { flex-direction: row; flex-wrap: wrap; }
+  .title-actions .btn { width: auto; }
+}
