@@ -30,6 +30,7 @@
   /* ------------------------------------------------------------------ */
   const DATA = window.NEON_TIDES;
   const TRADE = window.NEON_TIDES_TRADE;   // the gold night: story and market data (trade.js)
+  const CHAT = window.NEON_TIDES_CHAT || {}; // optional, authored conversations (dialogue.js)
   const MARKET = window.NeonMarket;        // pricing and gold lots, no DOM (market.js)
   const SAVE_KEY = "neon-tides:save:v1";
   const SETTINGS_KEY = "neon-tides:settings:v1";
@@ -568,10 +569,56 @@
   /* ------------------------------------------------------------------ */
   function locationActions() {
     const list = activeCase.actions[state.location] || [];
-    return list.filter(function (action) {
+    return list.concat(casualActions()).filter(function (action) {
       if (action.once && state.used[action.id]) return false;
       return conditionHolds(action.when);
     });
+  }
+
+  // Optional conversations share existing save counters. Unheard lines come first, and
+  // repeat chats never advance the clock or grant relationship points, clues or money.
+  function chatModeMatches(entry) {
+    return !entry.mode || entry.mode === (isTrade() ? "trade" : "case");
+  }
+  function casualActions() {
+    if (!state || state.resolved || state.confront) return [];
+    return Object.keys(CHAT).filter(function (id) {
+      return CHAT[id].visits.some(function (v) {
+        return v.at === state.location && chatModeMatches(v) && conditionHolds(v.when);
+      });
+    }).map(function (id) {
+      const person = DATA.world.characters[id] || TRADE.characters[id];
+      return { id: "chat_" + id, casual: id, kind: "talk", minutes: 0,
+        label: id === "radio" ? "Check in with Bengt · Channel 9" : "Chat with " + person.name,
+        // Teo has no figure drawn on Pier 9. Never attach that action to her empty bar stool.
+        thing: id === "teo" && state.location !== "bar" ? null : CHAT[id].thing };
+    });
+  }
+  function nextCasual(id) {
+    const pool = CHAT[id].lines.filter(function (line) { return chatModeMatches(line) && conditionHolds(line.when); });
+    let index = pool.findIndex(function (line) { return !state.used["chat_seen:" + id + ":" + line.id]; });
+    if (index < 0) {
+      const last = state.used["chat_last:" + id];
+      index = pool.findIndex(function (line) { return CHAT[id].lines.indexOf(line) + 1 === last; });
+      index = (index + 1) % pool.length;
+    }
+    const line = pool[index];
+    state.used["chat_seen:" + id + ":" + line.id] = 1;
+    state.used["chat_last:" + id] = CHAT[id].lines.indexOf(line) + 1;
+    return [{ type: "speech", who: id, text: line.text }];
+  }
+  function actionLines(action) {
+    if (action.casual) return nextCasual(action.casual);
+    const lines = expandLines(action.lines);
+    // Preserve the first reading of each distinct story response. Once read, the same
+    // repeatable Talk action offers small talk; changed evidence unlocks its new response.
+    const speaker = lines.find(function (line) { return line.type === "speech" && CHAT[line.who]; });
+    if (action.kind === "talk" && !action.once && speaker) {
+      const key = "dialogue:" + action.id + ":" + hashSeed(JSON.stringify(lines));
+      if (state.used[key]) return nextCasual(speaker.who);
+      state.used[key] = 1;
+    }
+    return lines;
   }
 
   // Actions the game itself adds: the confrontation, the drink, the tug.
@@ -598,7 +645,7 @@
   }
 
   function performAction(actionId) {
-    if (transient.travelling) return;
+    if (transient.travelling || state.resolved || state.confront) return;
     if (isTrade()) { performTradeAction(actionId); return; }
     if (actionId === "sys_confront") { startConfrontation(); return; }
     if (actionId === "sys_drink") { drinkCan(); return; }
@@ -614,7 +661,7 @@
     }
 
     // Text reflects the moment of speaking, so expand it before anything changes.
-    const lines = expandLines(action.lines);
+    const lines = actionLines(action);
 
     state.clock += actionMinutes(action);
     if (action.fuel) state.fuel = Math.max(0, state.fuel - action.fuel);
@@ -789,7 +836,7 @@
     setMode("play");
     positionFerry(state.location, null, false);
     render();
-    toast("Night shift · seed " + seed);
+    toast("Cast off for adventure · seed " + seed);
     debugMarket("start");
   }
 
@@ -948,7 +995,7 @@
       out.push({ id: "sys_tug", kind: "system", label: DATA.world.tug.label, minutes: DATA.world.tug.minutes });
     }
     if (state.clock >= parseClock(TRADE.meta.turnInFrom)) {
-      out.push({ id: "sys_turn_in", kind: "system", label: "Turn in aboard the Tern (end the night)", minutes: 0 });
+      out.push({ id: "sys_turn_in", kind: "system", label: "Rest aboard the Tern · Finish the night", minutes: 0 });
     }
     return out;
   }
@@ -962,7 +1009,7 @@
     if (!action) return;
     const cost = action.cost || 0;
     if (cost > state.credits) { toast("Not enough credits for that."); return; }
-    const lines = expandLines(action.lines);   // the moment of speaking, before anything changes
+    const lines = actionLines(action);   // the moment of speaking, before anything changes
     const before = state.clock;
     state.credits -= cost;
     state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
@@ -1593,7 +1640,7 @@
   // (The help text describes the same thing; nobody opens the help text first.)
   function coachCard() {
     return el("div", { class: "coach", role: "note" }, [
-      el("p", { class: "coach-title", text: "How this works" }),
+      el("p", { class: "coach-title", text: "Welcome aboard" }),
       el("p", { text: "The picture shows the quay you are moored at; people and things with a dashed ring can be tapped. Tap one of the four buttons under it to cross the harbour. Everything you can do is also listed under the story, with what it costs." }),
       el("button", { class: "btn btn-small", type: "button", onclick: function () { settings.coached = true; saveSettings(); render(); focusFirstChoice(); } }, "Got it")
     ]);
@@ -1610,7 +1657,7 @@
     const first = (state.visited[state.location] || 1) <= 1;
     let items = expandLines(first ? scene.first : scene.again);
     if (items.length === 0 && !first) items = approachLines(state.location);
-    renderLines(container, items);
+    renderConversation(container, items, "scene:" + state.variantId + ":" + state.location + ":" + state.visited[state.location]);
   }
 
   // A place's approach text is one line, or a list of entries with conditions (the metro's terminus
@@ -1621,19 +1668,19 @@
   }
 
   function renderResult(container, result) {
-    renderLines(container, result.lines);
+    renderConversation(container, result.lines, result);
     (result.clues || []).forEach(function (id) {
       const clue = activeCase.clues[id];
       if (!clue) return;
       container.appendChild(el("div", { class: "clue-found" }, [
-        el("span", { class: "clue-found-label", text: "Added to notebook · " + clue.title }),
+        el("span", { class: "clue-found-label", text: "Discovery recorded · " + clue.title }),
         clue.text
       ]));
     });
     // The gold night: what was just written into the notebook, as it was heard. Never interpreted.
     (result.heard || []).forEach(function (id) {
       container.appendChild(el("div", { class: "clue-found rumor-found" }, [
-        el("span", { class: "clue-found-label", text: "In your notebook · " + rumorSource(id) }),
+        el("span", { class: "clue-found-label", text: "New lead · " + rumorSource(id) }),
         TRADE.rumors[id].note
       ]));
     });
@@ -1662,28 +1709,40 @@
 
     if (state.resolved) {
       const done = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: "Morning" })]);
-      done.appendChild(actionButton({ kind: "choice", label: "Read the morning wire again", key: nextKey(), onClick: showResolution }));
-      done.appendChild(actionButton({ kind: "choice", label: "Start another night", key: nextKey(), onClick: function () { startTradeNight(""); } }));
+      done.appendChild(actionButton({ kind: "choice", label: "Read your morning report", key: nextKey(), onClick: showResolution }));
+      done.appendChild(actionButton({ kind: "choice", label: "Set out on another night", key: nextKey(), onClick: function () { startTradeNight(""); } }));
       container.appendChild(done);
       return;
     }
 
+    // Gold stays at the top. Optional chats are folded so they never bury a trade.
+    const gold = renderGoldGroup(nextKey);
+    if (gold) container.appendChild(gold);
+    else container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
     const here = locationActions().filter(function (a) { return a.kind !== "system"; });
-    if (here.length) {
-      const local = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: DATA.world.locations[state.location].short })]);
-      here.forEach(function (action) {
+    [
+      { label: "Explore & follow leads", match: function (a) { return !a.casual && a.kind !== "order"; } },
+      { label: "Food, tea & stories", match: function (a) { return a.kind === "order"; } },
+      { label: "People · Free conversation", match: function (a) { return !!a.casual; }, folded: true }
+    ].forEach(function (group) {
+      const available = here.filter(group.match);
+      if (!available.length) return;
+      const local = el(group.folded ? "details" : "div", { class: "action-group" + (group.folded ? " casual-group" : "") });
+      local.appendChild(el(group.folded ? "summary" : "p", { class: "action-group-label", text: group.label }));
+      available.forEach(function (action) {
         local.appendChild(actionButton({
-          kind: action.kind, label: action.label, key: nextKey(),
-          disabled: (action.cost || 0) > state.credits,
+          kind: action.casual ? "chat" : action.kind, label: action.label,
+          key: group.folded ? null : nextKey(), disabled: (action.cost || 0) > state.credits,
           costs: tradeBadges(actionMinutes(action), action.fuel, action.cost),
           onClick: function () { performAction(action.id); }
         }));
       });
+      if (group.folded) {
+        local.open = !!transient.chatOpen;
+        local.addEventListener("toggle", function () { transient.chatOpen = local.open; updateActionsCue(); });
+      }
       container.appendChild(local);
-    }
-
-    const gold = renderGoldGroup(nextKey);
-    if (gold) container.appendChild(gold);
+    });
 
     const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
     const ferryActions = locationActions().filter(function (a) { return a.kind === "system"; }).concat(sys);
@@ -1720,7 +1779,7 @@
     const held = goldHeld();
     const avg = MARKET.lots.average(state.gold);
     const group = el("div", { class: "action-group gold-group", id: "gold-group" }, [
-      el("p", { class: "action-group-label", text: "Gold · " + q.dealer.name }),
+      el("p", { class: "action-group-label", text: "Gold exchange · " + q.dealer.name }),
       el("p", { class: "gold-quote" }, q.buyOnly
         ? ["The desk pays ", el("b", { text: String(q.sell) }), " cr a gram"]
         : ["Buy ", el("b", { text: String(q.buy) }), " · Sell ", el("b", { text: String(q.sell) }), " cr a gram"]),
@@ -1732,6 +1791,10 @@
       button.id = id;
       return button;
     }
+    group.appendChild(el("p", { class: "market-help", text: "Buy: you pay · Sell: you receive · Trades take no time" }));
+    group.appendChild(el("p", { class: "market-stock", text: q.buyOnly
+      ? "Desk can still buy " + grams(q.canSell) + " from you tonight"
+      : "Available here: " + grams(q.canBuy) + " · Keep credits for food and fuel" }));
     // a dealer running low, sold out, or with his fill of your gold says so (4.0.1)
     if (q.buyOnly && q.dealer.limitNote) group.appendChild(el("p", { class: "gold-hold", text: q.canSell <= 0 ? q.dealer.full : q.dealer.limitNote }));
     if (!q.buyOnly && q.canBuy < 1 && q.dealer.soldOut) group.appendChild(el("p", { class: "gold-hold", text: q.dealer.soldOut }));
@@ -1756,6 +1819,45 @@
     });
   }
 
+  // A compact RPG dialogue box, with full-text reading always available. Paging is
+  // presentation only: no timers, typewriter delays, extra costs or duplicate actions.
+  function renderConversation(container, items, key) {
+    if (!items.some(function (item) { return item.type === "speech"; })) { renderLines(container, items); return; }
+    const pages = [];
+    let page = [];
+    items.forEach(function (item) {
+      if (page.some(function (line) { return line.type === "speech"; }) && item.type === "speech") {
+        pages.push(page); page = [];
+      }
+      page.push(item);
+    });
+    if (page.length) pages.push(page);
+    if (!transient.dialogue || transient.dialogue.key !== key) transient.dialogue = { key: key, page: 0, all: false };
+    const view = transient.dialogue;
+    const box = el("section", { class: "dialogue-box", "aria-label": "Conversation" });
+    function draw(focusId) {
+      box.innerHTML = "";
+      box.appendChild(el("p", { class: "dialogue-kicker", text: "Harbour voices · Take your time" }));
+      renderLines(box, view.all ? items : pages[Math.min(view.page, pages.length - 1)]);
+      if (pages.length > 1) {
+        const controls = el("div", { class: "dialogue-controls" });
+        if (!view.all) {
+          controls.appendChild(el("button", { id: "dialogue-back", class: "btn btn-small", type: "button", disabled: view.page === 0,
+            onclick: function () { view.page--; draw(view.page === 0 ? "dialogue-next" : "dialogue-back"); } }, "Previous"));
+          controls.appendChild(el("span", { class: "dialogue-progress", text: (view.page + 1) + " / " + pages.length }));
+          if (view.page < pages.length - 1) controls.appendChild(el("button", { id: "dialogue-next", class: "btn btn-small btn-primary", type: "button",
+            onclick: function () { view.page++; draw(view.page < pages.length - 1 ? "dialogue-next" : "dialogue-all"); } }, "Next →"));
+          else controls.appendChild(el("span", { class: "dialogue-end", text: "Your move, skipper." }));
+        }
+        controls.appendChild(el("button", { id: "dialogue-all", class: "btn btn-small", type: "button",
+          "aria-pressed": view.all ? "true" : "false", onclick: function () { view.all = !view.all; draw("dialogue-all"); } }, view.all ? "One line at a time" : "Read full exchange"));
+        box.appendChild(controls);
+      }
+      if (focusId) { const button = box.querySelector("#" + focusId); if (button) button.focus({ preventScroll: true }); }
+    }
+    draw(); container.appendChild(box);
+  }
+
   function speechNode(item) {
     const who = DATA.world.characters[item.who] || { name: item.who, color: "#8fb6b5" };
     const wrapper = el("div", { class: "speech" + (who.portrait ? "" : " no-portrait"), style: "--speaker:" + who.color });
@@ -1766,6 +1868,7 @@
     }
     wrapper.appendChild(el("div", { class: "speech-text" }, [
       el("span", { class: "speaker", text: who.name }),
+      who.role ? el("span", { class: "speaker-role", text: who.role }) : null,
       el("p", { text: item.text })
     ]));
     return wrapper;
@@ -1817,7 +1920,8 @@
       return;
     }
 
-    const here = locationActions().filter(function (a) { return a.kind !== "system"; });
+    const here = locationActions().filter(function (a) { return a.kind !== "system" && !a.casual; });
+    const chats = casualActions();
     const sys = systemActions();
     const confront = sys.filter(function (a) { return a.kind === "confront"; });
     const ferryActions = locationActions().filter(function (a) { return a.kind === "system"; })
@@ -1834,6 +1938,16 @@
         }));
       });
       container.appendChild(local);
+    }
+
+    if (chats.length) {
+      const casual = el("details", { class: "action-group casual-group" }, [el("summary", { class: "action-group-label", text: "People · Free conversation" })]);
+      casual.open = !!transient.chatOpen;
+      chats.forEach(function (action) {
+        casual.appendChild(actionButton({ kind: "chat", label: action.label, costs: costBadges(0), onClick: function () { performAction(action.id); } }));
+      });
+      casual.addEventListener("toggle", function () { transient.chatOpen = casual.open; updateActionsCue(); });
+      container.appendChild(casual);
     }
 
     // On phones the chips above the sheet are the travel buttons, so a Ferry group holding nothing
@@ -1972,7 +2086,7 @@
     const body = dom.nbBody;
     body.innerHTML = "";
 
-    const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Heard (" + state.rumors.length + ")" })]);
+    const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Rumours & discoveries (" + state.rumors.length + ")" })]);
     if (!state.rumors.length) {
       heardSection.appendChild(el("p", { class: "nb-empty", text: "Nothing written down yet. What people tell you goes here, in their words, with who said it and when. Whether it's true is up to you." }));
     }
@@ -2014,7 +2128,7 @@
         if (!s) return;
         list.appendChild(el("li", { text: DATA.world.locations[loc].short + " · read at " + formatClock(s.at) + " · " + (s.buy ? "buy " + s.buy + " / " : "") + "sell " + s.sell }));
       });
-      body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Boards you have read" }), list]));
+      body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Market boards · Last seen" }), list]));
     }
 
     const met = Object.keys(TRADE.people).filter(function (id) {
@@ -2175,7 +2289,7 @@
     });
     dom.modal.hidden = false;
     // The card scrolls, and the action buttons are its last child. Focusing a button without
-    // preventScroll makes the browser reveal it, which opened long panels ("How to play") at the end.
+    // preventScroll makes the browser reveal it, which opened long panels ("Captain’s guide") at the end.
     const first = dom.modalActions.querySelector("button");
     if (first) first.focus({ preventScroll: true });
     if (dom.modalCard) dom.modalCard.scrollTop = 0;   // after focus, for engines without preventScroll
@@ -2784,7 +2898,7 @@
     setMode("play");
     positionFerry(state.location, null, false);
     render();
-    toast("Shift started · seed " + seed);
+    toast("Adventure begun · seed " + seed);
   }
 
   function continueGame(saved) {
@@ -2809,7 +2923,7 @@
     const valid = saved && !saved.invalid ? saved : null;
     dom.btnContinue.hidden = !valid;
     if (valid) {
-      dom.btnContinue.textContent = "Continue shift · " + formatClock(valid.clock) + (valid.resolved ? " · closed" : "");
+      dom.btnContinue.textContent = "Continue your journey · " + formatClock(valid.clock) + (valid.resolved ? " · closed" : "");
     }
     if (!storage.ok) {
       dom.storageNote.textContent = "Saving is unavailable here (private mode or blocked storage). You can still play; progress won't survive a reload.";
@@ -2931,7 +3045,7 @@
   function openMenu() {
     const list = el("div", { class: "menu-list" });
     if (state && transient.mode === "play") {
-      list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { closeModal(); openNotebook(); } }, ["Notebook", el("span", { class: "val", text: isTrade() ? state.rumors.length + " notes" : state.clues.length + " clues" })]));
+      list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { closeModal(); openNotebook(); } }, ["Journal", el("span", { class: "val", text: isTrade() ? state.rumors.length + " notes" : state.clues.length + " clues" })]));
     }
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleStation(); openMenu(); } }, ["Radio", el("span", { class: "val", text: stationById(settings.station).name })]));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleMotion(); openMenu(); } }, ["Motion", el("span", { class: "val", text: motionLabel() })]));
@@ -2944,7 +3058,7 @@
         ? "The notebook says which threads your evidence settles and which lines of the night you can fill in. Turn hints off for a night where you have to work that out yourself."
         : "Nothing in the notebook says what you have settled or which lines are ready; the liar at the counter still tells you what is missing. Turn hints on to see the marks again." }));
     }
-    list.appendChild(el("button", { class: "btn", type: "button", onclick: openHelp }, ["How to play"]));
+    list.appendChild(el("button", { class: "btn", type: "button", onclick: openHelp }, ["Captain’s guide"]));
     if (state) {
       list.appendChild(el("div", { class: "muted", text: "Case seed: " + state.seed + " — the same seed always gives the same case." }));
       if (transient.mode === "play") list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { showTitle(); } }, ["Return to title", el("span", { class: "val", text: "keeps save" })]));
@@ -2964,18 +3078,20 @@
     const touch = touchFirst();
     const items = [
       "Gold is money in the Basin, kept when the banks fail, and it is also what the wet machines run on: contacts, sensors, radios, drones. Every scale chalks two numbers a gram: what you pay to buy, and what you get when you sell.",
-      "Prices move when the harbour does: boats come in, desks open, stories get round. Nobody will tell you which way.",
+      "Your goal is to grow the value of your purse and gold before you finish the night. Prices respond to boats, buyers and news. Compare leads, check the quays, and choose your moment.",
+      "Chat with people for free; repeated visits reveal different casual lines. Food and tea still unlock the important meal conversations. Casual chat never spends time or buys trust.",
+      "Use Next to read a conversation at your pace, or Read full exchange to see it all. Reading never moves the clock.",
       "Food and tea cost a few credits and some time. Sitting down is how you hear things; leaving at once saves both, and you may miss something.",
       "What you hear goes into the notebook" + (touch ? "" : " (N)") + " as it was said, with who said it, where and when. Whether it's true is up to you. Going to look for yourself costs fuel and time, and the news may be old by the time you get there.",
       "Scales are at Kurage 33 and Landing 3. Trading takes no time. " + (touch ? "Tap" : "Click") + " a ringed thing in the picture to do what the matching choice does.",
       "Crossings cost fuel and minutes; refuel at Landing 3. Out of fuel elsewhere, radio the harbour tug.",
       "From " + TRADE.meta.turnInFrom + " you can turn in aboard the Tern. The morning wire says what really happened, and Mei's scale says what your night was worth.",
-      "Every night is a seed; the same seed is the same night. The four investigations from before are under Case files on the title screen.",
+      "Every night is a seed; the same seed is the same night. Four mystery adventures await under Harbour adventures on the title screen.",
       "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
     openModal({
-      title: "How to play",
+      title: "Captain’s guide",
       body: [
         el("p", { text: "You run the night ferry Tern, with a little gold, a few hundred credits and most of a tank. The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross." }),
         el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
@@ -2988,7 +3104,7 @@
     if (isTrade() && transient.mode === "play") { openTradeHelp(); return; }
     const touch = touchFirst();
     const items = [
-      "Talking is free. Searching and crossing cost minutes; only labelled actions move the clock. Reading never does.",
+      "Talking and casual chats are free. Repeated chats offer different lines. Searching and crossing cost minutes; reading with Next or Read full exchange never does.",
       "Clues go into the notebook" + (touch ? "" : " (N)") + " with their exact wording.",
       "Somebody tonight is lying. When you can prove it, go back to them and put up to three pieces of evidence down: first the proofs that break the story, then the reason, and the one clue that supports it.",
       "Things you can act on are marked in the picture with a dashed ring and a label: " + (touch ? "tap" : "click") + " one and it does what the matching choice under the story does, for the same cost. \"Show … something from the notebook\" lets you hold a clue up to a witness and hear what they make of it.",
@@ -2997,12 +3113,12 @@
       DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
       "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
       "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor.",
-      "Every case is a seed, and the same seed always opens the same night. Case files on the title screen list them all, with the endings you have found.",
+      "Every case is a seed, and the same seed always opens the same night. Harbour adventures on the title screen lists the mysteries and endings you have found.",
       "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
     openModal({
-      title: "How to play",
+      title: "Captain’s guide",
       body: [
         el("p", { text: touch
           ? "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Tap one of the four buttons under it to cross the Basin. What you can do where you are is listed under the story; every crossing and search shows its cost before you commit."
@@ -3038,19 +3154,19 @@
       const seed = (variant.seeds || [])[0];             // validateAll() insists every case has one
       const found = endingsFound(variant.id);
       const total = variant.finalChoices.length;
-      const status = found.length === 0 ? "not yet closed"
+      const status = found.length === 0 ? "waiting to be discovered"
         : found.length + " of " + total + " endings · " + found.map(function (id) { return variant.endings[id].title; }).join(", ");
       list.appendChild(el("article", { class: "case-file" + (found.length ? " solved" : "") + (found.length === total ? " complete" : "") }, [
-        el("p", { class: "case-file-no", text: "Case file " + (i < 9 ? "0" : "") + (i + 1) + " · seed " + seed }),
-        el("h3", { class: "case-file-title", text: found.length ? variant.title : "Unsolved" }),
+        el("p", { class: "case-file-no", text: "Adventure " + (i < 9 ? "0" : "") + (i + 1) + " · seed " + seed }),
+        el("h3", { class: "case-file-title", text: found.length ? variant.title : "An untold story" }),
         found.length ? el("p", { class: "case-file-tag", text: variant.tagline }) : null,
         el("p", { class: "case-file-status", text: status }),
         el("button", { class: "btn btn-small", type: "button", "aria-label": (found.length ? "Play case file " : "Take case file ") + (i + 1) + ", seed " + seed,
-          onclick: function () { closeModal(); requestNewShift(seed); } }, found.length ? "Play it again" : "Take this case")
+          onclick: function () { closeModal(); requestNewShift(seed); } }, found.length ? "Play it again" : "Begin this adventure")
       ]));
     });
     openModal({
-      title: "Case files",
+      title: "Harbour adventures",
       body: [
         el("p", { class: "muted", text: "Every night in the Basin is a seed. These are the ones on file; any other word you type as a seed opens one of them at random, and always the same one." }),
         list
@@ -3293,3 +3409,4 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
+

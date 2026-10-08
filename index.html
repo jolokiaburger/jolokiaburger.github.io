@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#07051a">
-<meta name="description" content="Neon Tides — a night-ferry noir in a rain-soaked neon harbour: trade gold on what you hear over noodles and tea. Runs offline from a single folder.">
+<meta name="description" content="Neon Tides — a lantern-lit harbour adventure. Meet colourful characters, follow rumours and trade gold across Bellwater Basin.">
 <title>Neon Tides</title>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -25,7 +25,7 @@
     </div>
     <div class="topbar-actions">
       <button id="btn-notebook" class="btn btn-ghost" type="button" aria-controls="notebook" aria-expanded="false" title="Open the notebook (N)">
-        Notebook <span class="badge" id="notebook-count" aria-label="clues">0</span>
+        Journal <span class="badge" id="notebook-count" aria-label="clues">0</span>
       </button>
       <button id="btn-menu" class="btn btn-ghost" type="button" aria-haspopup="dialog" title="Menu (M)">Menu</button>
     </div>
@@ -123,7 +123,7 @@
     <stop offset="0.55" stop-color="#7ff2ff" stop-opacity="0.75"/>
     <stop offset="1" stop-color="#12b7cf" stop-opacity="0.5"/>
   </radialGradient>
-  <!-- wild Bell Reef stock glows greener than the farmed cyan (Old Lam's rule) -->
+  <!-- wild Bell Reef stock glows greener than the farmed cyan (Captain Lam's rule) -->
   <radialGradient id="jellyGlowWild">
     <stop offset="0" stop-color="#b6ffd6" stop-opacity="0.6"/>
     <stop offset="0.5" stop-color="#5dffa8" stop-opacity="0.2"/>
@@ -422,7 +422,7 @@
       <polygon class="beam" points="0,0 560,-46 560,46" fill="url(#beamGrad)"/>
     </g>
   </g>
-  <!-- The Quiet Debt: the Grey Kittiwake taking on ice at the outer mole until she sails. Her hull is
+  <!-- A Promise Beyond the Tide: the Grey Kittiwake taking on ice at the outer mole until she sails. Her hull is
        below the horizon behind Landing 3; what shows over the shelter roof is masts and work lights. -->
   <g id="kittiwake" class="case-art">
     <ellipse cx="170" cy="372" rx="78" ry="28" fill="url(#coldGlow)" opacity="0.5"/>
@@ -583,7 +583,7 @@
     <g class="jelly" style="--d:-5.6s" transform="translate(620 636) scale(0.45)" opacity="0.7"><use href="#sym-jelly"/></g>
     <g class="jelly" style="--d:-3.3s" transform="translate(1080 648) scale(0.4)" opacity="0.65"><use href="#sym-jelly"/></g>
     <g class="jelly" style="--d:-6.7s" transform="translate(320 630) scale(0.38)" opacity="0.6"><use href="#sym-jelly"/></g>
-    <!-- The Ebb: one wild straggler from Crate 17, caught in the eddy under Pier 9 -->
+    <!-- Where the Lanterns Go: one wild straggler from Crate 17, caught in the eddy under Pier 9 -->
     <g id="wild-jelly" class="case-art jelly" style="--d:-3s" transform="translate(1238 656) scale(0.56)"><use href="#sym-jelly-wild"/></g>
   </g>
   <!-- Deep water below the frame: older, slower jellies, only seen when a tall window letterboxes the picture. -->
@@ -757,7 +757,7 @@
     <rect x="519" y="512" width="6" height="10" rx="1" fill="#3df5ff"/>
     <rect x="519" y="515" width="6" height="2" fill="#ff2fa8"/>
   </g>
-  <!-- Old Lam on an upturned crate at the water's edge, thermos beside him -->
+  <!-- Captain Lam on an upturned crate at the water's edge, thermos beside him -->
   <g id="lam">
     <rect x="386" y="524" width="16" height="16" fill="#2a3560"/>
     <path d="M388 526 l 2 -18 q 7 -6 14 0 l 2 18 z" fill="#3a3060"/>
@@ -1059,11 +1059,11 @@
     <circle cx="1172" cy="486" r="9" fill="#2a2a2a"/>
     <path d="M1164 486 q 8 -16 16 0" fill="#c7d3e6" opacity="0.9"/>
     <rect x="1184" y="512" width="6" height="14" fill="#8e9ab8"/>
-    <!-- a clinic bandage on the hand round the thermos (The Ebb only) -->
+    <!-- a clinic bandage on the hand round the thermos (Where the Lanterns Go only) -->
     <rect id="matte-bandage" class="case-art" x="1181" y="522" width="10" height="5" rx="1.5" fill="#f6e9d8"/>
     <g class="frost" opacity="0.5"><ellipse class="steam" style="--d:-1s" cx="1186" cy="484" rx="5" ry="3" fill="#dffbff"/></g>
   </g>
-  <!-- numbered cargo. Crate 08 rides on top of 17; when 17 is gone (The Ebb), 08 drops to the deck -->
+  <!-- numbered cargo. Crate 08 rides on top of 17; when 17 is gone (Where the Lanterns Go), 08 drops to the deck -->
   <g id="cargo">
     <g id="crate-17">
       <g transform="translate(1340 498)"><use href="#sym-crate"/></g>
@@ -1077,7 +1077,7 @@
       <text x="1375" y="490" class="stencil" font-size="12" text-anchor="middle">08</text>
       <rect x="1346" y="470" width="40" height="5" fill="#3df5ff" opacity="0.8"/>
     </g>
-    <!-- six tank lids, wiped dry and stacked square by the slip (The Ebb only) -->
+    <!-- six tank lids, wiped dry and stacked square by the slip (Where the Lanterns Go only) -->
     <g id="tank-lids" class="case-art">
       <rect x="1333" y="537" width="17" height="2.4" fill="#8fd3ae"/><rect x="1333" y="534" width="17" height="2.4" fill="#b6e6cb"/>
       <rect x="1333" y="531" width="17" height="2.4" fill="#8fd3ae"/><rect x="1333" y="528" width="17" height="2.4" fill="#b6e6cb"/>
@@ -1262,13 +1262,13 @@
       <!-- Title overlay (shown while data-mode="title") -->
       <div id="title-overlay" class="title-overlay">
         <div class="title-card">
-          <p class="title-kicker">A night-ferry noir</p>
+          <p class="title-kicker">A harbour full of adventure</p>
           <h1 class="title-neon"><span class="t1">NEON</span><span class="t2">TIDES</span></h1>
-          <p class="title-tag">Rain on black water. Gold in every pocket. Everybody heard something.</p>
+          <p class="title-tag">Follow the lanterns. Find your people. Turn a good story into a golden opportunity.</p>
           <div class="title-actions">
-            <button id="btn-continue" class="btn btn-primary" type="button" hidden>Continue shift</button>
-            <button id="btn-new" class="btn btn-primary" type="button">Start night shift</button>
-            <button id="btn-cases" class="btn btn-title" type="button">Case files</button>
+            <button id="btn-continue" class="btn btn-primary" type="button" hidden>Continue your journey</button>
+            <button id="btn-new" class="btn btn-primary" type="button">Begin your trading adventure</button>
+            <button id="btn-cases" class="btn btn-title" type="button">Harbour adventures</button>
           </div>
         </div>
         <div class="title-foot">
@@ -1276,7 +1276,7 @@
             <summary>Seed (optional)</summary>
             <label class="seed-label" for="seed-input">Night seed</label>
             <input id="seed-input" class="seed-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="40" placeholder="leave blank for a random night">
-            <p class="hint">The same seed always gives the same night. <em>Case files</em> holds the four investigations, each with its own seed, starting with <code>high-tide</code>.</p>
+            <p class="hint">The same seed always gives the same night. <em>Harbour adventures</em> holds the four investigations, each with its own seed, starting with <code>high-tide</code>.</p>
           </details>
           <p id="storage-note" class="storage-note" role="status"></p>
         </div>
@@ -1291,7 +1291,7 @@
           <dl class="res-stats" id="res-stats"></dl>
           <div class="res-actions">
             <button id="btn-res-continue" class="btn btn-primary" type="button">Continue</button>
-            <button id="btn-res-new" class="btn" type="button">New shift…</button>
+            <button id="btn-res-new" class="btn" type="button">New adventure…</button>
           </div>
         </div>
       </div>
@@ -1325,7 +1325,7 @@
         </button>
       </div>
       <div class="inst inst-objective">
-        <span class="inst-label">Objective</span>
+        <span class="inst-label">Next lead</span>
         <span class="inst-objective-text" id="inst-objective">—</span>
       </div>
     </div>
@@ -1355,7 +1355,7 @@
   <aside id="notebook" class="notebook" role="dialog" aria-modal="true" aria-labelledby="notebook-title" hidden>
     <div class="notebook-inner">
       <header class="notebook-head">
-        <h2 id="notebook-title">Notebook</h2>
+        <h2 id="notebook-title">Journal</h2>
         <button id="btn-notebook-close" class="btn btn-small" type="button" aria-label="Close notebook">Close</button>
       </header>
       <div class="notebook-body" id="notebook-body"></div>
@@ -1382,6 +1382,8 @@
 <script src="cases.js"></script>
 <script src="trade.js"></script>
 <script src="market.js"></script>
+<script src="dialogue.js"></script>
 <script src="game.js"></script>
 </body>
 </html>
+

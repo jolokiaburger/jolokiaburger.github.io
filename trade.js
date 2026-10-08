@@ -67,7 +67,7 @@ window.NEON_TIDES_TRADE = (function () {
 
   var meta = {
     id: "two-rumours",
-    title: "Two Rumours",
+    title: "Gold on the Night Tide",
     startClock: "23:40",
     turnInFrom: "01:30",     // the night can be ended from here on ("Turn in aboard the Tern")
     dawnClock: "06:00",      // the night ends by itself here (4.0.1); the morning card says so
@@ -183,8 +183,8 @@ window.NEON_TIDES_TRADE = (function () {
   ];
 
   var characters = {
-    hollis: { name: "Hollis",       role: "Salvage diver, Long Patience",       color: "#7fd1ff" },
-    oduya:  { name: "Oduya",        role: "Broker, Landing 3 exchange hatch",   color: "#d9b071" }
+    hollis: { name: "Hollis",       role: "Treasure diver · Long Patience",       color: "#7fd1ff" },
+    oduya:  { name: "Oduya",        role: "Keeper of the gold hatch",   color: "#d9b071" }
   };
 
   /* ---- rumours: the notebook's wording is `note` ------------------------------ */
@@ -278,13 +278,13 @@ window.NEON_TIDES_TRADE = (function () {
     },
     r_matte_lit: {
       topic: "frostline", source: "matte", origin: "pier",
-      note: "Garrow has had the buying desk lit since midnight. \"Opens at one. Twenty-four karat, assayed. Don't quote me.\"",
+      note: "Garrow has had the buying desk lit since midnight. \"Opens at one. Twenty-four karat, assayed. Between us, skipper.\"",
       truth: { order: "true", both: "true" }, reliability: 0.85,
       relatedEvent: "frostline_order", affected: "pier", effect: "demand", expires: "01:30"
     },
     r_matte_dark: {
       topic: "frostline", source: "matte", origin: "pier",
-      note: "The desk was lit last night. Tonight Garrow came down at eleven, turned the card in the window face down, and went home. \"Don't quote me.\"",
+      note: "The desk was lit last night. Tonight Garrow came down at eleven, turned the card in the window face down, and went home. \"Between us, skipper.\"",
       truth: { vault: "true" }, reliability: 0.85,
       relatedEvent: "order_pulled", affected: "pier", effect: "demand", expires: "06:00"
     },
@@ -325,15 +325,15 @@ window.NEON_TIDES_TRADE = (function () {
   var people = {
     mei:    [ { text: "Auntie Mei. Runs Kurage 33 and the brass scale behind the counter. Hears everything first, and tells it bigger." },
               { if: { rel: { mei: 2 } }, text: "She has started putting your bowl down before you order." } ],
-    teo:    [ { text: "Teo. Co-op dispatcher. She routes the couriers, so the couriers' news routes through her. Says less than she knows." },
+    teo:    [ { text: "Teo. Courier captain. She routes the couriers, so the couriers' news routes through her. Says less than she knows." },
               { if: { rel: { teo: 1 } }, text: "She took the headset off one ear for you." },
               { if: { rel: { teo: 2 } }, text: "She told you a number she didn't have to." } ],
     hollis: [ { text: "Hollis, a salvage diver off the Long Patience. Loud when he's winning, louder when he isn't." } ],
     oduya:  [ { text: "Oduya, the broker at the Landing 3 exchange hatch. Never takes his gloves off. Buys low for a living." } ],
-    priya:  [ { text: "Priya Holm, the night clerk at Landing 3. Logs every hull in the Basin. Times, not faces." } ],
-    matte:  [ { text: "Matte Ruud, night watch at Frostline's gate. Notices everything, repeats almost nothing." } ],
-    lam:    [ { text: "Old Lam, retired tug engineer. Knows what the sea does to metal, and what Frostline did last time." } ],
-    dex:    [ { text: "Dex Amani, a co-op rider waiting for the last train. Carries Frostline's sealed cases for a living." } ]
+    priya:  [ { text: "Priya Gale, the night clerk at Landing 3. Logs every hull in the Basin. Times, not faces." } ],
+    matte:  [ { text: "Matte Rook, night watch at Frostline's gate. Notices everything, repeats almost nothing." } ],
+    lam:    [ { text: "Captain Lam, retired tug engineer. Knows what the sea does to metal, and what Frostline did last time." } ],
+    dex:    [ { text: "Dex Swift, a co-op rider waiting for the last train. Carries Frostline's sealed cases for a living." } ]
   };
 
   var things = { "gold-board": "Mei's gold board", "booth": "Exchange hatch", "timetable-board": "Priya's log", "boarding-lights": "The tarp", "vending": "Soy-milk stall" };
@@ -342,44 +342,44 @@ window.NEON_TIDES_TRADE = (function () {
   var scenes = {
     bar: {
       first: [
-        "You wake in the Tern's wheelhouse with rain drumming on the roof and the engine ticking as it cools. Kurage 33's lanterns lie on the black water like dropped coins.",
-        "Under the awning Auntie Mei is skimming the stock pot. Teo sits on the corner stool with her headset on, saying \"copy\" to somebody who isn't here.",
-        "On the quay, beside the stools, Mei's gold board: two numbers in chalk, what she'll sell you a gram for and what she'll give you for one. She rubs them out and writes them again whenever the harbour changes its mind.",
-        { notice: "You have a little gold, a few hundred credits, and most of a tank. Nobody is going to tell you what to do with them." }
+        "Rain taps a lively rhythm on the Tern's roof. Beyond the wheelhouse, Kurage 33's lanterns scatter gold across the harbour. Your next adventure starts with a warm bowl and a good question.",
+        "Mei waves you towards the counter. Teo lifts one ear of her headset: couriers are calling from every quay, and tonight's news is moving faster than the ferries.",
+        "Mei's brass scale gleams beside a freshly chalked board. BUY is what you pay per gram; SELL is what you receive. Somewhere across these four quays, a good story could become a good trade.",
+        { notice: "Your aim: finish the night worth more than you started. Trade gold, compare stories and investigate promising leads. Food and tea open conversations; friendly chat is free. You choose the route." }
       ],
       again: [
-        { if: { maxClock: "01:20" }, text: "Kurage 33 again: broth, chilli oil, rain on the awning. Teo is still on her corner stool, still on the headset." },
-        { if: { minClock: "01:20" }, text: "Kurage 33 again: broth, chilli oil, rain on the awning. Teo's stool is empty, her headset cord coiled on the counter." },
-        { if: { minClock: "00:45", maxClock: "01:40" }, text: "A salvage diver sits by the jellyfish tank in a drysuit peeled to the waist, eating like the sea owes him money." },
-        "Mei glances at her gold board before she glances at you."
+        { if: { maxClock: "01:20" }, text: "Kurage 33 welcomes you back with steam and golden light. Teo is on the corner stool, keeping the couriers moving." },
+        { if: { minClock: "01:20" }, text: "Mei raises a hand as you return. Teo has left her corner stool; the headset cord is neatly coiled beside her cup." },
+        { if: { minClock: "00:45", maxClock: "01:40" }, text: "A grinning diver has claimed a stool by the jellyfish tank. Judging by that appetite, he's brought back a story worth hearing." },
+        "Mei dusts chalk from her fingers. \"Back with a story, skipper? Or a bargain?\""
       ]
     },
     landing: {
       first: [
-        { if: { maxClock: "00:20" }, text: "Landing 3 is five bulbs on a wire and Priya's booth. The salvage berth beside it is empty; a rope trails into the water as if somebody left in a hurry." },
-        { if: { minClock: "00:20" }, text: "The salvage boat Long Patience is tied up at Landing 3, still streaming seawater. Divers in drysuits stand around a tarp under the boarding lights, and the lamp over the exchange hatch is on." },
-        "The exchange hatch is a steel window beside the booth. The broker behind it, Oduya, wears his gloves indoors and chalks his prices on the steel."
+        { if: { maxClock: "00:20" }, text: "Boarding lights shine above Priya's booth. The salvage berth is empty for now. You follow a loose rope with your eyes, out towards the breakwater." },
+        { if: { minClock: "00:20" }, text: "The Long Patience is back! Divers crowd a tarp beneath the boarding lights, water streaming from their suits. Across the quay, the gold hatch glows invitingly." },
+        "Beside Priya's booth, Oduya chalks two prices above his exchange hatch. He spots you looking and gives a practised little bow."
       ],
       again: [
-        { if: { maxClock: "00:20" }, text: "Landing 3. The salvage berth is still empty. Priya is still doing her crossword." },
-        { if: { minClock: "00:20" }, text: "Landing 3. The Long Patience drips at the salvage berth; the tarp under the boarding lights is still the most interesting thing in the Basin." },
-        "Oduya's gloves rest on the sill of the hatch, waiting for somebody's gold."
+        { if: { maxClock: "00:20" }, text: "Landing 3's lights greet you again. The salvage berth is still empty; Priya keeps one eye on the water and one on her crossword." },
+        { if: { minClock: "00:20" }, text: "The Long Patience rocks beside the quay. Under the boarding lights, the divers' haul is drawing curious glances." },
+        "Oduya straightens his price board. \"Welcome back, captain. Shall we see what the night's worth?\""
       ]
     },
     metro: {
       first: [
-        "Under the Line 9 viaduct the lanterns swing in the wind off the water. The night shift waits for the last train: a rider on the bench with a co-op bag, Old Lam by the edge of the quay with his feet over the water.",
-        "A stall under the stairs sells hot soy milk in paper cups. There's no scale here; nobody on this quay has anything to sell but time."
+        "Under the Line 9 viaduct the lanterns swing in the wind off the water. The night shift waits for the last train: a rider on the bench with a co-op bag, Captain Lam by the edge of the quay with his feet over the water.",
+        "Sweet soy milk steams beneath the stairs. There is no gold dealer here, but the people of Metro Quay know routes and stories no price board can show you."
       ],
       again: [
         { if: { maxClock: "01:40" }, text: "The Metro Quay. The last train hasn't gone yet; the rider is still on the bench." },
         { if: { minClock: "01:40" }, text: "The Metro Quay. The terminus is dark; the last train has gone, and the rider with it." },
-        "Old Lam hasn't moved."
+        "Captain Lam makes a little room beside him. Some sea stories are better with company."
       ]
     },
     pier: {
       first: [
-        "Pier 9 comes up white and humming. The floodlight makes the rain look like static. Matte Ruud stands at the gate in a Frostline parka.",
+        "Pier 9 rises through the silver rain. Behind its bright windows, another piece of the harbour's story is waiting. Matte Rook stands at the gate in a Frostline parka.",
         { if: { truth: ["order", "both"], maxClock: "01:00" }, text: "The dock office window is lit. A hand-lettered card is taped inside it: BUYING DESK · 01:00 · 24K ASSAYED ONLY." },
         { if: { truth: ["order", "both"], minClock: "01:00" }, text: "The dock office window is open, and a queue stands in the rain in front of it. A hand-lettered card: BUYING DESK · 24K ASSAYED ONLY. Frostline is paying." },
         { if: { truth: ["vault"] }, text: "The dock office is dark. A card in the window has been turned face down." }
@@ -388,7 +388,7 @@ window.NEON_TIDES_TRADE = (function () {
         { if: { truth: ["order", "both"], maxClock: "01:00" }, text: "Pier 9. The dock office window is lit; the card still says one o'clock." },
         { if: { truth: ["order", "both"], minClock: "01:00" }, text: "Pier 9. The queue at the dock office window is longer than it was. Nobody in it is talking." },
         { if: { truth: ["vault"] }, text: "Pier 9. The dock office is still dark. Matte is still at the gate." },
-        { if: { minClock: "01:30" }, text: "Teo is here, hood up, watching the dock office as if it owes her a courier fee." }
+        { if: { minClock: "01:30" }, text: "Teo stands beneath her hood by the office. She catches your eye and beckons you over." }
       ]
     }
   };
@@ -397,19 +397,19 @@ window.NEON_TIDES_TRADE = (function () {
   var actions = {
     bar: [
       {
-        id: "bar_noodles", thing: "mei", kind: "order", sitting: "noodles", label: "Order a thirty-three", cost: 14, minutes: 15,
+        id: "bar_noodles", thing: "mei", kind: "order", sitting: "noodles", label: "Share a bowl · No. 33 ramen", cost: 14, minutes: 15,
         sets: ["ate"], rel: { mei: 1 },
         lines: [
           { if: { notFlag: ["ate"] }, lines: [
-            { who: "mei", text: "Which number?" },
-            { who: "mei", text: "Thirty-three. You look like a thirty-three." },
+            { who: "mei", text: "Hungry for adventure? What'll it be?" },
+            { who: "mei", text: "The thirty-three! My best bowl for a night with possibilities." },
             "Pork-bone broth, a slick of chilli oil, an egg cut so the yolk just holds. Mei sets it down without asking how you are; the bowl is how she asks."
           ] },
           { if: { flag: ["ate"] }, text: "Another thirty-three. Mei doesn't ask. The bowl arrives with the egg cut the way you like it, which you didn't know she'd noticed." }
         ]
       },
       {
-        id: "bar_tea", thing: "tank", kind: "order", sitting: "tea", label: "Milk tea, and stay a while", cost: 6, minutes: 20,
+        id: "bar_tea", thing: "tank", kind: "order", sitting: "tea", label: "Milk tea & harbour stories", cost: 6, minutes: 20,
         sets: ["sat"], rel: { mei: 1 },
         lines: [
           { if: { notFlag: ["sat"] }, text: "Milk tea in a glass too hot to hold. You take the stool by the jellyfish tank and let the rain decide how long you stay." },
@@ -417,33 +417,33 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       },
       {
-        id: "bar_teo_tea", thing: "teo-figure", kind: "order", sitting: "teo_tea", label: "Buy Teo a milk tea", cost: 6, minutes: 5, once: true,
+        id: "bar_teo_tea", thing: "teo-figure", kind: "order", sitting: "teo_tea", label: "Treat Teo to tea", cost: 6, minutes: 5, once: true,
         when: { maxClock: "01:20" }, rel: { teo: 1 }, sets: ["met_teo"],
         lines: [ "You put a milk tea at Teo's elbow. She looks at it, then at you, and takes the headset off one ear." ]
       },
       {
-        id: "bar_mei_talk", kind: "talk", label: "Talk to Mei", minutes: 0, sets: ["met_mei"],
+        id: "bar_mei_talk", kind: "talk", label: "Ask Mei about tonight", minutes: 0, sets: ["met_mei"],
         lines: [
           { if: { notFlag: ["ate", "sat"] }, lines: [
-            { who: "mei", text: "Eat first. Talk after. House rule." },
+            { who: "mei", text: "Start with a bowl or a tea, skipper. Stay a little, hear a little. That's how adventures begin around here!" },
             "She taps the menu board with her ladle, then the gold board, as if they were the same kind of list."
           ] },
-          { if: { flag: ["ate"], notFlag: ["sat"] }, who: "mei", text: "You want more than soup, order tea. Gossip's thirsty work." },
+          { if: { flag: ["ate"], notFlag: ["sat"] }, who: "mei", text: "How was the broth? Stay for tea and you might catch the next story. This harbour never runs out of them." },
           { if: { flag: ["sat"] }, lines: [
-            { who: "mei", text: "Everybody's got a reason gold goes up and a reason it goes down. Tonight they've all got both." }
+            { who: "mei", text: "One quay sees treasure, another sees a shortage. Listen to both, skipper. The best route might run between them!" }
           ] }
         ]
       },
       {
-        id: "bar_teo_hello", kind: "talk", label: "Say hello to Teo", minutes: 0, once: true,
+        id: "bar_teo_hello", kind: "talk", label: "Teo! Got a moment?", minutes: 0, once: true,
         when: { maxClock: "01:20", notFlag: ["met_teo"] }, sets: ["met_teo"],
         lines: [
-          { who: "teo", text: "Skipper. Give me a minute. Four riders in the rain and one of them thinks Landing 3 is a direction." },
-          "She doesn't give you the minute."
+          { who: "teo", text: "Skipper! Four riders, three calls, one very confused delivery. Let me land this lot and we'll talk." },
+          "She gives you an apologetic grin and taps her headset. A cup of tea might persuade her to take a proper break."
         ]
       },
       {
-        id: "bar_teo_why", kind: "talk", label: "Ask Teo what Frostline wants it for", minutes: 0,
+        id: "bar_teo_why", kind: "talk", label: "What's Frostline building?", minutes: 0,
         when: { heard: ["r_frostline"], maxClock: "01:20", notFlag: ["teo_why_deep"], notHeard: ["r_thirty"] },
         sets: ["teo_why_asked"],
         lines: [
@@ -451,17 +451,17 @@ window.NEON_TIDES_TRADE = (function () {
             { who: "teo", text: "Sensors. Cold rooms. That's what the purchase courier said, and he gets paid not to wonder." },
             "She puts the headset back on both ears."
           ] },
-          { if: { relBelow: { teo: 2 }, flag: ["teo_why_asked"] }, text: "Teo doesn't answer the same question twice. Not for a milk tea, anyway." },
+          { if: { relBelow: { teo: 2 }, flag: ["teo_why_asked"] }, text: "\"Still curious? Good.\" Teo lowers her voice. \"Bring me something you've seen yourself. Then we'll compare notes.\"" },
           { if: { rel: { teo: 2 } }, lines: [
             "Teo looks at the rain for a while before she answers.",
             { who: "teo", text: "Thirty kilos, the order says. You know how much gold goes in a cold-room sensor? Two grams." },
-            { who: "teo", text: "Somebody's building something that isn't a cold room. Don't put that on the wire." }
+            { who: "teo", text: "Somebody's building something that isn't a cold room. Keep that between us for now. I'd like to know what's really going on before the whole harbour hears it." }
           ] }
         ],
         hearsWhen: [ { if: { rel: { teo: 2 } }, hears: ["r_thirty"] } ]
       },
       {
-        id: "bar_tell_teo", kind: "talk", label: "Tell Teo what you've seen tonight", minutes: 0, once: true,
+        id: "bar_tell_teo", kind: "talk", label: "Share your discoveries with Teo", minutes: 0, once: true,
         when: { maxClock: "01:20", heardAny: ["r_seen_gilt", "r_seen_bars", "r_seen_twelve", "r_matte_lit", "r_matte_dark"] },
         rel: { teo: 1 }, sets: ["met_teo"],
         lines: [
@@ -474,16 +474,16 @@ window.NEON_TIDES_TRADE = (function () {
           { if: { heardAny: ["r_matte_lit"] }, lines: [
             { who: "teo", text: "Lit, is it." },
             "She writes something on the back of her hand.",
-            { who: "teo", text: "You're useful, skipper. Don't let it go to your head." }
+            { who: "teo", text: "Now that's useful, skipper! Keep those eyes open. We make a pretty good team." }
           ] },
           { if: { heardAny: ["r_seen_gilt", "r_seen_bars", "r_seen_twelve"], notHeard: ["r_matte_lit", "r_matte_dark"] }, lines: [
-            { who: "teo", text: "Salvage is salvage. Comes up, goes down, the gulls get some. Frostline's different." },
-            "But she listens to all of it, and she doesn't put the headset back on until you've finished."
+            { who: "teo", text: "A fresh haul always stirs the prices. Frostline's another piece of the puzzle. Let's keep watching both." },
+            "She listens to every word. For once, the headset can wait."
           ] }
         ]
       },
       {
-        id: "bar_hollis", kind: "talk", label: "Ask the diver by the tank about the vault", minutes: 0, once: true,
+        id: "bar_hollis", kind: "talk", label: "Hollis, what treasure did you find?", minutes: 0, once: true,
         when: { minClock: "00:45", maxClock: "01:40" }, sets: ["met_hollis"],
         lines: [
           { if: { flag: ["met_hollis"] }, text: "The diver raises his bowl at you. \"Ferry. You again.\"" },
@@ -510,7 +510,7 @@ window.NEON_TIDES_TRADE = (function () {
 
     landing: [
       {
-        id: "landing_priya", thing: "timetable-board", kind: "talk", label: "Ask Priya about the salvage boat", minutes: 0, once: true, sets: ["met_priya"],
+        id: "landing_priya", thing: "timetable-board", kind: "talk", label: "Check the salvage arrival with Priya", minutes: 0, once: true, sets: ["met_priya"],
         lines: [
           { if: { maxClock: "00:20" }, lines: [
             { who: "priya", text: "Long Patience. Logged out 20:04, out by the breakwater. Due back a quarter past twelve. They're always late." }
@@ -525,7 +525,7 @@ window.NEON_TIDES_TRADE = (function () {
         hearsWhen: [ { if: { maxClock: "00:20" }, hears: ["r_boat"] } ]
       },
       {
-        id: "landing_tarp", thing: "boarding-lights", kind: "search", label: "Look at what the divers brought up", minutes: 10, once: true,
+        id: "landing_tarp", thing: "boarding-lights", kind: "search", label: "Investigate the salvage haul", minutes: 10, once: true,
         when: { minClock: "00:20" },
         lines: [
           { if: { truth: ["order"] }, text: "Coins, display trays, a bank's brass nameplate, all laid out on a tarp under the boarding lights. You turn a coin over. The edge is grey where the gilt has worn through to whatever's underneath. There are a few small bars. Not many." },
@@ -539,23 +539,23 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       },
       {
-        id: "landing_hollis", kind: "talk", label: "Talk to the diver at the hatch", minutes: 0, once: true,
+        id: "landing_hollis", kind: "talk", label: "Hear Hollis's diving report", minutes: 0, once: true,
         when: { minClock: "00:20", maxClock: "00:40", notFlag: ["met_hollis"] }, sets: ["met_hollis"],
         lines: [
-          "A diver in a drysuit is counting credits at the hatch with wet fingers. He calls himself Hollis, as if you'd asked.",
+          "A diver waves with a fistful of damp credits. \"Hollis! Treasure finder, rope untangler, currently buying supper. You're the Tern's skipper, right?\"",
           { if: { truth: ["order"] }, lines: [
-            { who: "hollis", text: "Don't believe what they're saying at Kurage. Vault. It's display trays. Gilt on lead, mostly." },
+            { who: "hollis", text: "That grand vault story? Afraid the treasure's mostly display trays. Gilt on lead. Still, we found a little real gold!" },
             { who: "hollis", text: "Four hundred grams of real, maybe. Oduya paid us like it was bars. Don't tell him." }
           ] },
           { if: { truth: ["vault"] }, lines: [
-            { who: "hollis", text: "Forty-one bars, ferry. Forty-one. Harbour Savings stamp." },
-            { who: "hollis", text: "And we haven't been in the back room yet. Back down at dawn." }
+            { who: "hollis", text: "Forty-one bars, skipper! Forty-one! Harbour Savings stamps on every one. Best dive of my life!" },
+            { who: "hollis", text: "And there's a back room we haven't reached! We're diving again at dawn. Imagine what's waiting down there." }
           ] },
           { if: { truth: ["both"] }, lines: [
             { who: "hollis", text: "Twelve bars. Real. The rest is plated junk." },
             { who: "hollis", text: "Oduya's paying under the board. We're taking it. Who else is buying at midnight?" }
           ] },
-          "He goes off towards the east quay and the smell of broth."
+          "He starts bundling his gear. \"Next stop, Mei’s counter. If I smell the broth from here, that counts as navigation, right?\""
         ],
         hearsWhen: [
           { if: { truth: ["order"] }, hears: ["r_gilt"] },
@@ -564,10 +564,10 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       },
       {
-        id: "landing_broker", kind: "talk", label: "Ask the broker what he's paying for", minutes: 0, once: true, sets: ["met_oduya"],
+        id: "landing_broker", kind: "talk", label: "Oduya, how's the gold trade?", minutes: 0, once: true, sets: ["met_oduya"],
         lines: [
           "Oduya takes off one glove to shake your hand, then puts it back on to talk.",
-          { who: "oduya", text: "Everything, friend. Coins, chains, teeth. By tomorrow there'll be so much salvage gold in this Basin the gulls will wear it." },
+          { who: "oduya", text: "Coins, chains, forgotten keepsakes! By tomorrow the salvage gold will have the gulls wearing necklaces. Quite a picture, eh?" },
           { who: "oduya", text: "Sell to me tonight, while I'm feeling generous." },
           "He smiles the way the pump's meter does."
         ],
@@ -581,15 +581,15 @@ window.NEON_TIDES_TRADE = (function () {
         id: "landing_refuel", kind: "system", label: "Refuel the Tern (fill the tank)", cost: 30, minutes: 20,
         when: { fuelBelow: 6 },
         effects: { refuel: true },
-        lines: [ "The pump at Landing 3 is slow and its meter lies, but it fills. Priya takes your credits without counting them; she counts later.", { notice: "Tank full." } ]
+        lines: [ "The old pump rattles into life. You check the Tern's mooring while her tank fills. Ready for another crossing! Priya takes your credits without counting them; she counts later.", { notice: "Tank full. The harbour awaits!" } ]
       }
     ],
 
     metro: [
       {
-        id: "metro_lam", thing: "lam", kind: "talk", label: "Sit with Old Lam by the water", minutes: 0, once: true, sets: ["met_lam"],
+        id: "metro_lam", thing: "lam", kind: "talk", label: "Sit with Captain Lam by the water", minutes: 0, once: true, sets: ["met_lam"],
         lines: [
-          "Old Lam doesn't look up. He's watching a lantern jelly turn slowly under the quay.",
+          "Captain Lam doesn't look up. He's watching a lantern jelly turn slowly under the quay.",
           { who: "lam", text: "Everything that matters under the water has gold on its contacts. Salt eats copper in a season. Gold, it never eats." },
           { who: "lam", text: "So the gold goes into the drones and the sensors and the old radios, and the old radios go into the sea, and the divers bring the gold back up. Round and round. Like the jellies." },
           { who: "lam", text: "Last time Frostline bought gold like it was rice, the tide station on Bell Reef closed a month later. I don't know why. I only fix engines." }
@@ -597,35 +597,35 @@ window.NEON_TIDES_TRADE = (function () {
         hears: ["r_lam"]
       },
       {
-        id: "metro_dex", thing: "dex", kind: "talk", label: "Talk to the rider on the bench", minutes: 0, once: true,
+        id: "metro_dex", thing: "dex", kind: "talk", label: "Catch up with Dex, the courier", minutes: 0, once: true,
         when: { maxClock: "01:40" }, sets: ["met_dex"],
         lines: [
-          { who: "dex", text: "Frostline? I carry for them three nights a week now. Used to be one." },
-          { who: "dex", text: "Sealed cases. Heavy for their size. Always to Pier 9, never back out. I don't open them. I've got a kid." }
+          { who: "dex", text: "Frostline's keeping me flying! Three nights a week now. Used to be one. Something's picking up over there." },
+          { who: "dex", text: "Sealed cases, heavy little things. Always into Pier 9, never out. I leave them sealed; my kid expects me home with bedtime stories, not trouble." }
         ],
         hears: ["r_dex"]
       },
       {
-        id: "metro_soymilk", thing: "vending", kind: "order", sitting: "tea", label: "Hot soy milk from the stall under the stairs", cost: 3, minutes: 10,
+        id: "metro_soymilk", thing: "vending", kind: "order", sitting: "tea", label: "Warm soy milk & a moment ashore", cost: 3, minutes: 10,
         lines: [ "Hot soy milk in a paper cup, sweet enough to count as dinner. You drink it on the stairs under the viaduct while the rain drips through the rails." ]
       }
     ],
 
     pier: [
       {
-        id: "pier_matte", thing: "matte", kind: "talk", label: "Ask Matte about the dock office window", minutes: 0, once: true, sets: ["met_matte"],
+        id: "pier_matte", thing: "matte", kind: "talk", label: "Matte, is the buying desk opening?", minutes: 0, once: true, sets: ["met_matte"],
         lines: [
           { if: { truth: ["order", "both"], maxClock: "01:00" }, lines: [
             { who: "matte", text: "Garrow's had the desk lit since midnight. Says it opens at one. Twenty-four karat, assayed, and he doesn't ask where it's from." },
-            { who: "matte", text: "Don't quote me." }
+            { who: "matte", text: "Between us, skipper." }
           ] },
           { if: { truth: ["order", "both"], minClock: "01:00" }, lines: [
             { who: "matte", text: "Garrow had the desk lit from midnight and opened it at one on the dot. Twenty-four karat, assayed, and he doesn't ask where it's from." },
-            { who: "matte", text: "He's been told to buy until four. Don't quote me." }
+            { who: "matte", text: "The desk's open now. Check its board before you make a deal, skipper." }
           ] },
           { if: { truth: ["vault"] }, lines: [
             { who: "matte", text: "Desk was lit last night. Tonight Garrow came down at eleven, turned the card over and went home." },
-            { who: "matte", text: "Nobody tells the gate why. Don't quote me." }
+            { who: "matte", text: "Nobody told the gate why. Keep your eyes open, skipper." }
           ] }
         ],
         hearsWhen: [
@@ -634,7 +634,7 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       },
       {
-        id: "pier_queue", kind: "search", label: "Watch the queue at the desk", minutes: 5, once: true,
+        id: "pier_queue", kind: "search", label: "Scout the buying desk", minutes: 5, once: true,
         when: { happened: ["frostline_order"] },
         lines: [ "A queue fifty long in the rain: dockworkers turning rings on their fingers, a grandmother with a chain folded in a handkerchief, two men with a strongbox between them and nothing to say to each other. At the window a Frostline clerk weighs, writes, pays. Nobody leaves the queue." ]
       },
@@ -648,7 +648,7 @@ window.NEON_TIDES_TRADE = (function () {
           ] },
           { if: { truth: ["vault"] }, lines: [
             { who: "teo", text: "Came to see for myself. Dark." },
-            { who: "teo", text: "Somebody owes my couriers a week of runs. Somebody always does." }
+            { who: "teo", text: "That's a week of runs my couriers were counting on. We'll find another route. We always do." }
           ] }
         ]
       }
@@ -664,9 +664,9 @@ window.NEON_TIDES_TRADE = (function () {
       when: { maxClock: "01:20", notHeard: ["r_frostline"] }, sets: ["met_teo"],
       lines: [
         { if: { notFlag: ["met_teo"] }, text: "Teo slides along a stool to get out of the drip from the awning. Now she's next to you." },
-        { who: "teo", text: "Skipper. Still keeping your savings in a sock, or did you get smart?" },
+        { who: "teo", text: "Skipper! Ready to put that little gold stash to work? I've heard something worth a cup of tea." },
         { who: "teo", text: "Frostline's looking for clean twenty-four karat. Quietly. Somebody up there needs a lot of it." },
-        { who: "teo", text: "Don't ask how I know. I route the couriers; couriers talk." }
+        { who: "teo", text: "My couriers go everywhere. Sometimes the best thing they deliver is a story!" }
       ],
       hears: ["r_frostline"]
     },
@@ -687,7 +687,7 @@ window.NEON_TIDES_TRADE = (function () {
       lines: [
         "Teo drinks half the milk tea in one go, like medicine.",
         { who: "teo", text: "Desk on Pier 9 opens at one. They'll pay over the board for stamped twenty-four." },
-        { who: "teo", text: "That's all you get for six credits." }
+        { who: "teo", text: "There. One cup, one promising lead. What you do with it is the exciting part." }
       ],
       hears: ["r_desk"]
     },
@@ -806,15 +806,15 @@ window.NEON_TIDES_TRADE = (function () {
   ];
 
   var ambience = [
-    { at: "bar", via: ["noodles", "tea", "teo_tea"], text: "The rain finds a new note on the awning. Mei hums along with it, wrong." },
+    { at: "bar", via: ["noodles", "tea", "teo_tea"], text: "Rain drums on the awning. Mei hums a bright little tune, and someone at the counter joins in." },
     { at: "bar", via: ["noodles", "tea"], text: "A ferry crew of four comes in dripping, orders four thirty-threes by holding up fingers, and talks about nothing but a cousin's wedding." },
-    { at: "bar", via: ["noodles", "tea"], text: "Somebody has left a can on the stool beside yours. Taken. You don't move it." },
+    { at: "bar", via: ["noodles", "tea"], text: "A can keeps the next stool for someone still out in the rain. Mei leaves an extra napkin beside it. Everyone has a place here." },
     { at: "bar", via: ["noodles", "tea", "teo_tea"], text: "The jellies in the tank turn slowly, as if they're listening for something under the counter." },
     { at: "bar", via: ["noodles", "tea"], text: "A courier eats standing up, checks her wrist, and is gone before the steam has cleared." },
-    { at: "landing", via: ["tea"], text: "Priya fills in a crossword clue, rubs it out, and fills it in again with the same word." },
-    { at: "landing", via: ["tea"], text: "The boarding lights swing on their wire. Somewhere out past the breakwater a buoy bell rings for nobody." },
-    { at: "metro", via: ["tea"], text: "A train comes in empty and goes out empty. The driver waves at Old Lam, who doesn't wave back." },
-    { at: "metro", via: ["tea"], text: "The soy milk goes cold faster than it should. The rain on the rails sounds like frying." }
+    { at: "landing", via: ["tea"], text: "Priya triumphantly fills in seven down. \"Voyage! I should have asked you an hour ago.\"" },
+    { at: "landing", via: ["tea"], text: "The boarding lights swing like a string of little stars. Beyond the breakwater, a buoy bell answers the Tern's gentle creak." },
+    { at: "metro", via: ["tea"], text: "Captain Lam points out a painted star beneath the viaduct. \"My granddaughter put that there. Says it guides lost captains home.\"" },
+    { at: "metro", via: ["tea"], text: "You warm both hands around your soy milk. Rain hisses along the rails, and the lanterns turn the puddles gold." }
   ];
 
   var sceneClasses = [
@@ -826,21 +826,21 @@ window.NEON_TIDES_TRADE = (function () {
     kicker: "Harbour wire · 06:00",
     byTruth: {
       order: {
-        title: "The Desk on Pier 9",
+        title: "The Golden Window",
         wire: [
           "FROSTLINE DESK LIFTS GOLD ACROSS THE BASIN. Frostline's buying desk on Pier 9 paid over the board from one until four. Chalk at Kurage 33 and the Landing 3 hatch followed within the hour.",
           "SALVAGE \"VAULT\" MOSTLY GILT. The Long Patience's haul from the Harbour Savings wreck assays at under a fifth fine. The broker at Landing 3 is said to be reviewing his position."
         ]
       },
       vault: {
-        title: "The Vault off the Breakwater",
+        title: "Treasure Beneath the Waves",
         wire: [
           "HARBOUR SAVINGS VAULT FOUND. Forty-one bars came ashore at Landing 3 overnight, with more expected at dawn. Gold traded soft across the Basin by two.",
           "FROSTLINE ORDER WITHDRAWN. A purchase order for high-purity gold, rumoured on the quays since Tuesday, was cancelled before its desk opened. The couriers were not told."
         ]
       },
       both: {
-        title: "A Night of Two Prices",
+        title: "Between Two Golden Shores",
         wire: [
           "TWO QUEUES, ONE METAL. Salvage bars sold cheap at the Landing 3 hatch while Frostline's desk paid over the board on Pier 9. Anyone with a boat and a scale could have stood in both queues.",
           "HARBOUR SAVINGS WRECK GIVES UP TWELVE BARS. The rest of the haul is plate, says the assayer."
@@ -848,7 +848,7 @@ window.NEON_TIDES_TRADE = (function () {
       }
     },
     // The night ended itself at dawn (4.0.1): one line before the wire.
-    dawnLine: "First light found you still at it. Nights in the Basin end the way the ferries do: on time, whether you're ready or not.",
+    dawnLine: "Sunrise finds the Tern still making her way. Time to tie up, count your gold, and see which stories the morning brought ashore.",
     // What you did, read back to you (4.0.1). game.js sets these flags when the night ends:
     //   end_dawn            the clock ran into dawn
     //   end_held            no trades at all
@@ -865,23 +865,23 @@ window.NEON_TIDES_TRADE = (function () {
     // The first three that hold are shown, in this order: most specific first.
     reflections: [
       { if: { truth: ["order"], flag: ["end_both_queues"] }, text: "You bought at Oduya's hatch and sold at Frostline's window. On a night when the vault was trays and the desk was real, that was the whole trick." },
-      { if: { truth: ["order"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word before the desk opened. On Pier 9 they'd call that reading the weather." },
-      { if: { truth: ["order"], flag: ["end_sold_on_mei"] }, text: "You sold on Mei's vault. The vault was display trays; somewhere Hollis is laughing at the same joke." },
-      { if: { truth: ["order"], flag: ["end_sold_to_oduya"] }, text: "Oduya bought your gold at the hatch and had sold it on to Frostline by four. He sends no thanks." },
+      { if: { truth: ["order"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo and before the desk opened. The order was real: an early lead can be worth the crossing." },
+      { if: { truth: ["order"], flag: ["end_sold_on_mei"] }, text: "You sold after hearing Mei's vault story. The haul was mostly display trays. Next time, a diver's first-hand account might change your decision." },
+      { if: { truth: ["order"], flag: ["end_sold_to_oduya"] }, text: "You sold at Oduya's hatch. With Frostline paying a premium across the water, comparing both boards could have opened another route." },
       { if: { truth: ["vault"], flag: ["end_sold_on_mei"] }, text: "You sold before the bars came ashore. Mei will tell the story bigger than it was, and for once she'll be right." },
       { if: { truth: ["vault"], flag: ["end_missed_correction"] }, text: "Teo knew by half past twelve that the order was pulled. She tells things like that to people she trusts." },
-      { if: { truth: ["vault"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word. Her word was a day old by the time you heard it, and so was the price you paid." },
+      { if: { truth: ["vault"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo's lead, but the order had already been cancelled. A reminder for next time: even a trusted friend can be working with old news." },
       { if: { truth: ["vault"], flag: ["end_sold_to_oduya"] }, text: "You sold to Oduya. He was right about the gulls, and so, it turns out, were you." },
       { if: { truth: ["both"], flag: ["end_both_queues"] }, text: "You stood in both queues: cheap bars at the hatch, a dear desk on Pier 9. That was the whole night, and you found it." },
-      { if: { truth: ["both"], flag: ["end_sold_on_mei"] }, text: "You sold to the first story you heard. There were two, and both were true." },
-      { if: { truth: ["both"], flag: ["end_bought_on_teo"] }, text: "You bought on Teo's word. It was good; there was just more to the night than her word." },
+      { if: { truth: ["both"], flag: ["end_sold_on_mei"] }, text: "You sold after hearing the salvage story. Tonight both stories were true; cheap supply and a keen buyer made an opportunity between the quays." },
+      { if: { truth: ["both"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo. The buyer was real, and the salvage hatch offered another piece of the opportunity." },
       { if: { truth: ["order", "both"], flag: ["end_bought_late"] }, text: "You bought after the whole Basin had heard about the desk. The price you paid had the news in it already." },
       { if: { flag: ["end_hit_limit"] }, text: "The desk would take only thirty grams from anyone. Frostline wanted the whole Basin's gold, a little from everybody." },
       { if: { flag: ["end_beat_idle"] }, text: "Your trades did better than sitting still would have. Mei noticed; she notices everything." },
-      { if: { flag: ["end_lost_to_idle"] }, text: "Sitting still would have done better tonight. Every trader in the Basin has a night like that, Mei says, and most of them have it twice." },
-      { if: { flag: ["end_never_left"] }, text: "You never untied the Tern. Everything you know about tonight, you heard at one counter." },
-      { if: { flag: ["end_looked"], notFlag: ["end_never_left"] }, text: "You went to see for yourself, which is the one habit Old Lam says the sea respects." },
-      { if: { flag: ["end_held"] }, text: "You held what you had and let the night happen to it." }
+      { if: { flag: ["end_lost_to_idle"] }, text: "Your trades, before food and fuel, finished behind holding your starting gold. Mei sets down a fresh cup. \"Now you know a little more. Bring that with you next time.\"" },
+      { if: { flag: ["end_never_left"] }, text: "You spent the night at Kurage 33. Next adventure, there are three more quays and a whole harbour of people to meet." },
+      { if: { flag: ["end_looked"], notFlag: ["end_never_left"] }, text: "You went to see for yourself, which is the one habit Captain Lam says the sea respects." },
+      { if: { flag: ["end_held"] }, text: "You held your gold and watched the night unfold. Waiting is a choice too; the next crossing is yours to make." }
     ],
     // read with the night's conditions, at the moment you turned in
     closing: [
@@ -908,3 +908,4 @@ window.NEON_TIDES_TRADE = (function () {
     ending: ending
   };
 })();
+

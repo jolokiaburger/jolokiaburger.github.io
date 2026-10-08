@@ -10,28 +10,28 @@
 :root {
   --water:        #05030f;   /* nearly black indigo-navy */
   --navy:         #0b0824;
-  --surface-900:  #120d2b;   /* panels */
-  --surface-800:  #1a1240;
-  --surface-700:  #26205a;   /* borders, industrial surfaces */
-  --surface-600:  #33306e;
-  --surface-500:  #4a4394;   /* border highlights */
-  --surface-300:  #9b93d6;   /* muted labels */
-  --cyan:         #3df5ff;   /* jellyfish, neon tubes */
+  --surface-900:  #111d36;   /* panels */
+  --surface-800:  #192c49;
+  --surface-700:  #2c4563;   /* borders, industrial surfaces */
+  --surface-600:  #365775;
+  --surface-500:  #567797;   /* border highlights */
+  --surface-300:  #b8cce0;   /* muted labels */
+  --cyan:         #8aead9;   /* jellyfish, neon tubes */
   --cyan-dim:     #12b7cf;
   --magenta:      #ff2fa8;   /* signage */
   --purple:       #8a5cff;
-  --amber:        #ffb04a;   /* noodle-bar warmth, primary buttons */
+  --amber:        #ffd08a;   /* noodle-bar warmth, primary buttons */
   --amber-bright: #ffd27a;
   --amber-deep:   #ff7a3d;   /* sunset orange */
   --coral:        #ff5d8a;   /* warnings */
   --paper:        #f6e9d8;   /* warm off-white reading text */
-  --paper-dim:    #c9bdd9;
+  --paper-dim:    #c8d5e4;
   --ink:          #1a1030;
 
   /* "sans-serif-condensed" is Android's name for Roboto Condensed, the nearest thing it has to
      Bahnschrift; other systems skip it. */
   --font-ui:    "Bahnschrift", "Trebuchet MS", "Segoe UI", "sans-serif-condensed", system-ui, sans-serif;
-  --font-prose: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --font-prose: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
   --font-mono:  "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
 
   --topbar-h: 52px;
@@ -874,4 +874,62 @@ body.reduce-motion .toast { transition: none; }
   .refl, .glints .twinkle, #far-windows .twinkle, .wave, .grid, .puff, .led-pulse, .blink,
   .vend-glow, .fluoro, .flood, .tank-glow { animation: none; }
   .letterbox-only { display: none; }     /* phone frames are 18:10 or wider (the 31dvh cap, landscape): seen rarely, and never worth the frames */
+}
+
+
+/* 15 · LANTERN ADVENTURE — presentation only; retain the measured phone shell.
+   Never animate paint properties inside #harbour (see MOBILE.md §12). */
+.encounter { background: linear-gradient(160deg, #192b47 0%, #101b32 70%); }
+.topbar { background: #101c32; }
+.loc-title { color: var(--amber-bright); font-size: clamp(21px, 2vw, 27px); line-height: 1.2; }
+.loc-kicker { color: var(--cyan); letter-spacing: .1em; }
+.btn, .action-btn { border-radius: 8px; }
+.btn-primary { background: linear-gradient(135deg, #ffe0a0, #ffc478); color: #211b30; border-color: #ffe1ad; text-shadow: none; }
+.action-btn { background: #182a44; }
+.action-btn.kind-chat { border-left: 3px solid #bea9ef; }
+.action-btn.kind-order { border-color: #b8875b; background: #312c3c; }
+.title-tag { max-width: 34em; color: #fff0d9; line-height: 1.55; }
+.title-kicker { color: #a4f2df; }
+.dialogue-box { display: flex; flex-direction: column; gap: 14px; padding: 16px; background: linear-gradient(145deg, #223b5b, #172a46); border: 1px solid #6488a4; border-top: 3px solid var(--amber); border-radius: 12px; box-shadow: 0 6px 22px #030a182e; }
+.dialogue-kicker { font-family: var(--font-ui); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--cyan) !important; }
+.dialogue-box .narration { font-size: .93em; line-height: 1.6; color: #d2dfed !important; }
+.speech { min-width: 0; }
+.portrait { border-radius: 12px; background: #253c58; box-shadow: 0 3px 12px #02081744; }
+.speech-text { min-width: 0; border-left: 0; padding: 0; }
+.speaker { font-size: 15px; color: var(--amber-bright); letter-spacing: .03em; }
+.speaker-role { display: block; color: #c2d7ea; font-family: var(--font-ui); font-size: 11px; line-height: 1.4; margin: 0 0 7px; }
+.speech-text p { font-size: 16px; line-height: 1.65; }
+.dialogue-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; border-top: 1px solid #56779766; padding-top: 10px; }
+.dialogue-controls .btn { min-height: 44px; font-size: 12px; padding: 8px 12px; }
+.dialogue-controls .btn:disabled { opacity: .45; }
+.dialogue-progress, .dialogue-end { color: #c2d7ea; font-family: var(--font-ui); font-size: 12px; }
+.dialogue-end { color: var(--cyan); }
+.gold-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 14px; border: 1px solid #bda26a; border-top: 3px solid #ffcf80; border-radius: 12px; background: linear-gradient(135deg, #2b3547, #192c44); }
+.gold-group > p { grid-column: 1 / -1; }
+.gold-group .action-group-label { color: var(--amber-bright); margin: 0; }
+.gold-group .gold-quote { font-family: var(--font-ui); font-size: 21px; line-height: 1.4; color: #fff2d7; }
+.gold-group .gold-hold { color: #e2eaf1; font-size: 13px; }
+.gold-group .action-btn { min-width: 0; min-height: 52px; flex-wrap: wrap; align-content: center; gap: 4px; margin: 0; padding: 10px; }
+.gold-group .act-costs { margin-left: 0; }
+.market-help, .market-stock { font-size: 11px; line-height: 1.5; color: #c9dce9; }
+.market-stock { color: #f8d99d; }
+.market-away { padding: 12px; border: 1px solid var(--surface-500); border-radius: 10px; color: var(--paper-dim); font-size: 13px; }
+.casual-group { border: 1px solid #776699; border-radius: 9px; padding: 0 10px 10px; }
+.casual-group:not([open]) { padding-bottom: 0; }
+.casual-group summary { cursor: pointer; min-height: 44px; padding: 13px 0; color: #decafa; list-style-position: inside; }
+.casual-group summary:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+@media (hover: hover) {
+  .action-btn:not([disabled]):hover { background: #294461; border-color: var(--amber); }
+  .btn-primary:not([disabled]):hover { background: #ffe4b4; }
+}
+@media (max-width: 899px) {
+  .dialogue-box { padding: 12px; gap: 10px; }
+  .loc-title { font-size: 21px; }
+  .speech { grid-template-columns: 46px minmax(0, 1fr); gap: 10px; }
+  .portrait { width: 46px; height: 46px; }
+  .speech-text p { font-size: 15px; line-height: 1.6; }
+  .gold-group { padding: 12px; }
+  .gold-group .gold-quote { font-size: 20px; }
+  .gold-group .action-btn { font-size: 14px; }
+  .title-actions .btn { white-space: normal; }
 }
