@@ -29,8 +29,12 @@
   /* 1 · CONSTANTS & TINY HELPERS                                        */
   /* ------------------------------------------------------------------ */
   const DATA = window.NEON_TIDES;
-  const TRADE = window.NEON_TIDES_TRADE;   // the gold night: story and market data (trade.js)
-  const CHAT = window.NEON_TIDES_CHAT || {}; // optional, authored conversations (dialogue.js)
+  const BASE_TRADE = window.NEON_TIDES_TRADE;
+  const SECOND_TRADE = window.NEON_TIDES_NIGHT_TWO ? window.NEON_TIDES_NIGHT_TWO.build(BASE_TRADE) : null;
+  let TRADE = BASE_TRADE;   // the gold night: story and market data (trade.js)
+  const BASE_CHAT = window.NEON_TIDES_CHAT || {};
+  const SECOND_CHAT = window.NEON_TIDES_NIGHT_TWO ? window.NEON_TIDES_NIGHT_TWO.buildChat(BASE_CHAT) : null;
+  let CHAT = BASE_CHAT; // optional, authored conversations (dialogue.js)
   const MARKET = window.NeonMarket;        // pricing and gold lots, no DOM (market.js)
   const SAVE_KEY = "neon-tides:save:v1";
   const SETTINGS_KEY = "neon-tides:settings:v1";
@@ -309,7 +313,12 @@
         if (seed !== normaliseSeed(seed)) report[v.id].push("pinned seed '" + seed + "' must be trimmed lower case");
       });
     });
-    if (TRADE) report["night:" + TRADE.meta.id] = validateTrade();
+    const current = TRADE;
+    try {
+      TRADE = BASE_TRADE;
+      if (TRADE) report["night:" + TRADE.meta.id] = validateTrade();
+      if (SECOND_TRADE) { TRADE = SECOND_TRADE; report["night:lantern-tomorrow"] = validateTrade(); }
+    } finally { TRADE = current; }
     return report;
   }
 
@@ -351,6 +360,8 @@
   }
   function setState(next) {
     state = next;
+    TRADE = state.kind === "trade" && state.night === 2 && SECOND_TRADE ? SECOND_TRADE : BASE_TRADE;
+    CHAT = state.kind === "trade" && state.night === 2 && SECOND_CHAT ? SECOND_CHAT : BASE_CHAT;
     transient.marketSpot = null;
     if (!state.timeline) state.timeline = {};   // saves from before 3.1
     if (!state.hinted) state.hinted = [];
@@ -377,6 +388,11 @@
   // Every field of a condition must hold. See the top of cases.js for the list.
   function conditionHolds(cond) {
     if (!cond) return true;
+    if (cond.night && (state.night || 1) !== cond.night) return false;
+    const previous = state.previous ? state.previous.flags : {};
+    if (cond.priorFlag && !cond.priorFlag.every(function (f) { return !!previous[f]; })) return false;
+    if (cond.priorNotFlag && cond.priorNotFlag.some(function (f) { return !!previous[f]; })) return false;
+    if (cond.cargoAtLeast && (!state.cargo || state.cargo.crates < cond.cargoAtLeast)) return false;
     if (cond.has && !cond.has.every(hasClue)) return false;
     if (cond.hasAny && !cond.hasAny.some(hasClue)) return false;
     if (cond.lacks && cond.lacks.some(hasClue)) return false;
@@ -385,6 +401,7 @@
     if (cond.notFlag && cond.notFlag.some(function (f) { return !!state.flags[f]; })) return false;
     if (cond.minClock && state.clock < parseClock(cond.minClock)) return false;
     if (cond.maxClock && state.clock >= parseClock(cond.maxClock)) return false;
+    if (typeof cond.creditsBelow === "number" && !(state.credits < cond.creditsBelow)) return false;
     if (typeof cond.fuelBelow === "number" && !(state.fuel < cond.fuelBelow)) return false;
     if (typeof cond.resolved === "boolean" && state.resolved !== cond.resolved) return false;
     if (cond.ending && state.ending !== cond.ending) return false;
@@ -860,6 +877,7 @@
 
   function startTradeNight(seedText) {
     const seed = normaliseSeed(seedText) || randomSeed();
+    TRADE = BASE_TRADE;
     setState(newTradeState(seed));
     transient.objective = null;
     observeMarket();                     // the first board is read, nothing has moved yet
@@ -870,6 +888,41 @@
     toast("Cast off for adventure · seed " + seed);
     debugMarket("start");
   }
+
+  // A chapter transition is only allowed from a finished first night. Create and
+  // save the entire new state once; retries cannot duplicate the carried purse.
+  function startSecondNight() {
+    if (!SECOND_TRADE || !isTrade() || !state.resolved || state.night === 2) return false;
+    const old = state;
+    TRADE = SECOND_TRADE;
+    const next = newTradeState(old.seed + ":night-2");
+    next.night = 2;
+    next.credits = old.credits;
+    next.gold = JSON.parse(JSON.stringify(old.gold));
+    next.fuel = old.fuel;
+    next.rel = Object.assign({}, old.rel);
+    next.previous = { seed: old.seed, flags: {}, worth: old.finish.worth };
+    ["nb_started", "nb_done", "nb_late", "nb_story", "nb_warmer", "nb_invite_mei", "nb_invite_priya", "nb_invite_lam", "exp_done", "exp_chart", "nm_done"].forEach(function (flag) {
+      if (old.flags[flag]) next.previous.flags[flag] = true;
+    });
+    if (old.flags.exp_chart) next.flags.exp_chart = true;
+    next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
+    Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
+    const q = MARKET.quote(SECOND_TRADE, next.truth, next.seed, "bar", next.clock);
+    next.start = { credits: next.credits, grams: MARKET.lots.total(next.gold), sell: q.sell, worth: MARKET.worth(next.credits, next.gold, q.sell) };
+    setState(next);
+    transient.objective = null;
+    observeMarket();
+    saveGame();
+    setMode("play");
+    positionFerry(state.location, null, false);
+    render();
+    focusEncounter();
+    toast("Night Two · A Lantern for Tomorrow");
+    return true;
+  }
+  function nextNightLabel() { return state && state.night === 2 ? "Start fresh Night One" : "Continue to Night Two · Keep earnings & choices"; }
+  function continueTradeStory() { if (state && state.night !== 2 && SECOND_TRADE) return startSecondNight(); startTradeNight(""); return true; }
 
   // The trade data must hang together before anyone plays it. Returns a list of problems.
   function validateTrade() {
@@ -1060,6 +1113,22 @@
     const before = state.clock;
     state.credits -= cost;
     state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
+    if (action.cargoBuy) {
+      state.cargo.crates = action.cargoBuy.crates;
+      state.cargo.bought = action.cargoBuy.crates;
+      state.cargo.courier = !!action.cargoBuy.courier;
+      state.cargo.cost += cost;
+    }
+    if (action.cargoSell || action.cargoReturn) {
+      const crates = state.cargo.crates;
+      const total = state.cargo.courier ? (action.cargoSell ? 12 : 0) : crates * (action.cargoSell ? 30 : 16);
+      state.credits += total;
+      if (state.cargo.courier) state.rewardCredits = (state.rewardCredits || 0) + total;
+      else state.cargo.revenue += total;
+      state.cargo[action.cargoSell ? "sold" : "returned"] = crates;
+      state.cargo.crates = 0;
+      lines.push({ type: "p", text: crates + " sealed crate" + (crates === 1 ? "" : "s") + " handed over · " + total + " cr received" + (state.cargo.courier ? " as a courier fee" : " in the cargo account") + ". Fuel and time are counted separately." });
+    }
     if (action.supplyPurchase) state.breakfastCost = (state.breakfastCost || 0) + cost;
     state.clock += actionMinutes(action);
     if (action.fuel) state.fuel = Math.max(0, state.fuel - action.fuel);
@@ -1203,7 +1272,7 @@
   // What the trades themselves made against holding the opening gold, with food and fuel left out.
   function tradeChoicesResult() {
     const s = state.start, f = state.finish;
-    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
+    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.cargo ? state.cargo.revenue : 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1688,7 +1757,7 @@
     }
 
     const loc = DATA.world.locations[state.location];
-    dom.encKicker.textContent = loc.kicker;
+    dom.encKicker.textContent = state.night === 2 ? "Night Two · A Lantern for Tomorrow" : loc.kicker;
     dom.encTitle.textContent = loc.title;
 
     if (state.confront) { renderConfrontation(body, actions); return; }
@@ -1776,7 +1845,7 @@
     if (state.resolved) {
       const done = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: "Morning" })]);
       done.appendChild(actionButton({ kind: "choice", label: "Read your morning report", key: nextKey(), onClick: showResolution }));
-      done.appendChild(actionButton({ kind: "choice", label: "Set out on another night", key: nextKey(), onClick: function () { startTradeNight(""); } }));
+      done.appendChild(actionButton({ kind: "choice", label: nextNightLabel(), key: nextKey(), onClick: continueTradeStory }));
       container.appendChild(done);
       return;
     }
@@ -1787,6 +1856,7 @@
     if (market) renderMarketDirectory(container, spot);
     const gold = !market || spot === "all" || spot === "gold" ? renderGoldGroup(nextKey) : null;
     container.appendChild(el("p", { class: "expedition-lead", text: currentObjective() }));
+    if (state.night === 2) renderSecondNightProgress(container);
     if (market && state.flags.nb_started && (spot === "all" || spot === "food")) renderBreakfastProgress(container);
     if (gold) container.appendChild(gold);
     else if (!market) container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
@@ -1851,6 +1921,10 @@
     return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
   }
   function marketActionLabel(action) {
+    if ((action.cargoSell || action.cargoReturn) && state.cargo) {
+      const total = state.cargo.courier ? (action.cargoSell ? 12 : 0) : state.cargo.crates * (action.cargoSell ? 30 : 16);
+      return (action.cargoSell ? "Deliver rice to Nao" : "Return unopened rice at the co-op") + " · " + state.cargo.crates + " crate(s) · " + total + " cr · 5 min";
+    }
     if (action.breakfastOpen && state.flags.nb_batch_delivered) {
       const offer = breakfastOffer(!!action.breakfastLate);
       return action.label + " · Your batch: " + offer.sold + " portions / " + offer.revenue + " cr";
@@ -1877,6 +1951,21 @@
       f.nb_batch_owned ? "Extra batch · " + (f.nb_batch_delivered ? "Handed over" : f.nb_done ? "Unserved; donated" : "Aboard the Tern · Hand over for 5 min before 05:40") + " · Cost " + (state.breakfastCost || 0) + " cr" + (f.nb_done ? " · Sales " + (state.breakfastRevenue || 0) + " cr" : " · Actual sales 0–48 cr; fuel and time extra.") : "No extra batch bought · You can complete the story for free. Optional batch: market 24 cr / Landing 3 co-op 18 cr, plus time and crossings."
     ];
   }
+  function secondNightProgress() {
+    const c = state.cargo;
+    const f = state.flags;
+    return [
+      "Carry-over · " + state.start.credits + " cr · " + grams(state.start.grams) + " gold · Fuel carried from Night One. New market boards, fresh dealer allowances.",
+      f.n2_done ? "Nao's festival recipe complete · " + (f.n2_smoky ? "Smoky mushroom rice" : "Plum & sesame rice") + (f.n2_late ? " · Saved bowl ending" : " · First spoonful ending") : f.n2_menu ? "Recipe chosen · Optional seasoning help; free tasting from 05:00 until dawn." : "Visit Nao, then choose a recipe · No purchase required.",
+      "Ingredient hold · " + c.crates + "/2 slots · " + (c.courier ? "Co-op property; 12 cr for on-time delivery" : "Your owned cargo") + ". " + c.cost + " cr spent / " + c.revenue + " cr returned, before fuel and time.",
+      "One purchase or courier route tonight · Deliver by 04:30 (last start 04:25); return unopened crates by 05:45 (last start 05:40). No automatic payout."
+    ];
+  }
+  function renderSecondNightProgress(container) {
+    const section = el("details", { class: "breakfast-progress nb-section" }, [el("summary", { text: "Night Two · Recipe & cargo log" })]);
+    secondNightProgress().forEach(function (line) { section.appendChild(el("p", { text: line })); });
+    container.appendChild(section);
+  }
   function renderBreakfastProgress(container) {
     const section = el("section", { class: "breakfast-progress nb-section" }, [el("h3", { text: "Nao · The Last Bowl Before Sunrise" })]);
     breakfastProgress().forEach(function (line) { section.appendChild(el("p", { text: line })); });
@@ -1885,7 +1974,7 @@
   function renderMarketDirectory(container, spot) {
     const directory = el("div", { class: "market-directory", role: "group", "aria-label": "Browse the Night Market" });
     directory.appendChild(el("p", { class: "action-group-label", text: "Lantern Market · Pick a stall" }));
-    directory.appendChild(el("p", { class: "market-status", text: state.flags.nb_done ? "Nao's breakfast counter open · Gold until dawn · Repair bench closed" : state.flags.nb_started && state.clock >= parseClock("05:00") ? "Nao's breakfast is ready · Visit her food counter" : state.clock >= parseClock("03:30")
+    directory.appendChild(el("p", { class: "market-status", text: state.night === 2 ? (state.flags.n2_done ? "Festival recipe ready · Gold and tea until dawn" : "Festival preparations · Gold, ingredients & Nao’s new recipe") : state.flags.nb_done ? "Nao's breakfast counter open · Gold until dawn · Repair bench closed" : state.flags.nb_started && state.clock >= parseClock("05:00") ? "Nao's breakfast is ready · Visit her food counter" : state.clock >= parseClock("03:30")
       ? "Late watch · Tea and gold until dawn · Repair bench closed"
       : "Gold scale · Hot food · Repairs · A delivery to trace" }));
     const buttons = el("div", { class: "market-stalls" });
@@ -1897,7 +1986,7 @@
       } }, closed ? "Kenji · Closed" : entry.label));
     });
     directory.appendChild(buttons);
-    if (spot === "repair" && state.clock < parseClock("03:30")) directory.appendChild(el("p", { class: "market-help", text: "Kenji's order needs 2 g and at least 2 g of Sora's remaining buying allowance. You can report the delivery for 25 cr instead. His bench closes at 03:30." }));
+    if (state.night !== 2 && spot === "repair" && state.clock < parseClock("03:30")) directory.appendChild(el("p", { class: "market-help", text: "Kenji's order needs 2 g and at least 2 g of Sora's remaining buying allowance. You can report the delivery for 25 cr instead. His bench closes at 03:30." }));
     container.appendChild(directory);
   }
   // The scale where you are: its two numbers, what you hold, and a few sizes of trade.
@@ -2215,6 +2304,7 @@
     body.innerHTML = "";
 
     body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Beyond the breakwater" }), el("p", { text: currentObjective() })]));
+    if (state.night === 2) renderSecondNightProgress(body);
     if (state.flags.nb_started) renderBreakfastProgress(body);
     const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Rumours & discoveries (" + state.rumors.length + ")" })]);
     if (!state.rumors.length) {
@@ -2555,17 +2645,24 @@
   }
   // A saved gold night: the same care, against trade.js instead of a case.
   function tradeSaveProblem(obj) {
-    if (!TRADE || obj.variantId !== TRADE.meta.id) return "unknown night '" + obj.variantId + "'";
-    if (!TRADE.truths.some(function (t) { return t.id === obj.truth; })) return "unknown night state";
+    const definition = obj.night === 2 ? SECOND_TRADE : BASE_TRADE;
+    if (!definition || obj.variantId !== definition.meta.id) return "unknown night '" + obj.variantId + "'";
+    if (!definition.truths.some(function (t) { return t.id === obj.truth; })) return "unknown night state";
     if (!DATA.world.locations[obj.location]) return "unknown location";
     if ([obj.clock, obj.fuel, obj.credits].some(function (n) { return typeof n !== "number" || !isFinite(n); })) return "bad numbers";
     if (!Array.isArray(obj.gold) || obj.gold.some(function (lot) { return !lot || typeof lot.grams !== "number" || typeof lot.cost !== "number"; })) return "bad gold";
-    if (!Array.isArray(obj.rumors) || obj.rumors.some(function (r) { return !r || !TRADE.rumors[r.id]; })) return "unknown rumor";
+    if (!Array.isArray(obj.rumors) || obj.rumors.some(function (r) { return !r || !definition.rumors[r.id]; })) return "unknown rumor";
     if (!Array.isArray(obj.trades) || !Array.isArray(obj.convos) || !Array.isArray(obj.fired) || !Array.isArray(obj.clues)) return "missing fields";
     if (!obj.flags || !obj.used || !obj.visited || !obj.rel || !obj.seen || !obj.ambience || !obj.start) return "missing fields";
     if (["rewardCredits", "rewardGrams"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid adventure reward";
     if (["breakfastCost", "breakfastRevenue"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid breakfast trade";
     if (obj.breakfastSold !== undefined && (!Number.isInteger(obj.breakfastSold) || obj.breakfastSold < 0 || obj.breakfastSold > 12)) return "invalid breakfast portions";
+    if (obj.night !== undefined && obj.night !== 1 && obj.night !== 2) return "unknown chapter";
+    if (obj.night === 2) {
+      if (!obj.previous || typeof obj.previous.seed !== "string" || !obj.previous.flags || Array.isArray(obj.previous.flags) || Object.values(obj.previous.flags).some(function (v) { return typeof v !== "boolean"; }) || !Number.isFinite(obj.previous.worth)) return "bad chapter memory";
+      const c = obj.cargo;
+      if (!c || typeof c.courier !== "boolean" || ["crates", "bought", "sold", "returned"].some(function (key) { return !Number.isInteger(c[key]) || c[key] < 0 || c[key] > 2; }) || c.crates + c.sold + c.returned !== c.bought || ["cost", "revenue"].some(function (key) { return !Number.isFinite(c[key]) || c[key] < 0; }) || (c.courier && (c.bought > 1 || c.cost !== 0 || c.revenue !== 0))) return "bad ingredient cargo";
+    }
     if (obj.resolved && !obj.finish) return "missing fields";
     return null;
   }
@@ -3178,6 +3275,7 @@
     reflections.forEach(function (item) { dom.resBody.appendChild(el("p", { class: "reflection", text: item.text })); });
     closing.forEach(function (item) { dom.resBody.appendChild(el("p", { text: item.text })); });
     dom.resBody.appendChild(el("p", { class: "epilogue", text: "You came ashore with " + s.credits + " cr and " + grams(s.grams) + " of gold, " + s.worth + " cr at Mei's prices then. You turn in with " + f.credits + " cr and " + grams(f.grams) + ", " + f.worth + " cr at Mei's prices now." }));
+    if (state.night === 2 && state.cargo.crates) dom.resBody.appendChild(el("p", { class: "epilogue", text: "Unserved rice · The unopened crates go to the morning co-op. No sale, return or courier payment is awarded automatically. Your purchase cost remains in the cargo account." }));
     const net = f.worth - s.worth;
     // What the same gold would be worth had you only held it: separates the harbour's drift from your choices.
     const idle = Math.round(s.credits + s.grams * f.sell) - s.worth;
@@ -3187,10 +3285,11 @@
       [state.flags.end_dawn ? "Dawn" : "Turned in", formatClock(state.endedAt)],
       ["The night", signed(net) + ", valued at Mei's scale"],
       ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
-      ["Your gold trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel, breakfast trading and adventure rewards aside" : "none"],
+      ["Your gold trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel, food cargo and adventure rewards aside" : "none"],
       ["Breakfast batch", state.breakfastCost ? (state.breakfastRevenue || 0) + " cr sales − " + state.breakfastCost + " cr stock = " + signed((state.breakfastRevenue || 0) - state.breakfastCost) + " before fuel and time" : "No extra batch bought"],
       ["Adventure reward", (state.rewardCredits || 0) + " cr · " + grams(state.rewardGrams || 0) + " of gold"],
-      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0)) + " cr on food, tea and fuel"],
+      ["Ingredient cargo", state.cargo ? state.cargo.revenue + " cr returned − " + state.cargo.cost + " cr stock = " + signed(state.cargo.revenue - state.cargo.cost) + " before fuel/time; " + state.cargo.crates + " crate(s) unserved" + (state.cargo.courier ? "; courier fee listed as adventure reward" : "") : "No ingredient trade on Night One"],
+      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0) - (state.cargo ? state.cargo.cost : 0)) + " cr on food, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
       ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],
@@ -3201,7 +3300,7 @@
       dom.resStats.appendChild(el("dd", { text: pair[1] }));
     });
     dom.btnResContinue.textContent = "Look around";
-    dom.btnResNew.textContent = "Another night";
+    dom.btnResNew.textContent = nextNightLabel();
     revealResolution();
   }
 
@@ -3442,7 +3541,7 @@
 
     dom.btnResContinue.addEventListener("click", function () { dom.resolution.hidden = true; render(); });
     // After a gold night the card offers another night straight away; the closed night has nothing to lose.
-    dom.btnResNew.addEventListener("click", function () { if (isTrade() && state.resolved) startTradeNight(""); else confirmNewShift(); });
+    dom.btnResNew.addEventListener("click", function () { if (isTrade() && state.resolved) continueTradeStory(); else confirmNewShift(); });
 
     document.addEventListener("keydown", function (e) {
       const typing = e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
@@ -3626,13 +3725,14 @@
     // the gold night: start it, act in it, and look behind the board (debug() shows the hidden truth)
     trade: {
       start: startTradeNight,
+      nextNight: startSecondNight,
       buy: buyGold,
       sell: sellGold,
       turnIn: endTradeNight,
       quote: function (loc, clock) { return state && isTrade() ? MARKET.breakdown(TRADE, state.truth, state.seed, loc || state.location, clock === undefined ? state.clock : (typeof clock === "string" ? parseClock(clock) : clock)) : null; },
       debug: tradeDebug,
       validate: validateTrade,
-      data: TRADE
+      get data() { return TRADE; }
     }
   };
 

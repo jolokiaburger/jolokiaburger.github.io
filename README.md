@@ -4,7 +4,7 @@ A warm trading adventure in a rain-soaked neon harbour. You run the night ferry 
 
 Eat, listen, decide whom to believe, buy or sell, and maybe cross the harbour to see for yourself. In the morning the harbour wire says what really happened.
 
-A night takes about 10–15 minutes. **This is an early test build**: one night, three ways it can really be going.
+A night takes about 10–15 minutes. **This is an early test build** with a complete two-night chapter. Each night has three possible market situations.
 
 ## Play
 
@@ -18,6 +18,7 @@ Open the game in any modern browser (desktop or phone). Nothing is installed or 
 - What you hear goes into the **journal** as it was said, with who said it and when. Nothing tells you whether it's true.
 - Crossing the harbour costs fuel and time. Prices differ between quays, and they move when something happens.
 - Dealers notice when you lean on them: buy a lot and the price goes up; some have only so much to sell or will only take so much.
+- After the first morning report, choose **Continue to Night Two · Keep earnings & choices**. Your credits, gold, fuel and relationships carry over; Nao remembers your help. Night Two has a new recipe trial and an optional sealed-rice trade.
 - From 01:30 you can **turn in** aboard the Tern; at dawn the night ends by itself. The morning card tells you what happened and what your night was worth.
 
 **Controls.** Click or tap the ringed people and things in the picture, or the choices under the story. Keyboard: `1`–`9` choose actions, `N` notebook, `M` menu, `R` radio, `Esc` closes panels. The radio (off by default) plays generated music. Menu → **Harbour sounds** separately enables gentle ferry, gold-trading and market effects; **Effects volume** cycles through 30%, 60% and 100%. Both controls remember your choice. See `SOUND.md`.
@@ -50,3 +51,11 @@ The market includes contextual conversations and varied free chats. Existing lig
 ## Nao's breakfast story
 
 At Nao's food counter, ask about the folded recipe to begin **The Last Bowl Before Sunrise**. Help prepare the counter, invite neighbours, or simply return for her first sunrise bowls. The personal story can be completed without buying anything. An optional twelve-portion supply batch adds a small trading decision: compare suppliers, allow for crossings and time, and accept that a quiet morning may leave stock unsold. The opening begins at 05:00; Nao keeps a last bowl for late arrivals until dawn. Rules and spoiler-marked routes: `NAO-STORY.md`.
+
+## Night Two · A Lantern for Tomorrow
+
+After ending Night One, continue from its morning card. Visit Nao to choose smoky mushroom rice or plum-and-sesame rice, help with the seasoning, and return for a free tasting from 05:00 until dawn. Her response remembers whether you attended her previous opening, arrived late, helped prepare her warmer or invited her neighbours.
+
+The Tern has two ingredient cargo slots for this chapter. One purchase route per night: Landing 3 sells sealed rice crates for 18 cr each; the market sells them for 26. Nao buys them for 30 each if handed over by 04:30. Alternatively carry one co-op crate for a 12 cr courier fee without buying it. Owned unopened leftovers can be returned at Landing 3 for 16 each by 05:45. Fuel, time and five-minute handovers matter; no payout occurs automatically at dawn.
+
+Gold trading follows fresh festival news, with a provisional instrument order, a confirmed co-op delivery and three possible outcomes. The second morning report closes this two-night story. See `NIGHT-TWO.md` for rules, source files and verification limits.

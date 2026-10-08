@@ -12,10 +12,10 @@ const saved=new Map();
 const context=vm.createContext({console,window:{},document:{readyState:'loading',addEventListener(){},getElementById(id){return ids.has(id)?{}:null;}},location:{protocol:'file:',search:''},setTimeout(){return 1;},clearTimeout(){},setInterval(){return 1;},clearInterval(){},URLSearchParams});
 context.window.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
 context.window.matchMedia=()=>({matches:false,addEventListener(){}});
-for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js'])vm.runInContext(read(name),context,{filename:name});
+for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress,
+  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -346,4 +346,91 @@ const guestRule=T.sceneClasses.find(rule=>rule.class==='nao-breakfast-guests');c
 R.state().flags.nb_invite_mei=true;check(R.conditionHolds(guestRule.when),'one invitation enables guest overlay');R.state().flags.nb_late=true;check(!R.conditionHolds(guestRule.when),'late return has notes instead of guest overlay');
 check(!R.conditionHolds(C.nao.lines.find(line=>line.id==='market_late_watch').when),'old tea-only chat stops after breakfast opens');
 api.trade.start('two-tides');R.visit('market','03:20');R.state().credits=0;api.performAction('nb_start');api.performAction('nb_wait_trays');equal(R.state().clock,M.parseClock('03:30'),'free wait bridges warmer preparation gap');api.performAction('nb_handwarm');check(R.state().flags.nb_warmer,'empty-purse skipper can prepare trays after repair cutoff');equal(R.state().credits,0,'tray preparation needs no food purchase');
+// Night Two is a real, saved chapter transition, not a fresh game with renamed text.
+const firstData=json(T);
+function beginSecond(truth, flags={nb_done:true,nb_warmer:true}) {
+ api.trade.start('frost-order');R.visit('market','05:00');Object.assign(R.state().flags,flags);
+ R.state().rel.nao=2;R.state().rel.mei=1;api.trade.turnIn();
+ const old=JSON.parse(json(R.state()));
+ check(api.trade.nextNight(),'finished Night One transitions');
+ R.state().truth=truth;R.setState(R.state());
+ return old;
+}
+for(const truth of ['order','vault','both'])for(const recipe of ['smoky','plum'])for(const source of ['landing','market'])for(const crates of [1,2]) {
+ const old=beginSecond(truth,{nb_done:true,nb_warmer:true,nb_invite_mei:true,exp_done:true,exp_chart:true});
+ const st=R.state();equal(st.night,2,'second chapter selected');equal(st.credits,old.credits,'actual purse carried');equal(json(st.gold),json(old.gold),'actual gold lots and costs carried');equal(st.fuel,old.fuel,'no free overnight fuel');equal(st.rel.nao,2,'relationship carried');
+ equal(st.start.credits,st.credits,'gold benchmark uses carried credits');equal(st.start.grams,M.lots.total(st.gold),'gold benchmark uses carried holdings');
+ check(st.previous.flags.nb_invite_mei&&st.previous.flags.exp_done&&st.flags.exp_chart,'story choices and channel unlock carried');
+ equal(st.spent,0,'spending resets for this evening');equal(st.trades.length,0,'fresh dealer allowance and trading history');equal(st.rumors.length,0,'old rumours do not masquerade as current news');
+ const untouched=json(st);check(!api.trade.nextNight(),'active Night Two cannot transition again');equal(json(st),untouched,'retry cannot duplicate carry-over resources');
+ api.travelTo('market');api.performAction('n2_nao_start');
+ check(st.lastResult.lines.some(l=>l.text.includes('warmer we prepared')),'Nao remembers warmer');check(st.lastResult.lines.some(l=>l.text.includes('thermos')),'Nao remembers invitation');
+ api.performAction('n2_menu_'+recipe);check(st.flags['n2_'+recipe],'recipe choice recorded');check(!R.locationActions().some(a=>a.id==='n2_menu_'+(recipe==='smoky'?'plum':'smoky')),'menu choice mutually exclusive');
+ api.performAction('n2_prep');check(st.flags.n2_prepped,'seasoning help recorded');
+ if(source==='landing')api.travelTo('landing');
+ const cash=st.credits;api.performAction('n2_buy_'+source+'_'+crates);equal(st.credits,cash-(source==='landing'?18:26)*crates,'cargo purchase cost exact');equal(st.cargo.crates,crates,'one or two ingredient slots filled');
+ const purchase=json(st);api.performAction('n2_buy_'+source+'_'+crates);equal(json(st),purchase,'purchase cannot repeat');
+ check(!R.locationActions().some(a=>a.cargoBuy),'one chosen purchase route blocks all other purchases');
+ const loaded=api.readSave();equal(R.saveProblem(loaded),null,'Night Two cargo save validates');R.setState(loaded);const now=R.state();
+ if(source==='landing')api.travelTo('market');
+ const deliveryCash=now.credits;const offer=R.locationActions().find(a=>a.id==='n2_deliver');check(R.marketActionLabel(offer).includes((30*crates)+' cr'),'actual cargo payout preview');api.performAction('n2_deliver');equal(now.credits,deliveryCash+30*crates,'agreed cargo payment');equal(now.cargo.crates,0,'sold cargo consumed');equal(now.cargo.sold,crates,'delivered crates logged');
+ const sold=json(now);api.performAction('n2_deliver');equal(json(now),sold,'handover cannot pay twice');
+ api.performAction('n2_wait');equal(now.clock,M.parseClock('05:00'),'explicit recipe wait');api.performAction('n2_taste');check(now.flags.n2_done,'recipe story completed');check(now.lastResult.lines.some(l=>l.text.includes(recipe==='smoky'?'Mushroom':'Plum')),'ending reflects selected recipe');
+ check(R.secondNightProgress().some(line=>line.includes('complete')),'cargo log reflects finished recipe');
+ const finished=json(now);api.performAction('n2_taste');equal(json(now),finished,'tasting cannot replay completion');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'cargo profits excluded from gold performance');equal(now.cargo.revenue-now.cargo.cost,(source==='landing'?12:4)*crates,'cargo margin before travel separate');equal(R.saveProblem(api.readSave()),null,'resolved Night Two reloads');
+ check(!api.trade.nextNight(),'two-night chapter ends, no automatic third night');
+ equal(R.saveProblem(old),null,'Night One save validates while chapter two active');R.setState(old);check(api.trade.data===T,'loading first night restores original data');
+}
+equal(json(T),firstData,'chapter builder never mutates original story');
+// Prior missed/late endings produce honest, different introductions.
+for(const [flags,phrase] of [[{},'while you were away'],[{nb_done:true,nb_late:true},'last-bowl skipper']]){beginSecond('vault',flags);api.travelTo('market');api.performAction('n2_nao_start');check(R.state().lastResult.lines.some(l=>l.text.includes(phrase)),'intro reflects previous attendance');}
+// A zero-credit, zero-gold, empty-tank player still has a complete no-purchase route.
+api.trade.start('two-tides');R.state().gold=[];R.state().credits=0;R.state().fuel=0;R.visit('bar','01:30');api.trade.turnIn();check(api.trade.nextNight(),'empty purse continues');
+api.performAction('sys_tug');equal(R.state().location,'landing','stranded carry-over has tug recovery');api.performAction('n2_reserve_fuel');equal(R.state().fuel,2,'one co-op emergency voucher');const reserve=json(R.state());api.performAction('n2_reserve_fuel');equal(json(R.state()),reserve,'fuel voucher cannot farm');api.travelTo('market');api.performAction('n2_nao_start');api.performAction('n2_menu_plum');api.performAction('n2_wait');api.performAction('n2_taste');check(R.state().flags.n2_done,'free ending reachable by actual crossings with no trade');equal(R.state().credits,0,'free ending has no hidden cost');
+beginSecond('both');api.travelTo('market');api.performAction('n2_nao_start');api.travelTo('landing');api.performAction('n2_courier');const courier=R.state();equal(courier.cargo.cost,0,'co-op property not paid stock');api.travelTo('market');const beforeFee=courier.credits;api.performAction('n2_deliver');equal(courier.credits,beforeFee+12,'courier fee paid exactly once');equal(courier.rewardCredits,12,'fee separate from commodity revenue');equal(courier.cargo.revenue,0,'courier cannot sell borrowed goods as owned stock');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'courier fee excluded from gold return');
+// Deadline boundaries include the five-minute handover; owned returns make losses explicit.
+beginSecond('order');R.visit('market','01:00');api.performAction('n2_nao_start');api.performAction('n2_buy_market_2');R.visit('market','04:25');check(R.locationActions().some(a=>a.id==='n2_deliver'),'last on-time start at 04:25');R.visit('market','04:26');check(!R.locationActions().some(a=>a.id==='n2_deliver'),'delivery closes after last safe start');R.visit('landing','05:40');check(R.locationActions().some(a=>a.id==='n2_return'),'return last safe start at 05:40');const returnCash=R.state().credits;api.performAction('n2_return');equal(R.state().credits,returnCash+32,'owned two-crate return pays 16 each');equal(R.state().clock,M.parseClock('05:45'),'handover completes at deadline');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'cargo return loss excluded from gold');equal(R.state().cargo.revenue-R.state().cargo.cost,-20,'return loss explicit');
+beginSecond('vault');R.visit('market','01:00');api.performAction('n2_nao_start');api.performAction('n2_menu_smoky');api.performAction('n2_buy_market_1');R.visit('market','05:45');check(!R.locationActions().some(a=>a.id==='n2_taste'),'late tasting switches action');api.performAction('n2_taste_late');check(R.state().flags.n2_late,'saved bowl ending');R.visit('landing','05:41');check(!R.locationActions().some(a=>a.id==='n2_return'),'return closes after last safe start');api.trade.turnIn();equal(R.state().cargo.revenue,0,'unserved cargo has no dawn payout');equal(R.tradeChoicesResult(),0,'unserved cargo cost is not gold loss');
+beginSecond('order');R.visit('market','01:00');api.performAction('n2_nao_start');api.performAction('n2_menu_plum');api.trade.turnIn();check(!R.state().flags.n2_done,'early rest does not auto-complete recipe');
+// New facts and gold events are separate from yesterday's rumour graph.
+for(const truth of ['order','vault','both']) {
+ beginSecond(truth);R.visit('pier','02:10');equal(!!M.quote(api.trade.data,truth,R.state().seed,'pier',R.state().clock),truth!=='vault','fog desk availability agrees with story');
+ api.performAction(truth==='vault'?'n2_pier_check_fog':'n2_pier_check_open');check(R.state().rumors.some(r=>r.id===(truth==='vault'?'n2_pier_fog':'n2_pier_open')),'confirmed desk status recorded');
+ R.visit('market','01:00');api.performAction('n2_nao_start');
+ for(let i=0,last='';i<12;i++){api.performAction('chat_nao');const text=R.state().lastResult.lines[0].text;check(text!==last,'Night Two casual replies rotate');last=text;}
+ equal(api.trade.validate().length,0,'each second-night state validates');
+ check(!R.locationActions().some(a=>a.id.startsWith('nb_')||a.id.startsWith('exp_')||a.id==='nm_contract'),'first-night quests absent from second chapter');
+}
+// Reject malformed optional chapter/cargo data without invalidating older saves.
+const chapter=JSON.parse(json(R.state()));
+for(const [key,value] of [['crates',3],['cost',-1],['revenue',Infinity],['bought',1],['courier','yes']]){const bad=JSON.parse(json(chapter));bad.cargo[key]=value;check(R.saveProblem(bad)!==null,'malformed cargo rejected: '+key);}
+const badMemory=JSON.parse(json(chapter));badMemory.previous.flags.nb_done='yes';check(R.saveProblem(badMemory)!==null,'nonboolean memory rejected');const badChapter=JSON.parse(json(chapter));badChapter.night=3;check(R.saveProblem(badChapter)!==null,'unknown chapter rejected');
+api.trade.start('frost-order');check(api.trade.data===T&&R.state().night===undefined,'fresh night resets data and chapter');equal(R.saveProblem(R.state()),null,'legacy shape remains valid');
+// Repeatable campaign seeds, courier returns, dawn and current-night gold accounting.
+api.trade.start('replay-lanterns');R.visit('bar','01:30');api.trade.turnIn();const replayFirst=JSON.parse(json(R.state()));api.trade.nextNight();const replayTruth=R.state().truth,replaySeed=R.state().seed;R.setState(replayFirst);api.trade.nextNight();equal(R.state().seed,replaySeed,'chapter seed reproducible');equal(R.state().truth,replayTruth,'chapter market truth reproducible');
+beginSecond('vault');api.travelTo('market');api.performAction('n2_nao_start');api.travelTo('landing');api.performAction('n2_courier');const returnFeeCash=R.state().credits;api.performAction('n2_return');equal(R.state().credits,returnFeeCash,'co-op return cannot pay owned-stock price');equal(R.state().cargo.returned,1,'co-op returned quantity recorded');check(!R.locationActions().some(a=>a.cargoBuy),'returned cargo does not reopen purchase allowance');
+beginSecond('order');R.visit('market','05:55');api.performAction('n2_nao_start');api.performAction('n2_menu_smoky');api.performAction('n2_taste_late');api.performAction('n2_bowl');check(R.state().resolved&&R.state().flags.end_dawn,'meal crossing dawn ends second chapter automatically');equal(R.saveProblem(api.readSave()),null,'automatic chapter ending save valid');equal(R.tradeChoicesResult(),0,'late meal does not appear as gold loss');
+beginSecond('both');const goldCash=R.state().credits;check(api.trade.buy(1),'Night Two actual gold buy');check(api.trade.sell(1),'Night Two actual gold sale');const spreadLoss=R.state().credits-goldCash;api.trade.turnIn();equal(R.tradeChoicesResult(),spreadLoss,'Night Two gold stats measure spread rather than carry-over');
+// Render the actual new controls and report into a small DOM mock. This checks
+// labels/handlers/accounting rows, not visual layout or browser focus behavior.
+class TestNode {
+ constructor(tag=''){this.tag=tag;this.children=[];this.attrs={};this.events={};this.textContent='';}
+ appendChild(child){this.children.push(child);return child;}
+ setAttribute(k,v){this.attrs[k]=v;}
+ addEventListener(k,fn){this.events[k]=fn;}
+ set innerHTML(value){this.children=[];this.textContent=value;}
+ get innerHTML(){return '';}
+}
+context.document.createElement=tag=>new TestNode(tag);
+context.document.createTextNode=text=>{const n=new TestNode('#text');n.textContent=text;return n;};
+const flatten=n=>[n,...n.children.flatMap(flatten)];
+const textOf=n=>flatten(n).map(x=>x.textContent).join(' ');
+api.trade.start('frost-order');R.visit('bar','01:30');api.trade.turnIn();
+let panel=new TestNode();R.renderTradeActions(panel);let transition=flatten(panel).find(n=>(n.attrs['data-label']||'').startsWith('Continue to Night Two'));
+check(transition&&transition.events.click,'resolved controls expose chapter transition');transition.events.click();equal(R.state().night,2,'actual rendered handler starts second chapter');
+api.travelTo('market');api.performAction('n2_nao_start');panel=new TestNode();R.renderTradeActions(panel);
+check(textOf(panel).includes('Choose smoky mushroom rice')&&textOf(panel).includes('Choose plum & sesame rice'),'both recipe controls rendered');check(textOf(panel).includes('Buy 2 sealed rice crates'),'cargo purchase controls rendered');check(flatten(panel).some(n=>n.tag==='details'&&textOf(n).includes('Recipe & cargo log')),'progress log folded in scrolling action panel');
+api.performAction('n2_menu_smoky');api.performAction('n2_buy_market_1');api.performAction('n2_deliver');api.performAction('n2_wait');api.performAction('n2_taste');api.trade.turnIn();
+const summary=Object.fromEntries(['resKicker','resTitle','resBody','resStats','btnResContinue','btnResNew'].map(k=>[k,new TestNode()]));R.summaryDom(summary);R.showTradeResolution();check(summary.resKicker.textContent.includes('Night Two'),'morning card identifies chapter');check(textOf(summary.resBody).includes('smoky mushroom'),'morning story reflects recipe');check(textOf(summary.resStats).includes('30 cr returned − 26 cr stock'),'morning report shows exact cargo account');equal(summary.btnResNew.textContent,'Start fresh Night One','chapter ending clearly labels fresh restart');
+panel=new TestNode();R.renderTradeActions(panel);const fresh=flatten(panel).find(n=>n.attrs['data-label']==='Start fresh Night One');check(fresh&&fresh.events.click,'fresh restart handler rendered');fresh.events.click();check(R.state().night===undefined&&api.trade.data===T,'fresh restart restores original chapter');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

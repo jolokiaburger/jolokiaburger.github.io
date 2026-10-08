@@ -1004,3 +1004,10 @@ body.hollis-at-bar #hollis-bar { display: inline; }
  .featured-portrait .portrait { width: 80px; height: 80px; }
 }
 .speech.featured-portrait.no-portrait { grid-template-columns: 1fr; }
+
+/* Night Two uses the existing market camera and fixed phone shell. */
+.n2-rice-prop, .n2-festival-prop { display: none; pointer-events: none; }
+body.night-two .n2-festival-prop, body.n2-rice-delivered .n2-rice-prop { display: inline; }
+body.night-two .nao-breakfast-batch { display: none; }
+
+.breakfast-progress summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; color: #f1d59e; font-size: 14px; }
