@@ -46,3 +46,7 @@ Conversations include Next/Previous and Read full exchange. Open People for free
 Browse Sora's gold scale, Nao Mizuno's food counter and Kenji Arata's repair bench in the illustrated arcade. Browsing is free; food, tea and searches show their costs before you choose. Follow the overdue gold launch from a courier's rumour to the current manifest and its dispatcher, then choose a small gold order or a courier payment. Deliveries replenish the gold tray on their actual schedules. Later in the night the repair bench and grill close, but tea and gold remain available until dawn.
 
 The market includes contextual conversations and varied free chats. Existing lighthouse progress and saves continue. See `NIGHT-MARKET.md` for the rules, source files and spoiler-marked test routes.
+
+## Nao's breakfast story
+
+At Nao's food counter, ask about the folded recipe to begin **The Last Bowl Before Sunrise**. Help prepare the counter, invite neighbours, or simply return for her first sunrise bowls. The personal story can be completed without buying anything. An optional twelve-portion supply batch adds a small trading decision: compare suppliers, allow for crossings and time, and accept that a quiet morning may leave stock unsold. The opening begins at 05:00; Nao keeps a last bowl for late arrivals until dawn. Rules and spoiler-marked routes: `NAO-STORY.md`.

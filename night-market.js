@@ -138,4 +138,96 @@
     { if: { flag: ["nm_report_done"] }, text: "LANTERN MARKET: The Tern checked the amended dispatch. Sora paid the courier fee; Nao corrected the chalk note beside the kettle." },
     { if: { flag: ["nm_job"], notFlag: ["nm_done"] }, text: "The market launch found its berth in the end. Your dispatch lead remains unfinished; Sora settled it with the morning crew." }
   );
+  /* Nao's optional personal thread. No meal, gold purchase or invitation is
+     required to see its ending. One extra food batch is a separate capped trade. */
+  T.breakfast = { servings: 12, price: 4, demand: { order: 5, vault: 3, both: 4 },
+    inviteFlags: ["nb_invite_mei", "nb_invite_priya", "nb_invite_lam"] };
+  T.people.nao.push({ if: { flag: ["nb_started"] }, text: "Nao wants to revive her father Haruto's breakfast counter. Tonight is a small trial, not a promise to take on every morning shift." },
+    { if: { flag: ["nb_done"] }, text: "She served her first sunrise bowls. The recipe is her father's; the handwritten menu is finally signed with her own name." });
+  T.rumors.r_nao_breakfast = { source: "nao", origin: "market", note: "Nao plans a trial breakfast at 05:00. Helping or attending is free. Optional: one extra twelve-portion batch costs 24 cr at the market or 18 cr at Landing 3. Delivered portions sell for 4 cr each; zero to twelve may sell. Fuel and time are extra. Deliver before 05:45. Invitations and a working warmer may help turnout.", truth: truthAll, reliability: 1, affected: "market", effect: "opportunity", expires: "05:45" };
+  T.rumors.r_nao_wharf = { source: "priya", origin: "landing", note: "The Landing 3 co-op's breakfast batch costs 18 cr and takes ten minutes to collect. It closes at 04:30; carrying the batch to Nao takes another crossing and a five-minute handover. One extra batch per skipper, with no guaranteed sales.", truth: truthAll, reliability: 1, affected: "market", effect: "supply", expires: "04:30" };
+  const food = { marketSpot: "food" };
+  T.actions.market.push(
+    action("nb_start", "talk", "Nao's folded recipe · Ask about breakfast", "nao", "Dad used to serve rice porridge to the first dock crews. He's retired now, and every time I unfold his recipe I hear him arguing with the kettle. I'd like to try a little breakfast opening at five. My own pantry covers the first bowls. You could help with the warmer, invite a few neighbours, or simply be here. You don't have to buy anything to make this matter.", { once: true, marketSpot: "food", when: { maxClock: "06:00" }, sets: ["nb_started"], hears: ["r_nao_breakfast"] }),
+    action("nb_recipe", "talk", "The last bowl before sunrise · Hear Nao's story", "nao", "Haruto—Dad—always kept one bowl for whoever arrived last. I thought it was terrible business. He said a counter isn't only a place where money changes hands. I want that part back. But I want my own name on the menu too. Is that selfish? ...No, don't answer quickly. I needed a little practice saying it aloud.", { once: true, marketSpot: "food", when: { flag: ["nb_started"], notFlag: ["nb_done"] }, sets: ["nb_story"] }),
+    action("nb_local_batch", "search", "Optional breakfast batch · 12 portions · 24 cr", "nao", "One sealed batch from the market co-op, twenty-four credits. This is your extra stock; my first bowls are already covered. Sales will return four credits a portion, up to twelve portions, but nobody can promise a crowd. Bring it back to my counter before quarter to six. You can still help without taking this deal.", { once: true, marketSpot: "food", cost: 24, minutes: 5, supplyPurchase: true, when: { flag: ["nb_started"], notFlag: ["nb_batch_owned", "nb_done"], maxClock: "04:50" }, sets: ["nb_batch_owned", "nb_local"] }),
+    action("nb_deliver", "search", "Hand Nao the extra breakfast batch · 5 min", "nao", "Seal intact, date checked. Into the covered serving tray it goes. I'll keep your batch separate and return the actual sales when we open together. Anything left over goes to the morning crew; nobody's breakfast gets wasted.", { once: true, marketSpot: "food", minutes: 5, when: { flag: ["nb_batch_owned"], notFlag: ["nb_batch_delivered", "nb_done"], maxClock: "05:40" }, sets: ["nb_batch_delivered"] }),
+    action("nb_handwarm", "search", "Help Nao heat the serving trays · 15 min", "nao", "Kenji's bench has closed, so we'll use the old insulated trays. You hold the kettle while I wrap them. Dad would have called this a repair made of tea towels. Good thing we have excellent tea towels.", { once: true, marketSpot: "food", minutes: 15, when: { flag: ["nb_started"], notFlag: ["nb_warmer", "nb_done"], minClock: "03:30", maxClock: "04:45" }, sets: ["nb_warmer", "nb_handwarm"] }),
+    action("nb_wait_trays", "system", "Wait for tray preparation · Until 03:30", "nao", "I'll clear the last grill order first. You find a dry stack of tea towels while I make room for the trays.", { once: true, marketSpot: "food", when: { flag: ["nb_started"], notFlag: ["nb_warmer", "nb_done"], minClock: "03:20", maxClock: "03:30" }, effects: { clockTo: "03:30" } }),
+    action("nb_wait", "system", "Stay for Nao's opening · Wait until 05:00", "nao", "You secure the Tern and help turn the counter toward morning. Nao unfolds the menu, smooths one corner, and leaves it flat this time. While you wait, the harbour keeps moving. At five she puts the first pot on.", { once: true, marketSpot: "food", when: { flag: ["nb_started"], notFlag: ["nb_done"], maxClock: "05:00" }, effects: { clockTo: "05:00" } }),
+    action("nb_open", "talk", "The first sunrise bowls · Open with Nao", "nao", "There. My name on the menu. Dad's recipe in the pot. Thank you for being here when I stopped folding it away.", { once: true, marketSpot: "food", breakfastOpen: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], minClock: "05:00", maxClock: "05:45" }, sets: ["nb_done"], effects: { breakfastSettlement: true }, lines: [
+      "Nao turns a small sign toward the quay: SUNRISE BOWLS · NAO MIZUNO. The first workers shake rain from their sleeves and make room for one another.",
+      { if: { flag: ["nb_repaired"] }, lines: [say("nao", "Kenji's warmer is purring. He left a note: 'No dramatic noises. Let the breakfast have the attention.'")] },
+      { if: { flag: ["nb_handwarm"] }, lines: [say("nao", "Our tea-towel engineering is holding! Dad would be unbearably pleased with us.")] },
+      { if: { notFlag: ["nb_warmer"] }, lines: [say("nao", "We'll serve in smaller rounds. Nothing wrong with a little opening. The kettle and I can manage.")] },
+      { if: { flag: ["nb_invite_mei"] }, lines: [say("mei", "A new menu deserves a good thermos. Here, Nao. And leave your name at the top, where it belongs.")] },
+      { if: { flag: ["nb_invite_priya"] }, lines: [say("priya", "I have ten minutes before handing over the log. That is a very respectable amount of breakfast.")] },
+      { if: { flag: ["nb_invite_lam"] }, lines: [say("lam", "Your father once fed me after a disastrous crossing. Today I get to pay his daughter. A pleasant improvement.")] },
+      say("nao", "My name on the menu. Dad's recipe in the pot. Thank you for being here when I stopped folding it away."),
+      { if: { flag: ["nb_batch_owned"], notFlag: ["nb_batch_delivered"] }, text: "Your extra batch is still aboard the Tern. It was not served, so it earns no sales; you arrange for the unopened batch to go to the morning crew." },
+      "She sets one last bowl aside for the next skipper. The counter feels like a beginning."
+    ] }),
+    action("nb_open_late", "talk", "Catch the last bowl · Return to Nao", "nao", "You made it. The first crews have already eaten, and I was starting to put the sign away. Then I remembered Dad's last bowl. Yours is still warm. We did a small thing tonight. I'd like to do it again, in my own way.", { once: true, marketSpot: "food", breakfastOpen: true, breakfastLate: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], minClock: "05:45", maxClock: "06:00" }, sets: ["nb_done", "nb_late"], effects: { breakfastSettlement: true }, lines: [
+      "The first breakfast rush has passed. Nao's signed menu is still propped beside the pot.",
+      say("nao", "You made it. Dad's last bowl rule wins again. Yours is still warm."),
+      { if: { flag: ["nb_invite_mei"] }, text: "Mei left a thermos and a note: 'Keep your name at the top.'" },
+      { if: { flag: ["nb_invite_priya"] }, text: "Priya's receipt says FIRST BREAKFAST: APPROVED. Nao has kept it." },
+      { if: { flag: ["nb_invite_lam"] }, text: "Captain Lam left a little brass star beside the menu, a greeting for Haruto." },
+      { if: { flag: ["nb_batch_owned"], notFlag: ["nb_batch_delivered"] }, text: "Your extra batch was never handed over. It earns no sales; the unopened portions go to the morning crew." },
+      say("nao", "It was a small opening. But it was mine. I'd like to do it again, in my own way.")
+    ] }),
+    action("nb_after", "talk", "Ask Nao what comes next", "nao", "One morning a week, perhaps. Enough to learn what works without forgetting to sleep. I'll tell Dad about the recipe. And about the part I changed: I asked people to come. That was harder than the cooking.", { once: true, marketSpot: "food", when: { flag: ["nb_done"] }, sets: ["nb_after"] }),
+    action("nb_bowl", "order", "Nao's sunrise bowl & barley tea", "nao", "Rice porridge, pickled greens, a little sesame. Seven credits and ten minutes to enjoy it. Dad's recipe never specified the story on the side; I think I'll keep that part.", { marketSpot: "food", cost: 7, minutes: 10, sitting: "nao_breakfast", when: { flag: ["nb_done"] } })
+  );
+  T.actions.landing.push(
+    action("nb_quote", "talk", "Compare Nao's supply offer with Priya", "priya", "The co-op has the same sealed twelve-portion batch for eighteen credits, collected in ten minutes. It closes at half past four. Add your crossings and fuel before calling it cheaper. Nao needs the handover finished before quarter to six. One batch only; breakfast demand is yours to judge.", { once: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], maxClock: "04:30" }, hears: ["r_nao_wharf"], sets: ["nb_quote"] }),
+    action("nb_wharf_batch", "search", "Optional co-op batch · 12 portions · 18 cr", "priya", "Eighteen credits, seal checked, collection receipt tucked under the string. Now get it to Nao's counter in time. A cheaper crate can still cost more after the crossing.", { once: true, cost: 18, minutes: 10, supplyPurchase: true, when: { flag: ["nb_started", "nb_quote"], notFlag: ["nb_batch_owned", "nb_done"], maxClock: "04:30" }, sets: ["nb_batch_owned", "nb_wharf"] }),
+    action("nb_invite_priya", "talk", "Invite Priya to Nao's breakfast", "priya", "Five o'clock? I can stop by during handover. I'll tell the early crew there's a pot on. Tell Nao she doesn't need a grand opening; a working kettle will do nicely.", { once: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], maxClock: "05:00" }, sets: ["nb_invite_priya"] })
+  );
+  T.actions.market.find(a => a.id === "nb_start").lines = [
+    { if: { maxClock: "05:00" }, lines: [say("nao", "Dad used to serve rice porridge to the first dock crews. He's retired now, and every time I unfold his recipe I hear him arguing with the kettle. I'd like to try a little breakfast opening at five. My pantry covers the first bowls. You could help with the warmer, invite neighbours, or simply be here. You don't have to buy anything to make this matter.")] },
+    { if: { minClock: "05:00" }, lines: [say("nao", "I put Dad's old breakfast recipe on the stove this morning. He's retired; I'm still learning to sign the menu myself. You're welcome to join me for the opening—or the last bowl, if the first crews have gone. No purchase required. A familiar face is a good beginning.")] }
+  ];
+  const foodVisit = T.actions.market.find(a => a.id === "nm_visit_food");
+  foodVisit.lines.forEach(line => { line.if.notFlag = ["nb_done"]; });
+  foodVisit.lines.unshift({ if: { flag: ["nb_done"] }, lines: [say("nao", "Welcome to my breakfast counter. A sunrise bowl with tea is seven credits and ten minutes. The old tea and bun orders are here too. Or stay for a free chat; I have quite a morning to tell you about.")] });
+  T.actions.bar.push(action("nb_invite_mei", "talk", "Invite Mei to Nao's breakfast", "mei", "Haruto's girl finally unfolded that recipe? I'll bring the good thermos. And send the first noodle delivery crew past her counter. A new breakfast is good for the whole quay.", { once: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], maxClock: "05:00" }, sets: ["nb_invite_mei"] }));
+  T.actions.metro.push(action("nb_invite_lam", "talk", "Invite Captain Lam to Nao's breakfast", "lam", "Haruto fed half the tug crews in my day. I'd be pleased to meet the new cook. I'll bring two early-shift friends, if their launch is on time. Better promise the visit than promise the crowd.", { once: true, when: { flag: ["nb_started"], notFlag: ["nb_done"], maxClock: "05:00" }, sets: ["nb_invite_lam"] }));
+  T.actions.market.push(action("nb_repair", "search", "Help Kenji mend Nao's warmer · 10 min", "kenji", "Hold the lamp. Clean contact, tight screw... there it is. Nao thought she needed a new cabinet. This one needed someone to give it ten patient minutes. You can tell her it still has a few good breakfasts in it.", { once: true, marketSpot: "repair", minutes: 10, when: { flag: ["nb_started"], notFlag: ["nb_warmer", "nb_done"], maxClock: "03:20" }, sets: ["nb_warmer", "nb_repaired"] }));
+  C.nao.lines.unshift(
+    { id: "breakfast_after", when: { flag: ["nb_done"] }, text: "I signed the menu without practising on the back first. You'd think that wouldn't feel like an adventure. It did." },
+    { id: "breakfast_warmer", when: { flag: ["nb_started", "nb_warmer"], notFlag: ["nb_done"] }, text: "The serving trays are ready. Now I only have to stop rearranging the spoons whenever I get nervous." },
+    { id: "breakfast_pantry", when: { flag: ["nb_batch_owned"], notFlag: ["nb_batch_delivered", "nb_done"] }, text: "Your extra batch is still aboard. A five-minute handover gets it into the tray; finish before 05:45. I'll account for actual sales when we open together." },
+    { id: "breakfast_shy", when: { flag: ["nb_started"], notFlag: ["nb_done"] }, text: "I can shout an order over three kettles. Inviting one friend to breakfast somehow takes all my courage." },
+    { id: "breakfast_hint", when: { notFlag: ["nb_started"] }, text: "That folded paper? An old breakfast recipe. I keep meaning to put it on the counter. You can ask me about it, if you like." }
+  );
+  C.nao.lines.find(line => line.id === "market_late_watch").when.notFlag = ["nb_done"];
+  C.kenji.lines.unshift({ id: "breakfast_repair", when: { flag: ["nb_repaired"] }, text: "Nao's cabinet was built to last. I like helping it keep that promise." });
+  T.conversations.push({ id: "nb_meal_intro", at: "market", via: ["market_meal", "market_tea"], when: { notFlag: ["nb_started"] }, lines: [
+    "Nao unfolds a handwritten recipe, then folds it again before anyone can read the heading.", say("nao", "Not a secret menu. More of a menu I'm arguing with. Ask me about breakfast when you're ready.")
+  ] });
+  T.conversations.push({ id: "nb_breakfast_chat", at: "market", via: ["nao_breakfast"], lines: [say("nao", "Dad used to say the last bowl was the one you remembered. I think the first one might matter too."), say("sora", "I'd happily test both theories. In the interests of sound market research.")] });
+  T.ambience.push({ at: "market", via: ["nao_breakfast"], text: "Someone draws a tiny sunrise on the corner of Nao's menu. She pretends not to notice, then moves the kettle so it won't drip on it." });
+  T.sceneClasses.push(
+    { class: "nao-breakfast-planned", when: { flag: ["nb_started"], notFlag: ["nb_done"] } },
+    { class: "nao-breakfast-ready", when: { flag: ["nb_warmer"] } },
+    { class: "nao-breakfast-stock", when: { flag: ["nb_batch_delivered"] } },
+    { class: "nao-breakfast-open", when: { flag: ["nb_done"] } },
+    { class: "nao-breakfast-guests", when: { flag: ["nb_done"], notFlag: ["nb_late"], flagAny: T.breakfast.inviteFlags } }
+  );
+  T.scenes.market.again.unshift(
+    { if: { flag: ["nb_done"] }, text: "SUNRISE BOWLS · NAO MIZUNO. The signed menu is propped beside a warm pot. Nao keeps one bowl for the next skipper." },
+    { if: { flag: ["nb_started"], notFlag: ["nb_done"], minClock: "05:00" }, text: "Nao has set the breakfast pot beside her folded menu. The first crews are arriving. Stop by her counter if you're staying for the opening." }
+  );
+  T.expeditionObjectives.unshift(
+    { when: { flag: ["nb_started"], notFlag: ["nb_done"], minClock: "05:45" }, text: "Nao kept the last bowl for you · Visit her food counter before dawn." },
+    { when: { flag: ["nb_started"], notFlag: ["nb_done"], minClock: "05:00" }, text: "Nao's breakfast is ready · Join her at the Night Market's food counter." }
+  );
+  T.ending.closing.unshift(
+    { if: { flag: ["nb_done"], notFlag: ["nb_late"] }, text: "SUNRISE BOWLS: Nao Mizuno's first breakfast welcomed the early crews. Her father Haruto's recipe sits beneath a new signature. She tells the Tern's skipper: 'Next time, I'll leave the menu unfolded.'" },
+    { if: { flag: ["nb_late"] }, text: "Nao served the first crews before you returned, then kept the last bowl warm for you. A small opening, a handwritten name, and one more reason to cross the harbour again." },
+    { if: { flag: ["nb_started"], notFlag: ["nb_done"] }, text: "Nao tried the breakfast counter while you were elsewhere. She leaves a note for the Tern: 'A small start. Come taste it another morning.' Any extra batch left unserved earned no sales." },
+    { if: { flag: ["nb_done", "nb_warmer"] }, text: "The serving trays held their warmth. Nao credits a patient skipper for helping the old counter keep its promise." },
+    { if: { flag: ["nb_done"], notFlag: ["nb_late"], flagAny: T.breakfast.inviteFlags }, text: "Your invitations brought neighbours to the opening. Nao discovered that asking people to come was part of the recipe too." }
+  );
 })();

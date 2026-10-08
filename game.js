@@ -381,6 +381,7 @@
     if (cond.hasAny && !cond.hasAny.some(hasClue)) return false;
     if (cond.lacks && cond.lacks.some(hasClue)) return false;
     if (cond.flag && !cond.flag.every(function (f) { return !!state.flags[f]; })) return false;
+    if (cond.flagAny && !cond.flagAny.some(function (f) { return !!state.flags[f]; })) return false;
     if (cond.notFlag && cond.notFlag.some(function (f) { return !!state.flags[f]; })) return false;
     if (cond.minClock && state.clock < parseClock(cond.minClock)) return false;
     if (cond.maxClock && state.clock >= parseClock(cond.maxClock)) return false;
@@ -744,6 +745,13 @@
       state.rewardGrams = (state.rewardGrams || 0) + effects.rewardGold;
       state.gold = MARKET.lots.buy(state.gold, effects.rewardGold, 0, { where: state.location, at: state.clock, provenance: "Earned for returning the Hoshimi lantern kits. Sora's stamped payment." });
     }
+    if (isTrade() && effects.breakfastSettlement && !state.flags.nb_supply_settled) {
+      const offer = breakfastOffer(!!state.flags.nb_late);
+      state.breakfastSold = offer.sold;
+      state.breakfastRevenue = (state.breakfastRevenue || 0) + offer.revenue;
+      state.credits += offer.revenue;
+      state.flags.nb_supply_settled = true;
+    }
     if (effects.clockTo) state.clock = Math.max(state.clock, parseClock(effects.clockTo));
   }
 
@@ -1052,12 +1060,16 @@
     const before = state.clock;
     state.credits -= cost;
     state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
+    if (action.supplyPurchase) state.breakfastCost = (state.breakfastCost || 0) + cost;
     state.clock += actionMinutes(action);
     if (action.fuel) state.fuel = Math.max(0, state.fuel - action.fuel);
     state.used[action.id] = (state.used[action.id] || 0) + 1;
     (action.sets || []).forEach(function (flag) { state.flags[flag] = true; });
     applyEffects(action.effects);
     applyRel(action.rel);
+    if (action.breakfastOpen && state.flags.nb_batch_owned) {
+      lines.push({ type: "p", text: "Your extra batch · " + (state.breakfastSold || 0) + " of 12 portions sold · " + (state.breakfastRevenue || 0) + " cr returned · " + (state.breakfastCost || 0) + " cr purchase cost · " + ((state.breakfastRevenue || 0) - (state.breakfastCost || 0)) + " cr before fuel and time. Unsold portions go to the morning crew." });
+    }
     if (sale) {
       const sold = MARKET.lots.sell(state.gold, sale.grams);
       const price = quote.sell + sale.premium, total = Math.round(sold.sold * price);
@@ -1188,7 +1200,7 @@
   // What the trades themselves made against holding the opening gold, with food and fuel left out.
   function tradeChoicesResult() {
     const s = state.start, f = state.finish;
-    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
+    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1772,6 +1784,7 @@
     if (market) renderMarketDirectory(container, spot);
     const gold = !market || spot === "all" || spot === "gold" ? renderGoldGroup(nextKey) : null;
     container.appendChild(el("p", { class: "expedition-lead", text: currentObjective() }));
+    if (market && state.flags.nb_started && (spot === "all" || spot === "food")) renderBreakfastProgress(container);
     if (gold) container.appendChild(gold);
     else if (!market) container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
     const visible = function (a) { return !a.directory && (!market || spot === "all" || !a.marketSpot || a.marketSpot === spot); };
@@ -1835,14 +1848,41 @@
     return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
   }
   function marketActionLabel(action) {
+    if (action.breakfastOpen && state.flags.nb_batch_delivered) {
+      const offer = breakfastOffer(!!action.breakfastLate);
+      return action.label + " · Your batch: " + offer.sold + " portions / " + offer.revenue + " cr";
+    }
     if (!action.goldSale) return action.label;
     const q = tradeQuote();
     return action.label + (q ? " · " + (action.goldSale.grams * (q.sell + action.goldSale.premium)) + " cr now" : "");
   }
+  // The small food trade is accounted separately from gold and quest rewards.
+  // Demand is only exposed when the opening action is available at five.
+  function breakfastOffer(late) {
+    const def = TRADE.breakfast;
+    if (!def || !state.flags.nb_batch_delivered) return { sold: 0, revenue: 0 };
+    const invitations = def.inviteFlags.filter(function (flag) { return state.flags[flag]; }).length;
+    const demand = def.demand[state.truth] + invitations * 2 + (state.flags.nb_warmer ? 2 : 0) - (late ? 3 : 0);
+    const sold = Math.max(0, Math.min(def.servings, demand));
+    return { sold: sold, revenue: sold * def.price };
+  }
+  function breakfastProgress() {
+    const f = state.flags, guests = TRADE.breakfast.inviteFlags.filter(function (flag) { return f[flag]; }).length;
+    return [
+      f.nb_done ? (f.nb_late ? "Opening complete · You shared the last bowl." : "Opening complete · Nao signed her own menu.") : state.clock >= parseClock("05:45") ? "The first crews have eaten · Nao keeps the last bowl for you until dawn." : "Opening from 05:00 · Return before 05:45 for the first crews; the last bowl stays warm until dawn.",
+      (f.nb_done ? "Opening preparation · " + (f.nb_warmer ? "Warm trays ready" : "Nao served in smaller rounds") : "Optional help · " + (f.nb_warmer ? "Serving trays ready" : state.clock >= parseClock("04:45") ? "Nao can manage without the warmer" : "Help Kenji before 03:20, or heat trays with Nao from 03:30 to before 04:45")) + " · Neighbours invited: " + guests + "/3" + (f.nb_done || state.clock >= parseClock("05:00") ? "" : " (before 05:00)."),
+      f.nb_batch_owned ? "Extra batch · " + (f.nb_batch_delivered ? "Handed over" : f.nb_done ? "Unserved; donated" : "Aboard the Tern · Hand over for 5 min before 05:40") + " · Cost " + (state.breakfastCost || 0) + " cr" + (f.nb_done ? " · Sales " + (state.breakfastRevenue || 0) + " cr" : " · Actual sales 0–48 cr; fuel and time extra.") : "No extra batch bought · You can complete the story for free. Optional batch: market 24 cr / Landing 3 co-op 18 cr, plus time and crossings."
+    ];
+  }
+  function renderBreakfastProgress(container) {
+    const section = el("section", { class: "breakfast-progress nb-section" }, [el("h3", { text: "Nao · The Last Bowl Before Sunrise" })]);
+    breakfastProgress().forEach(function (line) { section.appendChild(el("p", { text: line })); });
+    container.appendChild(section);
+  }
   function renderMarketDirectory(container, spot) {
     const directory = el("div", { class: "market-directory", role: "group", "aria-label": "Browse the Night Market" });
     directory.appendChild(el("p", { class: "action-group-label", text: "Lantern Market · Pick a stall" }));
-    directory.appendChild(el("p", { class: "market-status", text: state.clock >= parseClock("03:30")
+    directory.appendChild(el("p", { class: "market-status", text: state.flags.nb_done ? "Nao's breakfast counter open · Gold until dawn · Repair bench closed" : state.flags.nb_started && state.clock >= parseClock("05:00") ? "Nao's breakfast is ready · Visit her food counter" : state.clock >= parseClock("03:30")
       ? "Late watch · Tea and gold until dawn · Repair bench closed"
       : "Gold scale · Hot food · Repairs · A delivery to trace" }));
     const buttons = el("div", { class: "market-stalls" });
@@ -2172,6 +2212,7 @@
     body.innerHTML = "";
 
     body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Beyond the breakwater" }), el("p", { text: currentObjective() })]));
+    if (state.flags.nb_started) renderBreakfastProgress(body);
     const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Rumours & discoveries (" + state.rumors.length + ")" })]);
     if (!state.rumors.length) {
       heardSection.appendChild(el("p", { class: "nb-empty", text: "Nothing written down yet. What people tell you goes here, in their words, with who said it and when. Whether it's true is up to you." }));
@@ -2520,6 +2561,8 @@
     if (!Array.isArray(obj.trades) || !Array.isArray(obj.convos) || !Array.isArray(obj.fired) || !Array.isArray(obj.clues)) return "missing fields";
     if (!obj.flags || !obj.used || !obj.visited || !obj.rel || !obj.seen || !obj.ambience || !obj.start) return "missing fields";
     if (["rewardCredits", "rewardGrams"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid adventure reward";
+    if (["breakfastCost", "breakfastRevenue"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid breakfast trade";
+    if (obj.breakfastSold !== undefined && (!Number.isInteger(obj.breakfastSold) || obj.breakfastSold < 0 || obj.breakfastSold > 12)) return "invalid breakfast portions";
     if (obj.resolved && !obj.finish) return "missing fields";
     return null;
   }
@@ -3051,9 +3094,10 @@
       [state.flags.end_dawn ? "Dawn" : "Turned in", formatClock(state.endedAt)],
       ["The night", signed(net) + ", valued at Mei's scale"],
       ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
-      ["Your trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel and adventure rewards aside" : "none"],
+      ["Your gold trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel, breakfast trading and adventure rewards aside" : "none"],
+      ["Breakfast batch", state.breakfastCost ? (state.breakfastRevenue || 0) + " cr sales − " + state.breakfastCost + " cr stock = " + signed((state.breakfastRevenue || 0) - state.breakfastCost) + " before fuel and time" : "No extra batch bought"],
       ["Adventure reward", (state.rewardCredits || 0) + " cr · " + grams(state.rewardGrams || 0) + " of gold"],
-      ["Spent ashore", (state.spent || 0) + " cr on food, tea and fuel"],
+      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0)) + " cr on food, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
       ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],

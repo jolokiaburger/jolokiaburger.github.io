@@ -15,7 +15,7 @@ context.window.matchMedia=()=>({matches:false,addEventListener(){}});
 for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel,
+  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress,
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -288,4 +288,62 @@ for(const id of ['sora','nao','kenji']){
 }
 for(const match of read('index.html').matchAll(/<image[^>]+href="([^"]+)"/g))check(fs.existsSync(path.join(root,match[1])),'scene image reference shipped');
 api.trade.start('frost-order');R.visit('market','03:30');R.state().flags.nm_verified=true;check(api.currentObjective().includes('closed'),'objective updates after repair deadline');
+// Nao's personal thread: real routes, both suppliers, invitations, capped sales and saves.
+for(const seed of ['frost-order','vault-light','two-tides'])for(const source of ['local','wharf']){
+ api.trade.start(seed);api.travelTo('market');const st=R.state();
+ const start=st.credits;api.performAction('nb_start');equal(st.credits,start,'Nao story begins without a purchase');check(st.flags.nb_started,'Nao thread accepted');check(st.rumors.some(r=>r.id==='r_nao_breakfast'),'terms written in sourced notebook');
+ api.performAction('nb_recipe');check(st.flags.nb_story,'personal recipe conversation available');
+ api.performAction('nb_repair');check(st.flags.nb_repaired&&st.flags.nb_warmer,'Kenji helps repair warmer');
+ if(source==='local')api.performAction('nb_local_batch');
+ api.travelTo('landing');
+ if(source==='wharf'){
+  const beforeQuote=st.credits;api.performAction('nb_wharf_batch');equal(st.credits,beforeQuote,'co-op requires reading its terms');
+  api.performAction('nb_quote');check(st.rumors.some(r=>r.id==='r_nao_wharf'),'co-op collection terms recorded');api.performAction('nb_wharf_batch');
+ }
+ equal(st.breakfastCost,source==='local'?24:18,'chosen supplier cost recorded separately');
+ api.performAction('nb_invite_priya');api.performAction('landing_refuel');api.travelTo('bar');api.performAction('nb_invite_mei');api.travelTo('metro');api.performAction('nb_invite_lam');api.travelTo('market');
+ equal(st.location,'market','all invitations reachable with actual crossings');
+ const repeatPurchase=json(st);api.performAction('nb_local_batch');equal(json(st),repeatPurchase,'second supplier cannot create another batch');
+ const handoverAt=st.clock;api.performAction('nb_deliver');equal(st.clock,handoverAt+5,'batch handover takes five minutes');check(st.flags.nb_batch_delivered,'batch handed over');
+ const ready=api.readSave();equal(R.saveProblem(ready),null,'pre-opening breakfast save validates');R.setState(ready);const restored=R.state();
+ check(R.breakfastProgress().some(line=>line.includes('3/3')),'all invited neighbours shown in progress');
+ api.performAction('nb_wait');equal(restored.clock,M.parseClock('05:00'),'explicit wait reaches breakfast');
+ const expectedSales=seed==='vault-light'?44:48;const quote=R.breakfastOffer(false);equal(quote.sold,expectedSales/4,'prepared attendance follows seeded demand and twelve-portion cap');
+ check(R.marketActionLabel(R.activeCase().actions.market.find(a=>a.id==='nb_open')).includes(expectedSales+' cr'),'opening previews actual payout');
+ const before=restored.credits;api.performAction('nb_open');check(restored.flags.nb_done,'opening completed');equal(restored.credits,before+expectedSales,'opening pays actual batch sales');equal(restored.breakfastRevenue,expectedSales,'batch sales tracked separately');equal(restored.rewardCredits||0,0,'food sales are not adventure gifts');
+ for(const who of ['mei','priya','lam'])check(restored.lastResult.lines.some(l=>l.who===who),'invited character appears in opening dialogue');
+ const closed=json(restored);for(const id of ['nb_open','nb_open_late','nb_deliver','nb_local_batch'])api.performAction(id);equal(json(restored),closed,'opening payments and deliveries cannot repeat');
+ const net=restored.breakfastRevenue-restored.breakfastCost;equal(net,expectedSales-(source==='local'?24:18),'supply result before fuel is correct');
+ api.performAction('nb_after');check(restored.flags.nb_after,'Nao has a personal follow-up');
+ const cash=restored.credits,clock=restored.clock;api.performAction('nb_bowl');equal(restored.credits,cash-7,'sunrise meal costs seven');equal(restored.clock,clock+10,'sunrise meal takes ten minutes');check(restored.convos.includes('nb_breakfast_chat'),'sunrise meal has its own conversation');
+ const done=api.readSave();equal(R.saveProblem(done),null,'completed breakfast save validates');R.setState(done);api.trade.turnIn();equal(R.tradeChoicesResult(),0,'food sales excluded from gold-trading performance');
+}
+// Attendance alone gives the full personal ending, even with an empty purse.
+api.trade.start('frost-order');R.visit('market','04:55');R.state().credits=0;
+api.performAction('nb_start');api.performAction('nb_recipe');const freeTime=R.state().clock;
+api.performAction('nb_wait');api.performAction('nb_open');check(R.state().flags.nb_done,'no-money skipper reaches personal ending');equal(R.state().credits,0,'free opening does not invent a monetary reward');equal(R.state().breakfastRevenue,0,'Nao pantry does not become player stock');check(R.state().clock>=freeTime,'explicit wait costs time');
+check(R.state().lastResult.lines.some(l=>l.text.includes('smaller rounds')),'no-warmer opening acknowledged');
+// Low turnout can lose money; getting neighbours involved changes sales, not a free reward.
+for(const seed of ['frost-order','vault-light','two-tides']){
+ api.trade.start(seed);R.visit('market','01:00');api.performAction('nb_start');api.performAction('nb_local_batch');api.performAction('nb_deliver');R.visit('market','05:00');
+ const expected=T.breakfast.demand[R.state().truth]*4;api.performAction('nb_open');equal(R.state().breakfastRevenue,expected,'unprepared turnout follows seeded demand');check(R.state().breakfastRevenue<24,'quiet opening can lose money on extra batch');
+ api.trade.turnIn();equal(R.tradeChoicesResult(),0,'loss on supply batch does not appear as gold loss');
+ api.trade.start(seed);R.visit('market','04:00');api.performAction('nb_start');api.performAction('nb_handwarm');check(R.state().flags.nb_handwarm&&R.state().flags.nb_warmer,'late insulated-tray fallback works');
+ api.performAction('nb_local_batch');api.performAction('nb_deliver');R.visit('market','05:45');const lateQuote=R.breakfastOffer(true);const cash=R.state().credits;api.performAction('nb_open_late');equal(R.state().credits,cash+lateQuote.revenue,'late payout matches fewer customers');check(R.state().flags.nb_late&&R.state().flags.nb_done,'late return still finishes warmly');check(!R.locationActions().some(a=>a.id==='nb_open'),'late ending cannot switch to early payout');
+}
+api.trade.start('vault-light');R.visit('market','01:00');api.performAction('nb_start');api.performAction('nb_local_batch');R.visit('market','05:10');api.performAction('nb_open');equal(R.state().breakfastRevenue,0,'undelivered batch earns no money');check(R.state().lastResult.lines.some(l=>l.text.includes('still aboard')),'unserved cargo explained');
+api.trade.start('vault-light');R.visit('market','01:00');api.performAction('nb_start');R.state().credits=17;R.visit('landing');api.performAction('nb_quote');const poor=json(R.state());api.performAction('nb_wharf_batch');equal(json(R.state()),poor,'supply purchase cannot overdraw purse');
+// Deadline boundaries and alternative paths are authored explicitly.
+api.trade.start('frost-order');R.visit('market','03:19');api.performAction('nb_start');check(R.locationActions().some(a=>a.id==='nb_repair'),'repair starts before its last safe time');R.visit('market','03:20');check(!R.locationActions().some(a=>a.id==='nb_repair'),'repair cutoff reserves ten minutes before Kenji closes');R.visit('market','03:30');check(R.locationActions().some(a=>a.id==='nb_handwarm'),'fallback available when Kenji leaves');R.visit('market','04:45');check(!R.locationActions().some(a=>a.id==='nb_handwarm'),'fallback cannot run beyond preparation time');R.visit('market','04:50');check(!R.locationActions().some(a=>a.id==='nb_local_batch'),'local batch closes at advertised cutoff');
+R.visit('landing','04:30');check(!R.locationActions().some(a=>a.id==='nb_wharf_batch'),'co-op closes at its cutoff');R.visit('bar','05:00');check(!R.locationActions().some(a=>a.id==='nb_invite_mei'),'invitations close at opening');R.visit('market','04:59');check(!R.locationActions().some(a=>a.id==='nb_open'),'opening cannot occur before five');R.visit('market','05:00');check(R.locationActions().some(a=>a.id==='nb_open'),'opening available at five');R.visit('market','05:45');check(!R.locationActions().some(a=>a.id==='nb_open')&&R.locationActions().some(a=>a.id==='nb_open_late'),'quarter-to-six switches to last bowl');
+api.trade.start('two-tides');R.visit('market','05:50');api.performAction('nb_start');check(R.state().lastResult.lines[0].text.includes('put Dad'),'new late visit uses past-tense introduction');api.performAction('nb_open_late');check(R.state().flags.nb_done,'late discoverer can still close story');
+api.trade.start('two-tides');R.visit('market','01:00');api.performAction('nb_start');api.performAction('nb_local_batch');api.trade.turnIn();check(!R.state().flags.nb_done,'turning in early does not auto-complete Nao');equal(R.state().breakfastRevenue||0,0,'unfinished batch has no auto-payout');equal(R.tradeChoicesResult(),0,'unserved batch cost excluded from gold statistic');
+const legacy=JSON.parse(json(R.state()));for(const key of ['breakfastCost','breakfastRevenue','breakfastSold'])delete legacy[key];equal(R.saveProblem(legacy),null,'new breakfast counters remain optional for older saves');
+for(const [key,value] of [['breakfastCost',-1],['breakfastRevenue',Infinity],['breakfastSold',13],['breakfastSold',1.5]]){const bad=JSON.parse(json(legacy));bad[key]=value;check(R.saveProblem(bad)!==null,'bad optional breakfast field rejected');}
+for(const variant of D.variants){R.setState(R.newState(variant.seeds[0],variant.id));check(!R.locationActions().some(a=>a.id.startsWith('nb_')),'Nao subplot stays outside investigation mode');}
+api.trade.start('two-tides');R.visit('market','05:10');api.performAction('nb_start');api.performAction('nb_open');
+const guestRule=T.sceneClasses.find(rule=>rule.class==='nao-breakfast-guests');check(!R.conditionHolds(guestRule.when),'uninvited opening has no guest overlay');
+R.state().flags.nb_invite_mei=true;check(R.conditionHolds(guestRule.when),'one invitation enables guest overlay');R.state().flags.nb_late=true;check(!R.conditionHolds(guestRule.when),'late return has notes instead of guest overlay');
+check(!R.conditionHolds(C.nao.lines.find(line=>line.id==='market_late_watch').when),'old tea-only chat stops after breakfast opens');
+api.trade.start('two-tides');R.visit('market','03:20');R.state().credits=0;api.performAction('nb_start');api.performAction('nb_wait_trays');equal(R.state().clock,M.parseClock('03:30'),'free wait bridges warmer preparation gap');api.performAction('nb_handwarm');check(R.state().flags.nb_warmer,'empty-purse skipper can prepare trays after repair cutoff');equal(R.state().credits,0,'tray preparation needs no food purchase');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

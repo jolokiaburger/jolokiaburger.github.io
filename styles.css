@@ -937,6 +937,15 @@ body.reduce-motion .toast { transition: none; }
 /* 16 · Beyond the breakwater. One row preserves the fixed phone shell's height. */
 .exp-scene { display: none; pointer-events: none; }
 .market-arrival-parcels, .market-arrived-notice, .market-closed-bench, .market-player-wish { display: none; }
+.nao-breakfast-menu, .nao-breakfast-trays, .nao-breakfast-batch, .nao-breakfast-pot, .nao-breakfast-guests, .nao-menu-open { display: none; }
+body.nao-breakfast-planned .nao-breakfast-menu, body.nao-breakfast-open .nao-breakfast-menu,
+body.nao-breakfast-ready .nao-breakfast-trays, body.nao-breakfast-stock .nao-breakfast-batch,
+body.nao-breakfast-open .nao-breakfast-pot, body.nao-breakfast-open .nao-menu-open,
+body.nao-breakfast-guests .nao-breakfast-guests { display: inline; }
+body.nao-breakfast-open .nao-menu-planned { display: none; }
+.breakfast-progress { margin: 0 0 12px; padding: 12px; border: 1px solid #a38b63; border-radius: 9px; background: #34362d; color: #eae0c9; }
+.breakfast-progress h3 { margin: 0 0 8px; font-size: 14px; color: #f1d59e; }
+.breakfast-progress p { margin: 6px 0; font-size: 12px; line-height: 1.5; }
 body.market-restocked .market-arrival-parcels, body.market-restocked .market-arrived-notice,
 body.market-late-watch .market-closed-bench, body.market-wish .market-player-wish { display: inline; }
 body.market-restocked .market-late-notice, body.market-late-watch #exp-kenji { display: none; }

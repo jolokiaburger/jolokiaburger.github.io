@@ -43,3 +43,9 @@ Dialogue frames and expansion stall paint use warmer, quieter colours alongside 
 `night-market.js` extends the market after `expansion.js`, retaining the lighthouse action IDs. Sora, Nao and Kenji have distinct stalls, an illustrated arcade, matching market sprites and portrait dialogue. `game.js` adds a free directory inside the scrolling choices panel; choosing a stall filters its actions. The full market scene remains visible in both camera modes. `styles.css` keeps the fixed phone shell unchanged.
 
 The overdue launch has a seeded dispatch route, verifiable journal leads, actual stock replenishment and a small local price event. `market.js` sums scheduled arrivals without resetting purchases or buying caps. Kenji's limited order is a real two-gram sale with a displayed payout; Sora's courier alternative is a one-time adventure reward. Meals recognise investigation progress and the late watch; Kenji and the grill close at 03:30. Rules, balance assumptions and manual testing: `NIGHT-MARKET.md`.
+
+## Nao · The Last Bowl Before Sunrise
+
+`night-market.js` now includes Nao's personal breakfast thread, free story actions, an early warmer repair or later insulated-tray fallback, invitations to Mei/Priya/Lam, and early/late opening dialogue. Food purchases are optional. One extra supply batch can be sourced locally or at Landing 3; actual sales depend on seeded demand, preparation, invitations and timing. This is a one-night subplot, with no persistent business simulation yet.
+
+`game.js` keeps the progress card in the food pane and journal, guards supply settlement, and records optional validated cost/revenue/portion counters without invalidating older saves. The morning report separates the breakfast batch result from gold performance and food/fuel expenses. `index.html` and `styles.css` provide native counter props and opening states. Full rules, deadlines, accounting and test routes: `NAO-STORY.md`.
