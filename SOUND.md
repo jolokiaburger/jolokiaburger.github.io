@@ -11,7 +11,7 @@ New players start silent. Existing settings with a tuned radio migrate with effe
 ## What plays
 
 - Successful gold purchases and sales: scale latch, a restrained gold clink, paper rustle. Kenji's gold order uses the sale cue. Rejected transactions are silent.
-- Nao's food: grilled skewers, tea pours and bowl placement have distinct small cues.
+- Meals and drinks: Mei's ramen and milk tea, Rei's shared tea, Priya's flask and the metro's warm soy milk also use the bowl/pour cues. Nao's food: grilled skewers, tea pours and bowl placement have distinct small cues.
 - Warmer repair and tray preparation: light tools or kettle textures.
 - Nao's early or late opening: a roughly two-second original pentatonic phrase, once through the successful story action. Reloading or reading the exchange does not replay it.
 - Market ambience: a sparse cue every sixteen seconds, chosen from the stall's palette. After 03:30 the grill and repair sounds become tea ambience. No simulated speech, voices or typing ticks.

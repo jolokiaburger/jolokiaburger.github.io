@@ -6,7 +6,7 @@
   window.NEON_TIDES.world.locations.market.ferry = { x: 720, y: 742 };
   T.soundscape = {
     stalls: { all: ["tea", "grill", "repair"], food: ["tea", "grill", "bowl"], gold: ["tea"], repair: ["repair"], lane: ["tea"] },
-    actions: { market_skewers: "grill", market_tea: "tea", nm_late_bun: "bowl", nb_bowl: "bowl", nb_repair: "repair", nb_handwarm: "tea", nb_deliver: "bowl" }
+    actions: { bar_noodles: "bowl", bar_tea: "tea", bar_teo_tea: "tea", landing_tea: "tea", metro_soymilk: "tea", market_skewers: "grill", market_tea: "tea", nm_late_bun: "bowl", nb_bowl: "bowl", nb_repair: "repair", nb_handwarm: "tea", nb_deliver: "bowl" }
   };
   const say = (who, text) => ({ who: who, text: text });
   const action = (id, kind, label, who, text, extra) => Object.assign({ id, kind, label, minutes: 0, lines: [say(who, text)] }, extra || {});
