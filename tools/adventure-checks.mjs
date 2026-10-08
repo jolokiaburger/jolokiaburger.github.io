@@ -170,14 +170,27 @@ equal(R.saveProblem(noRewardSave),null,'pre-expansion reward fields remain optio
 noRewardSave.rewardCredits=-1;check(R.saveProblem(noRewardSave)!==null,'negative reward counter rejected');
 // Character redesign keeps save-facing IDs while updating every player-facing identity.
 equal(D.world.characters.teo.name,'Rei Minato','courier display identity updated');
-equal(D.world.characters.teo.artStyle,'anime','courier uses larger portrait presentation');
-equal(D.world.characters.mei.artStyle,'anime','Mei uses larger portrait presentation');
-for(const id of ['teo','mei']){
- const portrait=D.world.characters[id].portrait;
- check(fs.existsSync(path.join(root,portrait)),`${id} portrait is shipped`);
- const asset=read(portrait);check(asset.includes('viewBox="0 0 320 320"'),`${id} portrait scales natively`);
- check(asset.includes('<title'),`${id} portrait has accessible description`);
+equal(D.world.characters.teo.artStyle,'manga','courier uses larger portrait presentation');
+equal(D.world.characters.mei.artStyle,'manga','Mei uses larger portrait presentation');
+for(const [id,person] of Object.entries({...D.world.characters,...T.characters})){
+ const portrait=person.portrait;
+ check(portrait&&fs.existsSync(path.join(root,portrait)),`${id} portrait is shipped`);
+ equal(person.artStyle,'manga',`${id} uses manga presentation`);
+ const asset=fs.readFileSync(path.join(root,portrait));
+ equal(asset.toString('ascii',0,4),'RIFF',`${id} valid WebP container`);
+ equal(asset.toString('ascii',8,12),'WEBP',`${id} valid WebP signature`);
+ equal(asset.toString('ascii',12,16),'VP8 ',`${id} lossy WebP frame`);
+ equal(asset.readUInt16LE(26)&0x3fff,512,`${id} portrait width`);
+ equal(asset.readUInt16LE(28)&0x3fff,512,`${id} portrait height`);
+ check(asset.length<60000,`${id} portrait under 60 KB`);
 }
+for(const id of ['rei-pier','oduya-figure','hollis-landing','hollis-bar','priya-figure'])check(ids.has(id),`${id} figure is drawn`);
+api.trade.start('two-tides');R.visit('pier','01:30');
+equal(R.casualActions().find(a=>a.casual==='teo').thing,'rei-pier','Rei chat targets pier figure');
+R.visit('landing','00:25');equal(R.casualActions().find(a=>a.casual==='hollis').thing,'hollis-landing','Hollis chat targets landing figure');
+R.visit('bar','01:00');equal(R.casualActions().find(a=>a.casual==='hollis').thing,'hollis-bar','Hollis chat follows him to bar');
+R.visit('landing','00:40');check(!R.casualActions().some(a=>a.casual==='hollis'),'Hollis leaves landing on schedule');
+R.visit('bar','01:40');check(!R.casualActions().some(a=>a.casual==='hollis'),'Hollis leaves bar on schedule');
 for(const source of ['cases.js','trade.js','dialogue.js'])check(!/\bTeo\b|\bVale\b|T\.V\./.test(read(source)),'old display name removed consistently');
 check(read('cases.js').includes('WITNESS: R. Minato'),'witness signature follows renamed courier');
 check(read('cases.js').includes('checked — R.M.'),'log initials follow renamed courier');

@@ -18,7 +18,7 @@ window.NEON_TIDES_CHAT = {
     ]
   },
   teo: {
-    visits: [{ at: "bar", mode: "case" }, { at: "bar", mode: "trade", when: { maxClock: "01:20" } }, { at: "pier", mode: "trade", when: { minClock: "01:30" } }], thing: "teo-figure",
+    visits: [{ at: "bar", mode: "case" }, { at: "bar", mode: "trade", when: { maxClock: "01:20" } }, { at: "pier", mode: "trade", when: { minClock: "01:30" } }], thing: "teo-figure", thingsByPlace: { bar: "teo-figure", pier: "rei-pier" },
     lines: [
       { id: "hello", text: "Skipper! If anyone asks, this is a briefing. If nobody asks, it's my first break tonight. Don't ruin it with paperwork." },
       { id: "dream", text: "One day I'll take a ferry without this headset. Pick a light, follow it, find somewhere I haven't already scheduled a delivery. Sounds dangerous. I can't wait." },
@@ -90,6 +90,7 @@ window.NEON_TIDES_CHAT = {
     ]
   },
   hollis: {
+    thingsByPlace: { landing: "hollis-landing", bar: "hollis-bar" },
     visits: [{ at: "landing", mode: "trade", when: { minClock: "00:20", maxClock: "00:40" } }, { at: "bar", mode: "trade", when: { minClock: "00:45", maxClock: "01:40" } }],
     lines: [
       { id: "hello", text: "Skipper! Above water at last. Lovely place. Breathable. Excellent noodles." },
@@ -101,6 +102,7 @@ window.NEON_TIDES_CHAT = {
     ]
   },
   oduya: {
+    thing: "oduya-figure",
     visits: [{ at: "landing", mode: "trade" }],
     lines: [
       { id: "hello", text: "Captain! Welcome to the smallest treasure house in Bellwater. Mind your head. The profits have more room than I do." },

@@ -601,8 +601,8 @@
       const person = DATA.world.characters[id] || TRADE.characters[id];
       return { id: "chat_" + id, casual: id, kind: "talk", minutes: 0,
         label: id === "radio" ? "Check in with Bengt · Channel 9" : "Chat with " + person.name,
-        // Rei has no figure drawn on Pier 9. Never attach that action to her empty bar stool.
-        thing: id === "teo" && state.location !== "bar" ? null : CHAT[id].thing };
+        // Moving characters bind to the figure at their current quay.
+        thing: (CHAT[id].thingsByPlace && CHAT[id].thingsByPlace[state.location]) || CHAT[id].thing };
     });
   }
   function nextCasual(id) {
@@ -1882,9 +1882,9 @@
 
   function speechNode(item) {
     const who = DATA.world.characters[item.who] || { name: item.who, color: "#8fb6b5" };
-    const wrapper = el("div", { class: "speech" + (who.artStyle === "anime" ? " featured-portrait" : "") + (who.portrait ? "" : " no-portrait"), style: "--speaker:" + who.color });
+    const wrapper = el("div", { class: "speech" + ((who.artStyle === "anime" || who.artStyle === "manga") ? " featured-portrait" : "") + (who.portrait ? "" : " no-portrait"), style: "--speaker:" + who.color });
     if (who.portrait) {
-      const img = el("img", { class: "portrait", src: who.portrait, alt: "", width: "56", height: "56" });
+      const img = el("img", { class: "portrait", src: who.portrait, alt: "", width: "112", height: "112", decoding: "async" });
       img.addEventListener("error", function () { wrapper.classList.add("no-portrait"); img.remove(); });
       wrapper.appendChild(img);
     }

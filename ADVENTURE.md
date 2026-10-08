@@ -30,10 +30,10 @@ All three destinations have distinct inline SVG scenes and authored characters, 
 
 Run `node tools/adventure-checks.mjs` for the full engine checks, including all three world truths, both expedition rewards, real travel costs, save restoration, depleted stock, rescue and reward accounting. This does not replace visual testing on a real phone or a browser play-test.
 
-## Rei and Mei: anime character pass
+## Current character art
 
-The first two redesigned characters use original native vector portraits: `assets/portraits/rei-anime.svg` and `assets/portraits/mei-anime.svg`. Rei has a dark asymmetric haircut, teal headset and orange pilot jacket. Mei has a dark bun with silver temple streaks, a gold hairpin, jade earrings, red tunic and cream apron. Their figures in `index.html` use the same identifying colours and details. Featured portraits render at 96 px on desktop and 72 px on phones; other portraits retain their existing sizes.
+All thirteen speaking characters now use grounded adult manga portraits from `assets/portraits/*-manga.webp`. The earlier Rei and Mei SVG portraits remain as previous versions. The full set is 350,052 bytes; each asset is 512 × 512. The enlarged portrait treatment is shared by the full cast (112 px desktop, 80 px phones). `ART-DIRECTION.md` records the visual direction, character briefs, generation prompts and asset provenance.
 
-Teo's display name becomes Rei Minato throughout dialogue, witness records and signatures. Internal `teo` IDs, flags, clues, evidence requirements and save keys remain unchanged. Rei's dialogue emphasises practical wit, loyalty and curiosity; Mei's combines warm hospitality with dry humour. Essential facts and timings are preserved. The existing eight casual lines per character are rewritten without changing their availability or rewards.
+Teo's display name remains Rei Minato. Internal `teo` IDs, flags, clues, evidence requirements and save keys are unchanged. The scene figures now use natural adult silhouettes, muted workwear, individual hair and fine outlines. Oduya is visible near the landing hatch. Hollis appears at Landing 3 from 00:20–00:40, then the bar from 00:45–01:40. Rei appears at Pier 9 from 01:30. Picture chat targets follow the character's current location. Bengt remains a radio contact, with his own portrait.
 
-Portraits and the two harbour figures were inspected through native SVG raster previews. Interactive browser layout and real phone play-testing remain unverified.
+Dialogue frames and expansion stall paint use warmer, quieter colours alongside the harbour's established neon lighting. Portraits and native scene crops were visually inspected. Interactive browser layout and real phone play-testing remain unverified.

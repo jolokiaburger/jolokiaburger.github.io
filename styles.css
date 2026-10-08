@@ -962,3 +962,24 @@ body[data-adventure="trade"] .dock-chips .chip:disabled { opacity: .65; }
   .featured-portrait .portrait { width: 72px; height: 72px; }
   .speech.featured-portrait.no-portrait { grid-template-columns: 1fr; }
 }
+
+/* 18 · Quiet night-shift manga: matte frames and restrained workwear colours. */
+.dialogue-box { background: linear-gradient(145deg, #30343c, #202b35); border-color: #7a817f; border-top-color: #baa17c; border-radius: 8px; }
+.portrait { border-radius: 5px; border-color: #8b9695; background: #263640; box-shadow: 0 2px 8px #0005; }
+.speech.featured-portrait { grid-template-columns: 112px minmax(0, 1fr); }
+.featured-portrait .portrait { width: 112px; height: 112px; }
+.speaker { color: #eed3ac; }
+.speaker-role, .dialogue-progress { color: #bdc9c9; }
+.encounter { background: linear-gradient(180deg, #202a33, #142331); }
+.casual-group { border-color: #798a89; }
+.casual-group summary { color: #cedad4; }
+#oduya-figure, #rei-pier, #hollis-landing, #hollis-bar { display: none; }
+body[data-adventure="trade"] #oduya-figure,
+body.rei-at-pier #rei-pier,
+body.hollis-at-landing #hollis-landing,
+body.hollis-at-bar #hollis-bar { display: inline; }
+@media (max-width: 899px) {
+ .speech.featured-portrait { grid-template-columns: 80px minmax(0, 1fr); }
+ .featured-portrait .portrait { width: 80px; height: 80px; }
+}
+.speech.featured-portrait.no-portrait { grid-template-columns: 1fr; }

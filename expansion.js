@@ -16,9 +16,9 @@
     D.world.travel.push({ between: [a, b], fuel: island ? 3 : 1, minutes: island ? 35 : (a === "yard" || b === "yard" ? 20 : 15) });
   }); });
   const cast = {
-    sora: { name: "Sora Ember", role: "Lantern market host", color: "#ffd08a" },
-    rin: { name: "Rin Starling", role: "Salvage engineer", color: "#8aead9" },
-    aki: { name: "Aki Hoshimi", role: "Keeper of the guiding light", color: "#bcb5ff" }
+    sora: { name: "Sora Ember", role: "Lantern market host", color: "#ffd08a", portrait: "assets/portraits/sora-manga.webp", artStyle: "manga" },
+    rin: { name: "Rin Starling", role: "Salvage engineer", color: "#8aead9", portrait: "assets/portraits/rin-manga.webp", artStyle: "manga" },
+    aki: { name: "Aki Hoshimi", role: "Keeper of the guiding light", color: "#bcb5ff", portrait: "assets/portraits/aki-manga.webp", artStyle: "manga" }
   };
   Object.assign(T.characters, cast);
   Object.keys(cast).forEach(function (id) { T.things["exp-" + id] = cast[id].name; });

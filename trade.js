@@ -183,8 +183,8 @@ window.NEON_TIDES_TRADE = (function () {
   ];
 
   var characters = {
-    hollis: { name: "Hollis",       role: "Treasure diver · Long Patience",       color: "#7fd1ff" },
-    oduya:  { name: "Oduya",        role: "Keeper of the gold hatch",   color: "#d9b071" }
+    hollis: { name: "Hollis",       role: "Treasure diver · Long Patience",       color: "#7fd1ff", portrait: "assets/portraits/hollis-manga.webp", artStyle: "manga" },
+    oduya:  { name: "Oduya",        role: "Keeper of the gold hatch",   color: "#d9b071", portrait: "assets/portraits/oduya-manga.webp", artStyle: "manga" }
   };
 
   /* ---- rumours: the notebook's wording is `note` ------------------------------ */
@@ -336,7 +336,7 @@ window.NEON_TIDES_TRADE = (function () {
     dex:    [ { text: "Dex Swift, a co-op rider waiting for the last train. Carries Frostline's sealed cases for a living." } ]
   };
 
-  var things = { "gold-board": "Mei's gold board", "booth": "Exchange hatch", "timetable-board": "Priya's log", "boarding-lights": "The tarp", "vending": "Soy-milk stall" };
+  var things = { "rei-pier": "Rei", "hollis-landing": "Hollis", "hollis-bar": "Hollis", "oduya-figure": "Oduya", "gold-board": "Mei's gold board", "booth": "Exchange hatch", "timetable-board": "Priya's log", "boarding-lights": "The tarp", "vending": "Soy-milk stall" };
 
   /* ---- arrival text ------------------------------------------------------------ */
   var scenes = {
@@ -818,6 +818,9 @@ window.NEON_TIDES_TRADE = (function () {
   ];
 
   var sceneClasses = [
+    { class: "rei-at-pier", when: { minClock: "01:30" } },
+    { class: "hollis-at-landing", when: { minClock: "00:20", maxClock: "00:40" } },
+    { class: "hollis-at-bar", when: { minClock: "00:45", maxClock: "01:40" } },
     { class: "teo-gone", when: { minClock: "01:20" } }   // Rei leaves Kurage 33 for Pier 9
   ];
 
