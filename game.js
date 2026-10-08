@@ -319,7 +319,7 @@
   let state = null;         // the saved game
   let activeCase = null;    // built from state.variantId
   const transient = { travelling: null, timer: null, mode: "title", sceneClasses: [], objective: null, camera: null, cameraFrame: 0 };
-  const settings = { station: "off", motion: "auto", coached: false, camera: "close", hints: "on" };
+  const settings = { station: "off", effects: false, effectsVolume: 0.6, motion: "auto", coached: false, camera: "close", hints: "on" };
   const profile = { version: 1, cases: {} };   // cases[variantId] = { endings: [endingId, ...] }
   const storage = { ok: true, reason: "" };
   const dom = {};
@@ -533,9 +533,9 @@
     state.lastResult = null;
     if (isTrade()) { advanceMarket(before); observeMarket(); }   // the board you moor at, read on arrival
     saveGame();
-    if (settings.station === "off" && !transient.hintedRadio) {
+    if (settings.station === "off" && !settings.effects && !transient.hintedRadio) {
       transient.hintedRadio = true;
-      toast(touchFirst() ? "Radio is off. Tap the radio for engine sound and music." : "Radio is off. Tune it (R) for engine sound and music.");
+      toast(touchFirst() ? "Sound is off. Open Menu for gentle effects, or tune the radio for music." : "Sound is off. Menu (M) has gentle effects; radio (R) has music.");
     }
     beginCrossing(from, dest, minutes, check.cost.fuel);
   }
@@ -1078,6 +1078,7 @@
       state.trades.push({ kind: "sell", grams: sold.sold, price: price, total: total, basis: sold.basis, at: state.clock, where: state.location, contract: action.id });
       lines.push({ type: "p", text: "Sold " + grams(sold.sold) + " at " + price + " cr/g · Received " + total + " cr. This uses two grams of Sora's eighteen-gram buying allowance." });
     }
+    soundCue(action.breakfastOpen ? "opening" : (sale ? "sell" : (action.sound || (TRADE.soundscape && TRADE.soundscape.actions[action.id]))));
     const heardNow = [];
     hearsOf(action, heardNow);
     advanceMarket(before);
@@ -1116,6 +1117,7 @@
     if (after.canBuy < 1 && q.dealer.soldOut) lines.push({ type: "p", text: q.dealer.soldOut });
     else if (after.canBuy <= 5 && q.dealer.lowStock) lines.push({ type: "p", text: q.dealer.lowStock });
     state.lastResult = { label: "Bought " + grams(g) + " · " + q.dealer.name, lines: lines, clues: [], heard: [] };
+    soundCue("buy");
     saveGame();
     renderKeepingFocus();
     return true;
@@ -1136,6 +1138,7 @@
     const lines = [{ type: "p", text: fill(q.dealer.sellText, { grams: grams(sold.sold), total: total + " cr", price: q.sell }) }];
     if (tradeQuote().canSell <= 0 && q.dealer.full) lines.push({ type: "p", text: q.dealer.full });
     state.lastResult = { label: "Sold " + grams(sold.sold) + " · " + q.dealer.name, lines: lines, clues: [], heard: [] };
+    soundCue("sell");
     saveGame();
     renderKeepingFocus();
     return true;
@@ -2600,6 +2603,8 @@
     try {
       const parsed = JSON.parse(raw);
       settings.station = STATIONS.some(function (s) { return s.id === parsed.station; }) ? parsed.station : "off";
+      settings.effects = typeof parsed.effects === "boolean" ? parsed.effects : settings.station !== "off";
+      settings.effectsVolume = [0.3, 0.6, 1].indexOf(parsed.effectsVolume) !== -1 ? parsed.effectsVolume : 0.6;
       settings.motion = MOTION_MODES.indexOf(parsed.motion) !== -1 ? parsed.motion : (parsed.reduceMotion ? "reduced" : "auto");
       settings.coached = parsed.coached === true;
       settings.camera = CAMERA_MODES.indexOf(parsed.camera) !== -1 ? parsed.camera : "close";
@@ -2636,15 +2641,15 @@
   /* 13b · THE BOAT RADIO — music generated with the Web Audio API       */
   /* No audio files are used: rain is filtered noise, Lantern FM plucks  */
   /* a string model on a pentatonic scale, Basin Lo-Fi sequences drums   */
-  /* and synths. Everything starts only after the player tunes the dial. */
+  /* and synths. Audio starts only after tuning or enabling effects with a gesture. */
   /* ------------------------------------------------------------------ */
   const STATIONS = [
-    { id: "off",     name: "Off",         sub: "no sound" },
+    { id: "off",     name: "Off",         sub: "music off" },
     { id: "rain",    name: "Rain only",   sub: "harbour ambience" },
     { id: "lantern", name: "Lantern FM",  sub: "ambient · plucked strings" },
     { id: "basin",   name: "Basin Lo-Fi", sub: "hypnotic techno" }
   ];
-  const radio = { ctx: null, master: null, reverb: null, rainGain: null, noise: null, stop: null, plucks: {}, sfxPlayed: 0 };
+  const radio = { ctx: null, master: null, reverb: null, rainGain: null, noise: null, stop: null, plucks: {}, sfxPlayed: 0, effects: null, lastCue: -Infinity, ambientTimer: null };
 
   function stationById(id) { return STATIONS.filter(function (s) { return s.id === id; })[0] || STATIONS[0]; }
   function cycleStation() {
@@ -2658,7 +2663,8 @@
     if (radio.ctx) return true;
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return false;
-    const ctx = new Ctx();
+    let ctx;
+    try { ctx = new Ctx(); } catch (err) { return false; }
     const rate = ctx.sampleRate;
     const master = ctx.createGain();
     master.gain.value = MASTER_GAIN;
@@ -2667,6 +2673,9 @@
     compressor.ratio.value = 4;
     master.connect(compressor);
     compressor.connect(ctx.destination);
+    const effects = ctx.createGain();
+    effects.gain.value = settings.effects ? settings.effectsVolume : 0;
+    effects.connect(compressor);
 
     // Two seconds of noise, reused for rain, hats, claps and vinyl crackle.
     const noise = ctx.createBuffer(1, rate * 2, rate);
@@ -2707,6 +2716,8 @@
     reverb.connect(wet);
     wet.connect(master);
 
+    radio.effects = effects;
+    radio.ambientTimer = setInterval(marketAmbience, 16000);
     radio.ctx = ctx; radio.master = master; radio.reverb = reverb; radio.rainGain = rainGain; radio.noise = noise;
     return true;
   }
@@ -2720,7 +2731,7 @@
       stopMusic();
       if (radio.ctx) {
         radio.rainGain.gain.setTargetAtTime(0, radio.ctx.currentTime, 0.3);
-        setTimeout(function () { if (settings.station === "off" && radio.ctx) radio.ctx.suspend(); }, 1200);
+        setTimeout(function () { if (settings.station === "off" && !settings.effects && radio.ctx) radio.ctx.suspend(); }, 1200);
       }
       return;
     }
@@ -2781,9 +2792,9 @@
   }
 
   // Travel sound effects: a horn and engine when casting off, a hull bump and bell when mooring.
-  // They play only while the radio is on (any station), so "Off" stays completely silent.
+  // Effects use an independent dry bus: muting it also silences in-flight ferry cues.
   function sfxReady() {
-    if (settings.station === "off") return false;
+    if (!settings.effects || document.hidden) return false;
     if (!ensureAudio()) return false;
     if (radio.ctx.state === "suspended") resumeAudio();
     return true;
@@ -2803,7 +2814,7 @@
       const o = ctx.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.detune.value = Math.random() * 8 - 4;
       o.connect(hornTone); o.start(t); o.stop(t + 0.8);
     });
-    hornTone.connect(hornGain); hornGain.connect(radio.master); hornGain.connect(radio.reverb);
+    hornTone.connect(hornGain); hornGain.connect(radio.effects);
     // engine: a sub-bass triangle with a 9 Hz "chug", plus band-passed noise for the wash
     const engine = ctx.createGain();
     engine.gain.setValueAtTime(0.0001, t);
@@ -2820,7 +2831,7 @@
     const washBand = ctx.createBiquadFilter(); washBand.type = "bandpass"; washBand.frequency.value = 800; washBand.Q.value = 0.6;
     const washGain = ctx.createGain(); washGain.gain.value = 0.35;
     wash.connect(washBand); washBand.connect(washGain); washGain.connect(engine);
-    engine.connect(radio.master);
+    engine.connect(radio.effects);
     const end = t + dur + 0.3;
     sub.start(t); chug.start(t); wash.start(t);
     sub.stop(end); chug.stop(end); wash.stop(end);
@@ -2832,13 +2843,95 @@
     const thud = ctx.createOscillator();
     thud.frequency.setValueAtTime(90, t); thud.frequency.exponentialRampToValueAtTime(38, t + 0.18);
     const thudGain = ctx.createGain(); thudGain.gain.setValueAtTime(0.28, t); thudGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
-    thud.connect(thudGain); thudGain.connect(radio.master); thud.start(t); thud.stop(t + 0.32);
+    thud.connect(thudGain); thudGain.connect(radio.effects); thud.start(t); thud.stop(t + 0.32);
     // the ferry's bell: three partials with long decays
     [[1, 0.11], [2.4, 0.045], [4.1, 0.02]].forEach(function (partial) {
       const bell = ctx.createOscillator(); bell.frequency.value = 660 * partial[0];
       const g = ctx.createGain(); g.gain.setValueAtTime(partial[1], t + 0.06); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
-      bell.connect(g); g.connect(radio.master); g.connect(radio.reverb); bell.start(t + 0.06); bell.stop(t + 1.7);
+      bell.connect(g); g.connect(radio.effects); bell.start(t + 0.06); bell.stop(t + 1.7);
     });
+  }
+
+  // Tiny, original procedural cues: muted ceramics, paper and pentatonic glints.
+  // The dry effects bus keeps mute immediate; finite sources disconnect when finished.
+  function setEffects(on, volume) {
+    settings.effects = on === true;
+    if ([0.3, 0.6, 1].indexOf(volume) !== -1) settings.effectsVolume = volume;
+    if (settings.effects && !ensureAudio()) {
+      settings.effects = false;
+      toast("Audio isn't available in this browser.");
+    }
+    saveSettings();
+    if (!radio.ctx) return;
+    radio.effects.gain.setTargetAtTime(settings.effects ? settings.effectsVolume : 0, radio.ctx.currentTime, 0.03);
+    if (settings.effects) { resumeAudio(); soundCue("tea"); }
+    else if (settings.station === "off") setTimeout(function () {
+      if (!settings.effects && settings.station === "off" && radio.ctx) radio.ctx.suspend();
+    }, 250);
+  }
+  function effectTone(frequency, offset, duration, level, type) {
+    const ctx = radio.ctx, t = ctx.currentTime + offset;
+    const source = ctx.createOscillator(), gain = ctx.createGain();
+    source.type = type || "sine"; source.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(level, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    source.connect(gain); gain.connect(radio.effects);
+    source.onended = function () { source.disconnect(); gain.disconnect(); };
+    source.start(t); source.stop(t + duration + 0.02);
+  }
+  function effectNoise(frequency, offset, duration, level) {
+    const ctx = radio.ctx, t = ctx.currentTime + offset;
+    const source = ctx.createBufferSource(), band = ctx.createBiquadFilter(), gain = ctx.createGain();
+    source.buffer = radio.noise; band.type = "bandpass"; band.frequency.value = frequency; band.Q.value = 0.7;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(level, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+    source.connect(band); band.connect(gain); gain.connect(radio.effects);
+    source.onended = function () { source.disconnect(); band.disconnect(); gain.disconnect(); };
+    source.start(t); source.stop(t + duration + 0.02);
+  }
+  function soundCue(kind) {
+    if (["buy", "sell", "opening", "repair", "grill", "tea", "bowl"].indexOf(kind) === -1 || !sfxReady()) return false;
+    const t = radio.ctx.currentTime;
+    // A brief shared cooldown prevents repeated clicks from stacking loud cues.
+    if (t - radio.lastCue < 0.45) return false;
+    radio.lastCue = t; radio.sfxPlayed += 1;
+    if (kind === "buy" || kind === "sell") {
+      effectTone(440, 0, 0.09, 0.035, "triangle"); // scale latch
+      [880, 1320, kind === "buy" ? 1760 : 1100].forEach(function (f, i) { effectTone(f, 0.08 + i * 0.07, 0.25, 0.022); });
+      effectNoise(1600, 0.3, 0.3, 0.014); // blue-paper receipt
+    } else if (kind === "opening") {
+      [261.63, 329.63, 392, 440, 523.25].forEach(function (f, i) { effectTone(f, i * 0.22, 0.85, 0.028, "triangle"); });
+      effectTone(130.81, 0, 1.9, 0.022);
+      effectNoise(700, 0.1, 0.35, 0.012);
+    } else if (kind === "repair") {
+      [520, 650, 780].forEach(function (f, i) { effectTone(f, i * 0.14, 0.12, 0.018, "triangle"); });
+      effectNoise(900, 0.1, 0.2, 0.01);
+    } else if (kind === "grill") {
+      effectNoise(2300, 0, 0.8, 0.018);
+      effectTone(560, 0.1, 0.2, 0.015);
+    } else if (kind === "tea" || kind === "bowl") {
+      effectNoise(1200, 0, 0.65, 0.012);
+      effectTone(kind === "tea" ? 880 : 660, 0.2, 0.45, 0.022);
+      effectTone(1320, 0.22, 0.3, 0.008);
+    }
+    return true;
+  }
+  function marketAmbience() {
+    // Never wakes a suspended context. No ambience on title, crossings, endings,
+    // hidden tabs or reading panels. A sparse cycle avoids voice-like babble.
+    if (!settings.effects || !radio.ctx || radio.ctx.state !== "running" || document.hidden ||
+        !state || !isTrade() || state.resolved || state.location !== "market" ||
+        transient.mode !== "play" || transient.travelling ||
+        (dom.modal && !dom.modal.hidden) || (dom.notebook && !dom.notebook.hidden)) return;
+    const spot = transient.marketSpot || "all";
+    const palette = TRADE.soundscape && TRADE.soundscape.stalls[spot];
+    if (!palette || !palette.length) return;
+    let kind = palette[Math.floor(radio.ctx.currentTime / 16) % palette.length];
+    if (kind === "repair" && state.clock >= parseClock("03:30")) kind = "tea";
+    if (kind === "grill" && state.clock >= parseClock("03:30")) kind = "tea";
+    if (radio.ctx.currentTime - radio.lastCue >= 8) soundCue(kind);
   }
 
   // Karplus-Strong: a burst of noise circulating through a short, averaging delay line
@@ -3180,6 +3273,9 @@
       list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { closeModal(); openNotebook(); } }, ["Journal", el("span", { class: "val", text: isTrade() ? state.rumors.length + " notes" : state.clues.length + " clues" })]));
     }
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleStation(); openMenu(); } }, ["Radio", el("span", { class: "val", text: stationById(settings.station).name })]));
+    list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { setEffects(!settings.effects); openMenu(); } }, ["Harbour sounds", el("span", { class: "val", text: settings.effects ? "on" : "off" })]));
+    list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { const levels = [0.3, 0.6, 1]; setEffects(settings.effects, levels[(levels.indexOf(settings.effectsVolume) + 1) % levels.length]); openMenu(); } }, ["Effects volume", el("span", { class: "val", text: Math.round(settings.effectsVolume * 100) + "%" })]));
+    list.appendChild(el("p", { class: "muted", text: "Soft gold, ferry and market sounds. Independent of the radio; off starts quiet. Volume changes only effects." }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleMotion(); openMenu(); } }, ["Motion", el("span", { class: "val", text: motionLabel() })]));
     list.appendChild(el("p", { class: "muted", text: motionSummary() }));
     list.appendChild(el("button", { class: "btn", type: "button", onclick: function () { cycleCamera(); openMenu(); } }, ["Camera", el("span", { class: "val", text: settings.camera === "close" ? "close · the quay you're at" : "wide · the whole harbour" })]));
@@ -3244,7 +3340,7 @@
       "The notebook marks the threads your evidence settles and the lines you can fill in. Menu → Hints turns those marks off for a harder night; the liar's rebuttals at the counter stay.",
       DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
       "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
-      "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. While the radio is on, the ferry also sounds its horn and engine when you cast off and rings its bell when you moor.",
+      "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. Menu → Harbour sounds enables soft ferry, trading and market effects independently of the radio. Effects volume has three levels.",
       "Every case is a seed, and the same seed always opens the same night. Harbour adventures on the title screen lists the mysteries and endings you have found.",
       "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still."
     ];
@@ -3374,12 +3470,13 @@
     document.addEventListener("visibilitychange", function () {
       if (!radio.ctx) return;
       if (document.hidden) radio.ctx.suspend();
-      else if (settings.station !== "off") resumeAudio();
+      else if (settings.station !== "off" || settings.effects) resumeAudio();
     });
 
     // Sound that was on last time may only resume after a user gesture.
     const resumeOnce = function () {
       if (settings.station !== "off") setStation(settings.station, true);
+      if (settings.effects && ensureAudio()) resumeAudio();
       document.removeEventListener("pointerdown", resumeOnce);
       document.removeEventListener("keydown", resumeOnce);
     };
@@ -3522,7 +3619,8 @@
     radio: {
       setStation: setStation,
       stations: STATIONS,
-      state: function () { return { station: settings.station, hasContext: !!radio.ctx, contextState: radio.ctx ? radio.ctx.state : null, sfxPlayed: radio.sfxPlayed }; }
+      setEffects: setEffects,
+      state: function () { return { station: settings.station, effects: settings.effects, effectsVolume: settings.effectsVolume, hasContext: !!radio.ctx, contextState: radio.ctx ? radio.ctx.state : null, sfxPlayed: radio.sfxPlayed }; }
     },
     storage: storage,
     // the gold night: start it, act in it, and look behind the board (debug() shows the hidden truth)

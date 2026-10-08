@@ -20,7 +20,7 @@ Open the game in any modern browser (desktop or phone). Nothing is installed or 
 - Dealers notice when you lean on them: buy a lot and the price goes up; some have only so much to sell or will only take so much.
 - From 01:30 you can **turn in** aboard the Tern; at dawn the night ends by itself. The morning card tells you what happened and what your night was worth.
 
-**Controls.** Click or tap the ringed people and things in the picture, or the choices under the story. Keyboard: `1`–`9` choose actions, `N` notebook, `M` menu, `R` radio, `Esc` closes panels. The radio (off by default) plays generated music and ferry sounds.
+**Controls.** Click or tap the ringed people and things in the picture, or the choices under the story. Keyboard: `1`–`9` choose actions, `N` notebook, `M` menu, `R` radio, `Esc` closes panels. The radio (off by default) plays generated music. Menu → **Harbour sounds** separately enables gentle ferry, gold-trading and market effects; **Effects volume** cycles through 30%, 60% and 100%. Both controls remember your choice. See `SOUND.md`.
 
 The four short investigations from earlier versions are under **Case files** on the title screen.
 

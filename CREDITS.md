@@ -15,7 +15,7 @@ Everything in this folder was made for Neon Tides. Nothing was copied from anoth
 | Story, characters, dialogue, place names, brands (Kurage 33, Tiger Volt, OX-9, Frostline, Meridian Private Aquaria, Haldane Marine Credit, the Grey Kittiwake, tug Vidar, Bellwater Basin, Bell Reef, Line 9; for the gold night, Hollis, Oduya, the salvage boat Long Patience, Harbour Savings, the Heron) | `cases.js`, `trade.js`, `dialogue.js`, `expansion.js`, `night-market.js` | Written for this project. All people, companies, brands, vessels and places are fictional |
 | The gold market's numbers and model (base price, district offsets, event envelopes, seeded noise) | `trade.js`, `market.js` | Invented for the game; not modelled on any real market's data |
 | Interface text and layout | `index.html`, `styles.css`, `game.js` | Original |
-| Boat radio: rain ambience, *Lantern FM*, *Basin Lo-Fi*, and the ferry's horn, engine, hull bump and bell | generated at runtime in `game.js` (the *BOAT RADIO* section) | Filtered noise, a Karplus-Strong plucked-string model and oscillator synthesis through the Web Audio API. Both stations and all effects are original procedural sounds; no recorded audio, samples or sound fonts are bundled |
+| Boat radio: rain ambience, *Lantern FM*, *Basin Lo-Fi*, the ferry's horn, engine, hull bump and bell, gold-scale/receipt cues, market ceramics/grill/repair ambience, and Nao's pentatonic opening phrase | generated at runtime in `game.js` (the *BOAT RADIO* section) | Filtered noise, a Karplus-Strong plucked-string model and oscillator synthesis through the Web Audio API. Both stations and all effects are original procedural sounds; no recorded audio, samples or sound fonts are bundled |
 
 ## Fonts
 

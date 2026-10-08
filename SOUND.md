@@ -1,0 +1,28 @@
+# Harbour sounds — a quiet adventure mix
+
+The sound update uses a warm, understated JRPG mood: small metallic glints when gold changes hands, dry paper receipts, soft ceramics, filtered grill and kettle textures, patient repair taps, and a short rising pentatonic phrase for Nao's opening. These are original procedural cues, not samples from any game or anime. No audio files or network requests are needed.
+
+## Listen
+
+Open Menu (`M`) and turn **Harbour sounds** on. **Effects volume** cycles through 30%, 60% and 100%, with 60% as the initial setting. Music stays on the separate radio (`R`): try **Lantern FM** for plucked-string ambience or **Basin Lo-Fi** for the existing 104 bpm groove. Turning radio Off leaves enabled effects available. Turning Harbour sounds off silences the effects bus, including a ferry cue already playing.
+
+New players start silent. Existing settings with a tuned radio migrate with effects enabled to preserve the earlier ferry sounds. Browser autoplay rules may require the first click or key press after reopening. Settings persist locally; no game-save format changes.
+
+## What plays
+
+- Successful gold purchases and sales: scale latch, a restrained gold clink, paper rustle. Kenji's gold order uses the sale cue. Rejected transactions are silent.
+- Nao's food: grilled skewers, tea pours and bowl placement have distinct small cues.
+- Warmer repair and tray preparation: light tools or kettle textures.
+- Nao's early or late opening: a roughly two-second original pentatonic phrase, once through the successful story action. Reloading or reading the exchange does not replay it.
+- Market ambience: a sparse cue every sixteen seconds, chosen from the stall's palette. After 03:30 the grill and repair sounds become tea ambience. No simulated speech, voices or typing ticks.
+- Ferry departures and arrivals: the existing horn, engine, hull and bell now follow Harbour sounds independently of the radio.
+
+Ambient cues only play during an active gold night at the market. They pause during crossings, on title/end screens, with the notebook/menu open, and in hidden tabs. Ambience never wakes a suspended audio context. A short shared cooldown prevents rapid transaction clicks from piling up; ambience also waits eight seconds after an action cue. Finite new sources stop and disconnect themselves.
+
+## Files and validation
+
+`night-market.js` holds the stall palettes and action-to-cue mapping. `game.js` contains synthesis, the independent effects bus, controls, settings migration, scheduling and gameplay hooks. Menu controls remain in the existing scrolling modal; the fixed phone shell has no layout changes.
+
+Run `node tools/adventure-checks.mjs` for gameplay regression checks and `node tools/sound-checks.mjs` for the mock Web Audio contract checks. The latter covers successful/failed trades, opening replay prevention, bounded sources and cleanup, cooldowns, location/visibility gating, independent mute, old settings and missing audio support.
+
+These checks do not establish how the mix sounds on speakers or actual browser autoplay behavior. Listening on desktop headphones, a phone speaker and Safari/iOS remains to be done. Start at 30% for a first listening pass; tune the per-cue synthesis levels in `game.js` after that play-test.

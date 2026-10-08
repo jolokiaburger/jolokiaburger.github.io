@@ -4,6 +4,10 @@
   "use strict";
   const T = window.NEON_TIDES_TRADE, C = window.NEON_TIDES_CHAT;
   window.NEON_TIDES.world.locations.market.ferry = { x: 720, y: 742 };
+  T.soundscape = {
+    stalls: { all: ["tea", "grill", "repair"], food: ["tea", "grill", "bowl"], gold: ["tea"], repair: ["repair"], lane: ["tea"] },
+    actions: { market_skewers: "grill", market_tea: "tea", nm_late_bun: "bowl", nb_bowl: "bowl", nb_repair: "repair", nb_handwarm: "tea", nb_deliver: "bowl" }
+  };
   const say = (who, text) => ({ who: who, text: text });
   const action = (id, kind, label, who, text, extra) => Object.assign({ id, kind, label, minutes: 0, lines: [say(who, text)] }, extra || {});
   Object.assign(T.characters, {
