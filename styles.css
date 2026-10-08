@@ -933,3 +933,22 @@ body.reduce-motion .toast { transition: none; }
   .gold-group .action-btn { font-size: 14px; }
   .title-actions .btn { white-space: normal; }
 }
+
+/* 16 · Beyond the breakwater. One row preserves the fixed phone shell's height. */
+.exp-scene { display: none; pointer-events: none; }
+body[data-mode="play"][data-location="market"]:not(.travelling) .exp-market,
+body[data-mode="play"][data-location="yard"]:not(.travelling) .exp-yard,
+body[data-mode="play"][data-location="island"]:not(.travelling) .exp-island { display: inline; }
+body[data-location="market"]:not(.travelling) .hotspot,
+body[data-location="yard"]:not(.travelling) .hotspot,
+body[data-location="island"]:not(.travelling) .hotspot { display: none; }
+.expedition-lead { padding: 10px 12px; margin: 0 0 10px; border-left: 3px solid var(--amber); background: #192c49; color: var(--paper-dim); font-size: 13px; line-height: 1.5; }
+body[data-mode="play"][data-adventure="trade"] .dock-chips {
+  display: flex; overflow-x: auto; gap: 6px; padding: 6px 8px; background: #101b32;
+  flex: 0 0 auto; scrollbar-width: thin; scroll-snap-type: x proximity;
+}
+body[data-adventure="trade"] .dock-chips .chip { flex: 1 0 116px; min-width: 116px; scroll-snap-align: start; }
+body[data-adventure="trade"] .dock-chips .chip:disabled { opacity: .65; }
+@media (max-width: 899px) {
+  body[data-adventure="trade"] .dock-chips .chip { flex: 0 0 104px; min-width: 104px; }
+}

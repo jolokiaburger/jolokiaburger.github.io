@@ -12,14 +12,15 @@ const saved=new Map();
 const context=vm.createContext({console,window:{},document:{readyState:'loading',addEventListener(){},getElementById(id){return ids.has(id)?{}:null;}},location:{protocol:'file:',search:''},setTimeout(){return 1;},clearTimeout(){},setInterval(){return 1;},clearInterval(){},URLSearchParams});
 context.window.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
 context.window.matchMedia=()=>({matches:false,addEventListener(){}});
-for(const name of ['cases.js','trade.js','market.js','dialogue.js'])vm.runInContext(read(name),context,{filename:name});
+for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags,
+  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit,
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
   render = function () {}; renderKeepingFocus = function () {}; focusEncounter = function () {};
+  beginCrossing = function () {};
   setMode = function () {}; positionFerry = function () {}; toast = function () {};
   showResolution = function () {}; debugMarket = function () {};
   if (document.readyState === "loading")`);
@@ -101,4 +102,70 @@ for(const variant of D.variants){
   api.chooseEnding(choice.id);equal(state.ending,choice.ending,'ending still reachable');
  }
 }
+// Full expedition via real travel/action APIs: resource costs, unlocks, mutually exclusive payment,
+// autosave, capped dealers and rescue all apply without presentation hooks.
+for (const seed of ['frost-order','vault-light','two-tides']) {
+ for (const payment of ['cash','gold']) {
+  api.trade.start(seed);
+  check(!R.canTravel('island').ok,'island needs a discovered chart');
+  api.performAction('exp_chart');check(!R.state().flags.exp_chart,'cannot obtain chart from another quay');
+  for(const from of Object.keys(D.world.locations))for(const to of Object.keys(D.world.locations)){
+   if(from===to)continue;
+   check(R.travelCost(from,to)?.fuel>0,`explicit route ${from} to ${to}`);
+  }
+  const startClock=R.state().clock;
+  api.travelTo('market');equal(R.state().location,'market','market crossing succeeds');
+  api.performAction('exp_accept');check(R.state().flags.exp_job,'delivery accepted');
+  api.travelTo('yard');api.performAction('exp_chart');check(R.state().flags.exp_chart,'chart unlocks island');
+  const purse=R.state().credits;api.performAction('yard_refuel');equal(R.state().credits,purse-30,'yard fuel costs credits');equal(R.state().fuel,6,'yard fills tank');
+  const beforeCrossing=R.state().clock;
+  api.travelTo('island');equal(R.state().fuel,3,'outbound island crossing uses three fuel');equal(R.state().clock,beforeCrossing+35,'island crossing uses 35 minutes');
+  equal(api.readSave().location,'island','island visit autosaves');equal(R.saveProblem(api.readSave()),null,'expanded save validates');
+  check(api.trade.buy(1),'island gold can be bought');check(api.trade.sell(1),'island gold can be sold');
+  api.performAction('exp_collect');check(R.state().flags.exp_cargo,'kits collected');
+  const collectedAt=R.state().clock;api.performAction('exp_collect');equal(R.state().clock,collectedAt,'cannot repeatedly collect kits');
+  api.travelTo('market');equal(R.state().fuel,0,'return crossing uses remaining tank');
+  const beforeCash=R.state().credits,beforeGold=R.state().gold.reduce((n,l)=>n+l.grams,0);
+  api.performAction('exp_deliver_'+payment);check(R.state().flags.exp_done,'delivery completed');
+  equal(R.state().credits,beforeCash+(payment==='cash'?85:0),'chosen cash reward only');
+  equal(R.state().gold.reduce((n,l)=>n+l.grams,0),beforeGold+(payment==='gold'?1:0),'chosen gold reward only');
+  const rewardState=json(R.state());api.performAction('exp_deliver_cash');api.performAction('exp_deliver_gold');equal(json(R.state()),rewardState,'reward cannot be collected twice or switched');
+  check(api.currentObjective().includes('complete'),'objective records completion');
+  check(R.state().clock>startClock,'journey costs real time');
+  check(!R.canTravel('bar').ok,'empty tank prevents crossing');
+  api.performAction('sys_tug');equal(R.state().location,'landing','tug rescues expedition traveller');
+  api.trade.turnIn();check(R.state().resolved,'expanded night ends normally');
+  check(Number.isFinite(R.tradeChoicesResult()),'reward accounting leaves finite trade result');
+ }
+}
+// A no-trade quest never appears as trading profit. Gifted gold uses zero cash basis.
+api.trade.start('frost-order');R.visit('market');R.state().flags.exp_cargo=true;
+api.performAction('exp_deliver_cash');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'cash quest reward excluded from trading performance');
+api.trade.start('frost-order');R.visit('market');R.state().flags.exp_cargo=true;
+api.performAction('exp_deliver_gold');api.trade.turnIn();equal(R.tradeChoicesResult(),0,'gold quest reward excluded from trading performance');
+for(const variant of D.variants){R.setState(R.newState(variant.seeds[0],variant.id));for(const dest of ['market','yard','island'])check(!R.canTravel(dest).ok,'investigation retains original destinations');}
+for(const loc of ['market','yard','island']){
+ api.trade.start('vault-light');R.visit(loc);R.state().credits=100000;
+ const stock=T.market.dealers[loc].stock;
+ check(api.trade.buy(stock),'dealer stock can be bought');check(!api.trade.buy(1),'stock cannot be exceeded');
+ check(api.trade.sell(stock),'dealer accepts purchase back');
+ check(api.trade.debug().prices[loc].sell!==null,'expanded price is reported in debug');
+}
+// Buying caps and fuel affordability are enforced, not merely displayed.
+for(const loc of ['market','yard','island']){
+ api.trade.start('frost-order');R.visit(loc);
+ const limit=T.market.dealers[loc].limit;
+ R.state().gold=[{grams:limit+1,cost:0,karat:24,purity:0.999,where:loc,at:R.state().clock,provenance:'test cargo'}];
+ check(api.trade.sell(limit),'dealer buys up to its limit');check(!api.trade.sell(1),'dealer cannot exceed its buying limit');
+}
+api.trade.start('vault-light');R.visit('yard');R.state().credits=29;
+const poorState=json(R.state());api.performAction('yard_refuel');equal(json(R.state()),poorState,'refuel cannot overdraw purse');
+api.trade.start('vault-light');R.visit('island');R.state().fuel=2;
+check(R.locationActions().some(a=>a.id==='exp_collect')===false,'island pickup requires accepting the job');
+check(R.canTravel('market').ok===false,'island return needs three fuel');
+check(R.cheapestExit('island')===3,'rescue threshold uses actual island routes');
+check(R.activeCase().actions.island.length>0,'island retains exploration choices');
+const noRewardSave=JSON.parse(json(R.state()));delete noRewardSave.rewardCredits;delete noRewardSave.rewardGrams;
+equal(R.saveProblem(noRewardSave),null,'pre-expansion reward fields remain optional');
+noRewardSave.rewardCredits=-1;check(R.saveProblem(noRewardSave)!==null,'negative reward counter rejected');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

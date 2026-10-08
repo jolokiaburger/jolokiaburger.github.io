@@ -454,7 +454,7 @@
   // Objectives are an ordered list of { when: CONDITION, text }; the first rule that holds is shown.
   // That keeps "what now?" in cases.js, where each case can phrase it for its own lie.
   function currentObjective() {
-    const rules = activeCase.objectives;
+    const rules = isTrade() ? (TRADE.expeditionObjectives || []) : activeCase.objectives;
     for (let i = 0; i < rules.length; i++) {
       if (conditionHolds(rules[i].when)) return rules[i].text;
     }
@@ -482,16 +482,27 @@
     return route ? { fuel: route.fuel, minutes: route.minutes } : null;
   }
   function travelMinutes(cost) { return state.canArmed ? 0 : cost.minutes; }
+  function canTravelFromUnlocked(dest) {
+    const loc = DATA.world.locations[dest];
+    return !loc.unlockFlag || !!state.flags[loc.unlockFlag];
+  }
   function cheapestExit(from) {
     let min = Infinity;
     Object.keys(DATA.world.locations).forEach(function (to) {
-      if (to === from) return;
+      if (to === from || !locationAvailable(to) || !canTravelFromUnlocked(to)) return;
       const cost = travelCost(from, to);
       if (cost && cost.fuel < min) min = cost.fuel;
     });
     return min;
   }
+  function locationAvailable(dest) {
+    const loc = DATA.world.locations[dest];
+    return !!loc && (!loc.tradeOnly || isTrade());
+  }
   function canTravel(dest) {
+    if (!locationAvailable(dest)) return { ok: false, why: "not on this adventure" };
+    const place = DATA.world.locations[dest];
+    if (place.unlockFlag && !state.flags[place.unlockFlag]) return { ok: false, why: place.lockedText || "route not discovered" };
     if (dest === state.location) return { ok: false, why: "moored here" };
     if (transient.travelling) return { ok: false, why: "under way" };
     if (state.confront) return { ok: false, why: activeCase.confrontation.busyLabel };
@@ -721,6 +732,14 @@
     if (effects.fuel) state.fuel = Math.min(DATA.meta.fuelMax, Math.max(0, state.fuel + effects.fuel));
     if (effects.cans) state.cans = Math.max(0, state.cans + effects.cans);
     if (effects.refuel) state.fuel = DATA.meta.fuelMax;
+    if (isTrade() && effects.credits) {
+      state.credits += effects.credits;
+      state.rewardCredits = (state.rewardCredits || 0) + effects.credits;
+    }
+    if (isTrade() && effects.rewardGold) {
+      state.rewardGrams = (state.rewardGrams || 0) + effects.rewardGold;
+      state.gold = MARKET.lots.buy(state.gold, effects.rewardGold, 0, { where: state.location, at: state.clock, provenance: "Earned for returning the Hoshimi lantern kits. Sora's stamped payment." });
+    }
     if (effects.clockTo) state.clock = Math.max(state.clock, parseClock(effects.clockTo));
   }
 
@@ -1141,7 +1160,7 @@
   // What the trades themselves made against holding the opening gold, with food and fuel left out.
   function tradeChoicesResult() {
     const s = state.start, f = state.finish;
-    return Math.round(f.worth + (state.spent || 0) - (s.credits + s.grams * f.sell));
+    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1314,7 +1333,7 @@
   const FULL_VIEW = { x: 0, y: 0, w: 1440, h: 800 };
   const TITLE_CROP = { x: 567, y: 0, w: 640, h: 800 };
   const QUAY_W = 760, QUAY_H = 800 * 760 / 1440, QUAY_Y = 215;   // a quay in the picture's own 18:10: sign glow to waterline
-  const QUAY_X = { landing: 0, metro: 130, bar: 507, pier: 680 };  // the crop's left edge, clamped to the picture
+  const QUAY_X = { landing: 0, metro: 130, bar: 507, pier: 680, market: 340, yard: 340, island: 340 };  // the crop's left edge, clamped to the picture
   function portraitPhone() { return window.matchMedia("(max-width: 899px) and (orientation: portrait)").matches; }
   function cameraTarget() {
     if (transient.mode === "title") return portraitPhone() ? TITLE_CROP : FULL_VIEW;
@@ -1463,11 +1482,13 @@
     const cost = travelCost(state.location, dest);
     if (!cost) return "";
     const minutes = travelMinutes(cost);
-    if (!check.ok && check.why.indexOf("needs") === 0) return check.why;
+    if (!check.ok) return check.why;
     return cost.fuel + " fuel · " + minutes + " min" + (state.canArmed ? " (" + DATA.world.drink.name + ")" : "");
   }
 
   function renderHarbour() {
+    document.body.setAttribute("data-location", state.location);
+    document.body.setAttribute("data-adventure", isTrade() ? "trade" : "case");
     dom.hotspots.forEach(function (spot) {
       const dest = spot.getAttribute("data-dest");
       const loc = DATA.world.locations[dest];
@@ -1578,7 +1599,7 @@
 
   function renderChips() {
     dom.chips.innerHTML = "";
-    Object.keys(DATA.world.locations).forEach(function (dest) {
+    Object.keys(DATA.world.locations).filter(locationAvailable).forEach(function (dest) {
       const loc = DATA.world.locations[dest];
       const check = canTravel(dest);
       const cost = travelCost(state.location, dest);
@@ -1717,6 +1738,7 @@
 
     // Gold stays at the top. Optional chats are folded so they never bury a trade.
     const gold = renderGoldGroup(nextKey);
+    container.appendChild(el("p", { class: "expedition-lead", text: currentObjective() }));
     if (gold) container.appendChild(gold);
     else container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
     const here = locationActions().filter(function (a) { return a.kind !== "system"; });
@@ -1747,7 +1769,7 @@
     const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
     const ferryActions = locationActions().filter(function (a) { return a.kind === "system"; }).concat(sys);
     const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
-    Object.keys(DATA.world.locations).forEach(function (dest) {
+    Object.keys(DATA.world.locations).filter(locationAvailable).forEach(function (dest) {
       if (dest === state.location) return;
       const loc = DATA.world.locations[dest];
       const check = canTravel(dest);
@@ -1953,7 +1975,7 @@
     // On phones the chips above the sheet are the travel buttons, so a Ferry group holding nothing
     // but crossings is marked and hidden there (styles.css 13b).
     const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
-    Object.keys(DATA.world.locations).forEach(function (dest) {
+    Object.keys(DATA.world.locations).filter(locationAvailable).forEach(function (dest) {
       if (dest === state.location) return;
       const loc = DATA.world.locations[dest];
       const check = canTravel(dest);
@@ -2086,6 +2108,7 @@
     const body = dom.nbBody;
     body.innerHTML = "";
 
+    body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Beyond the breakwater" }), el("p", { text: currentObjective() })]));
     const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Rumours & discoveries (" + state.rumors.length + ")" })]);
     if (!state.rumors.length) {
       heardSection.appendChild(el("p", { class: "nb-empty", text: "Nothing written down yet. What people tell you goes here, in their words, with who said it and when. Whether it's true is up to you." }));
@@ -2433,6 +2456,7 @@
     if (!Array.isArray(obj.rumors) || obj.rumors.some(function (r) { return !r || !TRADE.rumors[r.id]; })) return "unknown rumor";
     if (!Array.isArray(obj.trades) || !Array.isArray(obj.convos) || !Array.isArray(obj.fired) || !Array.isArray(obj.clues)) return "missing fields";
     if (!obj.flags || !obj.used || !obj.visited || !obj.rel || !obj.seen || !obj.ambience || !obj.start) return "missing fields";
+    if (["rewardCredits", "rewardGrams"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid adventure reward";
     if (obj.resolved && !obj.finish) return "missing fields";
     return null;
   }
@@ -2964,8 +2988,9 @@
       [state.flags.end_dawn ? "Dawn" : "Turned in", formatClock(state.endedAt)],
       ["The night", signed(net) + ", valued at Mei's scale"],
       ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
-      ["Your trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food and fuel aside" : "none"],
-      ["Spent ashore", (state.spent || 0) + " cr on noodles, tea and fuel"],
+      ["Your trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel and adventure rewards aside" : "none"],
+      ["Adventure reward", (state.rewardCredits || 0) + " cr · " + grams(state.rewardGrams || 0) + " of gold"],
+      ["Spent ashore", (state.spent || 0) + " cr on food, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
       ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],
