@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+<title id="title">Auntie Mei</title><desc id="desc">A mature noodle-shop owner with a dark hair bun, gold hairpin, jade earrings, red tunic and cream apron, smiling in warm lantern light.</desc>
+<defs>
+ <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#482c3f"/><stop offset="1" stop-color="#173b49"/></linearGradient>
+ <linearGradient id="skin" x2=".8" y2="1"><stop stop-color="#ffe0b4"/><stop offset="1" stop-color="#ce8d76"/></linearGradient>
+ <linearGradient id="tunic" x2=".8" y2="1"><stop stop-color="#c75e62"/><stop offset="1" stop-color="#793848"/></linearGradient>
+ <linearGradient id="hair" x2="1" y2="1"><stop stop-color="#596166"/><stop offset=".3" stop-color="#343841"/><stop offset="1" stop-color="#222733"/></linearGradient>
+</defs>
+<rect width="320" height="320" rx="22" fill="url(#bg)"/>
+<circle cx="35" cy="52" r="53" fill="#ffca78" opacity=".14"/>
+<path d="M31 0V18M273 0V37" stroke="#a77662" stroke-width="3"/><ellipse cx="31" cy="51" rx="26" ry="35" fill="#e79c65"/><path d="M10 37H52M9 52H53M12 68H50" stroke="#c57855" stroke-width="2"/><ellipse cx="273" cy="61" rx="20" ry="26" fill="#ffc579" opacity=".6"/>
+<path d="M18 219H82M253 192H311M273 148V215" fill="none" stroke="#8aead9" stroke-width="3" opacity=".25"/>
+<!-- Practical red tunic and apron: she is a working adult, not a costume. -->
+<path d="M23 320L40 266Q66 234 122 229H202Q262 238 281 269L300 320Z" fill="url(#tunic)" stroke="#2c2c3c" stroke-width="4"/>
+<path d="M133 204V243Q164 263 193 240V204" fill="url(#skin)" stroke="#86594e" stroke-width="2"/>
+<path d="M134 216Q164 242 193 216V230Q166 250 134 235Z" fill="#b97768"/>
+<path d="M125 231L149 260L157 248L151 228M197 228L169 258L157 248" fill="#963f50" stroke="#e0a47d" stroke-width="2"/>
+<path d="M87 254L109 247L118 284H209L220 248L241 256L224 320H101Z" fill="#f0dfb4" stroke="#a78d79" stroke-width="3"/>
+<path d="M120 286H207V320H119Z" fill="#ffeac4"/><path d="M138 300H190V320" fill="none" stroke="#c4aa89" stroke-width="2"/>
+<path d="M154 282V311" stroke="#cdb390" stroke-width="2"/><circle cx="161" cy="271" r="3" fill="#ffcf85"/>
+<!-- Bun, loose temple locks and warm skin shadows. -->
+<ellipse cx="170" cy="50" rx="40" ry="31" fill="url(#hair)" stroke="#202837" stroke-width="3"/>
+<path d="M137 45Q170 24 199 48M149 32Q179 24 191 41" fill="none" stroke="#808081" stroke-width="3"/>
+<path d="M83 147Q72 85 115 66Q163 43 209 69Q246 94 231 168L205 218H105Z" fill="url(#hair)" stroke="#202837" stroke-width="3"/>
+<path d="M101 100Q115 81 151 87Q187 74 215 101L219 157Q212 196 184 219Q164 235 143 222Q112 204 101 167Z" fill="url(#skin)" stroke="#574448" stroke-width="2"/>
+<path d="M110 112L115 87Q150 108 185 83L197 91Q168 116 130 111L114 145L106 157Z" fill="#343842"/>
+<path d="M187 79Q221 90 227 115L218 168L205 130L205 101Z" fill="#343842"/>
+<path d="M101 151Q87 139 90 161Q93 177 107 179M220 148Q234 142 231 163Q228 177 216 177" fill="#d89c80" stroke="#86594e" stroke-width="2"/>
+<path d="M113 170L133 203L145 214L125 211L108 184Z" fill="#c88772" opacity=".55"/>
+<!-- Smiling almond eyes with visible irises, subtle adult expression lines. -->
+<path d="M112 140Q128 125 147 140Q129 153 115 146Z" fill="#ffefd1"/>
+<ellipse cx="130" cy="140" rx="8" ry="9" fill="#714c39"/><ellipse cx="130" cy="141" rx="3.5" ry="7" fill="#2e3138"/><circle cx="133" cy="136" r="2.8" fill="#fff5d9"/>
+<path d="M110 139Q129 125 148 140M110 145L105 149" fill="none" stroke="#3b343e" stroke-width="3" stroke-linecap="round"/>
+<path d="M174 138Q191 122 209 138Q192 150 178 145Z" fill="#ffefd1"/>
+<ellipse cx="191" cy="138" rx="8" ry="9" fill="#714c39"/><ellipse cx="191" cy="139" rx="3.5" ry="7" fill="#2e3138"/><circle cx="194" cy="134" r="2.8" fill="#fff5d9"/>
+<path d="M173 138Q191 123 210 137M211 141L216 145" fill="none" stroke="#3b343e" stroke-width="3" stroke-linecap="round"/>
+<path d="M116 123Q131 115 145 122M176 120Q193 113 206 120" fill="none" stroke="#59504e" stroke-width="3" stroke-linecap="round"/>
+<path d="M153 146L148 170L158 175" fill="none" stroke="#b67964" stroke-width="2" stroke-linecap="round"/>
+<path d="M123 159L135 162M186 158L201 156" stroke="#da9c7c" stroke-width="4" opacity=".6"/>
+<path d="M140 189Q162 201 185 185Q166 221 140 189Z" fill="#934c51"/><path d="M145 192Q164 197 180 189" stroke="#fff1d3" stroke-width="4"/>
+<path d="M137 185L134 191M187 182L191 187M152 215Q165 220 178 212" fill="none" stroke="#b47865" stroke-width="1.6"/>
+<!-- Silver temple streaks, gold pin and jade earrings. -->
+<path d="M100 95Q99 119 104 137M108 81Q117 70 131 70M215 96L222 128" fill="none" stroke="#9fa7a4" stroke-width="3"/>
+<path d="M125 44L202 59" stroke="#ffcf85" stroke-width="4" stroke-linecap="round"/><path d="M196 54L207 57L202 66L191 61Z" fill="#8aead9" stroke="#ffcf85" stroke-width="2"/>
+<circle cx="101" cy="178" r="5" fill="#ffd08a"/><path d="M101 183Q88 196 101 205Q113 197 101 183Z" fill="#57b5a1" stroke="#b2dbc4" stroke-width="2"/>
+<circle cx="222" cy="176" r="5" fill="#ffd08a"/><path d="M222 181Q210 194 222 203Q233 195 222 181Z" fill="#57b5a1" stroke="#b2dbc4" stroke-width="2"/>
+<path d="M39 300Q29 282 42 266M278 315Q294 289 279 276" fill="none" stroke="#ffdc9f" stroke-width="3" opacity=".45"/>
+</svg>

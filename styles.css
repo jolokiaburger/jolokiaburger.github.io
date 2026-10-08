@@ -952,3 +952,13 @@ body[data-adventure="trade"] .dock-chips .chip:disabled { opacity: .65; }
 @media (max-width: 899px) {
   body[data-adventure="trade"] .dock-chips .chip { flex: 0 0 104px; min-width: 104px; }
 }
+
+/* 17 · Character portraits: detailed native SVGs, larger without changing the phone shell. */
+.speech.featured-portrait { grid-template-columns: 96px minmax(0, 1fr); }
+.featured-portrait .portrait { width: 96px; height: 96px; object-fit: cover; }
+.speech.featured-portrait.no-portrait { grid-template-columns: 1fr; }
+@media (max-width: 899px) {
+  .speech.featured-portrait { grid-template-columns: 72px minmax(0, 1fr); }
+  .featured-portrait .portrait { width: 72px; height: 72px; }
+  .speech.featured-portrait.no-portrait { grid-template-columns: 1fr; }
+}

@@ -119,7 +119,7 @@ window.NEON_TIDES = (function () {
   /* ------------------------------------------------------------------ */
   /* THE NIGHT, as the notebook asks it (3.1)                            */
   /* ------------------------------------------------------------------ */
-  // Teo's night: the three cases that share her lie share these lines and add their own. Lines with
+  // Rei's night: the three cases that share her lie share these lines and add their own. Lines with
   // a `proof` are tested at the counter; the two here are the two proofs that break her story.
   var teoTimeline = [
     {
@@ -210,8 +210,8 @@ window.NEON_TIDES = (function () {
     ],
 
     characters: {
-      teo:   { name: "Teo Vale", role: "Courier captain",          color: "#ffb04a", portrait: "assets/portraits/teo.svg" },
-      mei:   { name: "Auntie Mei",        role: "Keeper of the hearth",           color: "#ff7a3d", portrait: "assets/portraits/mei.svg" },
+      teo:   { name: "Rei Minato", role: "Courier captain · Night routes",          color: "#ffb04a", portrait: "assets/portraits/rei-anime.svg", artStyle: "anime" },
+      mei:   { name: "Auntie Mei",        role: "Keeper of the hearth",           color: "#ff7a3d", portrait: "assets/portraits/mei-anime.svg", artStyle: "anime" },
       priya: { name: "Priya Gale",        role: "Keeper of the crossings",    color: "#3df5ff", portrait: "assets/portraits/priya.svg" },
       matte: { name: "Matte Rook",        role: "Sentinel of Pier 9",    color: "#9b93d6", portrait: "assets/portraits/matte.svg" },
       dex:   { name: "Dex Swift",         role: "Starlight courier",               color: "#ffb04a", portrait: "assets/portraits/dex.svg" },
@@ -256,11 +256,11 @@ window.NEON_TIDES = (function () {
     objectives: [
       { when: { resolved: true },                       text: "Adventure complete. Revisit your discoveries, or choose a new night from the menu." },
       { when: { confronting: true },                    text: "Choose what to put on the counter." },
-      { when: { notFlag: ["accepted"] },                text: "Hear Teo out at Kurage 33, then accept the job." },
-      { when: { proven: ["arrived", "met"], timeline: "unfilled" }, text: "You can prove Ari arrived and that Teo met them. Write the night down — the timeline in your notebook — then put it on the counter at Kurage 33." },
-      { when: { proven: ["arrived", "met"], motive: true }, text: "You have enough to put on the counter. Confront Teo at Kurage 33." },
-      { when: { proven: ["arrived", "met"] },           text: "Teo closed Ari's run at Pier 9 at 23:05. Find out why she is lying, then go back to Kurage 33." },
-      { when: { proven: ["met"] },                      text: "Teo's signature closes Ari's run at Pier 9. Pin Ari to the Basin too — the tally at Landing 3 — and find out why she is lying." },
+      { when: { notFlag: ["accepted"] },                text: "Hear Rei out at Kurage 33, then accept the job." },
+      { when: { proven: ["arrived", "met"], timeline: "unfilled" }, text: "You can prove Ari arrived and that Rei met them. Write the night down — the timeline in your notebook — then put it on the counter at Kurage 33." },
+      { when: { proven: ["arrived", "met"], motive: true }, text: "You have enough to put on the counter. Confront Rei at Kurage 33." },
+      { when: { proven: ["arrived", "met"] },           text: "Rei closed Ari's run at Pier 9 at 23:05. Find out why she is lying, then go back to Kurage 33." },
+      { when: { proven: ["met"] },                      text: "Rei's signature closes Ari's run at Pier 9. Pin Ari to the Basin too — the tally at Landing 3 — and find out why she is lying." },
       { when: { proven: ["arrived"] },                  text: "Ari's pass was scanned at Landing 3 at 22:23. Find out who met them. Closed runs are filed at Pier 9." },
       {                                                  text: "Find out whether Ari reached the Basin. Try Landing 3, the Metro Quay and Pier 9." }
     ],
@@ -269,14 +269,14 @@ window.NEON_TIDES = (function () {
     // without a proof counts clues for any explanation offered at the confrontation.
     threads: [
       { id: "arrived", question: "Did Ari reach the Basin?",  proof: "arrived" },
-      { id: "met",     question: "Did Teo meet Ari tonight?", proof: "met" },
-      { id: "why",     question: "Why is Teo lying?",         leads: true }
+      { id: "met",     question: "Did Rei meet Ari tonight?", proof: "met" },
+      { id: "why",     question: "Why is Rei lying?",         leads: true }
     ],
 
     // Things drawn in the picture that an action can be tied to (action.thing): the id in index.html
     // and the short name its tag shows. game.js marks a thing only while an action naming it is on offer.
     things: {
-      "teo-figure": "Teo", "teo-stool": "The bag on the stool", "mei": "Mei", "lucky-cat": "The lucky cat", "tank": "The tank", "ferry": "The radio",
+      "teo-figure": "Rei", "teo-stool": "The bag on the stool", "mei": "Mei", "lucky-cat": "The lucky cat", "tank": "The tank", "ferry": "The radio",
       "booth": "Priya", "timetable-board": "Timetable board", "shelter": "The shelter", "boarding-lights": "Boarding lights",
       "dex": "Dex", "yumi": "Yumi", "lam": "Captain Lam", "vending": "Vending machine",
       "matte": "Matte", "dock-office": "Dock office", "cargo": "Crate 17", "tank-lids": "Tank lids", "gate": "The gate"
@@ -285,7 +285,7 @@ window.NEON_TIDES = (function () {
     // Who a timeline line can name. The order is the order in the notebook's list.
     timelineNames: [
       { id: "ari",      name: "Ari Wynn" },
-      { id: "teo",      name: "Teo Vale" },
+      { id: "teo",      name: "Rei Minato" },
       { id: "mei",      name: "Auntie Mei" },
       { id: "priya",    name: "Priya Gale" },
       { id: "matte",    name: "Matte Rook" },
@@ -314,7 +314,7 @@ window.NEON_TIDES = (function () {
       },
       run_sheet: {
         title: "Signed run sheet, Pier 9",
-        text: "CO-OP RUN 4471 — SEALED SAMPLE CASE, MAINLAND LAB TO FROSTLINE.\nDELIVERED TO COLD ROOM B 22:58.\nRUN CLOSED 23:05 AT PIER 9 DOCK OFFICE.\nCOURIER: A. Wynn   DISPATCHER: T. Vale\nREMARK (dispatcher's hand): \"Courier released. Nothing outstanding.\"",
+        text: "CO-OP RUN 4471 — SEALED SAMPLE CASE, MAINLAND LAB TO FROSTLINE.\nDELIVERED TO COLD ROOM B 22:58.\nRUN CLOSED 23:05 AT PIER 9 DOCK OFFICE.\nCOURIER: A. Wynn   DISPATCHER: R. Minato\nREMARK (dispatcher's hand): \"Courier released. Nothing outstanding.\"",
         proves: ["met"]
       },
       truck_schedule: {
@@ -324,7 +324,7 @@ window.NEON_TIDES = (function () {
       },
       priya_account: {
         title: "Priya on the two figures",
-        text: "\"At 22:38 two people walked off toward the east quay under one umbrella. One had a courier jacket. The other had Teo's walk — like the ground owes her money. I do times, not faces.\"",
+        text: "\"At 22:38 two people walked off toward the east quay under one umbrella. One had a courier jacket. The other had Rei's walk — like the ground owes her money. I do times, not faces.\"",
         proves: []
       },
       yumi_foreman: {
@@ -352,30 +352,30 @@ window.NEON_TIDES = (function () {
             "She slides a fuel chit across the counter without looking at it.",
             { who: "teo", text: "Three fuel units from the co-op. Make them count! Frostline's truck leaves at six; let's have answers before then." },
             "Mei sets a can beside the chit. TIGER VOLT, it says, in letters made of lightning. SHARP TILL SUNRISE.",
-            { who: "mei", text: "For my favourite skipper! One can, one swift crossing. Save it for when every minute counts." },
+            { who: "mei", text: "Here. One can, one swift crossing. And when you find your answers, come back for something that tastes better." },
             { notice: "Fuel chit: +3 fuel. Tiger Volt: +1 can — drink it to make your next crossing take no clock time.", tone: "" }
           ]
         },
         {
-          id: "bar_ask_job", thing: "teo-figure", kind: "talk", label: "Teo, tell me what's at stake.", minutes: 0, once: true,
+          id: "bar_ask_job", thing: "teo-figure", kind: "talk", label: "Rei, tell me what's at stake.", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           lines: [
             { who: "teo", text: "The office needs someone out on the water. Someone who knows these quays. That's you, skipper." },
             { who: "teo", text: "As far as I'm concerned, Ari never got off here. Check the harbour anyway. Then we can give the office an answer." },
-            { who: "mei", text: "Not on an empty stomach! One thirty-three, coming right up!" }
+            { who: "mei", text: "You two can outwit the whole harbour after you eat. One thirty-three, coming right up." }
           ]
         },
         {
-          id: "bar_report", kind: "talk", label: "Compare leads with Teo", minutes: 0,
+          id: "bar_report", kind: "talk", label: "Compare leads with Rei", minutes: 0,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             { if: { lacks: ["arrival_tally", "run_sheet"] }, who: "teo", text: "No lead yet? Try Priya's tally at Landing 3. You've got a boat and a good eye. Use both." },
             { if: { has: ["arrival_tally"], lacks: ["run_sheet"] }, who: "teo", text: "A pass got scanned at Landing 3. Passes get scanned. It doesn't put anyone at my counter, or anywhere near me." },
             { if: { has: ["run_sheet"] }, lines: [
-              "Teo glances at the run sheet, then back at the radio.",
+              "Rei glances at the run sheet, then back at the radio.",
               { who: "teo", text: "We close runs over the radio all the time. If you've found more than a signature, let's hear it. Lay out your evidence." }
             ] },
-            { if: { has: ["arrival_tally"], lacks: ["run_sheet"] }, notice: "Teo's answer is a dodge. Something at Pier 9 might pin her down.", tone: "" }
+            { if: { has: ["arrival_tally"], lacks: ["run_sheet"] }, notice: "Rei's answer is a dodge. Something at Pier 9 might pin her down.", tone: "" }
           ]
         }
       ],
@@ -397,11 +397,11 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "landing_ask_teo", thing: "booth", kind: "talk", label: "Ask Priya whether she saw Teo tonight", minutes: 0, once: true,
+          id: "landing_ask_teo", thing: "booth", kind: "talk", label: "Ask Priya whether she saw Rei tonight", minutes: 0, once: true,
           when: { has: ["arrival_tally"] },
           gives: ["priya_account"],
           lines: [
-            { who: "priya", text: "Teo? At 22:38 two people walked off toward the east quay under one umbrella. One had a courier jacket. The other had Teo's walk — like the ground owes her money." },
+            { who: "priya", text: "Rei? At 22:38 two people walked off toward the east quay under one umbrella. One had a courier jacket. The other had Rei's walk — like the ground owes her money." },
             { who: "priya", text: "Times are my speciality. The walk? Let's call that an educated guess!" }
           ]
         },
@@ -470,18 +470,18 @@ window.NEON_TIDES = (function () {
           gives: ["run_sheet", "truck_schedule"],
           lines: [
             "The dock office is locked, but the outbound tray sits on the window ledge under the light where anyone could read it. Runs closed tonight: one.",
-            "Cold Room B, 22:58. Run closed 23:05. Two signatures. One of them is Teo's.",
+            "Cold Room B, 22:58. Run closed 23:05. Two signatures. One of them is Rei's.",
             "Pinned above the tray, Frostline's collection notice for the dawn truck."
           ]
         }
       ]
     },
 
-    /* ---- the confrontation: Teo's lie, shared by every case that doesn't bring its own ---- */
+    /* ---- the confrontation: Rei's lie, shared by every case that doesn't bring its own ---- */
     confrontation: {
       at: "bar",                                   // where the liar is confronted
-      thing: "teo-figure",                         // tap Teo to put it on the counter, once you hold a clue
-      actionLabel: "Piece together the truth with Teo",
+      thing: "teo-figure",                         // tap Rei to put it on the counter, once you hold a clue
+      actionLabel: "Piece together the truth with Rei",
       submitLabel: "Put it on the counter",
       accuseLabel: "Explain what really happened",
       stepBackLabel: "Keep investigating",
@@ -492,10 +492,10 @@ window.NEON_TIDES = (function () {
       maxEvidence: 3,
       requires: ["arrived", "met"],                // shown together, these break the lie
       intro: [
-        "You put your notebook on the counter between the chilli-oil pot and Teo's cold milk tea. Mei turns the burner down without being asked.",
+        "You put your notebook on the counter between the chilli-oil pot and Rei's cold milk tea. Mei turns the burner down without being asked.",
         { who: "teo", text: "All right, skipper. Up to three clues. Show me how they fit together." }
       ],
-      selectPrompt: "Pick up to three pieces of evidence to put on the counter. To break the lie, you need to show that Ari arrived and that Teo met them.",
+      selectPrompt: "Pick up to three pieces of evidence to put on the counter. To break the lie, you need to show that Ari arrived and that Rei met them.",
       challenge: {
         nothing: [
           { who: "teo", text: "Start with Ari's arrival. Have you found a record that places them in the Basin?" }
@@ -504,12 +504,12 @@ window.NEON_TIDES = (function () {
         missing: {
           met: [
             { who: "teo", text: "A pass got scanned at Landing 3. Passes get scanned. It doesn't put anyone at my counter, or anywhere near me." },
-            { notice: "Ari arrived — proven. Now prove that Teo met them.", tone: "" }
+            { notice: "Ari arrived — proven. Now prove that Rei met them.", tone: "" }
           ],
           arrived: [
             { who: "teo", text: "That's my signature on a form I sign twenty times a night. Runs get closed over the radio. It says I closed a run. It doesn't say I stood next to anybody." },
             { who: "teo", text: "Put Ari in the Basin first." },
-            { notice: "Teo met Ari — nearly proven. You still need to show Ari physically arrived.", tone: "" }
+            { notice: "Rei met Ari — nearly proven. You still need to show Ari physically arrived.", tone: "" }
           ]
         },
         // The paper is right but the notebook's timeline isn't filled in: say what happened first.
@@ -518,7 +518,7 @@ window.NEON_TIDES = (function () {
           { notice: "Fill in the timeline in your notebook, then put the evidence down again.", tone: "warn" }
         ],
         success: [
-          "Teo looks at the tally, then at the run sheet, then at the clock over the shelf. She takes the headset off and sets it on the counter, which you have never seen her do.",
+          "Rei looks at the tally, then at the run sheet, then at the clock over the shelf. She takes the headset off and sets it on the counter, which you have never seen her do.",
           { who: "teo", text: "All right. I met them. Pier 9, five past eleven, two bowls of ramen going cold in a bag." },
           { who: "teo", text: "Now you tell me why I'd lie about that, skipper — and you tell me what you've got that says so." }
         ]
@@ -533,7 +533,7 @@ window.NEON_TIDES = (function () {
       noProof: [
         { who: "teo", text: "That clue doesn't support this explanation. Take another look at your notebook. You've still got time to work it out." }
       ],
-      choicePrompt: "Teo waits. Mei ladles two bowls. What do you do with what you know?"
+      choicePrompt: "Rei waits. Mei ladles two bowls. What do you do with what you know?"
     }
   };
 
@@ -542,24 +542,24 @@ window.NEON_TIDES = (function () {
   /* ------------------------------------------------------------------ */
   var barFirst = [
     "Kurage 33 is the only lit thing on the east quay: cyan tube letters, an orange neon jellyfish pulsing beside them, lanterns dripping under the awning. Behind the counter Auntie Mei skims the pork-bone broth without looking at it.",
-    "On the corner stool, Teo Vale has her headset half on and a milk tea she isn't drinking. Her dispatch bag is zipped shut for once.",
-    { who: "teo", text: "Skipper! Just the person I need. We've got a missing courier and a harbour full of questions." },
+    "On the corner stool, Rei Minato brushes a dark fringe away from her headset. Her orange pilot jacket is rain-speckled, her milk tea untouched. For once, the dispatch bag beside her is zipped shut.",
+    { who: "teo", text: "Skipper. Good—you made it. A courier is missing, and the office is asking all the wrong questions. Help me ask the right ones." },
     { who: "teo", text: "Ari Wynn, co-op courier, was on the 22:10 from the mainland with a sealed sample case for Frostline's dawn truck. The mainland says they boarded. I say they never got off in the Basin." },
-    { who: "teo", text: "The office wants answers tonight. Your Tern can reach places a desk full of dispatchers can't." },
-    { who: "mei", text: "Hungry for adventure? What'll it be?" },
+    { who: "teo", text: "The office wants answers tonight. I have a headset and a mountain of forms. You have the Tern. I like our chances." },
+    { who: "mei", text: "There you are, skipper. Sit down before that stomach starts answering the radio for you." },
     "She doesn't wait for an answer.",
-    { who: "mei", text: "The thirty-three! My best bowl for a night with possibilities." }
+    { who: "mei", text: "One thirty-three. Egg just soft, chilli on the side. You can chase the horizon after supper." }
   ];
   var barAgainShared = [
     { if: { resolved: false, has: ["arrival_tally"], notFlag: ["confronted"] }, lines: [
-      "Teo is outside under the awning, arguing quietly with her radio. Her dispatch bag sits open on the corner stool, next to a can that means the seat is taken.",
+      "Rei is outside under the awning, arguing quietly with her radio. Her dispatch bag sits open on the corner stool, next to a can that means the seat is taken.",
       "Mei watches you notice it and says nothing, which is a kind of permission."
     ] },
     { if: { resolved: false, lacks: ["arrival_tally"] }, lines: [
-      "Kurage 33, again. The broth hasn't stopped. Teo's radio mutters on Frostline's channel and she answers it in single words."
+      "Kurage 33, again. The broth hasn't stopped. Rei's radio mutters on Frostline's channel and she answers it in single words."
     ] },
     { if: { resolved: false, has: ["arrival_tally"], flag: ["confronted"] }, lines: [
-      "Teo has put the headset back on. Every so often the radio pulls her out under the awning; the bag stays on the stool. Neither of you mentions the counter."
+      "Rei has put the headset back on. Every so often the radio pulls her out under the awning; the bag stays on the stool. Neither of you mentions the counter."
     ] }
   ];
   var landingScene = {
@@ -596,10 +596,10 @@ window.NEON_TIDES = (function () {
 
   /* ------------------------------------------------------------------ */
   /* VARIANT A — THE KIND LIE                                            */
-  /* Teo hid Ari after Ari discovered protected wild jellyfish in Crate 17 */
+  /* Rei hid Ari after Ari discovered protected wild jellyfish in Crate 17 */
   /* ------------------------------------------------------------------ */
   /* ------------------------------------------------------------------ */
-  /* SHOWING A CLUE (3.3): the three cases with Teo's lie share these     */
+  /* SHOWING A CLUE (3.3): the three cases with Rei's lie share these     */
   /* ------------------------------------------------------------------ */
   // extra = { teo: { clueId: [ENTRY] }, priya: {...}, mei: {...} } adds a case's own responses.
   function teoShows(extra) {
@@ -607,7 +607,7 @@ window.NEON_TIDES = (function () {
     return {
       bar: [
         {
-          id: "bar_show_teo", kind: "show", label: "Show Teo something from the notebook", minutes: 0,
+          id: "bar_show_teo", kind: "show", label: "Show Rei something from the notebook", minutes: 0,
           when: { flag: ["accepted"], resolved: false },
           shows: merge({
             arrival_tally: [
@@ -615,7 +615,7 @@ window.NEON_TIDES = (function () {
             ],
             run_sheet: [
               { who: "teo", text: "My name is on forty of those a week. If you think this one means something, it goes on the counter, not under my nose." },
-              { notice: "Teo won't discuss paper away from the counter. Put it on the counter when you are ready.", tone: "" }
+              { notice: "Rei won't discuss paper away from the counter. Put it on the counter when you are ready.", tone: "" }
             ],
             priya_account: [
               { who: "teo", text: "Priya does times, not faces. She said so herself. Two people and an umbrella. It rains here, skipper." }
@@ -625,7 +625,7 @@ window.NEON_TIDES = (function () {
             ]
           }, extra.teo),
           otherwise: [
-            "Teo leans closer to read, one hand over her headset.",
+            "Rei leans closer to read, one hand over her headset.",
             { who: "teo", text: "I can't place this one. Someone on another quay might know more." }
           ]
         },
@@ -637,7 +637,7 @@ window.NEON_TIDES = (function () {
               { who: "mei", text: "My records are bowls and regulars! Nobody new came in hungry tonight. That's all I can add." }
             ],
             run_sheet: [
-              { who: "mei", text: "Teo knows signatures better than I do. Ask her about this one; I'll see to the soup." }
+              { who: "mei", text: "Rei knows signatures better than I do. Ask her about this one; I'll see to the soup." }
             ]
           }, extra.mei),
           otherwise: [
@@ -651,7 +651,7 @@ window.NEON_TIDES = (function () {
           when: { flag: ["accepted"], resolved: false },
           shows: merge({
             run_sheet: [
-              { who: "priya", text: "Vale, 23:05, Pier 9. She walked past my booth at 22:38 and the next thing with her name on it is this. I do times. That's a time." }
+              { who: "priya", text: "Minato, 23:05, Pier 9. She walked past my booth at 22:38 and the next thing with her name on it is this. I do times. That's a time." }
             ],
             truck_schedule: [
               { who: "priya", text: "Garrow pins one of those on my booth too. No late loads. The driver doesn't wait, and he doesn't read." }
@@ -676,10 +676,10 @@ window.NEON_TIDES = (function () {
     truth: "protect",
     seeds: ["high-tide"],              // pinned: this seed always opens this case, however many cases exist
     sceneClasses: [
-      { class: "teo-gone", when: { ending: "by_the_book" } }   // "Teo's stool is empty."
+      { class: "teo-gone", when: { ending: "by_the_book" } }   // "Rei's stool is empty."
     ],
 
-    // The notebook's timeline: Teo's shared lines, then this night's own.
+    // The notebook's timeline: Rei's shared lines, then this night's own.
     timeline: teoTimeline.concat([
       {
         id: "tl_message", clock: "23:12", place: "metro",
@@ -702,7 +702,7 @@ window.NEON_TIDES = (function () {
         departure_tally: [ { who: "priya", text: "Mine. Fare on the dispatch account. I don't ask who pays; I write down who pays." } ]
       },
       mei: {
-        dispatch_bag: [ { who: "mei", text: "Two thirty-threes to go at ten to eleven. Teo never takes food away. I sold it anyway." } ]
+        dispatch_bag: [ { who: "mei", text: "Two thirty-threes to go at ten to eleven. Rei never takes food away. I sold it anyway." } ]
       }
     }),
     clues: {
@@ -713,7 +713,7 @@ window.NEON_TIDES = (function () {
       },
       departure_tally: {
         title: "Departure tally, Landing 3",
-        text: "00:40 TO MAINLAND — DEPARTED 00:52.\nPASSENGERS 2.\nCO-OP PASS SCANNED: WYNN, A.\nFARE CHARGED TO: DISPATCH ACCOUNT (VALE).\nCLERK: P. GALE.",
+        text: "00:40 TO MAINLAND — DEPARTED 00:52.\nPASSENGERS 2.\nCO-OP PASS SCANNED: WYNN, A.\nFARE CHARGED TO: DISPATCH ACCOUNT (MINATO).\nCLERK: P. GALE.",
         proves: ["motive_protect"]
       },
       crate17_tags: {
@@ -738,7 +738,7 @@ window.NEON_TIDES = (function () {
       },
       mei_bowls: {
         title: "Mei on the late bowls",
-        text: "\"Teo took two number thirty-threes to go at ten to eleven. Extra chilli oil, both. Teo never eats ramen — she says it's soup pretending. She carried them like medicine.\"",
+        text: "\"Rei took two number thirty-threes to go at ten to eleven. Extra chilli oil, both. Rei never eats ramen — she says it's soup pretending. She carried them like medicine.\"",
         proves: []
       }
     },
@@ -749,7 +749,7 @@ window.NEON_TIDES = (function () {
         again: barAgainShared.concat([
           { if: { ending: "two_bowls" }, lines: ["The bar is warm and nobody talks about Ari. On the third stool, a can nobody moves."] },
           { if: { ending: "cold_light" }, lines: ["Mei has pinned a chit to the wire behind the counter with your boat's name on it. You don't ask what it says."] },
-          { if: { ending: "by_the_book" }, lines: ["Teo's stool is empty. Mei serves you anyway, and puts the chilli oil where you can reach it."] }
+          { if: { ending: "by_the_book" }, lines: ["Rei's stool is empty. Mei serves you anyway, and puts the chilli oil where you can reach it."] }
         ])
       },
       landing: landingScene,
@@ -783,7 +783,7 @@ window.NEON_TIDES = (function () {
             ] },
             { if: { has: ["arrival_tally"], lacks: ["mei_bowls"] }, lines: [
               "Mei wipes the counter that is already clean.",
-              { who: "mei", text: "Teo took two number thirty-threes to go at ten to eleven. Extra chilli oil, both. Teo never eats ramen — she says it's soup pretending. She carried them like medicine." },
+              { who: "mei", text: "Rei took two number thirty-threes to go at ten to eleven. Extra chilli oil, both. Rei never eats ramen — she says it's soup pretending. She carried them like medicine." },
               { who: "mei", text: "That's the order as I remember it. Perhaps it's the piece you were missing." }
             ] },
             { if: { has: ["mei_bowls"] }, lines: [
@@ -796,13 +796,13 @@ window.NEON_TIDES = (function () {
           id: "bar_look", thing: "lucky-cat", kind: "search", label: "Explore Kurage 33", minutes: 10, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
-            "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Teo's is two milk teas, paid Thursdays.",
+            "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Rei's is two milk teas, paid Thursdays.",
             "Above the counter, tonight's chits in order: thirty-three, thirty-three, five, twelve — and one at 22:50 for two number thirty-threes, extra chilli oil, take away.",
             "Under the counter, a case of Tiger Volt and a case of OX-9, the orange one, for the hours nobody counts."
           ]
         },
         {
-          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Rei is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["dispatch_bag"],
           lines: [
@@ -836,7 +836,7 @@ window.NEON_TIDES = (function () {
           when: { maxClock: "01:40" },
           gives: ["dex_message"],
           lines: [
-            { who: "dex", text: "You the ferry? Teo said the ferry might come asking. She didn't say what to tell you, which for Teo is a whole speech." },
+            { who: "dex", text: "You the ferry? Rei said the ferry might come asking. She didn't say what to tell you, which for Rei is a whole speech." },
             "He looks at the departures strip, then at his phone, then turns the phone so you can read it.",
             { who: "dex", text: "Ari's in my rider group. Was. Is. This came in at twelve past eleven. I was supposed to delete it. I'm bad at being told." },
             { who: "dex", text: "Last train's at one-forty. I'm on it. Whatever you do with that, do it before Frostline reads it over my shoulder." }
@@ -893,7 +893,7 @@ window.NEON_TIDES = (function () {
       },
       harm: {
         wrong: [
-          "Teo goes very still.",
+          "Rei goes very still.",
           { who: "teo", text: "You think I— No. Ari is alive, skipper. If you've got a single thing that says otherwise, put it down. You haven't, because it doesn't exist." },
           { notice: "Your clues don't point to Ari being harmed. There's another explanation to discover.", tone: "warn" }
         ]
@@ -902,8 +902,8 @@ window.NEON_TIDES = (function () {
 
     finalChoices: [
       { id: "protect_ari", label: "Keep Ari out of it. Tell the office the trail ends at the landing.", ending: "two_bowls" },
-      { id: "report_crate", label: "Report Crate 17 to the harbour authority, but leave Ari and Teo out of the paperwork.", ending: "cold_light" },
-      { id: "report_all", label: "Report everything: Teo, Ari, the run sheet and the crate.", ending: "by_the_book" }
+      { id: "report_crate", label: "Report Crate 17 to the harbour authority, but leave Ari and Rei out of the paperwork.", ending: "cold_light" },
+      { id: "report_all", label: "Report everything: Rei, Ari, the run sheet and the crate.", ending: "by_the_book" }
     ],
 
     endings: {
@@ -911,7 +911,7 @@ window.NEON_TIDES = (function () {
         title: "Two Bowls of Ramen",
         lines: [
           "You radio the co-op office: the courier's pass was scanned at Landing 3 and nothing after that. It is, word for word, true.",
-          "Teo puts her headset back on, then catches your eye. \"Thanks, skipper.\" She slides the chilli oil over. Some promises fit in two words.",
+          "Rei puts her headset back on, then catches your eye. \"Thanks, skipper.\" She slides the chilli oil over. Some promises fit in two words.",
           "Ari's message comes through Mei a week later, on a chit: reef station reopened. wild stock returned. tell the skipper number thirty-three, extra chilli.",
           "Crate 17 goes out on the dawn truck. Somebody else will have to open it."
         ],
@@ -923,19 +923,19 @@ window.NEON_TIDES = (function () {
           // paragraphs that only hold before the dawn truck carry a clock condition; the late line covers after
           { if: { maxClock: "06:00" }, text: "You tie up at Pier 9 with the harbour authority's night inspector, a woman who has clearly done this before. Crate 17 is opened under the floodlight. The tags read what they read." },
           { if: { minClock: "06:00" }, text: "You tie up at Pier 9 with the harbour authority's night inspector, a woman who has clearly done this before. Crate 17's place under the floodlight is empty." },
-          "You leave Teo and Ari out of it. The inspector doesn't ask who tipped you off; she writes 'ferry operator, routine' and underlines routine.",
+          "You leave Rei and Ari out of it. The inspector doesn't ask who tipped you off; she writes 'ferry operator, routine' and underlines routine.",
           { if: { maxClock: "06:00" }, text: "Frostline's dawn truck leaves empty. Garrow is not on the pier to see it." },
-          "Teo finds out from the radio. A chit reaches the Tern by lunchtime: you didn't have to. you did. — T."
+          "Rei finds out from the radio. A chit reaches the Tern by lunchtime: you didn't have to. you did. — T."
         ],
         late: "By the time the inspector arrives, the truck has gone with Crate 17 on it. The paperwork follows it anyway; it just takes longer, and Garrow gets a head start."
       },
       by_the_book: {
         title: "By the Book",
         lines: [
-          "You file everything: the tally, the run sheet, the note, the crate. The co-op suspends Teo pending review. Frostline denies knowledge of any tags.",
+          "You file everything: the tally, the run sheet, the note, the crate. The co-op suspends Rei pending review. Frostline denies knowledge of any tags.",
           { if: { maxClock: "06:00" }, text: "The harbour authority opens Crate 17 under the floodlight and finds exactly what Ari found." },
           "Ari is located on the mainland and asked to testify. They do. It costs them the co-op job; it gets the reef station's evidence into a courtroom.",
-          "When Teo is allowed back, she takes the corner stool. Conversation between you will take time. Mei sets down two bowls; she has never stopped believing in a beginning."
+          "When Rei is allowed back, she takes the corner stool. Conversation between you will take time. Mei sets down two bowls; she has never stopped believing in a beginning."
         ],
         late: "The crate has gone by dawn. The case rests on paper and testimony instead of jellyfish, and takes a year longer."
       }
@@ -944,7 +944,7 @@ window.NEON_TIDES = (function () {
 
   /* ------------------------------------------------------------------ */
   /* VARIANT B — THE COLD SALE                                           */
-  /* Teo and Ari sold a tank out of Crate 17 to a private buyer           */
+  /* Rei and Ari sold a tank out of Crate 17 to a private buyer           */
   /* ------------------------------------------------------------------ */
   var coldSale = {
     id: "cold-sale",
@@ -953,10 +953,10 @@ window.NEON_TIDES = (function () {
     truth: "sale",
     seeds: ["bellwater"],
     sceneClasses: [
-      { class: "teo-gone", when: { ending: "receipts" } }      // "Teo's stool is empty."
+      { class: "teo-gone", when: { ending: "receipts" } }      // "Rei's stool is empty."
     ],
 
-    // The notebook's timeline: Teo's shared lines, then this night's own.
+    // The notebook's timeline: Rei's shared lines, then this night's own.
     timeline: teoTimeline.concat([
       {
         id: "tl_launch", clock: "23:30", where: "Slip 4",
@@ -995,7 +995,7 @@ window.NEON_TIDES = (function () {
       },
       crate17_short: {
         title: "Crate 17 count",
-        text: "FROSTLINE MANIFEST: CRATE 17 — LANTERN JELLIES, FARMED, 6 TANKS DECLARED.\nTANKS PRESENT: 5. Slot 3 empty, seal cut clean.\nTEMPERATURE LOG: gap 22:58–23:20, then \"checked — T.V.\"",
+        text: "FROSTLINE MANIFEST: CRATE 17 — LANTERN JELLIES, FARMED, 6 TANKS DECLARED.\nTANKS PRESENT: 5. Slot 3 empty, seal cut clean.\nTEMPERATURE LOG: gap 22:58–23:20, then \"checked — R.M.\"",
         proves: ["motive_sale"]
       },
       matte_launch: {
@@ -1014,8 +1014,8 @@ window.NEON_TIDES = (function () {
         proves: ["motive_sale"]
       },
       mei_tab: {
-        title: "Mei on Teo's tab",
-        text: "\"Teo's tab was three months. Tonight she paid it. Cash, from an envelope with a fish on it. I didn't ask where it came from. But you asked the right question, skipper.\"",
+        title: "Mei on Rei's tab",
+        text: "\"Rei's tab was three months. Tonight she paid it. Cash, from an envelope with a fish on it. I didn't ask where it came from. But you asked the right question, skipper.\"",
         proves: ["motive_sale"]
       }
     },
@@ -1024,9 +1024,9 @@ window.NEON_TIDES = (function () {
       bar: {
         first: barFirst,
         again: barAgainShared.concat([
-          { if: { ending: "receipts" }, lines: ["Teo's stool is empty. The tab wire has one fewer chit on it, and Mei has not replaced it."] },
-          { if: { ending: "dawn_truck" }, lines: ["Teo's tab is back on the wire. Nobody mentions Slip 4. Your number thirty-three has extra chilli oil."] },
-          { if: { ending: "black_water" }, lines: ["Teo nods when you come in. That's all. You find yourself reading the crate numbers on the pier every time you pass."] }
+          { if: { ending: "receipts" }, lines: ["Rei's stool is empty. The tab wire has one fewer chit on it, and Mei has not replaced it."] },
+          { if: { ending: "dawn_truck" }, lines: ["Rei's tab is back on the wire. Nobody mentions Slip 4. Your number thirty-three has extra chilli oil."] },
+          { if: { ending: "black_water" }, lines: ["Rei nods when you come in. That's all. You find yourself reading the crate numbers on the pier every time you pass."] }
         ])
       },
       landing: landingScene,
@@ -1060,7 +1060,7 @@ window.NEON_TIDES = (function () {
             ] },
             { if: { has: ["arrival_tally"], lacks: ["mei_tab"] }, lines: [
               "Mei looks at the tab wire, then at you.",
-              { who: "mei", text: "Teo's tab was three months. Tonight she paid it. Cash, from an envelope with a fish on it." },
+              { who: "mei", text: "Rei's tab was three months. Tonight she paid it. Cash, from an envelope with a fish on it." },
               { who: "mei", text: "I didn't ask where it came from. But you asked the right question, skipper." }
             ] },
             { if: { has: ["mei_tab"] }, lines: [
@@ -1073,13 +1073,13 @@ window.NEON_TIDES = (function () {
           id: "bar_look", thing: "lucky-cat", kind: "search", label: "Explore Kurage 33", minutes: 10, once: true,
           when: { flag: ["accepted"], resolved: false },
           lines: [
-            "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Teo's says three months, underlined twice — and tonight, a thick line through it.",
+            "Melamine bowls stacked by colour. Red chopsticks in a tin, bamboo steamers breathing on the counter, a waving cat with a chipped ear. On the wire behind the counter, the tabs: Rei's says three months, underlined twice — and tonight, a thick line through it.",
             "Between the cans on the counter, a matchbook with a fish-scale logo. Nobody smokes in here.",
             "Under the counter, a case of Tiger Volt and a case of OX-9, the orange one, for the hours nobody counts."
           ]
         },
         {
-          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Rei is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["envelope"],
           lines: [
@@ -1113,7 +1113,7 @@ window.NEON_TIDES = (function () {
           when: { maxClock: "01:40" },
           gives: ["dex_buyer"],
           lines: [
-            { who: "dex", text: "You the ferry? Teo said the ferry might come asking. She didn't say what to tell you, which for Teo is a whole speech." },
+            { who: "dex", text: "You the ferry? Rei said the ferry might come asking. She didn't say what to tell you, which for Rei is a whole speech." },
             "He crushes the can slowly, the way people do when they've decided to say something.",
             { who: "dex", text: "Ari asked me last week who buys live lantern jellies with no paperwork. I said Meridian, Slip 4, cash. I'm not proud of it. Ari said the dispatcher was in — 'T signs, I carry.'" },
             { who: "dex", text: "Last train's at one-forty. I'm on it. If you write that down, spell my name wrong." }
@@ -1179,7 +1179,7 @@ window.NEON_TIDES = (function () {
 
     finalChoices: [
       { id: "expose", label: "Expose the sale. The co-op and the harbour authority get everything by dawn.", ending: "receipts" },
-      { id: "ultimatum", label: "Give Teo until the dawn truck to bring the tank back and come clean herself.", lateLabel: "Give Teo the morning to bring the tank back and come clean herself.", ending: "dawn_truck" },
+      { id: "ultimatum", label: "Give Rei until the dawn truck to bring the tank back and come clean herself.", lateLabel: "Give Rei the morning to bring the tank back and come clean herself.", ending: "dawn_truck" },
       { id: "walk_away", label: "Say nothing. Take your fuel chit back to the water.", ending: "black_water" }
     ],
 
@@ -1187,30 +1187,30 @@ window.NEON_TIDES = (function () {
       receipts: {
         title: "The Truth Comes Ashore",
         lines: [
-          "You radio the co-op office and read them the run sheet, the count, the card. Teo listens to you do it. She doesn't interrupt; dispatchers know what a clear channel sounds like.",
+          "You radio the co-op office and read them the run sheet, the count, the card. Rei listens to you do it. She doesn't interrupt; dispatchers know what a clear channel sounds like.",
           { if: { maxClock: "06:00" }, text: "Frostline counts to five at dawn and, for once, has somebody to blame who isn't the weather." },
-          "The co-op suspends Teo. Meridian's launch is never found. Ari is, three weeks later, with the tank sold and the money mostly gone.",
-          "Mei pays Teo's tab back into the envelope and hands it to the inspector herself. 'I don't keep money that came out of a fish,' she says."
+          "The co-op suspends Rei. Meridian's launch is never found. Ari is, three weeks later, with the tank sold and the money mostly gone.",
+          "Mei pays Rei's tab back into the envelope and hands it to the inspector herself. 'I don't keep money that came out of a fish,' she says."
         ],
         late: "The truck left before the inspector arrived; the count was done on the road. It still came to five."
       },
       dawn_truck: {
         title: "A Chance Before Sunrise",
         lines: [
-          { if: { maxClock: "06:00" }, text: "You give her until six. Teo argues for the length of one cigarette she doesn't light, then radios Ari on a channel the co-op doesn't use." },
-          { if: { minClock: "06:00" }, text: "It is already past six. Teo argues for the length of one cigarette she doesn't light, then radios Ari on a channel the co-op doesn't use." },
-          { if: { maxClock: "06:00" }, text: "At twenty to six a launch with no lights ties up at Slip 4, and a tank the size of a beer keg comes back up the ladder in a blanket. Ari doesn't look at you. Teo signs the temperature log again — a different remark, in different handwriting, that is mostly true." },
+          { if: { maxClock: "06:00" }, text: "You give her until six. Rei argues for the length of one cigarette she doesn't light, then radios Ari on a channel the co-op doesn't use." },
+          { if: { minClock: "06:00" }, text: "It is already past six. Rei argues for the length of one cigarette she doesn't light, then radios Ari on a channel the co-op doesn't use." },
+          { if: { maxClock: "06:00" }, text: "At twenty to six a launch with no lights ties up at Slip 4, and a tank the size of a beer keg comes back up the ladder in a blanket. Ari doesn't look at you. Rei signs the temperature log again — a different remark, in different handwriting, that is mostly true." },
           { if: { minClock: "06:00" }, text: "A launch with no lights ties up at Slip 4 in the grey, and a tank the size of a beer keg comes back up the ladder in a blanket. Ari doesn't look at you." },
-          { if: { maxClock: "06:00" }, text: "Frostline counts six at dawn. Meridian keeps its deposit and its silence. Teo's tab is unpaid again by Tuesday." },
-          "Teo gives you a small, relieved nod. Mei adds extra chilli oil to your thirty-three. A second chance deserves a proper supper."
+          { if: { maxClock: "06:00" }, text: "Frostline counts six at dawn. Meridian keeps its deposit and its silence. Rei's tab is unpaid again by Tuesday." },
+          "Rei gives you a small, relieved nod. Mei adds extra chilli oil to your thirty-three. A second chance deserves a proper supper."
         ],
         late: "The tank comes back to a pier with no truck to load it. Frostline will count tomorrow, count wrong, and never know why."
       },
       black_water: {
         title: "An Unfinished Promise",
         lines: [
-          "You close the notebook. Teo watches you do it, and you both understand that this is a transaction too.",
-          "Frostline counts five at dawn, blames the mainland, and doubles the padlocks. Ari sends Teo a postcard with no words on it. The tab stays paid.",
+          "You close the notebook. Rei watches you do it, and you both understand that this is a transaction too.",
+          "Frostline counts five at dawn, blames the mainland, and doubles the padlocks. Ari sends Rei a postcard with no words on it. The tab stays paid.",
           "You run the Tern the way you always have. The jellyfish under the pontoon glow the same as before. You notice you check the crate numbers now, every time, and never say anything."
         ],
         late: "The dawn truck had gone before you closed the notebook. Five tanks' worth of quiet, on the road to the mainland."
@@ -1220,7 +1220,7 @@ window.NEON_TIDES = (function () {
 
   /* ------------------------------------------------------------------ */
   /* VARIANT C — THE QUIET DEBT                                          */
-  /* Ari owes a lender. Teo found them a berth on a factory trawler that  */
+  /* Ari owes a lender. Rei found them a berth on a factory trawler that  */
   /* pays the lender straight from the wages and asks no questions.       */
   /* "Never arrived" keeps the harbour police off the outer mole until    */
   /* the trawler sails on the morning tide. Crate 17 is clean this time.  */
@@ -1236,7 +1236,7 @@ window.NEON_TIDES = (function () {
       { class: "kittiwake", when: { maxClock: "06:00", resolved: false } }
     ],
 
-    // The notebook's timeline: Teo's shared lines, then this night's own.
+    // The notebook's timeline: Rei's shared lines, then this night's own.
     timeline: teoTimeline.concat([
       {
         id: "tl_pier_end", clock: "23:20", place: "pier",
@@ -1285,7 +1285,7 @@ window.NEON_TIDES = (function () {
       },
       crew_advance: {
         title: "Crew slip in the dispatch bag",
-        text: "GREY KITTIWAKE — FACTORY TRAWLER — CREW ADVANCE\nBERTH: DECKHAND. SIX MONTHS, NORTHERN GROUNDS. NO SHORE LEAVE.\nWAGES ASSIGNED TO: HALDANE MARINE CREDIT (ACCT WYNN)\nSIGNED: A. Wynn     WITNESS: T. Vale\nREPORT ABOARD: OUTER MOLE, 05:40. SAILS ON THE MORNING TIDE.",
+        text: "GREY KITTIWAKE — FACTORY TRAWLER — CREW ADVANCE\nBERTH: DECKHAND. SIX MONTHS, NORTHERN GROUNDS. NO SHORE LEAVE.\nWAGES ASSIGNED TO: HALDANE MARINE CREDIT (ACCT WYNN)\nSIGNED: A. Wynn     WITNESS: R. Minato\nREPORT ABOARD: OUTER MOLE, 05:40. SAILS ON THE MORNING TIDE.",
         proves: ["motive_debt"]
       },
       dex_slow_ferry: {
@@ -1295,7 +1295,7 @@ window.NEON_TIDES = (function () {
       },
       mei_stool: {
         title: "Mei on the stool kept free",
-        text: "\"Teo paid Ari's tab tonight. And the next six months of it, in advance, in that jar. She asked me to keep the third stool. 'They'll want a thirty-three in the spring.' I asked which spring. She didn't say.\"",
+        text: "\"Rei paid Ari's tab tonight. And the next six months of it, in advance, in that jar. She asked me to keep the third stool. 'They'll want a thirty-three in the spring.' I asked which spring. She didn't say.\"",
         proves: ["motive_debt"]
       },
       lam_kittiwake: {
@@ -1309,8 +1309,8 @@ window.NEON_TIDES = (function () {
       bar: {
         first: barFirst,
         again: barAgainShared.concat([
-          { if: { ending: "slow_ferry" }, lines: ["Teo is on the corner stool with the headset half on. The third stool has a can on it that nobody drinks. Mei moves it an inch every night, so it never looks forgotten."] },
-          { if: { ending: "the_paper" }, lines: ["Ari is on the third stool, eating a thirty-three like it might be taken away. They don't look at you. Teo does, once, and goes back to her radio."] },
+          { if: { ending: "slow_ferry" }, lines: ["Rei is on the corner stool with the headset half on. The third stool has a can on it that nobody drinks. Mei moves it an inch every night, so it never looks forgotten."] },
+          { if: { ending: "the_paper" }, lines: ["Ari is on the third stool, eating a thirty-three like it might be taken away. They don't look at you. Rei does, once, and goes back to her radio."] },
           { if: { ending: "meis_wire" }, lines: ["A new chit hangs on the wire behind the counter: WYNN, and a number with too many digits. Somewhere in the back, somebody is washing bowls and singing badly."] }
         ])
       },
@@ -1346,7 +1346,7 @@ window.NEON_TIDES = (function () {
             ] },
             { if: { has: ["arrival_tally"], lacks: ["mei_stool"] }, lines: [
               "Mei looks at the third stool, then at the jar by the till.",
-              { who: "mei", text: "Teo paid Ari's tab tonight. And the next six months of it, in advance, in that jar. She asked me to keep the third stool. 'They'll want a thirty-three in the spring.'" },
+              { who: "mei", text: "Rei paid Ari's tab tonight. And the next six months of it, in advance, in that jar. She asked me to keep the third stool. 'They'll want a thirty-three in the spring.'" },
               { who: "mei", text: "I asked which spring. She didn't say. I'm not telling you anything. I'm telling you what's in my jar." }
             ] },
             { if: { has: ["mei_stool"] }, lines: [
@@ -1365,7 +1365,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Teo is outside", minutes: 5, once: true,
+          id: "bar_bag", thing: "teo-stool", kind: "search", label: "Look in the dispatch bag while Rei is outside", minutes: 5, once: true,
           when: { has: ["arrival_tally"], resolved: false },
           gives: ["crew_advance"],
           lines: [
@@ -1399,7 +1399,7 @@ window.NEON_TIDES = (function () {
           when: { maxClock: "01:40" },
           gives: ["dex_slow_ferry"],
           lines: [
-            { who: "dex", text: "You the ferry? Teo said the ferry might come asking. She didn't say what to tell you, which for Teo is a whole speech." },
+            { who: "dex", text: "You the ferry? Rei said the ferry might come asking. She didn't say what to tell you, which for Rei is a whole speech." },
             "He turns the can round in his hands until the tiger faces him.",
             { who: "dex", text: "Ari's been paying Haldane two-thirds of every run since spring. Their mum's in a home on the mainland. Last week they said they'd found a way to pay it all at once. Six months on the Kittiwake." },
             { who: "dex", text: "I said nobody comes back off that boat the same. They said that's the point. Last train's at one-forty and I'm on it, and I'd like to be wrong about that boat." }
@@ -1470,7 +1470,7 @@ window.NEON_TIDES = (function () {
       },
       harm: {
         wrong: [
-          "Teo looks at you for a long moment, and then, surprisingly, almost smiles.",
+          "Rei looks at you for a long moment, and then, surprisingly, almost smiles.",
           { who: "teo", text: "Ari's alive, skipper. More alive tonight than they've let themselves be in a year. You've got nothing that says otherwise, because there isn't anything." },
           { notice: "Your clues don't point to Ari being harmed. There's another explanation to discover.", tone: "warn" }
         ]
@@ -1489,7 +1489,7 @@ window.NEON_TIDES = (function () {
         lines: [
           "You radio the co-op office: the courier's pass was scanned at Landing 3, and nothing after that. It is, word for word, true.",
           { if: { maxClock: "06:00" }, text: "Before dawn you watch from the wheelhouse as a figure with a duffel bag walks the length of the outer mole and goes up the Kittiwake's gangway without looking back. The trawler's work lights swing off the breakwater on the morning tide." },
-          "Teo doesn't come in the next night, or the one after. When she does, she orders a thirty-three, doesn't eat it, and leaves the third stool alone.",
+          "Rei doesn't come in the next night, or the one after. When she does, she orders a thirty-three, doesn't eat it, and leaves the third stool alone.",
           "In April Mei takes a call on the counter radio from the northern grounds, all static and gulls. Somebody asks for a thirty-three to be kept warm for September. Mei writes it on a chit and pins it to the wire beside the jar."
         ],
         late: "By the time you radioed, the Kittiwake had already gone out on the tide. All you decided was what to call it."
@@ -1501,7 +1501,7 @@ window.NEON_TIDES = (function () {
           "Nobody has enforced it in years. She enforces it.",
           { if: { maxClock: "06:00" }, text: "The Kittiwake sails at dawn one deckhand short. The deckhand is on the third stool at Kurage 33, still owing Haldane every coin, and furious with you in a way that keeps them warm." },
           { if: { minClock: "06:00" }, text: "The Kittiwake has already sailed, so the inspector radios the northern grounds for one deckhand." },
-          "Haldane's paper is void in the Basin and nowhere else; the mainland will take longer. Teo files the run as delivered and speaks to you only on channel nine for a month. Then one night she orders you a thirty-three without asking which number."
+          "Haldane's paper is void in the Basin and nowhere else; the mainland will take longer. Rei files the run as delivered and speaks to you only on channel nine for a month. Then one night she orders you a thirty-three without asking which number."
         ],
         late: "It takes a month to bring one deckhand home from the northern grounds. Ari comes back owing less. Trust will take longer, but there is a way forward."
       },
@@ -1509,8 +1509,8 @@ window.NEON_TIDES = (function () {
         title: "A Harbour Holds Together",
         lines: [
           "Mei hears the whole thing with the ladle in her hand, then writes WYNN and a number with too many digits on a chit and pins it to the wire. 'Haldane buys paper at thirty on the coin,' she says, 'and sells it at fifty to anybody who asks. A tab is a kind of bank; mine charges dishes.'",
-          "Before dawn the jar has Teo's money in it, and Priya's, and Bengt's, and some of yours.",
-          { if: { maxClock: "06:00" }, text: "On the last of the dark you run Teo out to the outer mole. Ari comes back down the Kittiwake's gangway with a duffel bag and a face like a closed door, thanks nobody, and gets into the Tern anyway." },
+          "Before dawn the jar has Rei's money in it, and Priya's, and Bengt's, and some of yours.",
+          { if: { maxClock: "06:00" }, text: "On the last of the dark you run Rei out to the outer mole. Ari comes back down the Kittiwake's gangway with a duffel bag and a face like a closed door, thanks nobody, and gets into the Tern anyway." },
           { if: { minClock: "06:00" }, text: "It is past six. Bengt's tug runs the Kittiwake down past the beacon, and Ari comes down a pilot ladder in the swell with a duffel bag and a face like a closed door." },
           "Ari washes bowls at Kurage 33 three nights a week now. The chit on the wire gets a line through it every Friday. Ari still says thank you to the bowl."
         ],
@@ -1533,7 +1533,7 @@ window.NEON_TIDES = (function () {
   /* slip ladder, inside the fence · 22:47 Matte badges out, palm cut ·   */
   /* 22:50 the boat he says he saw · 23:00 Yumi stitches him · 23:10 he   */
   /* sits by Mei's tank · 23:24 badges back in · 23:30 Garrow counts and  */
-  /* calls it in · 23:40 Teo knocks.                                      */
+  /* calls it in · 23:40 Rei knocks.                                      */
   /* ------------------------------------------------------------------ */
   var theEbb = {
     id: "the-ebb",
@@ -1541,7 +1541,7 @@ window.NEON_TIDES = (function () {
     tagline: "Clear the Tern's name and discover what glows beneath Pier 9.",
     truth: "release",
     seeds: ["slack-water"],
-    // Teo's lie about Ari belongs to the other nights; this one has its own briefing and its own pier.
+    // Rei's lie about Ari belongs to the other nights; this one has its own briefing and its own pier.
     omit: ["bar_accept", "bar_ask_job", "bar_report", "landing_ask_priya", "landing_read_board", "landing_ask_teo", "landing_wait", "pier_ask_matte", "pier_dock_office"],
     sceneClasses: [
       { class: "crate17-gone" },                                  // 17 gone; 08 lifted down into its place
@@ -1605,7 +1605,7 @@ window.NEON_TIDES = (function () {
     objectives: [
       { when: { resolved: true },                               text: "Adventure complete. Revisit your discoveries, or choose a new night from the menu." },
       { when: { confronting: true },                            text: "Choose what to show Matte." },
-      { when: { notFlag: ["accepted"] },                        text: "Hear Teo out under the awning at Kurage 33, then take the job." },
+      { when: { notFlag: ["accepted"] },                        text: "Hear Rei out under the awning at Kurage 33, then take the job." },
       { when: { proven: ["no_boat", "not_at_gate"], timeline: "unfilled" }, text: "No boat came, and Matte wasn't at his gate. Write it down — the timeline in your notebook — then put it to him under the floodlight at Pier 9." },
       { when: { proven: ["no_boat", "not_at_gate"], motive: true }, text: "You can break Matte's story. Put it to him under the floodlight at Pier 9." },
       { when: { proven: ["no_boat", "not_at_gate"] },           text: "No boat came, and Matte wasn't at his gate. Find out what really happened to Crate 17, then go back to Pier 9." },
@@ -1713,7 +1713,7 @@ window.NEON_TIDES = (function () {
       },
       bengt_radio: {
         title: "Bengt on channel nine",
-        text: "TUG VIDAR, CHANNEL NINE, ON TEO'S HANDSET:\n\"Launch? No launch. I've sat on the outer mole since twenty to eleven with nothing to do but watch the Basin. Nothing came out past the beacon but the tide.\"",
+        text: "TUG VIDAR, CHANNEL NINE, ON REI'S HANDSET:\n\"Launch? No launch. I've sat on the outer mole since twenty to eleven with nothing to do but watch the Basin. Nothing came out past the beacon but the tide.\"",
         proves: ["no_boat"]
       },
       gate_log: {
@@ -1762,7 +1762,7 @@ window.NEON_TIDES = (function () {
       bar: {
         first: [
           "Somebody is knocking on the hull. You come up out of sleep in the Tern's wheelhouse with the chart table printed on your cheek, and the clock on the bulkhead says twenty to twelve.",
-          "On the quay under Kurage 33's awning, Teo Vale has her headset round her neck and her radio in her hand. Behind her the lanterns drip, the orange neon jellyfish pulses beside the cyan letters, and Auntie Mei is pretending not to watch.",
+          "On the quay under Kurage 33's awning, Rei Minato has her headset round her neck and her radio in her hand. Behind her the lanterns drip, the orange neon jellyfish pulses beside the cyan letters, and Auntie Mei is pretending not to watch.",
           { who: "teo", text: "Skipper. Up. Frostline's lost a crate, and they've decided you took it." },
           { who: "teo", text: "Crate 17, Pier 9. Matte Rook says a launch with no lights came alongside at ten to eleven, and two men had it down the slip ladder. Garrow says the only hull that moved in the Basin tonight was the co-op's night ferry. That's you." },
           { who: "teo", text: "He's asked the harbour authority to hold the Tern at dawn. They hold the Tern, the co-op loses its ferry, you lose your licence, and I lose the only skipper who answers at this hour." },
@@ -1770,9 +1770,9 @@ window.NEON_TIDES = (function () {
           { who: "teo", text: "She's the woman who sold you the noodles that put you to sleep. Nobody will believe her. Find me the boat that isn't you." }
         ],
         again: [
-          { if: { resolved: false, notFlag: ["accepted"] }, text: "Teo waits on the quay with the radio. Mei keeps a bowl warm on the counter, whether or not you want it." },
-          { if: { resolved: false, flag: ["accepted"] }, text: "Kurage 33. Teo has moved inside, to the corner stool, and talks to the co-op office in single words. Mei keeps a bowl warm on the counter, whether or not you want it." },
-          { if: { ending: "green_water" }, lines: ["Teo is back on the corner stool with the headset on. Nobody mentions Crate 17. Mei has put a second jellyfish in the tank, blue like the first, and named it something she won't tell you."] },
+          { if: { resolved: false, notFlag: ["accepted"] }, text: "Rei waits on the quay with the radio. Mei keeps a bowl warm on the counter, whether or not you want it." },
+          { if: { resolved: false, flag: ["accepted"] }, text: "Kurage 33. Rei has moved inside, to the corner stool, and talks to the co-op office in single words. Mei keeps a bowl warm on the counter, whether or not you want it." },
+          { if: { ending: "green_water" }, lines: ["Rei is back on the corner stool with the headset on. Nobody mentions Crate 17. Mei has put a second jellyfish in the tank, blue like the first, and named it something she won't tell you."] },
           { if: { ending: "wild_stock" }, lines: ["The radio behind the counter is full of Frostline: inspectors at the ramp, trucks held, a lease on the reef under review. Mei turns it up when Garrow's name comes on, and down again after."] },
           { if: { ending: "night_watch" }, lines: ["Some nights now, Matte is on the stool nearest the tank, in a co-op jacket that doesn't fit him yet. He nods at you. Mei sets down two thirty-threes without being asked."] }
         ]
@@ -1822,7 +1822,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_ask_teo", thing: "teo-figure", kind: "talk", label: "Ask Teo what Frostline is saying", minutes: 0, once: true,
+          id: "ebb_ask_teo", thing: "teo-figure", kind: "talk", label: "Ask Rei what Frostline is saying", minutes: 0, once: true,
           when: { notFlag: ["accepted"] },
           lines: [
             { who: "teo", text: "Garrow came to count Crate 17 for the dawn truck at half eleven and found 08 on the deck and 17 gone. Matte told him about the launch. Garrow looked at the Basin, saw one boat with its lights on under Mei's awning, and picked up the phone." },
@@ -1831,11 +1831,11 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_radio_bengt", thing: "ferry", kind: "talk", label: "Ask Teo to raise the tug on her radio", minutes: 0, once: true,
+          id: "ebb_radio_bengt", thing: "ferry", kind: "talk", label: "Ask Rei to raise the tug on her radio", minutes: 0, once: true,
           when: { flag: ["accepted"], resolved: false },
           gives: ["bengt_radio"],
           lines: [
-            "Teo turns her radio to channel nine and holds it out so you can both hear.",
+            "Rei turns her radio to channel nine and holds it out so you can both hear.",
             { who: "radio", text: "Tug Vidar. Bengt. …Launch? No launch. I've sat on the outer mole since twenty to eleven with nothing to do but watch the Basin. Nothing came out past the beacon but the tide." },
             { who: "radio", text: "You want it in writing, ask Priya. I want it in writing that I'm cold." },
             { who: "teo", text: "Bengt can see the whole Basin from the mole. Bengt also likes you. Garrow will say both of those things." }
@@ -1870,7 +1870,7 @@ window.NEON_TIDES = (function () {
           ]
         },
         {
-          id: "ebb_report", kind: "talk", label: "Compare leads with Teo", minutes: 0,
+          id: "ebb_report", kind: "talk", label: "Compare leads with Rei", minutes: 0,
           when: { flag: ["accepted"], resolved: false },
           lines: [
             { if: { unproven: ["no_boat", "not_at_gate"] }, who: "teo", text: "Keep going. Priya watches the water, and Yumi watches the night shift. One of them may have the lead we need." },
@@ -2034,7 +2034,7 @@ window.NEON_TIDES = (function () {
           { if: { maxClock: "06:00" }, text: "You give him until six. Matte spends it walking the fence, three times round, then goes up to the office with the bandage still on and tells Garrow everything in the time it takes the kettle to boil." },
           { if: { minClock: "06:00" }, text: "It is already past six. Matte goes up to the office with the bandage still on and tells Garrow everything in the time it takes the kettle to boil." },
           "Garrow sacks him on the spot, then withdraws the complaint against the Tern by noon. A crate of animals Frostline was never allowed to own is not something you report stolen twice.",
-          "Teo hears it on the radio and sends Matte a co-op jacket with the next courier. Night runner, Pier 9 to Landing 3, cash on delivery. He's good at it: he doesn't say much, and nothing gets past him.",
+          "Rei hears it on the radio and sends Matte a co-op jacket with the next courier. Night runner, Pier 9 to Landing 3, cash on delivery. He's good at it: he doesn't say much, and nothing gets past him.",
           "He eats at Kurage 33 on Thursdays now, on the stool nearest the tank. Mei says he talks to the jellies. Mei says they don't mind."
         ],
         late: "By then the dawn truck had gone with two crates instead of three, and Garrow heard him out with his coat still on. The co-op jacket came anyway. He's growing into it."

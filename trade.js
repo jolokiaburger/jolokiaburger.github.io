@@ -325,7 +325,7 @@ window.NEON_TIDES_TRADE = (function () {
   var people = {
     mei:    [ { text: "Auntie Mei. Runs Kurage 33 and the brass scale behind the counter. Hears everything first, and tells it bigger." },
               { if: { rel: { mei: 2 } }, text: "She has started putting your bowl down before you order." } ],
-    teo:    [ { text: "Teo. Courier captain. She routes the couriers, so the couriers' news routes through her. Says less than she knows." },
+    teo:    [ { text: "Rei. Courier captain. She routes the couriers, so the couriers' news routes through her. Says less than she knows." },
               { if: { rel: { teo: 1 } }, text: "She took the headset off one ear for you." },
               { if: { rel: { teo: 2 } }, text: "She told you a number she didn't have to." } ],
     hollis: [ { text: "Hollis, a salvage diver off the Long Patience. Loud when he's winning, louder when he isn't." } ],
@@ -343,13 +343,13 @@ window.NEON_TIDES_TRADE = (function () {
     bar: {
       first: [
         "Rain taps a lively rhythm on the Tern's roof. Beyond the wheelhouse, Kurage 33's lanterns scatter gold across the harbour. Your next adventure starts with a warm bowl and a good question.",
-        "Mei waves you towards the counter. Teo lifts one ear of her headset: couriers are calling from every quay, and tonight's news is moving faster than the ferries.",
+        "Mei waves you towards the counter. Rei lifts one ear of her headset: couriers are calling from every quay, and tonight's news is moving faster than the ferries.",
         "Mei's brass scale gleams beside a freshly chalked board. BUY is what you pay per gram; SELL is what you receive. Somewhere across these four quays, a good story could become a good trade.",
         { notice: "Your aim: finish the night worth more than you started. Trade gold, compare stories and investigate promising leads. Food and tea open conversations; friendly chat is free. You choose the route." }
       ],
       again: [
-        { if: { maxClock: "01:20" }, text: "Kurage 33 welcomes you back with steam and golden light. Teo is on the corner stool, keeping the couriers moving." },
-        { if: { minClock: "01:20" }, text: "Mei raises a hand as you return. Teo has left her corner stool; the headset cord is neatly coiled beside her cup." },
+        { if: { maxClock: "01:20" }, text: "Kurage 33 welcomes you back with steam and golden light. Rei is on the corner stool, keeping the couriers moving." },
+        { if: { minClock: "01:20" }, text: "Mei raises a hand as you return. Rei has left her corner stool; the headset cord is neatly coiled beside her cup." },
         { if: { minClock: "00:45", maxClock: "01:40" }, text: "A grinning diver has claimed a stool by the jellyfish tank. Judging by that appetite, he's brought back a story worth hearing." },
         "Mei dusts chalk from her fingers. \"Back with a story, skipper? Or a bargain?\""
       ]
@@ -388,7 +388,7 @@ window.NEON_TIDES_TRADE = (function () {
         { if: { truth: ["order", "both"], maxClock: "01:00" }, text: "Pier 9. The dock office window is lit; the card still says one o'clock." },
         { if: { truth: ["order", "both"], minClock: "01:00" }, text: "Pier 9. The queue at the dock office window is longer than it was. Nobody in it is talking." },
         { if: { truth: ["vault"] }, text: "Pier 9. The dock office is still dark. Matte is still at the gate." },
-        { if: { minClock: "01:30" }, text: "Teo stands beneath her hood by the office. She catches your eye and beckons you over." }
+        { if: { minClock: "01:30" }, text: "Rei stands beneath her hood by the office. She catches your eye and beckons you over." }
       ]
     }
   };
@@ -401,8 +401,8 @@ window.NEON_TIDES_TRADE = (function () {
         sets: ["ate"], rel: { mei: 1 },
         lines: [
           { if: { notFlag: ["ate"] }, lines: [
-            { who: "mei", text: "Hungry for adventure? What'll it be?" },
-            { who: "mei", text: "The thirty-three! My best bowl for a night with possibilities." },
+            { who: "mei", text: "There you are, skipper. Sit down before that stomach starts answering the radio for you." },
+            { who: "mei", text: "One thirty-three. Egg just soft, chilli on the side. You can chase the horizon after supper." },
             "Pork-bone broth, a slick of chilli oil, an egg cut so the yolk just holds. Mei sets it down without asking how you are; the bowl is how she asks."
           ] },
           { if: { flag: ["ate"] }, text: "Another thirty-three. Mei doesn't ask. The bowl arrives with the egg cut the way you like it, which you didn't know she'd noticed." }
@@ -417,28 +417,28 @@ window.NEON_TIDES_TRADE = (function () {
         ]
       },
       {
-        id: "bar_teo_tea", thing: "teo-figure", kind: "order", sitting: "teo_tea", label: "Treat Teo to tea", cost: 6, minutes: 5, once: true,
+        id: "bar_teo_tea", thing: "teo-figure", kind: "order", sitting: "teo_tea", label: "Treat Rei to tea", cost: 6, minutes: 5, once: true,
         when: { maxClock: "01:20" }, rel: { teo: 1 }, sets: ["met_teo"],
-        lines: [ "You put a milk tea at Teo's elbow. She looks at it, then at you, and takes the headset off one ear." ]
+        lines: [ "You put a milk tea at Rei's elbow. She looks at it, then at you, and takes the headset off one ear." ]
       },
       {
         id: "bar_mei_talk", kind: "talk", label: "Ask Mei about tonight", minutes: 0, sets: ["met_mei"],
         lines: [
           { if: { notFlag: ["ate", "sat"] }, lines: [
-            { who: "mei", text: "Start with a bowl or a tea, skipper. Stay a little, hear a little. That's how adventures begin around here!" },
+            { who: "mei", text: "A bowl if you're hungry, tea if you're restless. Stay long enough and someone will tell you what they didn't mean to. That's this counter's real speciality." },
             "She taps the menu board with her ladle, then the gold board, as if they were the same kind of list."
           ] },
-          { if: { flag: ["ate"], notFlag: ["sat"] }, who: "mei", text: "How was the broth? Stay for tea and you might catch the next story. This harbour never runs out of them." },
+          { if: { flag: ["ate"], notFlag: ["sat"] }, who: "mei", text: "Good broth? Good. Now slow down for a tea. Stories have their own tide; you can't hurry them all." },
           { if: { flag: ["sat"] }, lines: [
-            { who: "mei", text: "One quay sees treasure, another sees a shortage. Listen to both, skipper. The best route might run between them!" }
+            { who: "mei", text: "One quay sees treasure, another sees a shortage. Listen to both before you spend. And leave yourself enough for the trip home—I'm running a noodle shop, not a rescue fleet." }
           ] }
         ]
       },
       {
-        id: "bar_teo_hello", kind: "talk", label: "Teo! Got a moment?", minutes: 0, once: true,
+        id: "bar_teo_hello", kind: "talk", label: "Rei! Got a moment?", minutes: 0, once: true,
         when: { maxClock: "01:20", notFlag: ["met_teo"] }, sets: ["met_teo"],
         lines: [
-          { who: "teo", text: "Skipper! Four riders, three calls, one very confused delivery. Let me land this lot and we'll talk." },
+          { who: "teo", text: "Skipper! Four riders, three calls, one crate going gloriously the wrong way. Give me a minute. I can still make this look planned." },
           "She gives you an apologetic grin and taps her headset. A cup of tea might persuade her to take a proper break."
         ]
       },
@@ -451,17 +451,17 @@ window.NEON_TIDES_TRADE = (function () {
             { who: "teo", text: "Sensors. Cold rooms. That's what the purchase courier said, and he gets paid not to wonder." },
             "She puts the headset back on both ears."
           ] },
-          { if: { relBelow: { teo: 2 }, flag: ["teo_why_asked"] }, text: "\"Still curious? Good.\" Teo lowers her voice. \"Bring me something you've seen yourself. Then we'll compare notes.\"" },
+          { if: { relBelow: { teo: 2 }, flag: ["teo_why_asked"] }, text: "\"Still curious? Good.\" Rei lowers her voice. \"Bring me something you've seen yourself. Then we'll compare notes.\"" },
           { if: { rel: { teo: 2 } }, lines: [
-            "Teo looks at the rain for a while before she answers.",
+            "Rei looks at the rain for a while before she answers.",
             { who: "teo", text: "Thirty kilos, the order says. You know how much gold goes in a cold-room sensor? Two grams." },
-            { who: "teo", text: "Somebody's building something that isn't a cold room. Keep that between us for now. I'd like to know what's really going on before the whole harbour hears it." }
+            { who: "teo", text: "That doesn't sound like a cold room to me. Keep it between us for now. One solid lead beats a hundred panicked calls." }
           ] }
         ],
         hearsWhen: [ { if: { rel: { teo: 2 } }, hears: ["r_thirty"] } ]
       },
       {
-        id: "bar_tell_teo", kind: "talk", label: "Share your discoveries with Teo", minutes: 0, once: true,
+        id: "bar_tell_teo", kind: "talk", label: "Share your discoveries with Rei", minutes: 0, once: true,
         when: { maxClock: "01:20", heardAny: ["r_seen_gilt", "r_seen_bars", "r_seen_twelve", "r_matte_lit", "r_matte_dark"] },
         rel: { teo: 1 }, sets: ["met_teo"],
         lines: [
@@ -474,7 +474,7 @@ window.NEON_TIDES_TRADE = (function () {
           { if: { heardAny: ["r_matte_lit"] }, lines: [
             { who: "teo", text: "Lit, is it." },
             "She writes something on the back of her hand.",
-            { who: "teo", text: "Now that's useful, skipper! Keep those eyes open. We make a pretty good team." }
+            { who: "teo", text: "Now that's something I can work with. You watch the water, I watch the routes. Pretty good team, right?" }
           ] },
           { if: { heardAny: ["r_seen_gilt", "r_seen_bars", "r_seen_twelve"], notHeard: ["r_matte_lit", "r_matte_dark"] }, lines: [
             { who: "teo", text: "A fresh haul always stirs the prices. Frostline's another piece of the puzzle. Let's keep watching both." },
@@ -639,7 +639,7 @@ window.NEON_TIDES_TRADE = (function () {
         lines: [ "A queue fifty long in the rain: dockworkers turning rings on their fingers, a grandmother with a chain folded in a handkerchief, two men with a strongbox between them and nothing to say to each other. At the window a Frostline clerk weighs, writes, pays. Nobody leaves the queue." ]
       },
       {
-        id: "pier_teo", kind: "talk", label: "Talk to Teo", minutes: 0, once: true,
+        id: "pier_teo", kind: "talk", label: "Talk to Rei", minutes: 0, once: true,
         when: { minClock: "01:30" }, sets: ["met_teo"],
         lines: [
           { if: { truth: ["order", "both"] }, lines: [
@@ -663,10 +663,10 @@ window.NEON_TIDES_TRADE = (function () {
       id: "cv_teo_frostline", at: "bar", via: ["tea", "teo_tea"],
       when: { maxClock: "01:20", notHeard: ["r_frostline"] }, sets: ["met_teo"],
       lines: [
-        { if: { notFlag: ["met_teo"] }, text: "Teo slides along a stool to get out of the drip from the awning. Now she's next to you." },
-        { who: "teo", text: "Skipper! Ready to put that little gold stash to work? I've heard something worth a cup of tea." },
+        { if: { notFlag: ["met_teo"] }, text: "Rei slides along a stool to get out of the drip from the awning. Now she's next to you." },
+        { who: "teo", text: "Skipper! Planning to put that gold to work? Buy me five quiet minutes and a tea. I've got a lead you'll want to hear." },
         { who: "teo", text: "Frostline's looking for clean twenty-four karat. Quietly. Somebody up there needs a lot of it." },
-        { who: "teo", text: "My couriers go everywhere. Sometimes the best thing they deliver is a story!" }
+        { who: "teo", text: "My couriers go everywhere. The stories ride free. Whether they're worth anything—well, that's where you come in." }
       ],
       hears: ["r_frostline"]
     },
@@ -685,7 +685,7 @@ window.NEON_TIDES_TRADE = (function () {
       id: "cv_teo_desk", at: "bar", via: ["tea", "teo_tea"],
       when: { maxClock: "00:30", heard: ["r_frostline"], rel: { teo: 1 }, notHeard: ["r_desk"] },
       lines: [
-        "Teo drinks half the milk tea in one go, like medicine.",
+        "Rei drinks half the milk tea in one go, like medicine.",
         { who: "teo", text: "Desk on Pier 9 opens at one. They'll pay over the board for stamped twenty-four." },
         { who: "teo", text: "There. One cup, one promising lead. What you do with it is the exciting part." }
       ],
@@ -696,11 +696,11 @@ window.NEON_TIDES_TRADE = (function () {
       when: { minClock: "00:30", maxClock: "01:20", heard: ["r_frostline"], rel: { teo: 1 }, notFlag: ["teo_call"] }, sets: ["teo_call"],
       lines: [
         { if: { truth: ["vault"] }, lines: [
-          "Teo listens to her headset for a long time. \"Copy,\" she says. Then, to you, quieter:",
+          "Rei listens to her headset for a long time. \"Copy,\" she says. Then, to you, quieter:",
           { who: "teo", text: "Forget the desk. Order's pulled. Somebody upstairs changed their mind at eleven and nobody told the couriers." }
         ] },
         { if: { truth: ["order", "both"] }, lines: [
-          "Teo listens to her headset, says \"copy\", and turns the volume down.",
+          "Rei listens to her headset, says \"copy\", and turns the volume down.",
           { who: "teo", text: "Desk's lit. One o'clock." },
           "She says it to nobody in particular, which is how she says things she means you to hear."
         ] }
@@ -731,7 +731,7 @@ window.NEON_TIDES_TRADE = (function () {
     {
       id: "cv_teo_call_cold", at: "bar", via: ["tea"],
       when: { minClock: "00:30", maxClock: "01:20", relBelow: { teo: 1 }, notFlag: ["teo_call"] }, sets: ["teo_call"],
-      lines: [ "Teo takes a call. She says \"copy\" twice, writes something on the back of her hand, and doesn't look at you." ]
+      lines: [ "Rei takes a call. She says \"copy\" twice, writes something on the back of her hand, and doesn't look at you." ]
     },
     {
       id: "cv_mei_engineers", at: "bar", via: ["noodles", "tea"],
@@ -818,7 +818,7 @@ window.NEON_TIDES_TRADE = (function () {
   ];
 
   var sceneClasses = [
-    { class: "teo-gone", when: { minClock: "01:20" } }   // Teo leaves Kurage 33 for Pier 9
+    { class: "teo-gone", when: { minClock: "01:20" } }   // Rei leaves Kurage 33 for Pier 9
   ];
 
   /* ---- the morning ------------------------------------------------------------------ */
@@ -852,29 +852,29 @@ window.NEON_TIDES_TRADE = (function () {
     // What you did, read back to you (4.0.1). game.js sets these flags when the night ends:
     //   end_dawn            the clock ran into dawn
     //   end_held            no trades at all
-    //   end_bought_on_teo   bought before 01:00, after hearing Teo's Frostline rumour
+    //   end_bought_on_teo   bought before 01:00, after hearing Rei's Frostline rumour
     //   end_sold_on_mei     sold before 01:00, after hearing Mei's vault rumour
     //   end_bought_late     bought at Mei's after 01:20, once the Basin had heard about the desk
     //   end_sold_to_oduya / end_bought_at_hatch / end_sold_at_desk   where you traded
     //   end_both_queues     bought at the hatch and sold at the desk
     //   end_hit_limit       sold the desk all it would take from you
-    //   end_missed_correction   heard Teo's rumour, never heard her correction, and bought (vault)
+    //   end_missed_correction   heard Rei's rumour, never heard her correction, and bought (vault)
     //   end_beat_idle / end_lost_to_idle   your trades (food and fuel aside) beat or lost to holding by 10+ cr
     //   end_never_left      never untied from Kurage 33
     //   end_looked          saw the tarp or asked Matte
     // The first three that hold are shown, in this order: most specific first.
     reflections: [
       { if: { truth: ["order"], flag: ["end_both_queues"] }, text: "You bought at Oduya's hatch and sold at Frostline's window. On a night when the vault was trays and the desk was real, that was the whole trick." },
-      { if: { truth: ["order"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo and before the desk opened. The order was real: an early lead can be worth the crossing." },
+      { if: { truth: ["order"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Rei and before the desk opened. The order was real: an early lead can be worth the crossing." },
       { if: { truth: ["order"], flag: ["end_sold_on_mei"] }, text: "You sold after hearing Mei's vault story. The haul was mostly display trays. Next time, a diver's first-hand account might change your decision." },
       { if: { truth: ["order"], flag: ["end_sold_to_oduya"] }, text: "You sold at Oduya's hatch. With Frostline paying a premium across the water, comparing both boards could have opened another route." },
       { if: { truth: ["vault"], flag: ["end_sold_on_mei"] }, text: "You sold before the bars came ashore. Mei will tell the story bigger than it was, and for once she'll be right." },
-      { if: { truth: ["vault"], flag: ["end_missed_correction"] }, text: "Teo knew by half past twelve that the order was pulled. She tells things like that to people she trusts." },
-      { if: { truth: ["vault"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo's lead, but the order had already been cancelled. A reminder for next time: even a trusted friend can be working with old news." },
+      { if: { truth: ["vault"], flag: ["end_missed_correction"] }, text: "Rei knew by half past twelve that the order was pulled. She tells things like that to people she trusts." },
+      { if: { truth: ["vault"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Rei's lead, but the order had already been cancelled. A reminder for next time: even a trusted friend can be working with old news." },
       { if: { truth: ["vault"], flag: ["end_sold_to_oduya"] }, text: "You sold to Oduya. He was right about the gulls, and so, it turns out, were you." },
       { if: { truth: ["both"], flag: ["end_both_queues"] }, text: "You stood in both queues: cheap bars at the hatch, a dear desk on Pier 9. That was the whole night, and you found it." },
       { if: { truth: ["both"], flag: ["end_sold_on_mei"] }, text: "You sold after hearing the salvage story. Tonight both stories were true; cheap supply and a keen buyer made an opportunity between the quays." },
-      { if: { truth: ["both"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Teo. The buyer was real, and the salvage hatch offered another piece of the opportunity." },
+      { if: { truth: ["both"], flag: ["end_bought_on_teo"] }, text: "You bought after hearing Rei. The buyer was real, and the salvage hatch offered another piece of the opportunity." },
       { if: { truth: ["order", "both"], flag: ["end_bought_late"] }, text: "You bought after the whole Basin had heard about the desk. The price you paid had the news in it already." },
       { if: { flag: ["end_hit_limit"] }, text: "The desk would take only thirty grams from anyone. Frostline wanted the whole Basin's gold, a little from everybody." },
       { if: { flag: ["end_beat_idle"] }, text: "Your trades did better than sitting still would have. Mei noticed; she notices everything." },

@@ -68,10 +68,10 @@ for(const seed of ['frost-order','vault-light','two-tides']){
  const tradeClock=R.state().clock,grams=R.state().gold.reduce((n,l)=>n+l.grams,0);
  check(api.trade.buy(1),'can buy gold');equal(R.state().gold.reduce((n,l)=>n+l.grams,0),grams+1,'gold added');
  check(api.trade.sell(1),'can sell gold');equal(R.state().clock,tradeClock,'trades remain free of time');
- // Teo and Dex cannot be chatted to after they leave their quays.
- R.visit('bar','01:20');check(!R.casualActions().some(a=>a.casual==='teo'),'Teo leaves bar at 01:20');
- R.visit('pier','01:29');check(!R.casualActions().some(a=>a.casual==='teo'),'Teo not yet at pier');
- R.visit('pier','01:30');check(R.casualActions().some(a=>a.casual==='teo'),'Teo arrives at pier at 01:30');
+ // Rei and Dex cannot be chatted to after they leave their quays.
+ R.visit('bar','01:20');check(!R.casualActions().some(a=>a.casual==='teo'),'Rei leaves bar at 01:20');
+ R.visit('pier','01:29');check(!R.casualActions().some(a=>a.casual==='teo'),'Rei not yet at pier');
+ R.visit('pier','01:30');check(R.casualActions().some(a=>a.casual==='teo'),'Rei arrives at pier at 01:30');
  R.visit('metro','01:39');check(R.casualActions().some(a=>a.casual==='dex'),'Dex before last train');
  R.visit('metro','01:40');check(!R.casualActions().some(a=>a.casual==='dex'),'Dex leaves with last train');
  // Rereading a save without new counters is supported.
@@ -168,4 +168,17 @@ check(R.activeCase().actions.island.length>0,'island retains exploration choices
 const noRewardSave=JSON.parse(json(R.state()));delete noRewardSave.rewardCredits;delete noRewardSave.rewardGrams;
 equal(R.saveProblem(noRewardSave),null,'pre-expansion reward fields remain optional');
 noRewardSave.rewardCredits=-1;check(R.saveProblem(noRewardSave)!==null,'negative reward counter rejected');
+// Character redesign keeps save-facing IDs while updating every player-facing identity.
+equal(D.world.characters.teo.name,'Rei Minato','courier display identity updated');
+equal(D.world.characters.teo.artStyle,'anime','courier uses larger portrait presentation');
+equal(D.world.characters.mei.artStyle,'anime','Mei uses larger portrait presentation');
+for(const id of ['teo','mei']){
+ const portrait=D.world.characters[id].portrait;
+ check(fs.existsSync(path.join(root,portrait)),`${id} portrait is shipped`);
+ const asset=read(portrait);check(asset.includes('viewBox="0 0 320 320"'),`${id} portrait scales natively`);
+ check(asset.includes('<title'),`${id} portrait has accessible description`);
+}
+for(const source of ['cases.js','trade.js','dialogue.js'])check(!/\bTeo\b|\bVale\b|T\.V\./.test(read(source)),'old display name removed consistently');
+check(read('cases.js').includes('WITNESS: R. Minato'),'witness signature follows renamed courier');
+check(read('cases.js').includes('checked — R.M.'),'log initials follow renamed courier');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

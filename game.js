@@ -601,7 +601,7 @@
       const person = DATA.world.characters[id] || TRADE.characters[id];
       return { id: "chat_" + id, casual: id, kind: "talk", minutes: 0,
         label: id === "radio" ? "Check in with Bengt · Channel 9" : "Chat with " + person.name,
-        // Teo has no figure drawn on Pier 9. Never attach that action to her empty bar stool.
+        // Rei has no figure drawn on Pier 9. Never attach that action to her empty bar stool.
         thing: id === "teo" && state.location !== "bar" ? null : CHAT[id].thing };
     });
   }
@@ -1882,7 +1882,7 @@
 
   function speechNode(item) {
     const who = DATA.world.characters[item.who] || { name: item.who, color: "#8fb6b5" };
-    const wrapper = el("div", { class: "speech" + (who.portrait ? "" : " no-portrait"), style: "--speaker:" + who.color });
+    const wrapper = el("div", { class: "speech" + (who.artStyle === "anime" ? " featured-portrait" : "") + (who.portrait ? "" : " no-portrait"), style: "--speaker:" + who.color });
     if (who.portrait) {
       const img = el("img", { class: "portrait", src: who.portrait, alt: "", width: "56", height: "56" });
       img.addEventListener("error", function () { wrapper.classList.add("no-portrait"); img.remove(); });

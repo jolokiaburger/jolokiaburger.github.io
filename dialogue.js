@@ -7,27 +7,27 @@ window.NEON_TIDES_CHAT = {
   mei: {
     visits: [{ at: "bar" }], thing: "mei",
     lines: [
-      { id: "welcome", text: "There you are! I was about to send a search party. Well, a bowl. Bowls are better at bringing people home." },
-      { id: "recipe", text: "The secret to my broth? Patience. And ginger. People always forget the ginger because patience sounds more impressive." },
-      { id: "cat", text: "That lucky cat's been waving for fifteen years. Most reliable employee I've ever had. Terrible at washing up, though." },
-      { id: "home", text: "A good harbour needs three things: a light, a hot meal, and someone pleased to see you. We've got all three tonight." },
-      { id: "seat", text: "See that spare stool? Yours whenever you need it. Even great adventurers have to sit down somewhere." },
-      { id: "market", mode: "trade", text: "Buy is what you pay me. Sell is what I pay you. Keep enough for a crossing and a cup of tea; gold can't drink itself." },
-      { id: "friend", mode: "trade", when: { rel: { mei: 2 } }, text: "I know that look now. You've got a plan. Take your time with it, skipper. I'll keep your usual bowl in mind." },
-      { id: "late", when: { minClock: "02:00" }, text: "Quiet hours are my favourite. Listen: the whole harbour is breathing. And that kettle is about to whistle." }
+      { id: "welcome", text: "Back in one piece? Good. That's my favourite kind of entrance. Sit down; you can look mysterious after you've eaten." },
+      { id: "recipe", text: "The broth takes patience. People do too. Unfortunately, adding ginger only works on one of them." },
+      { id: "cat", text: "That lucky cat's been waving for fifteen years. Rei tried to put it on the courier rota. I told her it already has a full-time job." },
+      { id: "home", text: "When I opened this counter, I had one pot and three stools. Now half the harbour calls it home. Best trade I ever made." },
+      { id: "seat", text: "The stool by the tank is yours. No reservation, no grand title. Just show up. A person ought to have somewhere they can do that." },
+      { id: "market", mode: "trade", text: "Buy is what you pay me; sell is what I pay you. Read both numbers. Then keep enough for fuel and tea. Clever people forget the simple things first." },
+      { id: "friend", mode: "trade", when: { rel: { mei: 2 } }, text: "You're learning when to listen and when to cast off. I noticed. I also noticed you like the egg a little softer. Both things matter." },
+      { id: "late", when: { minClock: "02:00" }, text: "Hear that? No trains, fewer engines, just rain and the kettle. At this hour the harbour stops performing and starts talking." }
     ]
   },
   teo: {
     visits: [{ at: "bar", mode: "case" }, { at: "bar", mode: "trade", when: { maxClock: "01:20" } }, { at: "pier", mode: "trade", when: { minClock: "01:30" } }], thing: "teo-figure",
     lines: [
-      { id: "hello", text: "Skipper! Good timing. I have exactly one peaceful minute. Let's spend it on something that isn't a delivery form." },
-      { id: "dream", text: "One day I'll take a ferry without a headset. No schedules. No calls. Just pick a light on the horizon and go." },
-      { id: "riders", text: "Dex calls himself the fastest rider in Bellwater. Priya says he's the fastest at explaining why he's late. Both can be true." },
-      { id: "tern", text: "The Tern has a good name. Small bird, long journey. Never let anyone convince you that you need a bigger boat to matter." },
-      { id: "tea", text: "Milk tea is excellent dispatch equipment. Warm hands, clear head. The co-op keeps rejecting my expenses, but I'll win them over." },
-      { id: "trade", mode: "trade", text: "A rumour is a lead, not a promise. Ask when they heard it. Then ask whether you can reach the buyer in time." },
-      { id: "friend", mode: "trade", when: { rel: { teo: 2 } }, text: "You listen, then you go and look. I like that. Half this harbour does those in the wrong order." },
-      { id: "pier", mode: "trade", when: { minClock: "01:30" }, text: "Different view from this end of the harbour, isn't it? I can almost see which stool I left my scarf on." }
+      { id: "hello", text: "Skipper! If anyone asks, this is a briefing. If nobody asks, it's my first break tonight. Don't ruin it with paperwork." },
+      { id: "dream", text: "One day I'll take a ferry without this headset. Pick a light, follow it, find somewhere I haven't already scheduled a delivery. Sounds dangerous. I can't wait." },
+      { id: "riders", text: "Dex says he's Bellwater's fastest rider. Priya says he's fastest at explaining why he's late. I put both statements in his performance review." },
+      { id: "tern", text: "A small boat can slip through where the big ships have to wait. Remember that when somebody tells you the Tern isn't enough." },
+      { id: "tea", text: "Mei can tell how my shift is going by how I hold the cup. Two hands means she's already making another. That's better dispatch support than the office provides." },
+      { id: "trade", mode: "trade", text: "A rumour is a lead. Check the time, check the buyer, check your tank. Then decide. You don't have to win every bargain to have a good night." },
+      { id: "friend", mode: "trade", when: { rel: { teo: 2 } }, text: "You actually go and look. Most people just repeat the loudest voice. Keep doing that, skipper. I like knowing you're out there." },
+      { id: "pier", mode: "trade", when: { minClock: "01:30" }, text: "From here I can see Mei's lanterns. Funny. Spend the whole shift planning routes, and there's still one light that always tells you where home is." }
     ]
   },
   priya: {

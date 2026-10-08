@@ -29,3 +29,11 @@ Ask Sora at the market about the lantern kits, obtain Rin's reef chart at the ya
 All three destinations have distinct inline SVG scenes and authored characters, bounded gold stock and buying limits. The yard provides paid refuelling; the existing tug remains an escape route when stranded. New markets retain the existing deterministic price simulation and price impact. Their initial spreads and limits are provisional balance choices.
 
 Run `node tools/adventure-checks.mjs` for the full engine checks, including all three world truths, both expedition rewards, real travel costs, save restoration, depleted stock, rescue and reward accounting. This does not replace visual testing on a real phone or a browser play-test.
+
+## Rei and Mei: anime character pass
+
+The first two redesigned characters use original native vector portraits: `assets/portraits/rei-anime.svg` and `assets/portraits/mei-anime.svg`. Rei has a dark asymmetric haircut, teal headset and orange pilot jacket. Mei has a dark bun with silver temple streaks, a gold hairpin, jade earrings, red tunic and cream apron. Their figures in `index.html` use the same identifying colours and details. Featured portraits render at 96 px on desktop and 72 px on phones; other portraits retain their existing sizes.
+
+Teo's display name becomes Rei Minato throughout dialogue, witness records and signatures. Internal `teo` IDs, flags, clues, evidence requirements and save keys remain unchanged. Rei's dialogue emphasises practical wit, loyalty and curiosity; Mei's combines warm hospitality with dry humour. Essential facts and timings are preserved. The existing eight casual lines per character are rewritten without changing their availability or rewards.
+
+Portraits and the two harbour figures were inspected through native SVG raster previews. Interactive browser layout and real phone play-testing remain unverified.
