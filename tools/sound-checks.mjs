@@ -7,11 +7,11 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const read=p=>fs.readFileSync(root+p,'utf8');
 let checks=0;const check=(v,m)=>{assert.ok(v,m);checks++;};
 const saved=new Map(),timers=[],nodes=[];
-function param(){return {value:0,setValueAtTime(v){this.value=v;},setTargetAtTime(v){this.value=v;},exponentialRampToValueAtTime(v){this.value=v;}};}
-function node(){const n={gain:param(),frequency:param(),Q:param(),detune:param(),threshold:param(),ratio:param(),connect(to){this.destination=to;},disconnect(){this.disconnected=true;},start(t){this.started=t;},stop(t){this.stopped=t;}};nodes.push(n);return n;}
+function param(){return {value:0,events:[],setValueAtTime(v,t){this.value=v;this.events.push({v,t});},setTargetAtTime(v,t){this.value=v;this.events.push({v,t});},exponentialRampToValueAtTime(v,t){this.value=v;this.events.push({v,t});}};}
+function node(kind){const n={kind,gain:param(),frequency:param(),Q:param(),detune:param(),threshold:param(),ratio:param(),connect(to){this.destination=to;},disconnect(){this.disconnected=true;},start(t){this.started=t;},stop(t){this.stopped=t;}};nodes.push(n);return n;}
 class Audio {
  constructor(){this.sampleRate=8000;this.currentTime=10;this.state='running';this.destination={};}
- createGain(){return node();}createOscillator(){return node();}createBufferSource(){return node();}createBiquadFilter(){return node();}createDynamicsCompressor(){return node();}createConvolver(){return node();}
+ createGain(){return node("gain");}createOscillator(){return node("oscillator");}createBufferSource(){return node("buffer");}createBiquadFilter(){return node("filter");}createDynamicsCompressor(){return node();}createConvolver(){return node();}
  createBuffer(ch,len){const data=Array.from({length:ch},()=>new Float32Array(len));return {getChannelData:i=>data[i]};}
  resume(){this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}
 }
@@ -37,7 +37,26 @@ check(!R.soundCue('tea'),'rapid click is rate limited');
 step();count=R.radio.sfxPlayed;R.state().credits=0;
 check(!api.trade.buy(1),'unaffordable buy rejected');check(R.radio.sfxPlayed===count,'failed buy silent');
 check(api.trade.sell(1),'sell succeeds');check(R.radio.sfxPlayed===count+1,'successful sell emits cue');
-for(const kind of ['opening','repair','grill','tea','bowl']){step();const before=nodes.length;check(R.soundCue(kind),kind+' scheduled');const finite=nodes.slice(before).filter(n=>n.stopped!==undefined);check(finite.length>0&&finite.every(n=>n.stopped>n.started),kind+' sources have bounded duration');for(const n of finite){n.onended();check(n.disconnected,kind+' source disconnects');}}
+for(const kind of ['buy','sell','opening','repair','grill','tea','bowl']){
+ step();const before=nodes.length;check(R.soundCue(kind),kind+' scheduled');
+ const created=nodes.slice(before),finite=created.filter(n=>n.stopped!==undefined);
+ check(finite.length>0&&finite.every(n=>n.stopped>n.started&&n.stopped-n.started<2.1),kind+' sources have bounded duration');
+ if(kind!=='opening'){
+  const tones=created.filter(n=>n.kind==='oscillator');
+  check(tones.every(n=>n.type==='sine'&&n.frequency.events.every(e=>e.v<=1100)),kind+' has no bright synthetic beep sequence');
+  check(created.filter(n=>n.kind==='gain').every(n=>n.gain.events.every(e=>e.v<=0.02)),kind+' has restrained peak levels');
+  check(created.some(n=>n.kind==='buffer'),kind+' includes environmental texture');
+ }
+ for(const n of created.filter(n=>n.kind==='buffer')){
+  check(n.destination.destination.type==='lowpass'&&n.destination.destination.frequency.value<=1800,kind+' noise loses harsh high frequencies');
+ }
+ for(const n of created.filter(n=>n.kind==='gain')){
+  const e=n.gain.events;
+  check(e[0].v===0.0001&&e.at(-1).v===0.0001&&e[1].t>e[0].t&&e.at(-1).t>e[1].t,kind+' has a smooth attack and release');
+ }
+ for(const n of finite)n.onended();
+ check(created.every(n=>n.disconnected),kind+' cleans up every source, filter and gain');
+}
 step();R.visit('market','01:00');count=R.radio.sfxPlayed;R.radio.ctx.currentTime+=10;R.marketAmbience();check(R.radio.sfxPlayed===count+1,'market ambience triggers when eligible');
 R.visit('bar','01:00');count=R.radio.sfxPlayed;R.radio.ctx.currentTime+=20;R.marketAmbience();check(R.radio.sfxPlayed===count,'market ambience stays in market');
 R.visit('market','01:00');context.document.hidden=true;check(!R.soundCue('opening'),'hidden tab suppresses cues');R.marketAmbience();check(R.radio.sfxPlayed===count,'hidden tab suppresses ambience');context.document.hidden=false;

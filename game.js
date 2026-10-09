@@ -3246,10 +3246,11 @@
       if (!settings.effects && settings.station === "off" && radio.ctx) radio.ctx.suspend();
     }, 250);
   }
-  function effectTone(frequency, offset, duration, level, type) {
+  function effectTone(frequency, offset, duration, level, type, endFrequency) {
     const ctx = radio.ctx, t = ctx.currentTime + offset;
     const source = ctx.createOscillator(), gain = ctx.createGain();
-    source.type = type || "sine"; source.frequency.value = frequency;
+    source.type = type || "sine"; source.frequency.setValueAtTime(frequency, t);
+    if (endFrequency) source.frequency.exponentialRampToValueAtTime(endFrequency, t + duration);
     gain.gain.setValueAtTime(0.0001, t);
     gain.gain.exponentialRampToValueAtTime(level, t + 0.012);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
@@ -3257,16 +3258,28 @@
     source.onended = function () { source.disconnect(); gain.disconnect(); };
     source.start(t); source.stop(t + duration + 0.02);
   }
-  function effectNoise(frequency, offset, duration, level) {
+  function effectNoise(frequency, offset, duration, level, attack) {
     const ctx = radio.ctx, t = ctx.currentTime + offset;
-    const source = ctx.createBufferSource(), band = ctx.createBiquadFilter(), gain = ctx.createGain();
-    source.buffer = radio.noise; band.type = "bandpass"; band.frequency.value = frequency; band.Q.value = 0.7;
+    const source = ctx.createBufferSource(), band = ctx.createBiquadFilter();
+    const soften = ctx.createBiquadFilter(), gain = ctx.createGain();
+    source.buffer = radio.noise;
+    band.type = "bandpass"; band.Q.value = 0.5;
+    band.frequency.setValueAtTime(frequency, t);
+    band.frequency.exponentialRampToValueAtTime(frequency * 0.7, t + duration);
+    // Round off the hiss: steam, pouring water and paper should never crackle
+    // like UI static. A slow swell gives the longer textures room to breathe.
+    soften.type = "lowpass"; soften.frequency.value = 1800; soften.Q.value = 0.5;
     gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(level, t + 0.03);
+    gain.gain.exponentialRampToValueAtTime(level, t + (attack || 0.03));
     gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-    source.connect(band); band.connect(gain); gain.connect(radio.effects);
-    source.onended = function () { source.disconnect(); band.disconnect(); gain.disconnect(); };
+    source.connect(band); band.connect(soften); soften.connect(gain); gain.connect(radio.effects);
+    source.onended = function () { source.disconnect(); band.disconnect(); soften.disconnect(); gain.disconnect(); };
     source.start(t); source.stop(t + duration + 0.02);
+  }
+  function effectCup(offset, level) {
+    // A brief, quiet ceramic contact rather than a sustained notification note.
+    effectTone(620, offset, 0.16, level);
+    effectTone(1030, offset + 0.006, 0.09, level * 0.3);
   }
   function soundCue(kind) {
     if (["buy", "sell", "opening", "repair", "grill", "tea", "bowl"].indexOf(kind) === -1 || !sfxReady()) return false;
@@ -3275,23 +3288,34 @@
     if (t - radio.lastCue < 0.45) return false;
     radio.lastCue = t; radio.sfxPlayed += 1;
     if (kind === "buy" || kind === "sell") {
-      effectTone(440, 0, 0.09, 0.035, "triangle"); // scale latch
-      [880, 1320, kind === "buy" ? 1760 : 1100].forEach(function (f, i) { effectTone(f, 0.08 + i * 0.07, 0.25, 0.022); });
-      effectNoise(1600, 0.3, 0.3, 0.014); // blue-paper receipt
+      // A wooden scale settling, low water under the quay, then a paper wrap.
+      // No rising electronic arpeggio: the successful action stays understated.
+      effectTone(210, 0, 0.11, 0.018, "sine", 135);
+      effectNoise(360, 0.04, 0.7, 0.017, 0.12);
+      effectNoise(kind === "buy" ? 950 : 760, 0.22, 0.38, 0.012, 0.07);
     } else if (kind === "opening") {
       [261.63, 329.63, 392, 440, 523.25].forEach(function (f, i) { effectTone(f, i * 0.22, 0.85, 0.028, "triangle"); });
       effectTone(130.81, 0, 1.9, 0.022);
       effectNoise(700, 0.1, 0.35, 0.012);
     } else if (kind === "repair") {
-      [520, 650, 780].forEach(function (f, i) { effectTone(f, i * 0.14, 0.12, 0.018, "triangle"); });
-      effectNoise(900, 0.1, 0.2, 0.01);
+      // Two felted bench taps, not three pitched confirmation beeps.
+      [0, 0.19].forEach(function (offset) {
+        effectTone(185, offset, 0.085, 0.013, "sine", 115);
+        effectNoise(580, offset, 0.13, 0.01);
+      });
     } else if (kind === "grill") {
-      effectNoise(2300, 0, 0.8, 0.018);
-      effectTone(560, 0.1, 0.2, 0.015);
-    } else if (kind === "tea" || kind === "bowl") {
-      effectNoise(1200, 0, 0.65, 0.012);
-      effectTone(kind === "tea" ? 880 : 660, 0.2, 0.45, 0.022);
-      effectTone(1320, 0.22, 0.3, 0.008);
+      effectNoise(1400, 0, 0.85, 0.018, 0.12);
+      effectNoise(680, 0.18, 0.42, 0.009, 0.06);
+    } else if (kind === "tea") {
+      // A mellow kettle exhale, a pour, then the cup meeting its saucer.
+      // Deliberately no high whistle; the texture sits beneath the music.
+      effectNoise(850, 0, 1.05, 0.018, 0.2);
+      effectNoise(430, 0.16, 0.65, 0.016, 0.12);
+      effectCup(0.72, 0.012);
+    } else if (kind === "bowl") {
+      effectNoise(470, 0, 0.38, 0.011, 0.07);
+      effectTone(170, 0.13, 0.12, 0.016, "sine", 110);
+      effectCup(0.15, 0.009);
     }
     return true;
   }
