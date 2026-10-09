@@ -1,0 +1,14 @@
+# Harbour polish and festival supplies
+
+All six updates use the existing offline, no-build game architecture.
+
+1. **Buildings:** `index.html` adds kitchen utensils and bottles, shelter crates and greenery, a Frostline office window, market cables and lanterns, and yard/canal fittings. Muted blue-grey surfaces keep amber interiors and characters prominent. `styles.css` leaves this decoration outside interaction targets.
+2. **Visible outcomes:** Festival bowls appear at Nao's counter; tea and lantern cloth appear in Kisaragi. Delivery details carry into later chapters through world memories. Existing bowl shelves, repaired pump light and breakfast props remain. Priya's returned umbrella appears beside the shelter. Scene rules live in `harbour-life.js` and `harbour-wire.js`.
+3. **Weather:** Small reflected light lines, lamp-lit rain and occasional awning drips use native SVG with slow CSS animation, no added blur filter or particle scheduler. Added movement stops under reduced motion; tiny animations also rest on phones. Main-harbour weather accents stay off distant illustrated scenes.
+4. **People:** Nao has a kettle, Sora a receipt and Priya her umbrella; Nao's kettle is hidden when she leaves with you. Contextual arrival greetings use `game.js`; new reactions in `dialogue.js`, `canal-town.js` and `harbour-life.js` acknowledge help and deliveries.
+5. **Harbour Wire:** Explicit Mark read remembers a post fingerprint; changed cargo text or a newly stale offer becomes unread again. Pins and read markers autosave and carry through chapters. Unread/Pinned filters and per-post links to accepted journal entries simplify return visits. Reading and pinning spend no resources.
+6. **Festival supply story:** Accept one fixed route at Landing 3. Three cases share the existing two-slot small freight hold with other cargo. Bowls: Jun in Kisaragi to Nao at the market. Tea: Mei to Hana in Kisaragi. Cloth: Sora to Hana. Courier fees are 6/5/5 cr with no stock purchase. Stock purchases are 18/12/10 cr; promised payments are 28/20/18 cr. Thus gross return is 16 cr for courier work or 26 cr for stock, before fuel. Each collection and delivery takes five minutes. Start delivery by 05:20 on a night shift or 10:20 in Chapter Three; exactly that time is allowed. Late goods earn no automatic payment. Completing all three opens Hana's closing cup, with no extra cash reward.
+
+## Validation
+
+Run `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. The adventure harness checks route exclusivity, both actual payment paths, hold capacity, save/reload compatibility, no repeated payments, deadlines including exact boundary, morning deadlines, visible outcome rules, unread changes and pinned persistence. It renders cards and category filters in a DOM mock. Actual browser visuals, touch layout and focus still need a player check.

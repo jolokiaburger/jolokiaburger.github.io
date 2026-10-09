@@ -15,7 +15,7 @@ context.window.matchMedia=()=>({matches:false,addEventListener(){}});
 for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {wirePosts, wireRender: renderHarbourWire, wireFilter: value => {transient.wireFilter=value;}, familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
+  window.Review = {markWireRead, toggleWirePin, wirePosts, wireRender: renderHarbourWire, wireFilter: value => {transient.wireFilter=value;}, familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -656,3 +656,55 @@ check(api.readSave().flags.wire_umbrella_started,'accepted request autosaves');
 R.visit('bar');wirePanel=new TestNode();R.wireRender(wirePanel);
 check(!flatten(wirePanel).some(n=>n.tag==='button'&&textOf(n)==='Offer to find the umbrella'),'accepted request cannot be accepted from its post twice');
 console.log(`Harbour Wire included: ${checks} total adventure checks.`);
+
+// Refinement pass: real festival cargo accounting and board state.
+for(const route of ['courier','stock']){
+ api.trade.start('festival-'+route);R.visit('landing','00:00');
+ const purse=R.state().credits;
+ api.performAction('fs_'+route);check(R.state().flags['fs_'+route],route+' route chosen');
+ const other=route==='courier'?'stock':'courier';
+ check(!R.locationActions().some(a=>a.id==='fs_'+other),'supply route cannot be changed');
+ R.visit('canal');api.performAction('fs_bowls_'+route+'_buy');
+ R.visit('market');api.performAction('fs_cloth_'+route+'_buy');
+ equal(R.freightHeld(),2,'festival uses shared two-case hold');
+ R.visit('bar');check(!R.locationActions().some(a=>a.id==='fs_tea_'+route+'_buy'),'third case blocked by actual hold capacity');
+ R.visit('market');api.performAction('fs_bowls_'+route+'_deliver');
+ R.visit('bar');api.performAction('fs_tea_'+route+'_buy');
+ R.visit('canal');api.performAction('fs_tea_'+route+'_deliver');api.performAction('fs_cloth_'+route+'_deliver');
+ const expected=route==='courier'?16:26;
+ equal(R.state().credits,purse+expected,route+' actual cargo margin before fuel');
+ const settled=R.state().credits;api.performAction('fs_cloth_'+route+'_deliver');equal(R.state().credits,settled,'no duplicate delivery payment');
+ api.performAction('fs_finish');check(R.state().flags.fs_done,'festival closing cup completed');
+ equal(R.state().credits,settled,'closing scene cannot create extra reward');
+ check(R.storyProgress().some(p=>p.id==='festival-supply'&&p.done),'festival result appears in journal');
+ check(R.wirePosts().some(p=>p.id==='festival-supply-thanks'),'festival completion creates board follow-up');
+ for(const good of ['bowls','tea','cloth'])check(api.getCase().sceneClasses.some(r=>r.class==='festival-'+good&&R.conditionHolds(r.when)),good+' delivery activates scene detail');
+ equal(R.saveProblem(api.readSave()),null,'festival cargo save passes schema');
+}
+api.trade.start('festival-late');R.visit('landing','00:00');api.performAction('fs_stock');R.visit('bar');api.performAction('fs_tea_stock_buy');
+R.visit('canal','05:21');const latePurse=R.state().credits;api.performAction('fs_tea_stock_deliver');
+equal(R.state().credits,latePurse,'late stock cannot earn payment');check(R.state().freight.fs_tea_stock.units===1,'late goods remain aboard');
+check(R.storyProgress().find(p=>p.id==='festival-supply').text.includes('window closed'),'journal explains expired supply thread');
+check(R.wirePosts().find(p=>p.id==='cargo-fs_tea_stock').text.includes('Purchase 12 cr'),'board keeps purchased cost after expiry');
+api.trade.start('festival-deadline');R.visit('landing','00:00');api.performAction('fs_courier');R.visit('bar');api.performAction('fs_tea_courier_buy');R.visit('canal','05:20');api.performAction('fs_tea_courier_deliver');check(R.state().flags.fs_tea_done,'delivery can begin exactly at deadline');
+api.trade.start('board-memory');
+const freshWirePost=R.wirePosts().find(p=>p.id==='welcome');check(freshWirePost.unread,'new post unread');
+const beforeRead={clock:R.state().clock,credits:R.state().credits,fuel:R.state().fuel};
+check(R.markWireRead('welcome'),'mark valid post read');check(!R.wirePosts().find(p=>p.id==='welcome').unread,'read marker clears unread');
+check(R.toggleWirePin('welcome')&&R.wirePosts().find(p=>p.id==='welcome').savedPin,'pin saved');
+equal(json({clock:R.state().clock,credits:R.state().credits,fuel:R.state().fuel}),json(beforeRead),'read and pin cost no resources');
+check(!R.markWireRead('invented')&&!R.toggleWirePin('invented'),'nonexistent posts cannot be persisted');
+check(api.readSave().wirePins.welcome,'pin autosaves');
+R.wireFilter('Pinned');wirePanel=new TestNode();R.wireRender(wirePanel);equal(flatten(wirePanel).filter(n=>n.tag==='article').length,1,'pinned filter renders selected post');
+R.visit('landing');api.performAction('fs_stock');R.visit('bar');R.markWireRead('cargo-fs_tea_stock');api.performAction('fs_tea_stock_buy');
+check(R.wirePosts().find(p=>p.id==='cargo-fs_tea_stock').unread,'changed cargo notice becomes unread again');
+R.visit('bar','05:30');api.trade.turnIn();api.trade.nextNight();
+check(R.state().wirePins.welcome&&!R.wirePosts().find(p=>p.id==='welcome').unread,'read and pinned posts survive next chapter');
+api.trade.turnIn();api.trade.nextNight();R.visit('landing','06:40');api.performAction('fs_courier');
+R.visit('bar');api.performAction('fs_tea_courier_buy');R.visit('canal','10:20');api.performAction('fs_tea_courier_deliver');
+check(R.state().flags.fs_tea_done,'morning supply route uses morning deadline');
+check(api.getCase().sceneClasses.some(r=>r.class==='festival-tea'&&R.conditionHolds(r.when)),'morning delivery updates scenery');
+for(const cls of ['festival-bowls-art','festival-tea-art','festival-cloth-art','umbrella-home','nao-tea-prop','sora-receipt-prop'])check(read('index.html').includes(cls),'drawn presence or delivery prop '+cls);
+check(read('styles.css').includes('body.reduce-motion .light-ripple'),'new weather respects reduced motion');
+check(read('styles.css').includes('.light-ripple, .awning-drip, .kettle-breath { animation: none; }'),'tiny new effects rest on phones');
+console.log(`Harbour polish included: ${checks} total adventure checks.`);

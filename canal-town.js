@@ -48,10 +48,13 @@
   };
   Object.keys(pools).forEach(id => { C[id].lines = pools[id].map((text, i) => ({ id: "ct_" + id + "_" + i, text })); });
   C.hana.lines.unshift(
+    { id: "festival_cloth_here", when: { flag: ["fs_cloth_done"] }, text: "Your cloth is on the bridge lanterns now. A case became six little lights; I rather like that exchange rate." },
+    { id: "festival_tea_here", when: { flag: ["fs_tea_done"] }, text: "Mei's tea is on the crew table. The delivery is paid for. Sitting down is the part we don't put on a receipt." },
     { id: "parcel_spoons", when: { flag: ["ct_parcel_done"] }, text: "Every table has enough spoons now. Your mysterious parcel became three very ordinary second helpings. A fine ending." },
     { id: "return_chair", when: { visited: { canal: 2 } }, text: "You found us again! The spare chair is still spare in exactly the direction of you." }
   );
   C.jun.lines.unshift(
+    { id: "festival_bowls_safe", when: { flag: ["fs_bowls_done"] }, text: "Nao said the bowls arrived without a chip. I wrap them for the voyage; a careful captain finishes the work." },
     { id: "tea_delivered", when: { flag: ["ct_tea_sold"] }, text: "Sora radioed to say the seal was perfect. A clear promise, a careful crossing, a warm kettle at the other end. Thank you." },
     { id: "return_cup", when: { visited: { canal: 2 } }, text: "The green cup? Yes, I remembered. You don't have to buy a case every time you visit a tea shop." }
   );

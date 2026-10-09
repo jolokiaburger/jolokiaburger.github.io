@@ -519,6 +519,12 @@
         f.cf_choice ? (f.cf_card ? "Take Nao's signed recipe to Hana in Kisaragi." : "Sail with Nao to Kisaragi and join Hana's preview supper before dawn.") : missing.length ? "Next: " + missing.join("; ") + "." : "Return to Nao and choose the small festival table or a signed recipe with an evening off.",
         f.cf_shared ? "Signed recipe shared · Nao kept her afternoon with Haruto." : "Preview supper shared · Nao reserved her own small festival table.");
     }
+    if (f.fs_started) {
+      const remaining = ["bowls", "tea", "cloth"].filter(function (id) { return !f["fs_" + id + "_done"]; });
+      add("festival-supply", "Hana · A table across the water", f.fs_done,
+        remaining.length && state.clock > parseClock(state.night === 3 ? "10:20" : "05:20") ? "Delivery window closed. Undelivered cases stay aboard without automatic payment; settled deliveries remain in your cargo accounts." : remaining.length ? (f.fs_stock ? "Stock route" : "Courier route") + " · Still to deliver: " + remaining.join(", ") + ". Check each cargo offer for destination, payment and deadline." : "Visit Hana in Kisaragi for a quiet cup; every cargo payment is already settled.",
+        "All three festival cases delivered · You shared Hana's closing cup.");
+    }
     if (f.wire_umbrella_started) add("wire-umbrella", "Priya · A patch of blue sky", f.wire_umbrella_done,
       f.wire_umbrella_found ? "Return the umbrella to Priya at Landing 3; no deadline." : "Search by the Metro Quay vending machine; five minutes, no purchase.", "Priya's umbrella returned · Her thank-you is on the Harbour Wire.");
     if (f.yard_started) add("yard", "Rin · Second Helping", f.yard_done, f.yard_pump_fixed ? "Return to Rin at Starling Yard and celebrate the repaired ferry." : "Help Rin fix the bilge pump at Starling Yard; ten minutes, no parts purchase.", "Second Helping's pump repaired and launch celebrated.");
@@ -545,7 +551,7 @@
       if (!group.length) return;
       section.appendChild(el("h4", { text: done ? "Completed" : "Active" }));
       const list = el("ul", { class: "story-list" });
-      group.forEach(function (row) { list.appendChild(el("li", { class: row.done ? "story-complete" : "story-active" }, [el("strong", { text: row.title }), el("p", { text: row.text })])); });
+      group.forEach(function (row) { list.appendChild(el("li", { id: "story-" + row.id, tabindex: "-1", class: row.done ? "story-complete" : "story-active" }, [el("strong", { text: row.title }), el("p", { text: row.text })])); });
       section.appendChild(list);
     });
     container.appendChild(section);
@@ -1090,6 +1096,8 @@
     if (old.flags.exp_chart) next.flags.exp_chart = true;
     if (old.flags.ct_route) next.flags.ct_route = true;
     ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned", "ay_started", "ay_stamp", "ay_receipt", "ay_compared", "ay_mismatch", "ay_done", "wire_umbrella_started", "wire_umbrella_found", "wire_umbrella_done"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
+    next.wireRead = Object.assign({}, old.wireRead || {});
+    next.wirePins = Object.assign({}, old.wirePins || {});
     next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
     Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0 || key.indexOf("lesson:") === 0 || key.indexOf("ay_") === 0 || key.indexOf("wire_umbrella_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
     const q = MARKET.quote(TRADE, next.truth, next.seed, "bar", next.clock);
@@ -1998,6 +2006,15 @@
     const first = (state.visited[state.location] || 1) <= 1;
     let items = expandLines(first ? scene.first : scene.again);
     if (items.length === 0 && !first) items = approachLines(state.location);
+    if (isTrade()) {
+      const greetings = {
+        market: { who: "sora", text: first ? "Welcome under the lanterns, captain. The scale is here; the kettle is over there. Neither requires you to hurry." : "Tern on the quay again! Check the board if you're trading; there's room to sit if you're visiting." },
+        landing: { who: "priya", text: state.flags.wire_umbrella_done ? "Welcome back. Your patch of blue sky is keeping my clipboard dry." : "There you are, captain. The Wire has the neighbours' news; I have the current paperwork." },
+        bar: { who: "mei", text: state.flags.freight_ceramics_done ? "Home again. One of Jun's bowls is waiting for its next adventure with broth." : "A dry stool, captain. Come in before your coat orders tea without you." },
+        canal: { who: "hana", text: state.flags.fs_done ? "Our festival captain! Today you may arrive empty-handed and leave well fed." : first ? "Welcome to Kisaragi. Follow the warm windows; the bridge will introduce the rest of us." : "Back beyond the locks. Good. A familiar face is an excellent reason to put water on." }
+      };
+      if (greetings[state.location]) items.push(greetings[state.location]);
+    }
     renderConversation(container, items, "scene:" + state.variantId + ":" + state.location + ":" + state.visited[state.location]);
   }
 
@@ -2567,7 +2584,7 @@
     body.innerHTML = "";
 
     if (transient.wireOpen) { renderHarbourWire(body); return; }
-    body.appendChild(el("button", { class: "btn wire-shortcut", type: "button", onclick: openHarbourWire, text: "Harbour Wire · Read neighbours & notices" }));
+    body.appendChild(el("button", { class: "btn wire-shortcut", type: "button", onclick: openHarbourWire, text: "Harbour Wire · " + wirePosts().filter(function (p) { return p.unread; }).length + " unread · Neighbours & notices" }));
     renderStoryProgress(body);
     renderCargoProgress(body);
     if (state.night === 2) renderSecondNightProgress(body);
@@ -2743,7 +2760,31 @@
   }
 
   function wirePosts() {
-    return window.NEON_TIDES_WIRE ? window.NEON_TIDES_WIRE.visible(state, TRADE, conditionHolds, parseClock) : [];
+    const posts = window.NEON_TIDES_WIRE ? window.NEON_TIDES_WIRE.visible(state, TRADE, conditionHolds, parseClock) : [];
+    return posts.map(function (p) {
+      const fingerprint = JSON.stringify([p.title, p.text, !!p.stale]);
+      return Object.assign({}, p, { fingerprint: fingerprint, unread: (state.wireRead || {})[p.id] !== fingerprint, savedPin: !!(state.wirePins || {})[p.id] });
+    });
+  }
+  function markWireRead(id) {
+    const post = wirePosts().find(function (p) { return p.id === id; });
+    if (!post) return false;
+    if (!state.wireRead) state.wireRead = {};
+    state.wireRead[id] = post.fingerprint; saveGame(); return true;
+  }
+  function toggleWirePin(id) {
+    if (!wirePosts().some(function (p) { return p.id === id; })) return false;
+    if (!state.wirePins) state.wirePins = {};
+    state.wirePins[id] = !state.wirePins[id]; saveGame(); return true;
+  }
+  function refreshWire(focusId) {
+    const top = dom.nbBody.scrollTop; renderNotebook(); dom.nbBody.scrollTop = top;
+    const button = $(focusId) || dom.nbBody.querySelector('.wire-filters button[aria-pressed="true"]'); if (button) button.focus({ preventScroll: true });
+  }
+  function openWireStory(id) {
+    transient.wireOpen = false; renderNotebook();
+    const row = $("story-" + id);
+    if (row) { row.scrollIntoView({ block: "nearest" }); row.focus({ preventScroll: true }); }
   }
   function openHarbourWire() {
     if (!isTrade()) return;
@@ -2753,7 +2794,7 @@
   }
   function renderHarbourWire(body) {
     body.appendChild(el("button", { class: "btn wire-shortcut", type: "button", text: "Back to journal", onclick: function () { transient.wireOpen = false; renderNotebook(); dom.nbBody.scrollTop = 0; dom.nbBody.querySelector("button").focus({ preventScroll: true }); } }));
-    body.appendChild(el("h3", { text: "Harbour Wire" }));
+    body.appendChild(el("h3", { text: "Harbour Wire · " + wirePosts().filter(function (p) { return p.unread; }).length + " unread" }));
     body.appendChild(el("p", { class: "wire-intro", text: "A little wire across the water · " + formatClock(state.clock) + ". Reading is free. Posts are neighbours' words, not live quotes; check the scale and current offers before trading." }));
     const filters = el("div", { class: "wire-filters", role: "group", "aria-label": "Filter Harbour Wire" });
     window.NEON_TIDES_WIRE.categories.forEach(function (category) {
@@ -2765,17 +2806,24 @@
     });
     body.appendChild(filters);
     const list = el("div", { class: "wire-posts", "aria-live": "polite" });
-    const posts = wirePosts().filter(function (p) { return !transient.wireFilter || transient.wireFilter === "All" || p.category === transient.wireFilter; });
+    const posts = wirePosts().filter(function (p) { return !transient.wireFilter || transient.wireFilter === "All" || (transient.wireFilter === "Unread" ? p.unread : transient.wireFilter === "Pinned" ? p.savedPin : p.category === transient.wireFilter); });
     posts.forEach(function (p) {
       const who = TRADE.characters[p.who] || DATA.world.characters[p.who];
-      const card = el("article", { class: "wire-post" + (p.stale ? " wire-stale" : "") }, [
+      const card = el("article", { class: "wire-post" + (p.stale ? " wire-stale" : "") + (p.unread ? " wire-unread" : "") }, [
         el("p", { class: "wire-meta", text: (who ? who.name : p.who) + " · " + p.category + " · " + (p.time === null ? "Community follow-up" : (p.pinned ? "Pinned · " : "") + formatClock(p.time)) + (p.stale ? " · Offer deadline passed" : "") }),
-        el("h4", { text: p.title }), el("p", { text: p.text })
+        el("h4", { text: (p.unread ? "New · " : "") + p.title }), el("p", { text: p.text })
       ]);
       if (p.id === "umbrella" && !state.flags.wire_umbrella_started && !state.resolved) {
         if (state.location === "landing") card.appendChild(el("button", { class: "btn btn-small", type: "button", text: "Offer to find the umbrella", onclick: function () { closeNotebook(); performTradeAction("wire_umbrella_accept"); } }));
         else card.appendChild(el("p", { text: "Meet Priya at Landing 3 to accept this request." }));
       }
+      const controls = el("div", { class: "wire-controls" });
+      controls.appendChild(el("button", { id: "wire-read-" + p.id, class: "btn btn-small", type: "button", text: p.unread ? "Mark read" : "Read", disabled: !p.unread, onclick: function () { markWireRead(p.id); refreshWire("wire-pin-" + p.id); } }));
+      controls.appendChild(el("button", { id: "wire-pin-" + p.id, class: "btn btn-small", type: "button", "aria-pressed": p.savedPin ? "true" : "false", text: p.savedPin ? "Unpin" : "Pin", onclick: function () { toggleWirePin(p.id); refreshWire("wire-pin-" + p.id); } }));
+      const storyMap = { umbrella: "wire-umbrella", "umbrella-thanks": "wire-umbrella", yard: "yard", "pump-thanks": "yard", breakfast: "breakfast", "festival-supply": "festival-supply", "festival-supply-thanks": "festival-supply" };
+      const story = p.cargo ? "freight-" + p.id.slice(6) : storyMap[p.id];
+      if (story && storyProgress().some(function (row) { return row.id === story; })) controls.appendChild(el("button", { class: "btn btn-small", type: "button", text: "View journal entry", onclick: function () { markWireRead(p.id); openWireStory(story); } }));
+      card.appendChild(controls);
       list.appendChild(card);
     });
     if (!posts.length) list.appendChild(el("p", { text: "No posts in this category yet. Neighbours pin more as the shift unfolds." }));

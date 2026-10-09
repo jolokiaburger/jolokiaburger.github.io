@@ -619,16 +619,17 @@
 <g id="dest-landing" class="dest">
   <use href="#sym-piling" x="52" y="552"/><use href="#sym-piling" x="130" y="552"/><use href="#sym-piling" x="210" y="552"/><use href="#sym-piling" x="296" y="552"/>
   <!-- lamp post -->
-  <rect x="56" y="392" width="5" height="148" fill="#33406a"/>
-  <path d="M58 392 h 22 v 8 h -22 z" fill="#33406a"/>
+  <rect x="56" y="392" width="5" height="148" fill="#344a56"/>
+  <path d="M58 392 h 22 v 8 h -22 z" fill="#344a56"/>
   <circle cx="78" cy="404" r="4.5" fill="#ffe3ad"/>
   <polygon points="68,409 88,409 130,540 30,540" fill="#ffd27a" opacity="0.07"/>
+  <g class="harbour-detail" aria-hidden="true"><path d="M37 440V531H74" fill="none" stroke="#526777" stroke-width="3"/><rect x="39" y="501" width="21" height="26" fill="#6c6355"/><path d="M40 506H59M40 517H59" stroke="#9d8664"/><path d="M46 490Q43 480 47 473Q52 481 50 490M51 492Q53 478 58 482" fill="#657d6c"/></g>
   <!-- shelter -->
   <rect id="shelter" x="92" y="428" width="164" height="112" fill="#0e0d2a"/>
   <rect x="92" y="428" width="164" height="112" fill="url(#halftone)" opacity="0.6"/>
-  <rect x="88" y="424" width="8" height="116" fill="#33406a"/>
-  <rect x="252" y="424" width="8" height="116" fill="#33406a"/>
-  <rect x="170" y="424" width="5" height="116" fill="#33406a" opacity="0.7"/>
+  <rect x="88" y="424" width="8" height="116" fill="#344a56"/>
+  <rect x="252" y="424" width="8" height="116" fill="#344a56"/>
+  <rect x="170" y="424" width="5" height="116" fill="#344a56" opacity="0.7"/>
   <polygon points="74,428 274,428 254,390 92,390" fill="#3a4d7a"/>
   <polygon points="74,428 274,428 270,438 78,438" fill="#1b2745"/>
   <rect x="92" y="389" width="164" height="3" fill="#3df5ff" opacity="0.7"/>
@@ -646,6 +647,7 @@
     <path d="M107 474h14v18h-14z" fill="#f7e8bb"/><path d="M125 476h12v16h-12z" fill="#a6d2ce"/><path d="M141 474h15v20h-15z" fill="#e5b5a2"/>
     <path d="M110 479h8m-8 4h7m19-3h7m-7 4h7m3-4h8m-8 4h7" stroke="#655c53" stroke-width="1"/>
   </g>
+  <g class="presence-prop umbrella-home" aria-hidden="true"><path d="M284 474Q299 455 314 474Z" fill="#8ebed5" stroke="#d6e3cf"/><path d="M299 474V517Q299 527 307 523" fill="none" stroke="#b8a68d" stroke-width="2"/><path d="M301 482l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z" fill="#f1d599"/></g>
   <!-- LED timetable board -->
   <rect id="timetable-board" x="186" y="448" width="62" height="72" fill="#07061a" stroke="#4a5f8f" stroke-width="2"/>
   <rect x="190" y="452" width="54" height="8" fill="#ff2fa8" opacity="0.9"/>
@@ -668,7 +670,7 @@
     <circle cx="268" cy="404" r="3"/><circle cx="279" cy="414" r="3"/><circle cx="289" cy="425" r="3"/><circle cx="296" cy="437" r="3"/><circle cx="300" cy="448" r="3"/>
   </g>
   <!-- ticket booth -->
-  <rect id="booth" x="262" y="452" width="68" height="88" fill="#26355c"/>
+  <rect id="booth" x="262" y="452" width="68" height="88" fill="#293d4b"/>
   <rect x="262" y="452" width="68" height="88" fill="url(#corrugated)"/>
   <rect x="256" y="446" width="80" height="8" fill="#3a4d7a"/>
   <rect x="270" y="458" width="52" height="9" fill="#ff2fa8"/>
@@ -761,7 +763,7 @@
   <!-- payphone, orange light -->
   <rect x="576" y="482" width="18" height="58" fill="#12102e"/>
   <rect class="led-pulse" style="--d:-1.2s" x="579" y="486" width="12" height="18" fill="#ffb04a" opacity="0.8"/>
-  <rect x="581" y="508" width="8" height="14" fill="#33406a"/>
+  <rect x="581" y="508" width="8" height="14" fill="#344a56"/>
   <!-- overflowing bin -->
   <rect x="378" y="516" width="18" height="24" fill="#2a3560"/>
   <use href="#sym-can-ox" x="380" y="504" transform="rotate(-20 385 513)"/><use href="#sym-can" x="388" y="502"/>
@@ -815,16 +817,26 @@
   <!-- building body: warm lit interior -->
   <rect x="710" y="336" width="366" height="210" fill="url(#interiorGlow)"/>
   <rect x="710" y="336" width="366" height="210" fill="url(#halftone)" opacity="0.35"/>
+  <!-- Kitchen depth: utensils, bottle shelf and linen beneath warm task light. -->
+  <g class="harbour-detail" aria-hidden="true">
+    <path d="M731 357H1052" stroke="#87684e" stroke-width="3"/>
+    <path d="M748 354V373M773 354V378M796 354V372" stroke="#b7afa0" stroke-width="2"/>
+    <ellipse cx="748" cy="376" rx="4" ry="6" fill="#a9b4af"/><ellipse cx="773" cy="381" rx="5" ry="4" fill="#a9b4af"/>
+    <path d="M1000 361h50v3h-50z" fill="#785a43"/>
+    <rect x="1006" y="348" width="6" height="13" rx="2" fill="#697d64"/><rect x="1020" y="346" width="7" height="15" rx="2" fill="#bb8d54"/><rect x="1037" y="350" width="6" height="11" rx="2" fill="#759395"/>
+    <path d="M712 342H805V355Q782 359 759 355Q737 359 712 355Z" fill="#9f7770" opacity=".7"/>
+    <path d="M738 343V353M767 343V353" stroke="#ead1a3" stroke-width="1"/>
+  </g>
   <!-- side walls -->
-  <rect x="698" y="336" width="14" height="210" fill="#26355c"/>
-  <rect x="1074" y="336" width="14" height="210" fill="#26355c"/>
+  <rect x="698" y="336" width="14" height="210" fill="#293d4b"/>
+  <rect x="1074" y="336" width="14" height="210" fill="#293d4b"/>
   <!-- roof and parapet -->
-  <rect x="694" y="302" width="382" height="36" fill="#26355c"/>
+  <rect x="694" y="302" width="382" height="36" fill="#293d4b"/>
   <rect x="694" y="302" width="382" height="36" fill="url(#corrugated)"/>
   <rect x="694" y="300" width="382" height="4" fill="#4a5f8f"/>
   <rect x="690" y="336" width="400" height="6" fill="#0f1530"/>
   <!-- roof junk: aircon unit, cat -->
-  <rect x="1012" y="284" width="30" height="18" fill="#33406a"/>
+  <rect x="1012" y="284" width="30" height="18" fill="#344a56"/>
   <circle cx="1027" cy="293" r="6" fill="#0f1530"/>
   <path d="M732 300 l 3 -6 l 3 6 l 8 0 q 6 -2 8 -8 q 2 8 -2 8 l -22 0 z" fill="#0f1530"/>
   <!-- NEON SIGN: KURAGE 33 in cyan tube letters, an orange neon jellyfish beside them -->
@@ -929,7 +941,7 @@
     <g class="jelly" style="--d:-6.2s" transform="translate(752 427) scale(0.22)"><use href="#sym-jelly"/></g>
     <g class="jelly" style="--d:-8.3s" transform="translate(742 458) scale(0.18)"><use href="#sym-jelly"/></g>
     <rect x="719" y="413" width="60" height="54" fill="none" stroke="#7ff2ff" stroke-width="1.2" opacity="0.9"/>
-    <rect x="716" y="407" width="66" height="5" fill="#26355c"/>
+    <rect x="716" y="407" width="66" height="5" fill="#293d4b"/>
     <rect x="722" y="415" width="4" height="50" fill="#ffffff" opacity="0.28"/>
     <ellipse cx="749" cy="476" rx="48" ry="7" fill="#3df5ff" opacity="0.32"/>
     <ellipse cx="800" cy="470" rx="34" ry="5" fill="#3df5ff" opacity="0.14"/>
@@ -1011,7 +1023,7 @@
     <line x1="692" y1="400" x2="692" y2="418"/><line x1="824" y1="402" x2="824" y2="420"/><line x1="982" y1="401" x2="982" y2="419"/><line x1="1102" y1="400" x2="1102" y2="416"/>
   </g>
   <!-- bins and crates by the wall -->
-  <rect x="682" y="516" width="22" height="30" fill="#33406a"/>
+  <rect x="682" y="516" width="22" height="30" fill="#344a56"/>
   <rect x="680" y="514" width="26" height="4" fill="#4a5f8f"/>
 <g id="hollis-bar" class="manga-figure" transform="translate(1094 522) scale(0.8)">
  <path d="M-11 -8L-15 4L-9 17H-4L-6 3H6L6 18H11L13 0L9 -8Z" fill="#26343c"/><path d="M-12 -38Q0 -44 12 -38L15 -9Q0 -5 -15 -9Z" fill="#5f6a56" stroke="#24333b" stroke-width=".8"/>
@@ -1027,13 +1039,21 @@
 <g id="dest-pier" class="dest">
   <use href="#sym-piling" x="1120" y="552"/><use href="#sym-piling" x="1200" y="552"/><use href="#sym-piling" x="1290" y="552"/><use href="#sym-piling" x="1370" y="552"/><use href="#sym-piling" x="1424" y="552"/>
   <!-- building -->
-  <rect x="1126" y="292" width="250" height="250" fill="#26355c"/>
+  <rect x="1126" y="292" width="250" height="250" fill="#293d4b"/>
   <rect x="1126" y="292" width="250" height="250" fill="url(#corrugated)"/>
   <rect x="1126" y="292" width="250" height="250" fill="url(#halftone)" opacity="0.4"/>
   <rect x="1120" y="286" width="262" height="8" fill="#3a4d7a"/>
   <rect x="1126" y="372" width="250" height="6" fill="#1b2745"/>
+  <g class="harbour-detail" aria-hidden="true">
+    <rect x="1282" y="308" width="67" height="37" rx="2" fill="#10263b" stroke="#6f8d98"/>
+    <rect x="1286" y="312" width="59" height="29" fill="#8dc0c6" opacity=".27"/>
+    <path d="M1315 310V343M1285 325H1347" stroke="#56737e" stroke-width="2"/>
+    <path d="M1290 331H1308M1321 331H1340" stroke="#d5dcc9" stroke-width="2"/>
+    <rect x="1286" y="352" width="57" height="12" fill="#d1b87e"/><text x="1314" y="361" font-size="6" fill="#283d48" text-anchor="middle">COLD CHAIN · PIER 9</text>
+    <path d="M1130 383V459H1150" fill="none" stroke="#9c7f61" stroke-width="2"/>
+  </g>
   <!-- rooftop refrigeration units -->
-  <rect x="1148" y="250" width="86" height="38" fill="#33406a"/>
+  <rect x="1148" y="250" width="86" height="38" fill="#344a56"/>
   <rect x="1148" y="250" width="86" height="38" fill="url(#corrugated)"/>
   <rect x="1148" y="246" width="86" height="4" fill="#4a5f8f"/>
   <circle cx="1191" cy="269" r="14" fill="#0f1530"/>
@@ -1041,9 +1061,9 @@
     <path d="M0 0 L -3 -12 L 3 -12 Z M0 0 L 12 -3 L 12 3 Z M0 0 L -3 12 L 3 12 Z M0 0 L -12 -3 L -12 3 Z" fill="#8fa0c8"/>
   </g>
   <circle cx="1191" cy="269" r="14" fill="none" stroke="#5b73a8" stroke-width="2" stroke-dasharray="3 3"/>
-  <rect x="1248" y="262" width="60" height="26" fill="#33406a"/>
+  <rect x="1248" y="262" width="60" height="26" fill="#344a56"/>
   <rect x="1248" y="258" width="60" height="4" fill="#4a5f8f"/>
-  <rect x="1320" y="240" width="14" height="48" fill="#33406a"/>
+  <rect x="1320" y="240" width="14" height="48" fill="#344a56"/>
   <g class="frost" opacity="0.5">
     <ellipse class="steam" style="--d:-0.5s" cx="1327" cy="236" rx="8" ry="5" fill="#dffbff"/>
     <ellipse class="steam" style="--d:-1.9s" cx="1330" cy="232" rx="10" ry="6" fill="#dffbff" opacity="0.6"/>
@@ -1091,8 +1111,8 @@
   <polygon points="1360,420 1372,440 1348,440" fill="#ffb04a"/>
   <rect x="1359" y="426" width="2.5" height="8" fill="#0f1530"/><rect x="1359" y="436" width="2.5" height="2.5" fill="#0f1530"/>
   <!-- floodlight -->
-  <rect x="1388" y="290" width="5" height="250" fill="#33406a"/>
-  <path d="M1378 292 h 26 v 10 h -26 z" fill="#33406a"/>
+  <rect x="1388" y="290" width="5" height="250" fill="#344a56"/>
+  <path d="M1378 292 h 26 v 10 h -26 z" fill="#344a56"/>
   <rect x="1380" y="302" width="22" height="6" fill="#dffbff"/>
   <polygon class="flood" points="1380,308 1402,308 1440,540 1330,540" fill="#dffbff" opacity="0.06"/>
   <ellipse cx="1391" cy="304" rx="26" ry="10" fill="url(#coldGlow)"/>
@@ -1156,6 +1176,10 @@
 <!-- LAYER 5 · REFLECTIONS ON THE WATER (animated)                  -->
 <!-- ------------------------------------------------------------ -->
 <g id="layer-reflections" opacity="0.9">
+  <g class="harbour-refined-water" aria-hidden="true" fill="none" stroke="#e5c28b" stroke-linecap="round">
+    <path class="light-ripple" d="M150 600h40m-28 11h68m-74 16h33m-5 14h57" opacity=".18"/>
+    <path class="light-ripple" style="animation-delay:-3s" d="M831 654h55m-40 10h90m-71 14h37m-57 12h64" opacity=".2"/>
+  </g>
   <g class="refl" style="--d:0s"><rect x="802" y="566" width="180" height="3" fill="#ff7a3d" opacity="0.35"/></g>
   <g class="refl" style="--d:-1.2s"><rect x="832" y="578" width="120" height="2" fill="#ffb04a" opacity="0.3"/></g>
   <g class="refl" style="--d:-2.1s"><rect x="772" y="592" width="220" height="2" fill="#ff7a3d" opacity="0.22"/></g>
@@ -1190,6 +1214,14 @@
 <!-- Local WebP illustration; native hit targets, text and state overlays stay crisp. -->
 <rect width="1440" height="800" fill="#182632"/>
 <image href="assets/scenes/lantern-market.webp" x="0" y="0" width="1440" height="800" preserveAspectRatio="xMidYMid slice"/>
+<g class="harbour-detail" aria-hidden="true"><path d="M74 158Q350 205 593 169T1112 167T1380 149" fill="none" stroke="#4d534e" stroke-width="3"/>
+  <path d="M216 192V219M476 185V216M982 178V211" stroke="#968365" stroke-width="2"/>
+  <g fill="#e6b375" stroke="#b98658"><ellipse cx="216" cy="226" rx="13" ry="18"/><ellipse cx="476" cy="223" rx="13" ry="18"/><ellipse cx="982" cy="218" rx="13" ry="18"/></g>
+  <path d="M451 302h113v13l-13 6-15-6-13 6-14-6-15 6-15-6-15 6Z" fill="#927976" opacity=".65"/>
+</g>
+<g class="presence-prop nao-tea-prop" aria-hidden="true"><ellipse cx="327" cy="465" rx="27" ry="5" fill="#483d34"/><path d="M310 445Q324 431 339 445V461Q324 470 310 461Z" fill="#879b89" stroke="#dcc394"/><path d="M337 447l14-9-6 17M320 439v-5h8v5" fill="none" stroke="#b8c7ad" stroke-width="3"/><path class="kettle-breath" d="M349 432Q355 421 349 414" fill="none" stroke="#ebdfbd" stroke-width="2"/></g>
+<g class="presence-prop sora-receipt-prop" aria-hidden="true"><path d="M797 453h30v45l-5-4-5 4-5-4-5 4-5-4-5 4Z" fill="#e7ddbc"/><path d="M803 463h18m-18 7h15m-15 7h18" stroke="#8c826b" stroke-width="2"/></g>
+<g class="presence-prop festival-bowls-art" aria-hidden="true"><path d="M371 465h31q-3 14-15 14t-16-14m4-6h31q-3 14-15 14t-16-14" fill="#8eb6be" stroke="#efe0b6" stroke-width="2"/></g>
 <g class="market-scene-title"><rect x="464" y="42" width="512" height="56" rx="8" fill="#17252c" fill-opacity=".9" stroke="#beaa78"/><text x="720" y="77" text-anchor="middle" fill="#f4e2b3" font-size="25" font-family="sans-serif" letter-spacing="3">LANTERN NIGHT MARKET</text></g>
 <g id="market-wall"><rect x="64" y="241" width="91" height="112" rx="3" fill="#443c35" stroke="#a99171"/><path d="M75 256H111V298H75ZM118 261H142V306H118ZM78 309H111V341H78ZM116 317H142V342H116Z" fill="#ddd0b3"/><path d="M81 267H103M80 279H102M123 273H137M83 321H104" stroke="#837768" stroke-width="2"/><path class="market-player-wish" d="M126 323L130 331L139 332L132 338L134 347L126 342L118 347L120 338L113 332L122 331Z" fill="#e9c776"/></g>
 <g id="market-lane"><rect x="891" y="276" width="108" height="92" fill="#494739" stroke="#bda47e" stroke-width="2"/><rect x="903" y="286" width="83" height="57" fill="#ded3b7"/><text x="945" y="306" text-anchor="middle" fill="#353c3b" font-size="13" font-family="sans-serif">DISPATCH</text><path d="M913 316H975M913 326H966" stroke="#77786a" stroke-width="2"/><text class="market-late-notice" x="945" y="359" text-anchor="middle" fill="#f5cc99" font-size="13" font-family="sans-serif">CHECK ETA</text><text class="market-arrived-notice" x="945" y="359" text-anchor="middle" fill="#c8ddbb" font-size="13" font-family="sans-serif">DELIVERED</text></g>
@@ -1215,6 +1247,7 @@
 </g>
 <g class="exp-scene exp-yard">
  <image href="assets/scenes/starling-yard-manga.webp" width="1440" height="800" preserveAspectRatio="xMidYMid slice"/>
+ <g class="harbour-detail" aria-hidden="true"><path d="M858 260H975V290H858Z" fill="#b5a27b" opacity=".7"/><path d="M864 268h28m15 0h53m-88 10h76" stroke="#574e40" stroke-width="2"/><path d="M975 317V359H1138" fill="none" stroke="#ab946a" stroke-width="2"/><path d="M963 322h25v13h-25m33 10v24m21-24v17" fill="none" stroke="#b0b7a3" stroke-width="3"/></g>
  <g class="location-plaque"><rect x="435" y="34" width="570" height="55" rx="8"/><text x="720" y="70" text-anchor="middle">STARLING · SECOND CHANCES</text></g>
  <g id="yard-board" class="yard-object"><rect x="80" y="415" width="132" height="74" rx="5"/><text x="146" y="444" text-anchor="middle">WORK BOARD</text><text x="146" y="466" text-anchor="middle" font-size="14" textLength="112" lengthAdjust="spacingAndGlyphs">Repair · Discover</text></g>
  <g id="yard-ferry"><rect x="494" y="298" width="300" height="208" fill="transparent"/><g class="yard-nameplate"><rect x="548" y="461" width="205" height="33" rx="5"/><text x="650" y="483" text-anchor="middle">SECOND HELPING</text></g></g>
@@ -1263,6 +1296,9 @@
  <image href="assets/scenes/kisaragi-canal.webp" x="0" y="0" width="1440" height="800" preserveAspectRatio="xMidYMid slice"/>
  <g fill="#17252c" fill-opacity=".9" stroke="#beaa78"><rect x="415" y="36" width="610" height="56" rx="8"/></g>
  <text x="720" y="73" text-anchor="middle" fill="#f4e2b3" font-size="25" font-family="sans-serif" letter-spacing="3">KISARAGI CANAL TOWN</text>
+ <g class="harbour-detail" aria-hidden="true"><path d="M453 235h123v9l-15 5-15-5-15 5-15-5-15 5-15-5-15 5-15-5Z" fill="#927976" opacity=".5"/><path d="M856 305Q908 291 970 309" fill="none" stroke="#9b865f" stroke-width="2"/><rect x="891" y="306" width="23" height="34" rx="6" fill="#e1b279" opacity=".75"/></g>
+ <g class="presence-prop festival-tea-art" aria-hidden="true"><rect x="786" y="341" width="64" height="37" rx="3" fill="#667e69" stroke="#ddc797"/><text x="818" y="364" text-anchor="middle" fill="#efdeb9" font-size="10">MEI'S TEA</text></g>
+ <g class="presence-prop festival-cloth-art" aria-hidden="true"><path d="M423 306Q580 324 804 305" fill="none" stroke="#6a6251" stroke-width="2"/><g fill="#e2b174" stroke="#fae1b2"><ellipse cx="454" cy="325" rx="12" ry="17"/><ellipse cx="518" cy="331" rx="12" ry="17"/><ellipse cx="583" cy="332" rx="12" ry="17"/><ellipse cx="649" cy="331" rx="12" ry="17"/><ellipse cx="715" cy="327" rx="12" ry="17"/><ellipse cx="782" cy="325" rx="12" ry="17"/></g></g>
  <g class="world-memory memory-seals-art"><rect x="1008" y="459" width="48" height="27" fill="#5d756a" stroke="#dfcda0"/><circle cx="1022" cy="472" r="8" fill="none" stroke="#bcd1ce" stroke-width="3"/><circle cx="1043" cy="472" r="8" fill="none" stroke="#bcd1ce" stroke-width="3"/></g>
 <g class="world-memory memory-spoons-art"><rect x="664" y="321" width="60" height="22" rx="3" fill="#694832"/><path d="M675 323V307M688 323V307M701 323V307M714 323V307" stroke="#ded7bb" stroke-width="3"/></g>
 <g class="world-memory memory-recipe-art"><rect x="690" y="276" width="80" height="47" fill="#f3e4c1" stroke="#967158"/><text x="730" y="295" text-anchor="middle" fill="#5f4640" font-size="13" textLength="68" lengthAdjust="spacingAndGlyphs">NAO'S RECIPE</text><path d="M701 306H758M701 314H743" stroke="#996e58"/></g>
@@ -1355,6 +1391,9 @@
 <!-- LAYER 8 · GRAIN TEXTURE + RAIN                                 -->
 <!-- ------------------------------------------------------------ -->
 <rect id="grain" x="-400" y="-400" width="2240" height="1600" fill="url(#grainPattern)"/>
+<!-- Local lamp catches and awning drips; no screen-wide blur or particles. -->
+<g class="lamp-rain-detail" aria-hidden="true" stroke="#f2d7a2" stroke-width="1" opacity=".24"><path d="M76 419l-2 11m12 5-2 10m-15 14-2 10m11-2-2 11M899 375l-2 9m12 12-2 11m-16 8-2 9"/></g>
+<g class="awning-drip" aria-hidden="true" stroke="#acd1d6" stroke-width="1.3"><path d="M707 416v5M1080 416v5"/></g>
 <!-- light rain; the rect is much larger than the frame so it can slide -->
 <g class="rain-layer" aria-hidden="true">
   <rect class="rain-rect" x="-600" y="-700" width="2600" height="2100" fill="url(#rainPattern)"/>

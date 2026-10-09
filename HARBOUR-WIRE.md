@@ -4,11 +4,11 @@ Read the illustrated paper noticeboard under the Landing 3 shelter, choose **Rea
 
 ## Content
 
-31 authored posts plus three cargo cards cover Trading, Neighbours, Stories and Notices. Clock-gated messages arrive during the shift; completed quests, deliveries and repeat canal visits change the feed. Pinned older notices retain their original time. Community follow-ups have a label rather than an invented timestamp. Cargo cards show purchase, promised payment, destination and handover deadline; expired offers are marked, and unavailable morning offers are omitted. Current gold quotes remain on the actual scales.
+33 authored posts plus three cargo cards cover Trading, Neighbours, Stories and Notices. Clock-gated messages arrive during the shift; completed quests, deliveries and repeat canal visits change the feed. Pinned older notices retain their original time. Community follow-ups have a label rather than an invented timestamp. Cargo cards show purchase, promised payment, destination and handover deadline; expired offers are marked, and unavailable morning offers are omitted. Current gold quotes remain on the actual scales.
 
 Priya's sky-blue umbrella is an optional board lead. At Landing 3, accept from its card or the story choices. Search at Metro Quay for five minutes, then return it at Landing 3. No credits, fuel beyond normal travel, or deadline is imposed. The active story and completed outcome appear in the Journal. Priya posts a thank-you; progress survives chapter changes and browser saves.
 
-The board is available through all three trading chapters. It requires no server, external webpage or network. Existing saves acquire it without migration. Reading never modifies game state or exposes hidden seed truth.
+The board is available through all three trading chapters. It requires no server, external webpage or network. Existing saves acquire it without migration. Reading never spends resources or exposes hidden seed truth. Explicit read markers and pins autosave; see `HARBOUR-POLISH.md` for their persistence rules.
 
 ## Source and checks
 

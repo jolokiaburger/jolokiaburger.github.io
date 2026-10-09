@@ -24,6 +24,7 @@
       data.ending.closing.push({ if: { flag: [flag + "_owned"], notFlag: [flag + "_done"] }, text: "UNSOLD CARGO: " + d.title + " stayed aboard. No automatic payment; the case is set aside when this shift closes." });
     });
     if (morning) data.actions.yard.find(a => a.id === "freight_seals_buy").when.truth = ["order", "both"];
+    installFestivalSupply(data, morning);
     installReadingAndAssay(data);
     if (morning) window.NEON_TIDES_CANAL_OUTING(data);
     Object.assign(data.things, { "yard-board": "Rin's work board", "yard-ferry": "Second Helping · Rescued ferry", "yard-kettle": "Workshop kettle", "yard-kenji": "Kenji · Parts bench" });
@@ -61,6 +62,33 @@
     data.sceneClasses = (data.sceneClasses || []).concat(visuals.map(v => ({ class: v[0], when: v[1] })));
     data.ending.closing.push({ if: { flag: ["yard_done"] }, text: "STARLING YARD: Second Helping's bilge pump is ready for the day crew. A rescued ferry has another beginning." }, { if: { flag: ["yard_star_returned"] }, text: "HOMEWARD STAR: Captain Lam has his daughter's brass keepsake again." }, { if: { flagAny: ["companion_island", "companion_canal"] }, text: "A QUIET VISIT: You and Nao took a little time without turning it into an errand." });
   }
+  function installFestivalSupply(data, morning) {
+    data.sceneClasses = data.sceneClasses || [];
+    data.sceneClasses.push({ class: "nao-away", when: { flagAny: ["companion_nao", "cf_aboard"] } });
+    const deadline = morning ? "10:20" : "05:20";
+    data.actions.landing.push(
+      act("fs_courier", "Festival supplies · Choose courier work", "priya", "Three separate cases: Jun's bowls from Kisaragi to Nao at the market, Mei's tea from Kurage 33 to Hana in Kisaragi, and Sora's lantern cloth from the market to Hana. No stock purchase. Fees: 6, 5 and 5 credits. Each collection and handover takes five minutes; start every delivery by " + deadline + ". Fuel is yours. Choose this or stock trading for this shift, not both.", { once: true, when: { notFlag: ["fs_started"], maxClock: deadline }, sets: ["fs_started", "fs_courier"] }),
+      act("fs_stock", "Festival supplies · Choose stock trading", "priya", "Buy Jun's bowls for 18 cr and sell to Nao for 28; Mei's tea for 12 and Hana pays 20; Sora's cloth for 10 and Hana pays 18. Three separate cases, two cargo slots shared with other small freight. Each collection and handover takes five minutes; start delivery by " + deadline + ". Promised payments require delivery; unsold goods earn nothing this shift. Fuel costs extra. Your route choice stays fixed for this shift.", { once: true, when: { notFlag: ["fs_started"], maxClock: deadline }, sets: ["fs_started", "fs_stock"] })
+    );
+    const goods = [
+      { id: "bowls", title: "Festival bowls", from: "canal", to: "market", source: "jun", who: "nao", cost: 18, payment: 28, fee: 6 },
+      { id: "tea", title: "Festival tea", from: "bar", to: "canal", source: "mei", who: "hana", cost: 12, payment: 20, fee: 5 },
+      { id: "cloth", title: "Festival lantern cloth", from: "market", to: "canal", source: "sora", who: "hana", cost: 10, payment: 18, fee: 5 }
+    ];
+    goods.forEach(g => ["courier", "stock"].forEach(route => {
+      const id = "fs_" + g.id + "_" + route, cost = route === "stock" ? g.cost : 0, payment = route === "stock" ? g.payment : g.fee;
+      data.freight[id] = Object.assign({}, g, { cost, payment, lastStart: deadline });
+      data.actions[g.from].push(act(id + "_buy", (route === "stock" ? "Buy · " : "Collect courier case · ") + g.title, g.source,
+        "One sealed case. " + cost + " cr purchase; " + payment + " cr promised on intact delivery. Start handover by " + deadline + "; fuel and five-minute handling at each end are yours to plan.",
+        { kind: "search", once: true, cost, minutes: 5, freightBuy: id, when: { flag: ["fs_" + route], notFlag: ["fs_" + g.id + "_owned"], maxClock: deadline }, sets: ["fs_" + g.id + "_owned", "freight_" + id + "_owned"] }));
+      data.actions[g.to].push(act(id + "_deliver", "Deliver · " + g.title, g.who,
+        "Seal intact, case counted. Here's the promised " + payment + " credits. That corner of the festival has a little of your voyage in it now.",
+        { kind: "search", once: true, minutes: 5, freightDeliver: id, sound: "sell", when: { flag: ["fs_" + g.id + "_owned", "fs_" + route], notFlag: ["fs_" + g.id + "_done"], lastStart: deadline }, sets: ["fs_" + g.id + "_done", "freight_" + id + "_done"] }));
+    }));
+    data.actions.canal.push(act("fs_finish", "Hana · A table carried across the water", "hana", "Bowls, tea, lantern cloth. Three ordinary things; a whole evening when they come together. All your payments are already settled. This last cup is simply for staying a moment.", { once: true, sound: "tea", when: { flag: ["fs_bowls_done", "fs_tea_done", "fs_cloth_done"], notFlag: ["fs_done"] }, sets: ["fs_done"] }));
+    ["bowls", "tea", "cloth"].forEach(g => data.sceneClasses.push({ class: "festival-" + g, when: { everFlagAny: ["fs_" + g + "_done"] } }));
+    data.ending.closing.push({ if: { flag: ["fs_done"] }, text: "FESTIVAL SUPPLIES: Bowls, tea and lantern cloth delivered. Individual cargo payments are included in your freight accounts; fuel remains a separate cost." });
+  }
   function installReadingAndAssay(data) {
     data.things["review-rack"] = "The Lantern Review · Magazine rack";
     data.actions.bar.push(act("review_rack", "Browse The Lantern Review", "mei", "A fresh gold special, a summer back issue and a few seasonal stories. Choose an issue from the rack below. Reading is free; the clock can rest while you do.", { readingRack: true, directory: true, thing: "review-rack" }));
@@ -91,6 +119,7 @@
         { id: "life_yard_return", when: { visited: { yard: 2 } }, text: "Back at the bench! I've cleared your usual patch of tabletop. No repair quota; tell me something from beyond the cranes." }
       ],
       hana: [
+        { id: "life_festival_supply", when: { flag: ["fs_done"] }, text: "There you are, captain. Tonight you can follow the lanterns to a table you helped make possible. No more loading for this visit." },
         { id: "life_recipe_memory", when: { priorFlag: ["cf_shared"] }, text: "Nao's signed recipe is on the festival board. I kept the card exactly as she sent it. People should recognise their own words when they come back." },
         { id: "life_attended_memory", when: { priorFlag: ["cf_attended"] }, text: "Her little preview table made everyone less nervous about their own dishes. I'll keep the same-sized table for her; a good evening needn't become a bigger obligation." }
       ],
@@ -101,7 +130,7 @@
       ],
       mei: [{ id: "life_bowls_memory", when: { priorFlag: ["freight_ceramics_done"] }, text: "The blue bowls you delivered are still doing good work. I recognise them before I recognise my own inventory numbers." }, { id: "life_bowls", when: { flag: ["freight_ceramics_done"] }, text: "Jun's bowls are on the shelf. The blue one holds exactly enough broth for somebody returning from an adventure. Very scientific sizing." }],
       mako: [{ id: "life_seals_memory", when: { priorFlag: ["freight_seals_done"] }, text: "Your pump seals are fitted. The lock pump is steady again. A good delivery keeps helping after its receipt dries." }, { id: "life_seals", when: { flag: ["freight_seals_done"] }, text: "Those seals are on the pump bench. Clear terms, intact cargo. You make paperwork feel almost sociable." }],
-      nao: [{ id: "life_view_memory", when: { priorFlag: ["companion_island"] }, text: "When the counter gets busy, I picture Aki's lighthouse sweep. A little room around a thought. I'm glad we went." }, { id: "life_canal_memory", when: { priorFlag: ["companion_canal"] }, text: "I keep thinking of that quiet bench. Nothing to serve, nothing to prove. We should be guests somewhere again." }],
+      nao: [{ id: "life_festival_bowls", when: { flag: ["fs_bowls_done"] }, text: "Jun's bowls are ready on the counter. I keep turning the blue one toward the lantern; even an empty bowl can look welcoming." }, { id: "life_view_memory", when: { priorFlag: ["companion_island"] }, text: "When the counter gets busy, I picture Aki's lighthouse sweep. A little room around a thought. I'm glad we went." }, { id: "life_canal_memory", when: { priorFlag: ["companion_canal"] }, text: "I keep thinking of that quiet bench. Nothing to serve, nothing to prove. We should be guests somewhere again." }],
       lam: [{ id: "life_star", when: { flag: ["yard_star_returned"] }, text: "The star's in my coat pocket. Every now and then I check it's there. My daughter will laugh when I tell her her little charm finally travelled home." }]
     };
     Object.keys(reactions).forEach(id => {

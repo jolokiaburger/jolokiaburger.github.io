@@ -33,6 +33,7 @@ window.NEON_TIDES_CHAT = {
   priya: {
     visits: [{ at: "landing" }], thing: "booth",
     lines: [
+      { id: "umbrella_home", mode: "trade", when: { flag: ["wire_umbrella_done"] }, text: "The blue umbrella is back beside the booth. I like that a useful thing can also be a reminder that somebody noticed." },
       { id: "hello", text: "Welcome back, captain. You're not late. I haven't put you on a timetable. Very generous of me." },
       { id: "puzzle", text: "Seven letters. 'A journey worth taking.' I put ADVENTURE, ran out of squares, and decided the crossword was wrong." },
       { id: "lights", text: "I check all five boarding lamps before every shift. Someone coming home should never have to guess where to land." },

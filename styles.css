@@ -1124,3 +1124,28 @@ body[data-location="market"].morning-hana-present .morning-hana-art { display: i
 .wire-post p { color: #3d4143; line-height: 1.6; margin: 8px 0 0; }
 .wire-post .wire-meta { color: #61513e; font-size: 12px; margin-top: 0; }
 .wire-stale { border-left-color: #986b3e; background: #f4ecd9; }
+
+/* Harbour polish: native SVG detail; no added blur filters or particle loops. */
+.harbour-detail, .presence-prop, .harbour-refined-water, .lamp-rain-detail, .awning-drip { pointer-events: none; }
+.presence-prop { display: none; }
+body[data-adventure="trade"] .nao-tea-prop, body[data-adventure="trade"] .sora-receipt-prop { display: inline; }
+body.nao-away .nao-tea-prop { display: none; }
+.umbrella-returned .umbrella-home, .festival-bowls .festival-bowls-art,
+.festival-tea .festival-tea-art, .festival-cloth .festival-cloth-art { display: inline; }
+.light-ripple { animation: harbour-ripple 9s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes harbour-ripple { 0%,100% { transform: scaleX(.96); } 50% { transform: scaleX(1.04); } }
+.awning-drip { animation: harbour-drip 5s ease-in infinite; }
+@keyframes harbour-drip { 0%,70%,100% { opacity: 0; transform: translateY(0); } 74% { opacity: .45; } 92% { opacity: 0; transform: translateY(24px); } }
+.kettle-breath { opacity: .35; animation: kettle-breath 7s ease-in-out infinite; }
+@keyframes kettle-breath { 0%,100% { opacity: .2; } 50% { opacity: .5; } }
+body.reduce-motion .light-ripple, body.reduce-motion .awning-drip, body.reduce-motion .kettle-breath { animation: none !important; }
+body.reduce-motion .awning-drip { display: none; }
+@media (max-width: 899px) { .light-ripple, .awning-drip, .kettle-breath { animation: none; } .awning-drip { display: none; } }
+.wire-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.notebook .wire-controls .btn { min-height: 44px; }
+.wire-unread { border-left-color: #ab7439; }
+.wire-controls .btn:disabled { opacity: .6; cursor: default; }
+body[data-location="market"] .lamp-rain-detail, body[data-location="yard"] .lamp-rain-detail,
+body[data-location="canal"] .lamp-rain-detail, body[data-location="island"] .lamp-rain-detail,
+body[data-location="market"] .awning-drip, body[data-location="yard"] .awning-drip,
+body[data-location="canal"] .awning-drip, body[data-location="island"] .awning-drip { display: none; }

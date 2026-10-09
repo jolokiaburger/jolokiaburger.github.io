@@ -37,8 +37,11 @@
   post("festival-thanks", "hana", "Neighbours", null, "Enough room at the table", "The festival preparations have a little of the Tern in them now. Please come back as a guest, not only as our wonderfully reliable captain.", { flagAny: ["cf_done", "n3_done"] });
   post("assay-thanks", "priya", "Trading", null, "A receipt corrected, a worry removed", "The swapped assay paperwork is corrected. Checking a record isn't betting on a price. Thank you for keeping those two things separate.", { flag: ["ay_done"] });
   post("return", "mako", "Neighbours", null, "A familiar wake", "The Tern has come through Kisaragi more than once now. Jun has stopped asking whether you're a visitor. That is how a town quietly adopts you.", { visited: { canal: 2 } });
+  post("festival-supply", "hana", "Stories", "23:40", "A table across the water", "Bowls from Jun, tea from Mei, cloth from Sora. Priya at Landing 3 has two routes: carry our stock for small guaranteed delivery fees, or buy your own cases for agreed resale payments. Fuel and deadlines still matter: start deliveries by 05:20 at night or 10:20 in the morning. Ask her before collecting anything.", { notFlag: ["fs_done"] });
+  post("festival-supply-thanks", "hana", "Neighbours", null, "Three crossings in our evening", "The bowls are on Nao's counter. The tea and lantern cloth are here. Thank you, Tern. Your cargo accounts are settled; your place at the table doesn't need a receipt.", { flag: ["fs_done"] });
   function install(data) {
     ["landing", "metro"].forEach(loc => { data.actions[loc] = data.actions[loc].filter(a => !a.id.startsWith("wire_")); });
+    data.sceneClasses.push({ class: "umbrella-returned", when: { flag: ["wire_umbrella_done"] } });
     data.things["wire-board"] = "Harbour Wire · Neighbours & notices";
     data.actions.landing.unshift({ id: "wire_read", kind: "system", label: "Read the Harbour Wire · Free", minutes: 0, thing: "wire-board", wireBoard: true, lines: [] });
     data.actions.landing.push({ id: "wire_umbrella_accept", kind: "talk", label: "Offer to find Priya's umbrella", minutes: 0, once: true, lines: [{ who: "priya", text: "Sky-blue, paper star on the handle. Look by the vending machine at Metro Quay; a five-minute search should do. Bring it here whenever you like. No need to buy anything." }], when: { notFlag: ["wire_umbrella_started"] }, sets: ["wire_umbrella_started"] },
@@ -51,14 +54,17 @@
     const build = chapter.build;
     chapter.build = base => { const data = build(base); install(data); return data; };
   });
-  window.NEON_TIDES_WIRE = { posts, categories: ["All", "Trading", "Neighbours", "Stories", "Notices"],
+  window.NEON_TIDES_WIRE = { posts, categories: ["All", "Unread", "Pinned", "Trading", "Neighbours", "Stories", "Notices"],
     visible(state, data, holds, parse) {
       const start = parse(data.meta.startClock);
       const result = posts.filter(p => (!p.at || parse(p.at) <= state.clock) && holds(p.when)).map(p => Object.assign({}, p, { time: p.at ? parse(p.at) : null, pinned: !!p.at && parse(p.at) < start }));
       Object.keys(data.freight || {}).forEach(id => {
         const d = data.freight[id], cargo = (state.freight || {})[id];
         const offer = data.actions[d.from].find(a => a.freightBuy === id);
-        if (!cargo && offer && offer.when && offer.when.truth && !holds({ truth: offer.when.truth })) return;
+        if (!cargo && offer && offer.when) {
+          const availability = Object.assign({}, offer.when); delete availability.maxClock;
+          if (!holds(availability)) return;
+        }
         result.push({ id: "cargo-" + id, who: d.source, category: "Trading", time: start, title: d.title,
           text: cargo ? (cargo.units ? "Aboard the Tern. Deliver to " + window.NEON_TIDES.world.locations[d.to].short + "; start handover by " + d.lastStart + ". Purchase " + cargo.cost + " cr; promised payment " + d.payment + " cr. Check your journal for remaining time." : "Delivered safely. Purchase " + cargo.cost + " cr; payment " + cargo.revenue + " cr. Thanks, skipper.") : "Offer: " + d.cost + " cr purchase; " + d.payment + " cr promised on delivery to " + window.NEON_TIDES.world.locations[d.to].short + ". Start the five-minute handover by " + d.lastStart + ". Fuel and travel are your costs. Check the offer at the source before buying.", stale: !cargo && state.clock > parse(d.lastStart), cargo: true });
       });
