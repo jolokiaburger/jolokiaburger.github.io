@@ -1,0 +1,10 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "path": "assets/scenes/starling-yard-manga.webp",
+      "reference": "assets/scenes/kisaragi-canal.webp",
+      "prompt": "Use case: illustration-story. Asset type: wide 18:10 static game location background for Neon Tides, a warm adult anime and manga lo-fi harbour adventure. Input image is style and mood reference only; create a different location. Scene: Starling Salvage Yard in a rain-soaked Japanese futuristic harbour late at night. Rich, inviting working boatyard with a rusty overhead crane at the left, a small rescued ferry on timber blocks at centre, a warmly lit open repair workshop at right with labelled-free shelves of engine parts, coils of rope, neatly organised tools and salvaged lantern housings. At left foreground a covered assay table with a brass scale and small wrapped gold trays; at right foreground a kettle and mugs on a wooden workbench, stacked crates and a hand fuel pump. Walkable quay across lower-middle, dark reflective water across bottom quarter, distant neon town and ship silhouettes across upper background. Fine expressive ink drawing, detailed crosshatching, subtle painterly colouring, cinematic warm amber workshop lights against deep blue and muted teal rain. Quiet hopeful everyday sci-fi drama. No prominent people: leave clear usable space near assay table and repair workshop for character overlays. Full landscape composition, no inset panels, no UI, no lettering, no watermark. Detailed but readable on a phone."
+    }
+  ]
+}

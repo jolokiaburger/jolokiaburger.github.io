@@ -47,3 +47,7 @@ If you reuse the artwork or text elsewhere, credit it as "Artwork and story from
 ## Character visual refinement
 
 Updated Sora, Priya and Mei portraits and Sora’s matching market sprite were created with OpenAI’s built-in image-generation tool. Sora uses blonde hair and navy workwear; Priya is an original Japanese office worker with a warm slice-of-life cashier influence; Mei is an original older cyberpunk cook inspired by Motoko Kusanagi. The illustrations use original faces and clothing rather than copies of existing characters. Native harbour figures in `index.html` were updated to match. Prompts: `tools/character-redesign-prompts.json`.
+
+## Starling Yard and the three-chapter season
+
+`assets/scenes/starling-yard-manga.webp` is an original harbour-workshop illustration generated with the built-in image-generation tool, using the project's original Kisaragi artwork as a mood reference. It contains no copied characters or franchise assets. The final prompt and mode are recorded in `tools/yard-art-prompts.json`. The interactive portrait pins, work signs, memory overlays and morning tint are native SVG/CSS in `index.html` and `styles.css`. New stories and dialogue in `harbour-life.js` and `morning-after.js` are original writing for Neon Tides; the existing code/art/story licence split applies.

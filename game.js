@@ -31,9 +31,11 @@
   const DATA = window.NEON_TIDES;
   const BASE_TRADE = window.NEON_TIDES_TRADE;
   const SECOND_TRADE = window.NEON_TIDES_NIGHT_TWO ? window.NEON_TIDES_NIGHT_TWO.build(BASE_TRADE) : null;
+  const THIRD_TRADE = window.NEON_TIDES_MORNING ? window.NEON_TIDES_MORNING.build(SECOND_TRADE) : null;
   let TRADE = BASE_TRADE;   // the gold night: story and market data (trade.js)
   const BASE_CHAT = window.NEON_TIDES_CHAT || {};
   const SECOND_CHAT = window.NEON_TIDES_NIGHT_TWO ? window.NEON_TIDES_NIGHT_TWO.buildChat(BASE_CHAT) : null;
+  const THIRD_CHAT = window.NEON_TIDES_MORNING ? window.NEON_TIDES_MORNING.buildChat(SECOND_CHAT) : null;
   let CHAT = BASE_CHAT; // optional, authored conversations (dialogue.js)
   const MARKET = window.NeonMarket;        // pricing and gold lots, no DOM (market.js)
   const SAVE_KEY = "neon-tides:save:v1";
@@ -318,6 +320,7 @@
       TRADE = BASE_TRADE;
       if (TRADE) report["night:" + TRADE.meta.id] = validateTrade();
       if (SECOND_TRADE) { TRADE = SECOND_TRADE; report["night:lantern-tomorrow"] = validateTrade(); }
+      if (THIRD_TRADE) { TRADE = THIRD_TRADE; report["shift:morning-after"] = validateTrade(); }
     } finally { TRADE = current; }
     return report;
   }
@@ -360,8 +363,8 @@
   }
   function setState(next) {
     state = next;
-    TRADE = state.kind === "trade" && state.night === 2 && SECOND_TRADE ? SECOND_TRADE : BASE_TRADE;
-    CHAT = state.kind === "trade" && state.night === 2 && SECOND_CHAT ? SECOND_CHAT : BASE_CHAT;
+    TRADE = state.kind === "trade" && state.night === 3 && THIRD_TRADE ? THIRD_TRADE : state.kind === "trade" && state.night === 2 && SECOND_TRADE ? SECOND_TRADE : BASE_TRADE;
+    CHAT = state.kind === "trade" && state.night === 3 && THIRD_CHAT ? THIRD_CHAT : state.kind === "trade" && state.night === 2 && SECOND_CHAT ? SECOND_CHAT : BASE_CHAT;
     transient.marketSpot = null;
     if (!state.timeline) state.timeline = {};   // saves from before 3.1
     if (!state.hinted) state.hinted = [];
@@ -388,6 +391,8 @@
   // Every field of a condition must hold. See the top of cases.js for the list.
   function conditionHolds(cond) {
     if (!cond) return true;
+    if (cond.lastStart && state.clock > parseClock(cond.lastStart)) return false;
+    if (cond.freightSpace && freightHeld() >= 2) return false;
     if (cond.visited && !Object.keys(cond.visited).every(function (loc) { return (state.visited[loc] || 0) >= cond.visited[loc]; })) return false;
     if (cond.night && (state.night || 1) !== cond.night) return false;
     const previous = state.previous ? state.previous.flags : {};
@@ -512,6 +517,14 @@
         f.cf_choice ? (f.cf_card ? "Take Nao's signed recipe to Hana in Kisaragi." : "Sail with Nao to Kisaragi and join Hana's preview supper before dawn.") : missing.length ? "Next: " + missing.join("; ") + "." : "Return to Nao and choose the small festival table or a signed recipe with an evening off.",
         f.cf_shared ? "Signed recipe shared · Nao kept her afternoon with Haruto." : "Preview supper shared · Nao reserved her own small festival table.");
     }
+    if (f.yard_started) add("yard", "Rin · Second Helping", f.yard_done, f.yard_pump_fixed ? "Return to Rin at Starling Yard and celebrate the repaired ferry." : "Help Rin fix the bilge pump at Starling Yard; ten minutes, no parts purchase.", "Second Helping's pump repaired and launch celebrated.");
+    if (f.yard_star_found) add("star", "Lam · A safe-homecoming star", f.yard_star_returned, "Return the brass keepsake to Captain Lam at Metro Quay.", "Captain Lam received his daughter's brass star.");
+    if (f.n3_started) add("morning", "Festival · A table through the tide", f.n3_shared,
+      f.n3_done ? "Join Hana's crew breakfast at the delivery location before 11:00." : !f.n3_cargo ? "Collect the stranded table kit from Rin at Starling Yard." : !f.n3_route ? "Check Priya's revised festival route at Landing 3." : "Deliver to Hana " + (state.truth === "vault" ? "at the Night Market" : "in Kisaragi") + "; start handover by 10:15.", "Festival table delivered · You joined the crew for breakfast.");
+    Object.keys(state.freight || {}).forEach(function (id) {
+      const d = TRADE.freight[id], cargo = state.freight[id];
+      add("freight-" + id, d.title, !cargo.units, "Deliver to " + DATA.world.locations[d.to].short + " · " + deliveryTime(d.lastStart) + ".", "Delivered · " + cargo.revenue + " cr received; " + cargo.cost + " cr purchase.");
+    });
     return rows;
   }
   function renderStoryProgress(container) {
@@ -537,6 +550,11 @@
     if (c && c.bought) rows.push({ title: "Rice · Nao at the Night Market", text: "Purchase " + c.cost + " cr · Promised " + (c.courier ? "12 cr courier fee" : c.bought * 30 + " cr") + " · " + (c.crates ? deliveryTime("04:25") + " (5 min handover; completed by 04:30). Return at Landing 3: " + (c.courier ? "0 cr" : c.crates * 16 + " cr") + " · " + deliveryTime("05:40") + "." : "Settled · " + (c.courier && c.sold ? 12 : c.revenue) + " cr received.") });
     if (tea) rows.push({ title: "Sealed tea · Sora at the Night Market", text: "Purchase " + tea.cost + " cr · Promised 38 cr · " + (tea.units ? deliveryTime("05:55") + " (5 min handover; completed by 06:00)." : "Delivered · " + tea.revenue + " cr received.") });
     if (f.nb_batch_owned) rows.push({ title: "Breakfast batch · Nao's counter", text: "Purchase " + (state.breakfastCost || 0) + " cr · Payment depends on actual sales: 0–48 cr · " + (f.nb_done ? "Settled · " + (state.breakfastRevenue || 0) + " cr received." : f.nb_batch_delivered ? "Stock handed over; open with Nao from 05:00." : deliveryTime("05:39") + " (5 min handover; start before 05:40).") });
+    Object.keys(state.freight || {}).forEach(function (id) {
+      const c = state.freight[id], d = TRADE.freight[id];
+      rows.push({ title: d.title + " · " + DATA.world.locations[d.to].short, text: "Purchase " + c.cost + " cr · Promised " + d.payment + " cr · " + (c.units ? deliveryTime(d.lastStart) + " (5 min handover; last start " + d.lastStart + ")." : "Delivered · " + c.revenue + " cr received.") });
+    });
+    if (f.n3_cargo) rows.push({ title: "Festival table kit · Crew property", text: "Purchase 0 cr · Promised 18 cr courier fee · " + (f.n3_done ? "Delivered; fee received." : deliveryTime("10:15") + " · " + (f.n3_route ? "Hana at " + (state.truth === "vault" ? "the market." : "Kisaragi.") : "Confirm the destination with Priya.")) });
     return rows;
   }
   function renderCargoProgress(container) {
@@ -546,6 +564,43 @@
     rows.forEach(function (row) { section.appendChild(el("article", { class: "cargo-card" }, [el("strong", { text: row.title }), el("p", { text: row.text })])); });
     container.appendChild(section);
   }
+  function freightHeld() { return Object.values(state.freight || {}).reduce(function (sum, c) { return sum + c.units; }, 0); }
+  function freightTotals() { return Object.values(state.freight || {}).reduce(function (sum, c) { sum.cost += c.cost; sum.revenue += c.revenue; return sum; }, { cost: 0, revenue: 0 }); }
+  function travelPlan(dest) {
+    const check = canTravel(dest), route = travelCost(state.location, dest);
+    if (!route) return { destination: dest, ok: false, text: "No direct route." };
+    const minutes = travelMinutes(route), arrive = state.clock + minutes;
+    const back = travelCost(dest, state.location), returnFuel = back ? route.fuel + back.fuel : Infinity;
+    const payments = [];
+    Object.keys(state.freight || {}).forEach(function (id) {
+      const c = state.freight[id], d = TRADE.freight[id];
+      if (c.units && d.to === dest) payments.push(d.title + ": " + d.payment + " cr · " + (arrive <= parseClock(d.lastStart) ? (parseClock(d.lastStart) - arrive) + " min left to start 5 min handover" : "deadline missed on arrival"));
+    });
+    if (dest === "market" && state.canalTrade && state.canalTrade.units) payments.push("Jun's tea: 38 cr · " + (arrive <= parseClock("05:55") ? (parseClock("05:55") - arrive) + " min to start 5 min handover" : "deadline missed on arrival"));
+    if (dest === "market" && state.cargo && state.cargo.crates) payments.push("Rice: " + (state.cargo.courier ? "12 cr fee" : state.cargo.crates * 30 + " cr") + " · " + (arrive <= parseClock("04:25") ? (parseClock("04:25") - arrive) + " min to start 5 min handover" : "delivery deadline missed on arrival"));
+    if (state.flags.n3_cargo && !state.flags.n3_done && state.flags.n3_route && dest === (state.truth === "vault" ? "market" : "canal")) payments.push("Festival kit: 18 cr fee · " + (arrive <= parseClock("10:15") ? (parseClock("10:15") - arrive) + " min to start 5 min handover" : "deadline missed on arrival"));
+    const refill = ["landing", "yard", "canal"].indexOf(dest) !== -1;
+    const returnNote = state.fuel >= returnFuel ? "Fuel covers the direct return (" + returnFuel + " total)." : "Direct return needs " + returnFuel + " total fuel; your tank has " + state.fuel + ". " + (refill ? "A refill here costs 30 cr / 10 min; " + (state.credits >= 30 ? "your purse covers it." : "your current purse cannot cover it.") : "No full refill at this quay; plan another route or tug recovery.");
+    const text = DATA.world.locations[dest].short + " · " + route.fuel + " fuel / " + minutes + " min · Arrive " + formatClock(arrive) + ". " + (check.ok ? "" : "Cannot sail: " + check.why + ". ") + returnNote + (back ? " Return crossing: " + back.minutes + " min, before handovers or refuelling." : "") + (arrive >= dawnClock() ? " Arrival reaches shift end." : "") + (payments.length ? " Cargo: " + payments.join("; ") + "." : " No held delivery is due here.");
+    return { destination: dest, ok: check.ok, arrival: arrive, returnFuel: returnFuel, payments: payments, text: text };
+  }
+  function renderTravelPlanner(container) {
+    const places = Object.keys(DATA.world.locations).filter(function (id) { return id !== state.location && locationAvailable(id); });
+    if (!places.length) return;
+    const section = el("details", { class: "travel-planner action-group" }, [el("summary", { text: "Plan a crossing · Fuel, return & deliveries" })]);
+    section.open = !!transient.planOpen;
+    const label = el("label", { for: "plan-destination", text: "Destination" });
+    const select = el("select", { id: "plan-destination" });
+    places.forEach(function (id) { select.appendChild(el("option", { value: id, text: DATA.world.locations[id].short })); });
+    select.value = places.indexOf(transient.planDestination) !== -1 ? transient.planDestination : places[0];
+    const note = el("p", { class: "travel-plan-note", role: "status" });
+    const button = el("button", { class: "btn", type: "button", onclick: function () { travelTo(select.value); } });
+    function update() { const plan = travelPlan(select.value); transient.planDestination = select.value; note.textContent = plan.text; button.textContent = "Cast off for " + DATA.world.locations[select.value].short; button.disabled = !plan.ok; }
+    select.addEventListener("change", update);
+    section.addEventListener("toggle", function () { transient.planOpen = section.open; });
+    [label, select, note, button].forEach(function (node) { section.appendChild(node); }); update(); container.appendChild(section);
+  }
+
   function rememberedQuote(loc) {
     const quote = state.seen[loc], age = Math.max(0, state.clock - quote.at);
     return DATA.world.locations[loc].short + " · Observed " + formatClock(quote.at) + " · " + age + " min ago · " + (quote.buy ? "Buy " + quote.buy + " / " : "") + "Sell " + quote.sell + " cr/g · " + (age ? "Remembered quote; recheck on arrival." : "Just observed.");
@@ -591,6 +646,10 @@
   }
   function canTravel(dest) {
     if (!locationAvailable(dest)) return { ok: false, why: "not on this adventure" };
+    if (state.night === 3 && (dest === "canal" || state.location === "canal")) {
+      if (state.truth === "vault") return { ok: false, why: "lock bulletin: low water · no passage this shift" };
+      if (state.truth === "both" && state.clock < parseClock("08:00")) return { ok: false, why: "lock bulletin: gate reopens at 08:00" };
+    }
     const place = DATA.world.locations[dest];
     if (place.unlockFlag && !state.flags[place.unlockFlag]) return { ok: false, why: place.lockedText || "route not discovered" };
     if (dest === state.location) return { ok: false, why: "moored here" };
@@ -686,6 +745,8 @@
     const list = activeCase.actions[state.location] || [];
     return list.concat(casualActions()).filter(function (action) {
       if (action.once && state.used[action.id]) return false;
+      if (isTrade() && action.freightBuy && freightHeld() >= 2) return false;
+      if (isTrade() && state.location === "market" && state.flags.companion_nao && action.id !== "life_nao_return" && action.lines && action.lines.some(function (line) { return line.who === "nao"; })) return false;
       return conditionHolds(action.when);
     });
   }
@@ -835,6 +896,7 @@
 
   function applyEffects(effects) {
     if (!effects) return;
+    (effects.clearFlags || []).forEach(function (flag) { delete state.flags[flag]; });
     if (effects.fuel) state.fuel = Math.min(DATA.meta.fuelMax, Math.max(0, state.fuel + effects.fuel));
     if (effects.cans) state.cans = Math.max(0, state.cans + effects.cans);
     if (effects.refuel) state.fuel = DATA.meta.fuelMax;
@@ -982,24 +1044,27 @@
   // A chapter transition is only allowed from a finished first night. Create and
   // save the entire new state once; retries cannot duplicate the carried purse.
   function startSecondNight() {
-    if (!SECOND_TRADE || !isTrade() || !state.resolved || state.night === 2) return false;
+    if (!SECOND_TRADE || !isTrade() || !state.resolved || (state.night || 1) >= 3) return false;
     const old = state;
-    TRADE = SECOND_TRADE;
-    const next = newTradeState(old.seed + ":night-2");
-    next.night = 2;
+    const chapter = (old.night || 1) + 1;
+    TRADE = chapter === 3 ? THIRD_TRADE : SECOND_TRADE;
+    if (!TRADE) return false;
+    const next = newTradeState(old.seed + (chapter === 2 ? ":night-2" : ":morning-3"));
+    next.night = chapter;
     next.credits = old.credits;
     next.gold = JSON.parse(JSON.stringify(old.gold));
     next.fuel = old.fuel;
     next.rel = Object.assign({}, old.rel);
-    next.previous = { seed: old.seed, flags: {}, worth: old.finish.worth };
-    ["nb_started", "nb_done", "nb_late", "nb_story", "nb_warmer", "nb_invite_mei", "nb_invite_priya", "nb_invite_lam", "exp_done", "exp_chart", "nm_done"].forEach(function (flag) {
-      if (old.flags[flag]) next.previous.flags[flag] = true;
+    next.previous = { seed: old.seed, flags: Object.assign({}, old.previous ? old.previous.flags : {}), worth: old.finish.worth };
+    Object.keys(old.flags).filter(function (flag) { return old.flags[flag] === true && !/^end_/.test(flag) && flag !== "companion_nao" && flag !== "cf_aboard"; }).forEach(function (flag) {
+      next.previous.flags[flag] = true;
     });
     if (old.flags.exp_chart) next.flags.exp_chart = true;
     if (old.flags.ct_route) next.flags.ct_route = true;
+    ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
     next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
     Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
-    const q = MARKET.quote(SECOND_TRADE, next.truth, next.seed, "bar", next.clock);
+    const q = MARKET.quote(TRADE, next.truth, next.seed, "bar", next.clock);
     next.start = { credits: next.credits, grams: MARKET.lots.total(next.gold), sell: q.sell, worth: MARKET.worth(next.credits, next.gold, q.sell) };
     setState(next);
     transient.objective = null;
@@ -1009,11 +1074,13 @@
     positionFerry(state.location, null, false);
     render();
     focusEncounter();
-    toast("Night Two · A Lantern for Tomorrow");
+    toast(TRADE.meta.title);
     return true;
   }
-  function nextNightLabel() { return state && state.night === 2 ? "Start fresh Night One" : "Continue to Night Two · Keep earnings & choices"; }
-  function continueTradeStory() { if (state && state.night !== 2 && SECOND_TRADE) return startSecondNight(); startTradeNight(""); return true; }
+  function nextNightLabel() {
+    return state && state.night === 3 ? "Start fresh Night One" : state && state.night === 2 ? "Continue to Chapter Three · Morning After the Lanterns" : "Continue to Night Two · Keep earnings & choices";
+  }
+  function continueTradeStory() { if (state && (state.night || 1) < 3 && SECOND_TRADE) return startSecondNight(); startTradeNight(""); return true; }
 
   // The trade data must hang together before anyone plays it. Returns a list of problems.
   function validateTrade() {
@@ -1174,7 +1241,7 @@
       out.push({ id: "sys_tug", kind: "system", label: DATA.world.tug.label, minutes: DATA.world.tug.minutes });
     }
     if (state.clock >= parseClock(TRADE.meta.turnInFrom)) {
-      out.push({ id: "sys_turn_in", kind: "system", label: "Rest aboard the Tern · Finish the night", minutes: 0 });
+      out.push({ id: "sys_turn_in", kind: "system", label: state.night === 3 ? "Rest aboard the Tern · Finish the morning shift" : "Rest aboard the Tern · Finish the night", minutes: 0 });
     }
     return out;
   }
@@ -1195,6 +1262,8 @@
       toast(goldHeld() < sale.grams ? "Kenji needs two grams. Keep exploring, or report to Sora for the courier fee." : "Sora's buying allowance cannot cover this order. You can still take the courier fee.");
       return;
     }
+    if (action.freightBuy && ((state.freight || {})[action.freightBuy] || freightHeld() >= 2)) return;
+    if (action.freightDeliver && (!(state.freight || {})[action.freightDeliver] || state.freight[action.freightDeliver].units !== 1)) return;
     const lines = actionLines(action);   // the moment of speaking, before anything changes
     if (action.marketBrowse) transient.marketSpot = action.marketBrowse;
     if (action.marketBrowse === "gold") {
@@ -1204,6 +1273,16 @@
     const before = state.clock;
     state.credits -= cost;
     state.spent = (state.spent || 0) + cost;   // noodles, tea and fuel: the morning card counts them apart
+    if (action.freightBuy) {
+      if (!state.freight) state.freight = {};
+      state.freight[action.freightBuy] = { cost: cost, revenue: 0, units: 1 };
+    }
+    if (action.freightDeliver) {
+      const cargo = state.freight[action.freightDeliver], def = TRADE.freight[action.freightDeliver];
+      cargo.units = 0; cargo.revenue = def.payment;
+      state.credits += def.payment;
+      lines.push({ type: "p", text: "Purchase " + cargo.cost + " cr · Sales " + cargo.revenue + " cr · " + (cargo.revenue - cargo.cost) + " cr gross margin, before fuel and time." });
+    }
     if (action.cargoBuy) {
       state.cargo.crates = action.cargoBuy.crates;
       state.cargo.bought = action.cargoBuy.crates;
@@ -1363,7 +1442,7 @@
   // What the trades themselves made against holding the opening gold, with food and fuel left out.
   function tradeChoicesResult() {
     const s = state.start, f = state.finish;
-    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.cargo ? state.cargo.revenue : 0) - (state.canalTrade ? state.canalTrade.revenue : 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
+    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.cargo ? state.cargo.revenue : 0) - (state.canalTrade ? state.canalTrade.revenue : 0) - freightTotals().revenue - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1646,7 +1725,7 @@
   // drink and an objective. Nothing tells you what to do; the cell glows when the board changes.
   function renderTradeInstruments() {
     dom.instClock.classList.remove("late");
-    dom.instDawn.textContent = state.resolved ? "the night is over"
+    dom.instDawn.textContent = state.night === 3 ? (state.resolved ? "morning shift complete" : "morning crew · shift ends 11:00") : state.resolved ? "the night is over"
       : state.clock >= parseClock(TRADE.meta.firstLight || "05:00") ? "first light at " + (TRADE.meta.dawnClock || "06:00")
       : "rain on the Basin";
     dom.instCanLabel.textContent = "Purse";
@@ -1723,7 +1802,7 @@
     locationActions().forEach(function (action) {
       if (action.thing && !bound[action.thing]) { bound[action.thing] = action; order.push(action.thing); }
     });
-    if (state.location === "canal") casualActions().forEach(function (action) {
+    if (["canal", "yard"].indexOf(state.location) !== -1) casualActions().forEach(function (action) {
       if (action.thing) { if (!bound[action.thing]) order.push(action.thing); bound[action.thing] = action; }
     });
     const conf = activeCase.confrontation;
@@ -1851,7 +1930,7 @@
     }
 
     const loc = DATA.world.locations[state.location];
-    dom.encKicker.textContent = state.night === 2 ? "Night Two · A Lantern for Tomorrow" : loc.kicker;
+    dom.encKicker.textContent = state.night >= 2 ? TRADE.meta.title : loc.kicker;
     dom.encTitle.textContent = loc.title;
 
     if (state.confront) { renderConfrontation(body, actions); return; }
@@ -1984,6 +2063,7 @@
       container.appendChild(local);
     });
 
+    renderTravelPlanner(container);
     const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
     const ferryActions = locationActions().filter(function (a) { return a.kind === "system" && visible(a); }).concat(sys);
     const ferry = el("div", { class: "action-group" + (ferryActions.length ? "" : " only-travel") }, [el("p", { class: "action-group-label", text: "Ferry" })]);
@@ -2019,6 +2099,10 @@
     return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
   }
   function marketActionLabel(action) {
+    if (action.freightBuy || action.freightDeliver) {
+      const d = TRADE.freight[action.freightBuy || action.freightDeliver];
+      return action.label + " · Buy " + d.cost + " cr / receive " + d.payment + " cr · " + deliveryTime(d.lastStart) + " · Fuel/time extra";
+    }
     if (action.cargoBuy) return action.label + " · Purchase " + (action.cost || 0) + " cr · Promised " + (action.cargoBuy.courier ? "12 cr fee" : action.cargoBuy.crates * 30 + " cr") + " · " + deliveryTime("04:25") + " · Fuel/time extra";
     if (action.id === "ct_buy_tea") return action.label + " · Promised 38 cr at Sora's scale · " + deliveryTime("05:55") + " · Fuel/time extra";
     if ((action.cargoSell || action.cargoReturn) && state.cargo) {
@@ -2069,10 +2153,13 @@
   function renderCanalProgress(container) {
     if (!state.flags.ct_route && !state.flags.cf_invited) return;
     const f = state.flags, cargo = state.canalTrade;
-    const section = el("details", { class: "breakfast-progress nb-section" }, [el("summary", { text: "Kisaragi · Routes, tea & festival log" })]);
+    const section = el("details", { class: "breakfast-progress nb-section" }, [el("summary", { text: state.night === 3 ? "Kisaragi · Morning routes & cargo" : "Kisaragi · Routes, tea & festival log" })]);
     const lines = ["Harbour crossings: 2 fuel / 40 min each way. Hoshimi: 4 fuel / 55 min each way. Refuel in town for 30 cr / 10 min; tug recovery is available.",
       cargo ? "Tea case · " + cargo.cost + " cr purchase / " + cargo.revenue + " cr sales · " + cargo.units + " aboard. Fuel and time extra; no automatic payout." : "Optional tea trade · One sealed case, 24 cr from Jun / 38 cr to Sora. No purchase needed for either side quest.",
       f.ct_parcel_done ? "Address mystery complete · Hana received the spare spoons; 12 cr fee paid once." : f.ct_parcel ? "Parcel lead · Read the bridge notice and ask Jun, then deliver to Hana." : "Mako has a parcel with an unfinished address."];
+    if (state.night === 3) {
+      lines.splice(1, 2, "Morning cargo · Jun offers ceramic bowls for Mei and Hana offers lantern cloth for Sora. Read the written cost, payment and deadline before purchasing.", state.truth === "vault" ? "Lock bulletin: low water; no canal passage this shift. Hana's crew table is at the market." : state.truth === "both" && state.clock < parseClock("08:00") ? "Lock bulletin: gate reopens at 08:00. Priya can wait with you for the signed release." : "The canal gate is open. Hana's festival crew table is in Kisaragi.");
+    }
     if (f.cf_invited) lines.push(f.cf_done ? (f.cf_shared ? "Nao shared her signed recipe and kept her afternoon off." : "Nao joined the preview supper and reserved a small festival table.") : f.cf_choice ? "Decision made · Return to Hana before dawn with Nao or her signed card." : "Invitation preparation · Sample: " + (f.cf_prepared ? "ready" : "help Nao") + " / Hana: " + (f.cf_met_hana ? "met" : "visit town") + " / Pairing: " + (f.cf_aroma ? "noted" : "ask Jun") + ". Return to Nao to choose.");
     lines.forEach(function (text) { section.appendChild(el("p", { text: text })); });
     container.appendChild(section);
@@ -2085,7 +2172,7 @@
   function renderMarketDirectory(container, spot) {
     const directory = el("div", { class: "market-directory", role: "group", "aria-label": "Browse the Night Market" });
     directory.appendChild(el("p", { class: "action-group-label", text: "Lantern Market · Pick a stall" }));
-    directory.appendChild(el("p", { class: "market-status", text: state.night === 2 ? (state.flags.n2_done ? "Festival recipe ready · Gold and tea until dawn" : "Festival preparations · Gold, ingredients & Nao’s new recipe") : state.flags.nb_done ? "Nao's breakfast counter open · Gold until dawn · Repair bench closed" : state.flags.nb_started && state.clock >= parseClock("05:00") ? "Nao's breakfast is ready · Visit her food counter" : state.clock >= parseClock("03:30")
+    directory.appendChild(el("p", { class: "market-status", text: state.night === 3 ? "Morning crew · Gold, small cargo & a festival table" : state.night === 2 ? (state.flags.n2_done ? "Festival recipe ready · Gold and tea until dawn" : "Festival preparations · Gold, ingredients & Nao’s new recipe") : state.flags.nb_done ? "Nao's breakfast counter open · Gold until dawn · Repair bench closed" : state.flags.nb_started && state.clock >= parseClock("05:00") ? "Nao's breakfast is ready · Visit her food counter" : state.clock >= parseClock("03:30")
       ? "Late watch · Tea and gold until dawn · Repair bench closed"
       : "Gold scale · Hot food · Repairs · A delivery to trace" }));
     const buttons = el("div", { class: "market-stalls" });
@@ -2097,7 +2184,7 @@
       } }, closed ? "Kenji · Closed" : entry.label));
     });
     directory.appendChild(buttons);
-    if (state.night !== 2 && spot === "repair" && state.clock < parseClock("03:30")) directory.appendChild(el("p", { class: "market-help", text: "Kenji's order needs 2 g and at least 2 g of Sora's remaining buying allowance. You can report the delivery for 25 cr instead. His bench closes at 03:30." }));
+    if ((state.night || 1) === 1 && spot === "repair" && state.clock < parseClock("03:30")) directory.appendChild(el("p", { class: "market-help", text: "Kenji's order needs 2 g and at least 2 g of Sora's remaining buying allowance. You can report the delivery for 25 cr instead. His bench closes at 03:30." }));
     container.appendChild(directory);
   }
   // The scale where you are: its two numbers, what you hold, and a few sizes of trade.
@@ -2758,7 +2845,7 @@
   }
   // A saved gold night: the same care, against trade.js instead of a case.
   function tradeSaveProblem(obj) {
-    const definition = obj.night === 2 ? SECOND_TRADE : BASE_TRADE;
+    const definition = obj.night === 3 ? THIRD_TRADE : obj.night === 2 ? SECOND_TRADE : BASE_TRADE;
     if (!definition || obj.variantId !== definition.meta.id) return "unknown night '" + obj.variantId + "'";
     if (!definition.truths.some(function (t) { return t.id === obj.truth; })) return "unknown night state";
     if (!DATA.world.locations[obj.location]) return "unknown location";
@@ -2775,12 +2862,21 @@
     }
     if (obj.flags.ct_tea_owned && !obj.canalTrade) return "missing canal tea cargo";
     if (obj.breakfastSold !== undefined && (!Number.isInteger(obj.breakfastSold) || obj.breakfastSold < 0 || obj.breakfastSold > 12)) return "invalid breakfast portions";
-    if (obj.night !== undefined && obj.night !== 1 && obj.night !== 2) return "unknown chapter";
-    if (obj.night === 2) {
+    if (obj.night !== undefined && obj.night !== 1 && obj.night !== 2 && obj.night !== 3) return "unknown chapter";
+    if (obj.night >= 2) {
       if (!obj.previous || typeof obj.previous.seed !== "string" || !obj.previous.flags || Array.isArray(obj.previous.flags) || Object.values(obj.previous.flags).some(function (v) { return typeof v !== "boolean"; }) || !Number.isFinite(obj.previous.worth)) return "bad chapter memory";
       const c = obj.cargo;
       if (!c || typeof c.courier !== "boolean" || ["crates", "bought", "sold", "returned"].some(function (key) { return !Number.isInteger(c[key]) || c[key] < 0 || c[key] > 2; }) || c.crates + c.sold + c.returned !== c.bought || ["cost", "revenue"].some(function (key) { return !Number.isFinite(c[key]) || c[key] < 0; }) || (c.courier && (c.bought > 1 || c.cost !== 0 || c.revenue !== 0))) return "bad ingredient cargo";
     }
+    if (obj.freight !== undefined) {
+      if (!obj.freight || Array.isArray(obj.freight)) return "bad small freight";
+      for (const id of Object.keys(obj.freight)) {
+        const c = obj.freight[id], d = (definition.freight || {})[id];
+        if (!d || !c || c.cost !== d.cost || ![0, 1].includes(c.units) || c.revenue !== (c.units ? 0 : d.payment) || !obj.flags["freight_" + id + "_owned"] || (!!obj.flags["freight_" + id + "_done"] !== (c.units === 0))) return "invalid small freight";
+      }
+      if (Object.values(obj.freight).reduce(function (sum, c) { return sum + c.units; }, 0) > 2) return "freight hold overflow";
+    }
+    if (Object.keys(definition.freight || {}).some(function (id) { return obj.flags["freight_" + id + "_owned"] && !(obj.freight || {})[id]; })) return "missing small freight";
     if (obj.resolved && !obj.finish) return "missing fields";
     return null;
   }
@@ -3368,9 +3464,9 @@
     if (!storage.ok) {
       dom.storageNote.textContent = "Saving is unavailable here (private mode or blocked storage). You can still play; progress won't survive a reload.";
     } else if (valid) {
-      dom.storageNote.textContent = valid.kind === "trade" && valid.resolved && valid.night !== 2
-        ? "Your first night is saved. Open its morning report to continue to Night Two with your earnings and choices."
-        : valid.kind === "trade" && valid.night === 2 ? "Your second night is saved, including the people and choices you carried forward."
+      dom.storageNote.textContent = valid.kind === "trade" && valid.resolved && (valid.night || 1) < 3
+        ? "Your shift report is saved. Open it to continue the next chapter with your earnings and choices."
+        : valid.kind === "trade" && valid.night >= 2 ? "Your chapter is saved, including the people and choices you carried forward."
         : "Your journey is saved in this browser.";
     } else {
       dom.storageNote.textContent = "Progress autosaves in this browser after every action.";
@@ -3398,22 +3494,23 @@
     reflections.forEach(function (item) { dom.resBody.appendChild(el("p", { class: "reflection", text: item.text })); });
     closing.forEach(function (item) { dom.resBody.appendChild(el("p", { text: item.text })); });
     dom.resBody.appendChild(el("p", { class: "epilogue", text: "You came ashore with " + s.credits + " cr and " + grams(s.grams) + " of gold, " + s.worth + " cr at Mei's prices then. You turn in with " + f.credits + " cr and " + grams(f.grams) + ", " + f.worth + " cr at Mei's prices now." }));
-    if (state.night === 2 && state.cargo.crates) dom.resBody.appendChild(el("p", { class: "epilogue", text: "Unserved rice · The unopened crates go to the morning co-op. No sale, return or courier payment is awarded automatically. Your purchase cost remains in the cargo account." }));
+    if (state.night >= 2 && state.cargo.crates) dom.resBody.appendChild(el("p", { class: "epilogue", text: "Unserved rice · The unopened crates go to the morning co-op. No sale, return or courier payment is awarded automatically. Your purchase cost remains in the cargo account." }));
     const net = f.worth - s.worth;
     // What the same gold would be worth had you only held it: separates the harbour's drift from your choices.
     const idle = Math.round(s.credits + s.grams * f.sell) - s.worth;
     function signed(n) { return (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(n) + " cr"; }
     dom.resStats.innerHTML = "";
     [
-      [state.flags.end_dawn ? "Dawn" : "Turned in", formatClock(state.endedAt)],
+      [state.flags.end_dawn ? (state.night === 3 ? "Shift end" : "Dawn") : "Turned in", formatClock(state.endedAt)],
       ["The night", signed(net) + ", valued at Mei's scale"],
       ["Had you sat still", signed(idle) + ": your " + grams(s.grams) + ", held all night"],
       ["Your gold trades", state.trades.length ? signed(tradeChoicesResult()) + " against holding, food, fuel, food cargo and adventure rewards aside" : "none"],
       ["Breakfast batch", state.breakfastCost ? (state.breakfastRevenue || 0) + " cr sales − " + state.breakfastCost + " cr stock = " + signed((state.breakfastRevenue || 0) - state.breakfastCost) + " before fuel and time" : "No extra batch bought"],
       ["Adventure reward", (state.rewardCredits || 0) + " cr · " + grams(state.rewardGrams || 0) + " of gold"],
       ["Ingredient cargo", state.cargo ? state.cargo.revenue + " cr returned − " + state.cargo.cost + " cr stock = " + signed(state.cargo.revenue - state.cargo.cost) + " before fuel/time; " + state.cargo.crates + " crate(s) unserved" + (state.cargo.courier ? "; courier fee listed as adventure reward" : "") : "No ingredient trade on Night One"],
+      ["Small cargo", freightTotals().revenue + " cr sales − " + freightTotals().cost + " cr stock, before fuel/time"],
       ["Canal tea", state.canalTrade ? state.canalTrade.revenue + " cr sales − " + state.canalTrade.cost + " cr stock = " + signed(state.canalTrade.revenue - state.canalTrade.cost) + " before fuel/time; " + state.canalTrade.units + " case aboard" : "No canal tea bought"],
-      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0) - (state.cargo ? state.cargo.cost : 0) - (state.canalTrade ? state.canalTrade.cost : 0)) + " cr on food, tea and fuel"],
+      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0) - (state.cargo ? state.cargo.cost : 0) - (state.canalTrade ? state.canalTrade.cost : 0) - freightTotals().cost) + " cr on food, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
       ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],

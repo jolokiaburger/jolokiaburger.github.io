@@ -195,7 +195,7 @@
         {if:{flag:["n2_late"]},text:"Nao saved your bowl. A late return still found a place at her counter."},
         {if:{flag:["n2_started"],notFlag:["n2_done"]},text:"You helped begin a recipe, but missed its tasting. Nao finishes the trial with the morning crew; no story completion or trade payout is awarded automatically."},
         {if:{notFlag:["n2_started"]},text:"Nao tested her festival menu with her neighbours. You followed other tides tonight."},
-        {text:"The Tern rests beneath a paper lantern. Two evenings, familiar faces, and something new to look forward to. This two-night chapter ends here."}
+        {text:"The Tern rests beneath a paper lantern. Two evenings, familiar faces, and something new to look forward to. The morning crew is arriving. Continue to Morning After the Lanterns when you are ready."}
       ]
     };
     return T;

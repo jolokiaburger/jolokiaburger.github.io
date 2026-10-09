@@ -1076,3 +1076,27 @@ body[data-location="canal"]:not(.travelling) .hotspot { display: none; }
 .canal-person-target .thing-ring { stroke: #f2d6a2; stroke-width: 2; }
 .canal-person-target:hover .thing-ring, .canal-person-target:focus .thing-ring { stroke: #aceddc; stroke-width: 4; }
 .canal-person-target .thing-tag-bg { fill: #182d34; stroke: #eed5a2; }
+
+/* Places remember completed work; these overlays share the scene's fixed composition. */
+.world-memory, .morning-hana-art { display: none; pointer-events: none; }
+.memory-kits .memory-kits-art, .memory-menu .memory-menu-art,
+.memory-spoons .memory-spoons-art, .memory-recipe .memory-recipe-art,
+.memory-tea .memory-tea-art, .yard-repaired .yard-repair-light { display: inline; }
+body[data-location="market"].morning-hana-present .morning-hana-art { display: inline; }
+.nao-away #exp-nao { display: none; }
+.location-plaque rect { fill: #192d34; fill-opacity: .92; stroke: #c6b083; }
+.location-plaque text { fill: #f3dfb9; font: 24px sans-serif; letter-spacing: 2px; }
+.yard-object rect, .yard-nameplate rect { fill: #24333a; fill-opacity: .92; stroke: #d2bd90; stroke-width: 2; }
+.yard-object text, .yard-nameplate text { fill: #f4dfb7; font: 16px sans-serif; }
+.scene-person rect { fill: #20373c; stroke: #eed5a2; stroke-width: 3; }
+.scene-person path { fill: none; stroke: #eed5a2; stroke-width: 3; }
+.scene-person circle { fill: #eed5a2; stroke: #20373c; stroke-width: 2; }
+.travel-planner { border: 1px solid #526c72; border-radius: 8px; padding: .7rem; background: #18282f; }
+.travel-planner summary { cursor: pointer; color: #efd3a0; font-weight: 600; }
+.travel-planner label { display: block; margin-top: .7rem; }
+.travel-planner select { width: 100%; margin: .4rem 0; min-height: 44px; color: #f3e5c9; background: #243941; border: 1px solid #8eaaab; border-radius: 6px; padding: .5rem; }
+.travel-plan-note { line-height: 1.55; }
+.morning-shift .exp-scene { filter: brightness(1.12) saturate(.9); }
+
+.morning-wash { display: none; pointer-events: none; }
+.morning-shift .morning-wash { display: inline; }
