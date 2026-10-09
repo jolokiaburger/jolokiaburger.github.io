@@ -388,6 +388,7 @@
   // Every field of a condition must hold. See the top of cases.js for the list.
   function conditionHolds(cond) {
     if (!cond) return true;
+    if (cond.visited && !Object.keys(cond.visited).every(function (loc) { return (state.visited[loc] || 0) >= cond.visited[loc]; })) return false;
     if (cond.night && (state.night || 1) !== cond.night) return false;
     const previous = state.previous ? state.previous.flags : {};
     if (cond.priorFlag && !cond.priorFlag.every(function (f) { return !!previous[f]; })) return false;
@@ -473,11 +474,81 @@
   // Objectives are an ordered list of { when: CONDITION, text }; the first rule that holds is shown.
   // That keeps "what now?" in cases.js, where each case can phrase it for its own lie.
   function currentObjective() {
+    if (isTrade()) {
+      const active = storyProgress().filter(function (row) { return !row.done; });
+      if (active.length) return active.length + " active stor" + (active.length === 1 ? "y" : "ies") + " · " + active[0].text + " Notebook: all next steps.";
+    }
     const rules = isTrade() ? (TRADE.expeditionObjectives || []) : activeCase.objectives;
     for (let i = 0; i < rules.length; i++) {
       if (conditionHolds(rules[i].when)) return rules[i].text;
     }
     return "";
+  }
+
+  // Independent story cards are derived from existing flags; old saves need no migration.
+  function storyProgress() {
+    const f = state.flags, rows = [];
+    function add(id, title, done, next, outcome) { rows.push({ id: id, title: title, done: !!done, text: done ? outcome : next }); }
+    if (f.exp_job) add("lantern", "Hoshimi · Guiding lights", f.exp_done,
+      f.exp_cargo ? "Return the kits to Sora at the Night Market; choose 85 cr or 1 g of gold." : f.exp_chart ? "Collect the kits on Hoshimi Island; allow 15 min at the storehouse." : "Ask Rin at Starling Yard for the reef chart, then refuel for the island.",
+      "Lantern kits delivered · " + (f.exp_gold ? "1 g of gold received." : "85 cr received."));
+    if (f.nm_job) add("dispatch", "Market · The overdue launch", f.nm_done,
+      f.nm_verified ? (state.clock < parseClock("03:30") ? "Return to the market: report to Sora for 25 cr, or fill Kenji's 2 g order before 03:30." : "Kenji's bench has closed; report the checked dispatch to Sora for 25 cr.") : f.nm_manifest ? "Check the dispatch with " + (state.truth === "vault" ? "Priya at Landing 3." : "Rin at Starling Yard.") : "Read the current dispatch slip in the market delivery lane.",
+      f.nm_contract_done ? "Kenji's sensor-gold order filled at the agreed premium." : "Dispatch checked · 25 cr courier reward received.");
+    if (f.nb_started) add("breakfast", "Nao · The last sunrise bowl", f.nb_done,
+      state.clock >= parseClock("05:00") ? "Return to Nao before dawn for breakfast; the last bowl stays warm after 05:45." : "Meet Nao at 05:00. Optional: hear her recipe, help with trays and invite neighbours; buying stock is optional.",
+      f.nb_late ? "You shared the saved bowl with Nao." : "Nao opened her counter with her own name on the menu.");
+    if (f.n2_started) add("recipe", "Nao · A lantern for tomorrow", f.n2_done,
+      !f.n2_menu ? "Choose smoky mushroom or plum-and-sesame rice at Nao's counter." : state.clock >= parseClock("05:00") ? "Taste Nao's recipe before dawn, at the market or in Kisaragi if she is aboard." : "Optional: test the seasoning. Taste the recipe with Nao from 05:00; ingredients are not required.",
+      (f.n2_smoky ? "Smoky mushroom" : "Plum-and-sesame") + " recipe tasted · Tomorrow's menu is ready.");
+    if (f.ct_parcel) add("parcel", "Kisaragi · The fourth table", f.ct_parcel_done,
+      !f.ct_notice ? "Read the festival noticeboard by Hana in Kisaragi." : !f.ct_recipient ? "Ask Jun who keeps the fourth table." : "Deliver Mako's parcel to Hana by the bridge.", "Hana received the spare spoons · 12 cr delivery fee received.");
+    if (f.cf_invited) {
+      const missing = [];
+      if (!f.cf_prepared) missing.push("prepare a sample with Nao at the market");
+      if (!f.cf_met_hana) missing.push("meet Hana in Kisaragi");
+      if (!f.cf_aroma) missing.push("ask Jun for a tea pairing");
+      add("festival", "Nao · Lanterns beyond the locks", f.cf_done,
+        f.cf_choice ? (f.cf_card ? "Take Nao's signed recipe to Hana in Kisaragi." : "Sail with Nao to Kisaragi and join Hana's preview supper before dawn.") : missing.length ? "Next: " + missing.join("; ") + "." : "Return to Nao and choose the small festival table or a signed recipe with an evening off.",
+        f.cf_shared ? "Signed recipe shared · Nao kept her afternoon with Haruto." : "Preview supper shared · Nao reserved her own small festival table.");
+    }
+    return rows;
+  }
+  function renderStoryProgress(container) {
+    const rows = storyProgress();
+    const section = el("section", { class: "nb-section story-log" }, [el("h3", { text: "Stories · Next steps & outcomes" })]);
+    if (!rows.length) section.appendChild(el("p", { class: "nb-empty", text: "No stories accepted yet. Visit the market counters, or ask Mako about the fourth table in Kisaragi." }));
+    [false, true].forEach(function (done) {
+      const group = rows.filter(function (row) { return row.done === done; });
+      if (!group.length) return;
+      section.appendChild(el("h4", { text: done ? "Completed" : "Active" }));
+      const list = el("ul", { class: "story-list" });
+      group.forEach(function (row) { list.appendChild(el("li", { class: row.done ? "story-complete" : "story-active" }, [el("strong", { text: row.title }), el("p", { text: row.text })])); });
+      section.appendChild(list);
+    });
+    container.appendChild(section);
+  }
+  function deliveryTime(lastStart) {
+    const remaining = parseClock(lastStart) - state.clock;
+    return remaining < 0 ? "Delivery window closed" : remaining === 0 ? "Start handover now" : remaining + " min to start handover";
+  }
+  function cargoProgress() {
+    const rows = [], f = state.flags, c = state.cargo, tea = state.canalTrade;
+    if (c && c.bought) rows.push({ title: "Rice · Nao at the Night Market", text: "Purchase " + c.cost + " cr · Promised " + (c.courier ? "12 cr courier fee" : c.bought * 30 + " cr") + " · " + (c.crates ? deliveryTime("04:25") + " (5 min handover; completed by 04:30). Return at Landing 3: " + (c.courier ? "0 cr" : c.crates * 16 + " cr") + " · " + deliveryTime("05:40") + "." : "Settled · " + (c.courier && c.sold ? 12 : c.revenue) + " cr received.") });
+    if (tea) rows.push({ title: "Sealed tea · Sora at the Night Market", text: "Purchase " + tea.cost + " cr · Promised 38 cr · " + (tea.units ? deliveryTime("05:55") + " (5 min handover; completed by 06:00)." : "Delivered · " + tea.revenue + " cr received.") });
+    if (f.nb_batch_owned) rows.push({ title: "Breakfast batch · Nao's counter", text: "Purchase " + (state.breakfastCost || 0) + " cr · Payment depends on actual sales: 0–48 cr · " + (f.nb_done ? "Settled · " + (state.breakfastRevenue || 0) + " cr received." : f.nb_batch_delivered ? "Stock handed over; open with Nao from 05:00." : deliveryTime("05:39") + " (5 min handover; start before 05:40).") });
+    return rows;
+  }
+  function renderCargoProgress(container) {
+    const rows = cargoProgress();
+    if (!rows.length) return;
+    const section = el("section", { class: "nb-section cargo-log" }, [el("h3", { text: "Cargo · Cost, payment & delivery" }), el("p", { class: "clue-meta", text: "Fuel and travel time are extra. Payment requires handover; no automatic payout." })]);
+    rows.forEach(function (row) { section.appendChild(el("article", { class: "cargo-card" }, [el("strong", { text: row.title }), el("p", { text: row.text })])); });
+    container.appendChild(section);
+  }
+  function rememberedQuote(loc) {
+    const quote = state.seen[loc], age = Math.max(0, state.clock - quote.at);
+    return DATA.world.locations[loc].short + " · Observed " + formatClock(quote.at) + " · " + age + " min ago · " + (quote.buy ? "Buy " + quote.buy + " / " : "") + "Sell " + quote.sell + " cr/g · " + (age ? "Remembered quote; recheck on arrival." : "Just observed.");
   }
 
   // Classes on <body> that let the picture follow the story: the platform empties after the last train,
@@ -547,7 +618,8 @@
     state.location = dest;
     transient.marketSpot = null;
     state.visited[dest] = (state.visited[dest] || 0) + 1;
-    state.lastResult = null;
+    const crossing = crossingLines(from, dest);
+    state.lastResult = crossing.length ? { label: "Crossing to " + DATA.world.locations[dest].short, lines: crossing, clues: [] } : null;
     if (isTrade()) { advanceMarket(before); observeMarket(); }   // the board you moor at, read on arrival
     saveGame();
     if (settings.station === "off" && !settings.effects && !transient.hintedRadio) {
@@ -555,6 +627,18 @@
       toast(touchFirst() ? "Sound is off. Open Menu for gentle effects, or tune the radio for music." : "Sound is off. Menu (M) has gentle effects; radio (R) has music.");
     }
     beginCrossing(from, dest, minutes, check.cost.fuel);
+  }
+
+  function crossingLines(from, to) {
+    if (!isTrade()) return [];
+    const rules = (DATA.world.crossings || []).filter(function (rule) {
+      return (!rule.to || rule.to === to) && (!rule.from || rule.from === from) && conditionHolds(rule.when);
+    });
+    if (!rules.length) return [];
+    const rule = rules[0], key = "crossing:" + rule.id;
+    const index = state.used[key] || 0;
+    state.used[key] = index + 1;
+    return expandLines(rule.exchanges[index % rule.exchanges.length]);
   }
 
   function beginCrossing(from, dest, minutes, fuel) {
@@ -627,7 +711,7 @@
     });
   }
   function nextCasual(id) {
-    const pool = CHAT[id].lines.filter(function (line) { return chatModeMatches(line) && conditionHolds(line.when); });
+    const pool = CHAT[id].lines.filter(function (line) { return chatModeMatches(line) && conditionHolds(line.when); }).sort(function (a, b) { return Number(!!b.when) - Number(!!a.when); });
     let index = pool.findIndex(function (line) { return !state.used["chat_seen:" + id + ":" + line.id]; });
     if (index < 0) {
       const last = state.used["chat_last:" + id];
@@ -1639,6 +1723,9 @@
     locationActions().forEach(function (action) {
       if (action.thing && !bound[action.thing]) { bound[action.thing] = action; order.push(action.thing); }
     });
+    if (state.location === "canal") casualActions().forEach(function (action) {
+      if (action.thing) { if (!bound[action.thing]) order.push(action.thing); bound[action.thing] = action; }
+    });
     const conf = activeCase.confrontation;
     systemActions().forEach(function (action) {
       // a system action may name its own thing (a scale on the gold night); the confrontation uses conf.thing
@@ -1690,7 +1777,7 @@
       if (!tagClear(tag)) tag.y = y + h + 2;
       if (!tagClear(tag)) tag.y = y - 48;
       placedTags.push(tag);
-      const g = svgEl("g", { class: "thing kind-" + action.kind, role: "button", tabindex: "0", "data-thing": thingId, "data-action": action.id,
+      const g = svgEl("g", { class: "thing kind-" + action.kind + (thingId.indexOf("canal-") === 0 ? " canal-person-target" : ""), role: "button", tabindex: "0", "data-thing": thingId, "data-action": action.id,
         "aria-label": action.label + (cost ? " (" + cost + ")" : ""),
         onclick: function () { performAction(action.id); },
         onkeydown: function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); performAction(action.id); } } }, [
@@ -1758,7 +1845,7 @@
       const to = DATA.world.locations[trip.to];
       dom.encKicker.textContent = "Under way";
       dom.encTitle.textContent = "Crossing to " + to.name;
-      renderLines(body, approachLines(trip.to));
+      renderLines(body, state.lastResult ? state.lastResult.lines : approachLines(trip.to));
       body.appendChild(el("p", { class: "notice", text: (trip.fuel ? "−" + trip.fuel + " fuel · " : "") + "+" + trip.minutes + " min" }));
       return;
     }
@@ -1772,9 +1859,12 @@
     // with every result.
     if (touchFirst() && !settings.coached) dom.encCoach.appendChild(coachCard());
     if (isTrade() && state.marketNote) body.appendChild(el("p", { class: "notice market-note", text: state.marketNote }));
-    if (state.lastResult) renderResult(body, state.lastResult);
+    if (state.lastResult) {
+      renderResult(body, state.lastResult);
+      if (state.lastResult.label.indexOf("Crossing to ") === 0) renderScene(body);
+    }
     else renderScene(body);
-    if (isTrade()) renderTradeActions(actions);
+    if (isTrade()) { renderCargoProgress(body); renderTradeActions(actions); }
     else renderActions(actions);
   }
 
@@ -1929,6 +2019,8 @@
     return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
   }
   function marketActionLabel(action) {
+    if (action.cargoBuy) return action.label + " · Purchase " + (action.cost || 0) + " cr · Promised " + (action.cargoBuy.courier ? "12 cr fee" : action.cargoBuy.crates * 30 + " cr") + " · " + deliveryTime("04:25") + " · Fuel/time extra";
+    if (action.id === "ct_buy_tea") return action.label + " · Promised 38 cr at Sora's scale · " + deliveryTime("05:55") + " · Fuel/time extra";
     if ((action.cargoSell || action.cargoReturn) && state.cargo) {
       const total = state.cargo.courier ? (action.cargoSell ? 12 : 0) : state.cargo.crates * (action.cargoSell ? 30 : 16);
       return (action.cargoSell ? "Deliver rice to Nao" : "Return unopened rice at the co-op") + " · " + state.cargo.crates + " crate(s) · " + total + " cr · 5 min";
@@ -2322,7 +2414,8 @@
     const body = dom.nbBody;
     body.innerHTML = "";
 
-    body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Beyond the breakwater" }), el("p", { text: currentObjective() })]));
+    renderStoryProgress(body);
+    renderCargoProgress(body);
     if (state.night === 2) renderSecondNightProgress(body);
     renderCanalProgress(body);
     if (state.flags.nb_started) renderBreakfastProgress(body);
@@ -2366,9 +2459,9 @@
       Object.keys(DATA.world.locations).forEach(function (loc) {
         const s = state.seen[loc];
         if (!s) return;
-        list.appendChild(el("li", { text: DATA.world.locations[loc].short + " · read at " + formatClock(s.at) + " · " + (s.buy ? "buy " + s.buy + " / " : "") + "sell " + s.sell }));
+        list.appendChild(el("li", { text: rememberedQuote(loc) }));
       });
-      body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Market boards · Last seen" }), list]));
+      body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Market boards · Last observed" }), el("p", { class: "clue-meta", text: "These are recorded prices, not guaranteed current offers." }), list]));
     }
 
     const met = Object.keys(TRADE.people).filter(function (id) {

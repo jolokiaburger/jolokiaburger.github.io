@@ -15,6 +15,18 @@
     const island = a === "island" || b === "island";
     D.world.travel.push({ between: [a, b], fuel: island ? 3 : 1, minutes: island ? 35 : (a === "yard" || b === "yard" ? 20 : 15) });
   }); });
+  D.world.crossings = [
+    { id: "island-out", to: "island", exchanges: [
+      ["The cranes shrink to thin black strokes. Beyond the breakwater, the swell lifts the Tern like a slow breath.", { who: "aki", text: "Hoshimi to Tern. I have your light. Follow the marked channel; there's tea when you tie up." }],
+      ["This time you recognise the reef bell before you see it. The lighthouse paints a silver road across the bow.", { who: "aki", text: "Back again, skipper? I'll put out a second cup. The gulls are already making their introductions." }],
+      ["Flying fish flash beside the hull. Behind you, the Basin is a handful of warm lights.", { who: "aki", text: "The outside water is clear tonight. Take the last bend gently; the cove isn't going anywhere." }]
+    ] },
+    { id: "island-home", from: "island", exchanges: [
+      ["Hoshimi's beam follows the stern until the harbour lights take over. The Tern's ropes smell of open water."],
+      ["Aki flashes the gallery lamp twice: a small goodbye you now know how to answer."],
+      ["The city grows out of the rain again. A distant train draws a bright line toward supper and familiar voices."]
+    ] }
+  ];
   const cast = {
     sora: { name: "Sora Ember", role: "Lantern market host", color: "#ffd08a", portrait: "assets/portraits/sora-manga.webp", artStyle: "manga" },
     rin: { name: "Rin Starling", role: "Salvage engineer", color: "#8aead9", portrait: "assets/portraits/rin-manga.webp", artStyle: "manga" },

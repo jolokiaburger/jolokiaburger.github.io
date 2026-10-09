@@ -1063,5 +1063,16 @@ body.night-two .nao-breakfast-batch { display: none; }
 /* Kisaragi uses the market's full composition and existing fixed phone shell. */
 body[data-mode="play"][data-location="canal"]:not(.travelling) .exp-canal { display: inline; }
 body[data-location="canal"]:not(.travelling) .hotspot { display: none; }
-.canal-label rect { fill: #172b30; fill-opacity: .92; stroke: #b9a379; }
-.canal-label text { fill: #f3dfb9; font: 20px sans-serif; }
+
+/* Story and cargo cards stay compact and readable in the scrolling phone notebook. */
+.story-list { list-style: none; padding: 0; margin: .5rem 0; }
+.story-list li, .cargo-card { margin: .55rem 0; padding: .65rem .8rem; border-left: 3px solid #e7bd7d; background: #18282f; border-radius: 6px; }
+.story-list p, .cargo-card p { margin: .3rem 0 0; line-height: 1.5; }
+.story-list .story-complete { border-color: #89c5ad; }
+.story-log h4 { margin: .8rem 0 .3rem; color: #e7bd7d; }
+.canal-person-frame { fill: #20373c; stroke: #eed5a2; stroke-width: 3; }
+.canal-person-anchor { fill: none; stroke: #eed5a2; stroke-width: 3; }
+.canal-person-foot { fill: #eed5a2; stroke: #20373c; stroke-width: 2; }
+.canal-person-target .thing-ring { stroke: #f2d6a2; stroke-width: 2; }
+.canal-person-target:hover .thing-ring, .canal-person-target:focus .thing-ring { stroke: #aceddc; stroke-width: 4; }
+.canal-person-target .thing-tag-bg { fill: #182d34; stroke: #eed5a2; }

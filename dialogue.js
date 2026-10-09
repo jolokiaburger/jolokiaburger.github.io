@@ -124,3 +124,15 @@ window.NEON_TIDES_CHAT = {
     ]
   }
 };
+
+// Fresh reactions become eligible as the harbour remembers your work.
+window.NEON_TIDES_CHAT.mei.lines.unshift(
+  { id: "after_lights", mode: "trade", when: { flag: ["exp_done"] }, text: "Sora told me about those lantern kits. People will get home by that light. Have an extra napkin; heroic work still drips sauce." },
+  { id: "after_breakfast", mode: "trade", when: { flag: ["nb_done"] }, text: "Nao put her name on the menu. I remember the first time I did that. The letters looked much larger than the shop." },
+  { id: "return_canal", mode: "trade", when: { visited: { canal: 1, bar: 2 } }, text: "You smell faintly of barley tea and lock water. Kisaragi? Sit down and tell me which light you liked best." }
+);
+window.NEON_TIDES_CHAT.priya.lines.unshift(
+  { id: "tea_receipt", mode: "trade", when: { flag: ["ct_tea_sold"] }, text: "Jun's case delivered, payment confirmed. A very satisfying line in the ledger. I drew a tiny ferry beside it. Officially, that's a routing symbol." },
+  { id: "rice_receipt", mode: "trade", when: { flag: ["n2_rice_delivered"] }, text: "Nao confirmed the rice arrived. Your receipt is filed, your fee is settled, and you may now discuss something wonderfully unrelated to paperwork." },
+  { id: "canal_return", mode: "trade", when: { visited: { canal: 1, landing: 2 } }, text: "Back through the locks! Mako said your approach was tidy. High praise from someone who argues with ropes for a living." }
+);

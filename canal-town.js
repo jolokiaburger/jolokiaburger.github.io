@@ -9,6 +9,28 @@
   Object.keys(D.world.locations).forEach(id => D.world.travel.push({ between: [id, "canal"], fuel: id === "island" ? 4 : 2, minutes: id === "island" ? 55 : 40 }));
   D.world.locations.canal = loc;
   D.variants.forEach(v => { v.scenes.canal = { first: [loc.approach], again: [loc.approach] }; });
+  // Specific companion exchanges precede the general route observations.
+  D.world.crossings.unshift(
+    { id: "nao-locks", to: "canal", when: { flag: ["cf_aboard"], notFlag: ["cf_done"] }, exchanges: [
+      [{ who: "nao", text: "Hello, I'm Nao, and this is... No. Hello, I'm Nao. I made this. That's enough, isn't it?" }, "The lock walls rise around the Tern. As the water lifts you, Nao tries her introduction once more, a little louder."],
+      [{ who: "nao", text: "I practised on the kettle this time. It interrupted less than the engine. I think I'm ready to say my name first." }, { who: "mako", text: "Tern, welcome back. Hana's kept a place by the bridge. No speeches required to moor here." }],
+      ["Nao watches the warehouse windows give way to lanterns and tiled roofs.", { who: "nao", text: "I can bring one little pot a long way. That feels like a good size of adventure." }]
+    ] },
+    { id: "canal-out", to: "canal", exchanges: [
+      ["The last container crane falls behind. Reeds brush the banks; the old lock gate opens with a patient groan.", { who: "mako", text: "Kisaragi locks to Tern. Green lantern on the left, slow water ahead. Welcome inland, skipper." }],
+      ["You recognise the blue-tiled bathhouse at the bend. Someone on a balcony raises a cup to the Tern.", { who: "mako", text: "Back for tea or another little mystery? Your usual mooring is clear." }],
+      ["A kingfisher darts between the reeds. Jun's shop light appears beyond the bridge before the town sign does.", { who: "mako", text: "The lock's ready. Hana says arriving without a task counts as visiting, too." }]
+    ] },
+    { id: "canal-home-nao", from: "canal", when: { flag: ["cf_attended"] }, exchanges: [
+      [{ who: "nao", text: "Two people asked for my recipe. I remembered to sign it before I apologised. Actually... I didn't apologise." }, "The lock lowers the Tern toward the harbour. Nao leans against the rail, smiling into her scarf."],
+      [{ who: "nao", text: "Next visit, I'd like to try the dumplings instead of being the cook. We can be guests. Imagine that." }, "Harbour neon begins to colour the canal behind you."]
+    ] },
+    { id: "canal-home", from: "canal", exchanges: [
+      ["Lantern reflections stretch behind the stern. Beyond the locks, the first crane light blinks like an old acquaintance.", { who: "mako", text: "Tern, clear of the gate. Give the harbour our regards; come back when the kettle wins the argument." }],
+      ["A bicycle keeps pace along the towpath, then rings its bell goodbye. The open Basin feels wider after the quiet canal."],
+      [{ who: "mako", text: "Safe home, skipper. Jun's saving the green cups for your next visit." }, "The last stone bridge slips into the rain behind you."]
+    ] }
+  );
   const cast = {
     hana: { name: "Hana Tsukino", role: "Festival organiser · A table for new beginnings", color: "#e6b6c5", portrait: "assets/portraits/hana-manga.webp", artStyle: "manga" },
     jun: { name: "Jun Arai", role: "Tea merchant · Small cargo, careful promises", color: "#b5d4b2", portrait: "assets/portraits/jun-manga.webp", artStyle: "manga" },
@@ -25,6 +47,18 @@
     mako: ["A lock gate does one thing at a time. I try to learn from it.", "Ceramic bowls travel beautifully when nobody stacks an engine on top of them.", "I know every doorstep here. Names are harder; people keep lending each other coats.", "The bridge was built before the street lamps. It has heard some excellent arguments about supper.", "Take a minute before you cast off. A checked rope is much less dramatic than an unchecked one."]
   };
   Object.keys(pools).forEach(id => { C[id].lines = pools[id].map((text, i) => ({ id: "ct_" + id + "_" + i, text })); });
+  C.hana.lines.unshift(
+    { id: "parcel_spoons", when: { flag: ["ct_parcel_done"] }, text: "Every table has enough spoons now. Your mysterious parcel became three very ordinary second helpings. A fine ending." },
+    { id: "return_chair", when: { visited: { canal: 2 } }, text: "You found us again! The spare chair is still spare in exactly the direction of you." }
+  );
+  C.jun.lines.unshift(
+    { id: "tea_delivered", when: { flag: ["ct_tea_sold"] }, text: "Sora radioed to say the seal was perfect. A clear promise, a careful crossing, a warm kettle at the other end. Thank you." },
+    { id: "return_cup", when: { visited: { canal: 2 } }, text: "The green cup? Yes, I remembered. You don't have to buy a case every time you visit a tea shop." }
+  );
+  C.mako.lines.unshift(
+    { id: "parcel_closed", when: { flag: ["ct_parcel_done"] }, text: "Hana has her spoons, I have a complete address, and you have your fee. Next parcel, I'm asking my sister to use a surname." },
+    { id: "return_rope", when: { visited: { canal: 2 } }, text: "That was a tidy approach. You're starting to know the current here. One day I'll have to wave instead of give directions." }
+  );
   function installShared(data) {
     Object.assign(data.characters, cast);
     Object.assign(data.things, T.things);
@@ -102,6 +136,11 @@
       { id: "cf_nao_card", when: { flag: ["cf_shared"] }, text: "My recipe is visiting Kisaragi. I'm visiting Dad. We both get a good afternoon." },
       { id: "cf_nao_boat", when: { flag: ["cf_aboard"], notFlag: ["cf_done"] }, text: "I practised my introduction on the ferry. The engine was a generous audience." }
     );
+    chat.nao.lines.unshift(
+      { id: "cf_return_guest", when: { flag: ["cf_attended"], visited: { canal: 2 } }, text: "Hana greeted me by name before I opened the pot. I think that's my favourite thing about coming back." },
+      { id: "cf_paid_rice", when: { flag: ["n2_rice_delivered"] }, text: "Your rice is stacked under my counter, and your agreed payment is done. Now we can talk about something besides invoices. Tea?" }
+    );
+    chat.jun.lines.unshift({ id: "cf_pairing_after", when: { flag: ["cf_done"] }, text: "Nao chose her own pace. My pairing notes fit on one card; perhaps good plans should leave space around the edges." });
     chat.hana.lines.unshift({ id: "cf_hana_after", when: { flag: ["cf_done"] }, text: "A festival should make room for its cooks, not decide their lives for them. Nao made a good choice." });
     return chat;
   };

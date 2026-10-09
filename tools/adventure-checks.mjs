@@ -15,7 +15,7 @@ context.window.matchMedia=()=>({matches:false,addEventListener(){}});
 for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
+  window.Review = {storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -456,4 +456,42 @@ panel=new TestNode();R.renderTradeActions(panel);const fresh=flatten(panel).find
 // New folded log and quest controls render through the production action renderer.
 beginSecond('order');R.visit('market');api.performAction('n2_nao_start');api.performAction('n2_menu_plum');api.performAction('cf_invitation');panel=new TestNode();R.renderTradeActions(panel);check(textOf(panel).includes('Help Nao prepare a festival sample'),'festival preparation control rendered');check(flatten(panel).some(n=>n.tag==='details'&&textOf(n).includes('Kisaragi · Routes, tea & festival log')),'canal log folded rather than burying controls');
 R.visit('canal');panel=new TestNode();R.renderTradeActions(panel);check(textOf(panel).includes('Meet Hana')&&textOf(panel).includes('Ask Jun for a pairing'),'canal contact controls rendered');check(textOf(panel).includes('Refuel by the locks')&&textOf(panel).includes('Cast off for'),'return and fuel controls rendered');check(textOf(panel).includes("Buy Jun's sealed tea case"),'tea purchase rendered alongside gold');
+// Parallel story cards, remembered prices and persistent route dialogue.
+api.trade.start('frost-order');
+Object.assign(R.state().flags,{exp_job:true,exp_done:true,exp_cash:true,nm_job:true,nm_manifest:true,nb_started:true,ct_parcel:true,ct_notice:true});
+let stories=R.storyProgress();
+equal(stories.length,4,'each accepted story has its own card');
+check(stories.find(x=>x.id==='lantern').done,'completed lighthouse remains recorded');
+check(stories.find(x=>x.id==='dispatch').text.includes('Rin'),'unfinished dispatch survives completed lighthouse');
+check(stories.find(x=>x.id==='parcel').text.includes('Ask Jun'),'parcel advances independently');
+const originalStories=json(R.state());panel=new TestNode();R.renderStoryProgress(panel);
+check(textOf(panel).includes('Active')&&textOf(panel).includes('Completed'),'notebook groups active stories and outcomes');
+equal(json(R.state()),originalStories,'rendering quest log cannot mutate progress');
+R.visit('bar','02:00');R.state().seen.yard={buy:71,sell:65,at:R.state().clock-60};
+check(R.rememberedQuote('yard').includes('Observed 01:00')&&R.rememberedQuote('yard').includes('60 min ago'),'quotes show observed time and age');
+check(R.rememberedQuote('yard').includes('recheck on arrival'),'remembered quotes explicitly need rechecking');
+R.state().flags.ct_route=true;R.state().fuel=6;
+const beforeTrip=R.state().clock;api.travelTo('canal');
+const firstCross=json(R.state().lastResult.lines);
+check(firstCross.includes('Green lantern')||firstCross.includes('green lantern'),'Mako greets the first inland crossing');
+equal(R.state().clock,beforeTrip+40,'atmospheric dialogue adds no travel time');
+equal(R.saveProblem(api.readSave()),null,'crossing dialogue save is compatible');
+R.setState(api.readSave());equal(json(R.state().lastResult.lines),firstCross,'crossing dialogue remains readable after reload');
+R.state().fuel=6;api.travelTo('market');R.state().fuel=6;api.travelTo('canal');
+check(json(R.state().lastResult.lines)!==firstCross,'repeat inland crossing offers fresh dialogue');
+api.performAction('chat_mako');check(R.state().lastResult.lines[0].text.includes('tidy approach'),'new return reaction precedes evergreen chat');
+const crossingState=json({clock:R.state().clock,credits:R.state().credits,fuel:R.state().fuel,flags:R.state().flags});
+const islandA=json(R.crossingLines('market','island')),islandB=json(R.crossingLines('market','island'));
+check(islandA!==islandB,'island crossings also rotate');
+equal(json({clock:R.state().clock,credits:R.state().credits,fuel:R.state().fuel,flags:R.state().flags}),crossingState,'crossing lines cannot grant resources or flags');
+beginSecond('order');R.visit('market','03:00');api.performAction('n2_nao_start');api.performAction('n2_menu_smoky');api.performAction('cf_invitation');api.performAction('n2_buy_market_2');
+let cargo=R.cargoProgress()[0];check(cargo.text.includes('Purchase 52 cr')&&cargo.text.includes('Promised 60 cr'),'rice card compares cost and promised total');
+check(cargo.text.includes('80 min to start'),'rice deadline counts down from actual purchase completion');
+R.visit('market','04:25');check(R.cargoProgress()[0].text.includes('Start handover now'),'rice exact last-start boundary');
+R.visit('market','04:26');check(R.cargoProgress()[0].text.includes('Delivery window closed'),'rice deadline closes one minute later');
+check(R.storyProgress().some(x=>x.id==='recipe')&&R.storyProgress().some(x=>x.id==='festival'),'festival cannot hide unfinished recipe');
+R.state().canalTrade={cost:24,revenue:0,units:1};R.state().flags.ct_tea_owned=true;
+R.visit('market','05:55');check(R.cargoProgress().find(x=>x.title.startsWith('Sealed tea')).text.includes('Start handover now'),'tea last-start boundary matches real action');
+api.performAction('ct_sell_tea');check(R.cargoProgress().find(x=>x.title.startsWith('Sealed tea')).text.includes('Delivered · 38 cr'),'tea settlement replaces countdown');
+api.trade.start('frost-order');R.state().flags.exp_done=true;api.performAction('chat_mei');check(R.state().lastResult.lines[0].text.includes('lantern kits'),'fresh quest reaction prioritised immediately');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);
