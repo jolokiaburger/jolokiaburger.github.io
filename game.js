@@ -3630,12 +3630,38 @@
     toast("Saved shift loaded · " + formatClock(state.clock));
   }
 
+  const RELEASE_SEEN_KEY = "neon-tides:release-seen";
+  let sessionReleaseSeen = null;
+  function releaseIsNew() {
+    const release = window.NEON_TIDES_RELEASE;
+    return !!release && sessionReleaseSeen !== release.version && storageGet(RELEASE_SEEN_KEY) !== release.version;
+  }
+  function releaseLabel() {
+    const release = window.NEON_TIDES_RELEASE;
+    return release ? "v" + release.version + " · Updated " + release.dateLabel : "";
+  }
+  function refreshRelease() {
+    if (dom.releaseVersion) dom.releaseVersion.textContent = releaseLabel();
+    if (dom.btnReleaseNotes) dom.btnReleaseNotes.textContent = "What's new" + (releaseIsNew() ? " · New" : "");
+  }
+  function openReleaseNotes(fromMenu) {
+    const release = window.NEON_TIDES_RELEASE;
+    if (!release) return;
+    sessionReleaseSeen = release.version;
+    storageSet(RELEASE_SEEN_KEY, release.version);
+    refreshRelease();
+    const notes = el("ul", { class: "release-notes" });
+    release.notes.forEach(function (line) { notes.appendChild(el("li", { text: line })); });
+    openModal({ title: "What's new", body: [el("p", { class: "muted", text: releaseLabel() }), notes],
+      actions: [{ label: fromMenu ? "Back to Menu" : "Close", onClick: fromMenu ? openMenu : null }] });
+  }
   function showTitle() {
     setMode("title");
     refreshTitle();
     dom.btnNew.focus({ preventScroll: true });
   }
   function refreshTitle() {
+    refreshRelease();
     const saved = readSave();
     const valid = saved && !saved.invalid ? saved : null;
     dom.btnContinue.hidden = !valid;
@@ -3822,6 +3848,9 @@
       list.appendChild(el("button", { class: "btn btn-danger", type: "button", onclick: confirmNewShift }, ["New shift…"]));
     }
     list.appendChild(el("p", { class: "muted", text: storage.ok ? "Autosave: on (after every action)." : "Autosave: unavailable in this browser (" + storage.reason + "). The session still works." }));
+    const releaseLine = el("div", { class: "release-line" }, [el("span", { text: releaseLabel() }),
+      el("button", { class: "release-link", type: "button", text: "What's new" + (releaseIsNew() ? " · New" : ""), onclick: function () { closeModal(); openReleaseNotes(true); } })]);
+    list.appendChild(releaseLine);
     openModal({ title: "Menu", body: list, actions: [{ label: "Close" }] });
   }
 
@@ -3933,6 +3962,7 @@
   }
 
   function bindEvents() {
+    dom.btnReleaseNotes.addEventListener("click", function () { openReleaseNotes(false); });
     dom.hotspots.forEach(function (spot) {
       const dest = spot.getAttribute("data-dest");
       spot.addEventListener("click", function () { if (transient.mode === "play") travelTo(dest); });
@@ -4054,6 +4084,8 @@
     dom.encBody = $("enc-body");
     dom.encCoach = $("enc-coach");
     dom.encActions = $("enc-actions");
+    dom.releaseVersion = $("release-version");
+    dom.btnReleaseNotes = $("btn-release-notes");
     dom.notebook = $("notebook");
     dom.btnNotebook = $("btn-notebook");
     dom.btnNotebookClose = $("btn-notebook-close");

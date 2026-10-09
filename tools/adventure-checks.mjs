@@ -12,10 +12,10 @@ const saved=new Map();
 const context=vm.createContext({console,window:{},document:{readyState:'loading',addEventListener(){},getElementById(id){return ids.has(id)?{}:null;}},location:{protocol:'file:',search:''},setTimeout(){return 1;},clearTimeout(){},setInterval(){return 1;},clearInterval(){},URLSearchParams});
 context.window.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
 context.window.matchMedia=()=>({matches:false,addEventListener(){}});
-for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js'])vm.runInContext(read(name),context,{filename:name});
+for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js','release.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {markWireRead, toggleWirePin, wirePosts, wireRender: renderHarbourWire, wireFilter: value => {transient.wireFilter=value;}, familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
+  window.Review = {releaseIsNew, releaseLabel, openReleaseNotes, markWireRead, toggleWirePin, wirePosts, wireRender: renderHarbourWire, wireFilter: value => {transient.wireFilter=value;}, familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -708,3 +708,20 @@ for(const cls of ['festival-bowls-art','festival-tea-art','festival-cloth-art','
 check(read('styles.css').includes('body.reduce-motion .light-ripple'),'new weather respects reduced motion');
 check(read('styles.css').includes('.light-ripple, .awning-drip, .kettle-breath { animation: none; }'),'tiny new effects rest on phones');
 console.log(`Harbour polish included: ${checks} total adventure checks.`);
+
+// Player release notes remain short and separate from shift saves.
+const playerRelease=context.window.NEON_TIDES_RELEASE;
+check(R.releaseIsNew(),'unviewed release is marked new');
+check(R.releaseLabel().includes('v4.6')&&R.releaseLabel().includes('9 Oct 2026'),'version and update date displayed');
+check(playerRelease.notes.length===3&&playerRelease.notes.join(' ').split(/\s+/).length<=60,'player notes limited to three short points');
+const releaseSave=json(R.state());
+R.openReleaseNotes(false);
+check(!R.releaseIsNew(),'opening notes clears new marker');
+equal(saved.get('neon-tides:release-seen'),playerRelease.version,'viewed release remembered separately');
+equal(json(R.state()),releaseSave,'release notes cannot alter shift save');
+check(textOf(familyNodes.modalBody).includes('Ask Priya at Landing 3'),'notes give a useful player starting point');
+equal(flatten(familyNodes.modalBody).filter(n=>n.tag==='li').length,3,'only three release notes rendered');
+const versionNow=playerRelease.version;playerRelease.version='next';check(R.releaseIsNew(),'future release gets fresh new marker');playerRelease.version=versionNow;
+check(ids.has('release-version')&&ids.has('btn-release-notes'),'title release controls exist');
+check(read('index.html').indexOf('release.js')<read('index.html').indexOf('src="game.js"'),'release metadata loaded before engine');
+console.log(`Release included: ${checks} total adventure checks.`);

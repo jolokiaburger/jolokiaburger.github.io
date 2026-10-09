@@ -1149,3 +1149,11 @@ body[data-location="market"] .lamp-rain-detail, body[data-location="yard"] .lamp
 body[data-location="canal"] .lamp-rain-detail, body[data-location="island"] .lamp-rain-detail,
 body[data-location="market"] .awning-drip, body[data-location="yard"] .awning-drip,
 body[data-location="canal"] .awning-drip, body[data-location="island"] .awning-drip { display: none; }
+
+/* A quiet player release label, with a comfortable touch target. */
+.release-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; color: #c1c7be; font-size: 12px; line-height: 1.5; }
+.release-link { appearance: none; border: 0; background: transparent; color: #e6c891; font: inherit; padding: 8px 0; min-height: 44px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.release-link:hover { color: #fff0c8; }
+.release-link:focus-visible { outline: 2px solid #e6c891; outline-offset: 4px; border-radius: 2px; }
+.release-notes { padding-left: 20px; line-height: 1.65; }
+.release-notes li + li { margin-top: 10px; }
