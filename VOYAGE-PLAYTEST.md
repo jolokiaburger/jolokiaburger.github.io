@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.2
+# Neon Tides Voyage · Playtest 0.3
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,14 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Refinement update · 0.3
+
+- **Crossing moment:** after sailing 120 map units, an optional button opens one short passenger, radio or observation card. Opening the card pauses sailing. It never opens automatically, costs no clock time and can be ignored. New departures rotate the lines; Nao speaks when aboard. The selected line survives a save/reload.
+- **Timed buyer requests:** Metro releases one gold-contact regulator case at 00:50: buy 48 cr, Kenji pays 78 at Lantern Market by 03:20. Frostline releases chilled jasmine starter at 02:00: buy 28 cr, Hana pays 50 at Kisaragi by 05:30. Cargo offers include labelled waits; these advance the clock to release time.
+- **Route preview:** cargo cards show estimated sailing minutes and fuel for the safe outbound route, reflecting an engine upgrade. Fuel credits use the full-tank rate (30/6 = 5 cr per fuel). These are distance-based estimates; collection, turns, detours, the five-minute handover and return costs need separate allowance.
+- **Expired cases:** unload at any quay after the delivery deadline. This frees a hold slot without payment or refund, keeps the purchase loss in the report, and cannot be used to buy the same contract again.
+- **Working waterfronts:** striped kitchen awning and stools, market counters, train carriages, numbered cold bays, pipework, repair rails, crane hook, shop signs, small neighbours, moored skiffs, reeds and faint offshore mist. Decorative figures, vessels, reeds and mist do not create collision hazards. Buoys, quay rings and routes remain clear. After the pump repair, Second Helping leaves its dry slip and appears beside the yard; Nao’s table appears after the preview supper. Cargo buyers and sellers acknowledge settled deliveries.
 
 ## Controls and rules
 

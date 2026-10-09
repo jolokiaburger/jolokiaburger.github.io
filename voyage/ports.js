@@ -28,3 +28,29 @@ P.freight={bowls:{title:'Jun’s blue bowls',from:'canal',to:'bar',cost:20,payme
 P.lamp={deadline:1740,payment:40};
 Object.assign(P.meals,{yard:{name:'Workshop miso & rice',price:7,minutes:10,who:'rin',text:'Kenji called this a parts delivery. The part was dinner. We agreed it was essential equipment.'},canal:{name:'Jun’s roasted tea',price:4,minutes:8,who:'jun',text:'The first cup is for tasting. The second is for whatever you meant to say before you got busy tasting.'},metro:{name:'Warm soy milk',price:3,minutes:6,who:'yumi',text:'A little warmth before another crossing. No story required, though I’d be glad to hear one.'},island:{name:'Aki’s watchkeeper tea',price:3,minutes:8,who:'aki',text:'Stay for one sweep of the beam. Tea tastes different when you can see where everybody is trying to go.'}});
 })();
+
+(function(){'use strict';const P=window.VoyagePorts;
+Object.assign(P.freight,{
+ regulators:{title:'Gold-contact regulators',from:'metro',to:'market',cost:48,payment:78,opens:1490,deadline:1640,source:'lam',recipient:'kenji'},
+ starter:{title:'Chilled jasmine starter',from:'pier',to:'canal',cost:28,payment:50,opens:1560,deadline:1770,source:'matte',recipient:'hana'}
+});
+P.characters.lam.chats.push('The platform workshop releases gold-contact regulators at 00:50. Kenji pays seventy-eight for the sealed case; buying it costs forty-eight.');
+P.characters.matte.chats.push('Hana’s jasmine starter clears the cold room at 02:00. Twenty-eight to buy, fifty at Kisaragi before 05:30. Keep the seal closed.');
+P.characters.hana.chats.push('My evening tea needs the chilled jasmine starter from Frostline. The promise is fifty credits for one sealed case, before half past five.');
+P.crossing=function(s,from,n){
+ const voices=s.flags.naoAboard?[
+ ['Nao','I practised saying “one small table” to the kettle. It listened beautifully. I hope Hana will, too.'],
+ ['Nao','Those windows beyond the locks… each one is somebody coming home. I like being allowed to visit without having to stay.'],
+ ['Nao',s.flags.naoPreview?'Hana saved the recipe card, not a promise from me. I can feel my shoulders coming down.':'If the sample is too salty, we’ll call it a very accurate portrait of the harbour.'],
+ ['Nao','Shall we take a breath before the next quay? Even good adventures can use a little quiet.']
+ ]:[
+ ['Mako · Harbour radio','Tern, your light is clear from the locks. There’s a kettle beyond the bridge whenever you choose that route.'],
+ ['Captain’s log','A homeward ferry passes at a distance. Its windows draw a warm line across the rain; someone raises a hand.'],
+ ['Aki · Harbour radio',s.flags.lampDelivered?'Steady sweep from Hoshimi tonight. Your kit is doing its quiet work, captain.':'Hoshimi light to night traffic: clear water by the western marker. Safe crossings, all of you.'],
+ ['Captain’s log','The engine finds its comfortable note. Between the buoys, the city sounds smaller and the water feels wide.']
+ ];
+ const local={bar:['Mei · Harbour radio','You left your scarf by the counter. No heroic turnabouts, please. It will still be here when you come home.'],yard:['Rin · Harbour radio',s.flags.pump?'Second Helping is ready for the day crew. That smooth pump is a little of your work sailing with them.':'The crane is asleep, the workshop isn’t. Give us a wave when you pass the reeds.'],pier:['Captain’s log','Behind the Tern, refrigeration fans fade into rain. Ahead, a string of lanterns marks the warmer water.'],canal:['Mako · Harbour radio','Clear of the lockside quay, Tern. Watch how the lanterns stretch as the channel opens. That is my favourite part.'],metro:['Captain’s log','A train rolls into the terminus. For a moment its lit windows and your wake are travelling side by side.']};
+ const pool=local[from]&&!s.flags.naoAboard?[local[from],...voices]:voices;
+ const [speaker,text]=pool[n%pool.length];return {speaker,text};
+};
+})();

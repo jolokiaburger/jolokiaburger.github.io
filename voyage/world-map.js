@@ -11,5 +11,5 @@ window.VoyageWorld={width:2600,height:1800,
  {id:'pier',name:'Frostline Pier 9',subtitle:'Cold store · The instrument desk',x:1990,y:450,shore:{x:2050,y:450},color:'#acd3d4',people:['matte'],arrival:'Refrigeration fans hum over the water. Matte checks your line, then nods toward the desk and its freshly written prices.'},
  {id:'canal',name:'Kisaragi',subtitle:'Beyond the locks · Tea & festival tables',x:1900,y:1410,shore:{x:1960,y:1410},color:'#dfb598',people:['jun','hana','mako'],arrival:'Lantern reflections lead you to the lockside quay. Jun has warmed the pot; Hana is finding space for one more little table.'},
  {id:'island',name:'Hoshimi Island',subtitle:'The guiding light · Aki’s watch',x:1290,y:1510,shore:{x:1350,y:1510},color:'#c8b9d5',people:['aki'],arrival:'The lighthouse beam passes softly over your roof. Aki comes down to meet the Tern with a thermos and a very patient smile.'}
- ],salvage:{x:485,y:860,name:'A lantern in the reeds'},beacons:[{x:605,y:425},{x:1085,y:735},{x:940,y:415},{x:1750,y:710},{x:1650,y:1170},{x:655,y:1200},{x:1725,y:1620}]};
+ ],reedBeds:[{x:85,y:810},{x:60,y:910},{x:750,y:650}],fogBanks:[{x:530,y:690,r:145},{x:1820,y:850,r:180}],salvage:{x:485,y:860,name:'A lantern in the reeds'},beacons:[{x:605,y:425},{x:1085,y:735},{x:940,y:415},{x:1750,y:710},{x:1650,y:1170},{x:655,y:1200},{x:1725,y:1620}]};
 })();
