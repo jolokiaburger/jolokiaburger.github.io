@@ -2,7 +2,7 @@
 
 Open `index.html` to choose **Voyage** or **Classic**.
 
-**Voyage 0.1** is the first playable sailing stage: steer through a top-down harbour, dock at Kurage 33, Landing 3 and Lantern Market, talk to four characters, trade gold, deliver Mei's tea, recover a signal-light kit, refuel and tune the Tern. WASD/arrows or touch buttons steer; Set course assists. Each version has a separate save. See `VOYAGE-PLAYTEST.md` for controls, scope and feedback.
+**Voyage 0.2** expands the top-down sailing game to eight quays and thirteen characters. Trade gold and sealed cargo, deliver Mei's tea, help Rin and Aki keep the lighthouse turning, take Nao to Kisaragi and bring her home. The journal tracks several stories; the shared cargo hold can be upgraded. WASD/arrows or touch buttons steer; Set course assists. Existing Voyage saves continue, and Classic keeps its separate save. See `VOYAGE-PLAYTEST.md` for controls, scope and feedback.
 
 **Classic 4.6** at `classic.html` keeps all existing chapters, locations, sound and stories. Web-hosted Classic uses the original save key and can continue existing shifts. Its rules follow below.
 

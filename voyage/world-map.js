@@ -1,10 +1,15 @@
 (function(){'use strict';
-window.VoyageWorld={width:1800,height:1200,
- land:[{x:0,y:0,w:1800,h:35},{x:0,y:1165,w:1800,h:35},{x:0,y:0,w:35,h:1200},{x:1765,y:0,w:35,h:1200},
- {x:70,y:55,w:450,h:270},{x:1120,y:55,w:580,h:285},{x:1120,y:885,w:580,h:245},{x:730,y:485,w:200,h:210}],
+window.VoyageWorld={width:2600,height:1800,
+ land:[{x:0,y:0,w:2600,h:35},{x:0,y:1765,w:2600,h:35},{x:0,y:0,w:35,h:1800},{x:2565,y:0,w:35,h:1800},
+ {x:70,y:55,w:450,h:270},{x:1120,y:55,w:580,h:285},{x:1120,y:885,w:580,h:245},{x:730,y:485,w:200,h:210},{x:70,y:1060,w:410,h:280},{x:740,y:1420,w:480,h:260},{x:2050,y:100,w:450,h:420},{x:1960,y:1170,w:210,h:510},{x:2290,y:1170,w:210,h:510},{x:1350,y:1400,w:320,h:230}],
  ports:[
- {id:'landing',name:'Landing 3',subtitle:'The exchange & harbour office',x:365,y:385,color:'#a9c5bf',people:['priya'],arrival:'Priya lifts her clipboard. “Welcome alongside, captain. News at the office, gold at the hatch, fuel at the pump.”'},
- {id:'bar',name:'Kurage 33',subtitle:'Mei’s kitchen · Your home quay',x:1320,y:395,color:'#e3ae78',people:['mei'],arrival:'A warm kitchen window catches your wake. Mei has already moved a bowl away from the rain.'},
- {id:'market',name:'Lantern Market',subtitle:'Sora’s scale · Nao’s counter',x:1280,y:830,color:'#d8b877',people:['sora','nao'],arrival:'You tie up beneath a row of lanterns. Somewhere inside the arcade a kettle welcomes the next customer.'}
- ],salvage:{x:485,y:860,name:'A lantern in the reeds'},beacons:[{x:605,y:425},{x:1085,y:735},{x:940,y:415}]};
+ {id:'landing',shore:{x:365,y:325},name:'Landing 3',subtitle:'The exchange & harbour office',x:365,y:385,color:'#a9c5bf',people:['priya'],arrival:'Priya lifts her clipboard. “Welcome alongside, captain. News at the office, gold at the hatch, fuel at the pump.”'},
+ {id:'bar',shore:{x:1320,y:340},name:'Kurage 33',subtitle:'Mei’s kitchen · Your home quay',x:1320,y:395,color:'#e3ae78',people:['mei'],arrival:'A warm kitchen window catches your wake. Mei has already moved a bowl away from the rain.'},
+ {id:'market',shore:{x:1280,y:885},name:'Lantern Market',subtitle:'Sora’s scale · Nao’s counter',x:1280,y:830,color:'#d8b877',people:['sora','nao','kenji'],arrival:'You tie up beneath a row of lanterns. Somewhere inside the arcade a kettle welcomes the next customer.'},
+ {id:'metro',name:'Metro Quay',subtitle:'Line 9 · Night crews & homeward trains',x:365,y:1000,shore:{x:365,y:1060},color:'#c2a6c0',people:['lam','yumi'],arrival:'The terminus lamps make little pools in the rain. Captain Lam waves from the shelter; Yumi is taking a well-earned break.'},
+ {id:'yard',name:'Starling Yard',subtitle:'Rin’s workshop · Second chances',x:960,y:1360,shore:{x:960,y:1420},color:'#a9c89e',people:['rin'],arrival:'A crane sleeps above the sheds. Rin clears a dry corner of the bench and points out the kettle.'},
+ {id:'pier',name:'Frostline Pier 9',subtitle:'Cold store · The instrument desk',x:1990,y:450,shore:{x:2050,y:450},color:'#acd3d4',people:['matte'],arrival:'Refrigeration fans hum over the water. Matte checks your line, then nods toward the desk and its freshly written prices.'},
+ {id:'canal',name:'Kisaragi',subtitle:'Beyond the locks · Tea & festival tables',x:1900,y:1410,shore:{x:1960,y:1410},color:'#dfb598',people:['jun','hana','mako'],arrival:'Lantern reflections lead you to the lockside quay. Jun has warmed the pot; Hana is finding space for one more little table.'},
+ {id:'island',name:'Hoshimi Island',subtitle:'The guiding light · Aki’s watch',x:1290,y:1510,shore:{x:1350,y:1510},color:'#c8b9d5',people:['aki'],arrival:'The lighthouse beam passes softly over your roof. Aki comes down to meet the Tern with a thermos and a very patient smile.'}
+ ],salvage:{x:485,y:860,name:'A lantern in the reeds'},beacons:[{x:605,y:425},{x:1085,y:735},{x:940,y:415},{x:1750,y:710},{x:1650,y:1170},{x:655,y:1200},{x:1725,y:1620}]};
 })();
