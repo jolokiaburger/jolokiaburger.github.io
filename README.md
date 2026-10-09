@@ -1,10 +1,16 @@
 # Neon Tides
 
+Open `index.html` to choose **Voyage** or **Classic**.
+
+**Voyage 0.1** is the first playable sailing stage: steer through a top-down harbour, dock at Kurage 33, Landing 3 and Lantern Market, talk to four characters, trade gold, deliver Mei's tea, recover a signal-light kit, refuel and tune the Tern. WASD/arrows or touch buttons steer; Set course assists. Each version has a separate save. See `VOYAGE-PLAYTEST.md` for controls, scope and feedback.
+
+**Classic 4.6** at `classic.html` keeps all existing chapters, locations, sound and stories. Web-hosted Classic uses the original save key and can continue existing shifts. Its rules follow below.
+
 A warm trading adventure in a rain-soaked neon harbour. You run the night ferry *Tern* with a little physical gold, a few hundred credits and most of a tank. Gold is the Basin's money of last resort, and the metal its wet machines run on. Tonight the noodle bar is full of rumours that point in opposite directions.
 
 Eat, listen, decide whom to believe, buy or sell, and maybe cross the harbour to see for yourself. In the morning the harbour wire says what really happened.
 
-A night takes about 10–15 minutes. **This is an early test build** with a complete two-night chapter. Each night has three possible market situations.
+A night takes about 10–15 minutes. **Classic has three chapters**, including a morning shift. Each night has three possible market situations.
 
 ## Play
 
