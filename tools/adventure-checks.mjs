@@ -12,10 +12,10 @@ const saved=new Map();
 const context=vm.createContext({console,window:{},document:{readyState:'loading',addEventListener(){},getElementById(id){return ids.has(id)?{}:null;}},location:{protocol:'file:',search:''},setTimeout(){return 1;},clearTimeout(){},setInterval(){return 1;},clearInterval(){},URLSearchParams});
 context.window.localStorage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)};
 context.window.matchMedia=()=>({matches:false,addEventListener(){}});
-for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js'])vm.runInContext(read(name),context,{filename:name});
+for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
+  window.Review = {wirePosts, wireRender: renderHarbourWire, wireFilter: value => {transient.wireFilter=value;}, familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
@@ -590,3 +590,69 @@ check(familyNodes.resolution.hidden&&!familyNodes.modal.hidden,'afternoon avoids
 let joinButton=flatten(familyNodes.modalActions).find(n=>n.tag==='button'&&textOf(n).trim()==='Join their picnic');check(joinButton&&joinButton.events.click,'production picnic choice button exists');joinButton.events.click();R.familyModal();
 check(textOf(familyNodes.modalBody).includes('Haruto Mizuno')&&textOf(familyNodes.modalBody).includes('12:30'),'completed scene includes father and afternoon time');equal(flatten(familyNodes.modalActions).filter(n=>n.tag==='button').length,1,'completed afternoon exposes only return button');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);
+
+// Harbour Wire: public information, free reading and a complete optional request.
+api.trade.start('frost-order');
+const wire=context.window.NEON_TIDES_WIRE;
+equal(new Set(wire.posts.map(p=>p.id)).size,wire.posts.length,'unique wire post IDs');
+check(wire.posts.length>=30,'substantial neighbourhood board content');
+for(const p of wire.posts){
+ check(T.characters[p.who]||D.world.characters[p.who],`wire known author ${p.id}`);
+ check(wire.categories.includes(p.category),`wire category ${p.id}`);
+ check(!p.when?.truth,`wire never exposes hidden seed truth ${p.id}`);
+}
+const wireBefore=json(R.state());
+let wp=R.wirePosts();
+check(wp.some(p=>p.id==='welcome'),'initial welcome visible');
+check(!wp.some(p=>p.id==='first-light'),'future posts hidden');
+check(!wp.some(p=>p.id==='umbrella-thanks'),'unearned thank-you hidden');
+equal(json(R.state()),wireBefore,'reading wire cannot alter the save or resources');
+R.visit('landing');
+check(R.locationActions().some(a=>a.id==='wire_read'),'Landing 3 board action available');
+api.performAction('wire_umbrella_accept');
+check(R.storyProgress().some(p=>p.id==='wire-umbrella'&&!p.done),'accepted request is in active stories');
+R.visit('metro');const umbrellaClock=R.state().clock,umbrellaCredits=R.state().credits;
+api.performAction('wire_umbrella_search');
+equal(R.state().clock,umbrellaClock+5,'umbrella search takes advertised five minutes');
+equal(R.state().credits,umbrellaCredits,'umbrella quest needs no purchase');
+check(R.state().flags.wire_umbrella_found,'umbrella found');
+R.visit('landing');api.performAction('wire_umbrella_return');
+check(R.storyProgress().some(p=>p.id==='wire-umbrella'&&p.done),'umbrella outcome stays in journal');
+wp=R.wirePosts();
+check(wp.some(p=>p.id==='umbrella-thanks'),'return unlocks Priya follow-up');
+check(!wp.some(p=>p.id==='umbrella'),'closed request removed from board');
+const returned=json(R.state());api.performAction('wire_umbrella_return');equal(json(R.state()),returned,'completed request cannot be repeated');
+R.visit('bar','05:40');
+wp=R.wirePosts();check(wp.some(p=>p.id==='first-light'),'scheduled post arrives');
+check(wp.filter(p=>p.cargo).every(p=>p.stale),'expired unpurchased cargo marked stale');
+R.state().flags.yard_done=true;wp=R.wirePosts();
+check(wp.some(p=>p.id==='pump-thanks')&&!wp.some(p=>p.id==='yard'),'completed yard has follow-up instead of request');
+R.state().visited.canal=2;check(R.wirePosts().some(p=>p.id==='return'),'repeat canal visit gets fresh greeting');
+check(ids.has('wire-board'),'Landing board has a drawn interaction target');
+check(read('index.html').indexOf('harbour-wire.js')<read('index.html').indexOf('src="game.js"'),'wire loaded before engine');
+// Render real board cards and category filtering using the existing DOM mock.
+R.wireFilter('All');let wirePanel=new TestNode();R.wireRender(wirePanel);
+check(textOf(wirePanel).includes('Harbour Wire')&&textOf(wirePanel).includes('Offer deadline passed'),'wire title and stale labels render');
+check(flatten(wirePanel).filter(n=>n.tag==='article').length===R.wirePosts().length,'all visible posts become cards');
+R.wireFilter('Trading');wirePanel=new TestNode();R.wireRender(wirePanel);
+check(flatten(wirePanel).filter(n=>n.tag==='article').length===R.wirePosts().filter(p=>p.category==='Trading').length,'trading filter renders only its posts');
+check(!textOf(wirePanel).includes('A familiar wake'),'neighbour chat excluded by trading filter');
+api.trade.turnIn();check(api.trade.nextNight(),'wire season continues to second chapter');R.visit('landing');
+check(R.locationActions().some(a=>a.id==='wire_read'),'board available in second chapter');
+check(R.state().flags.wire_umbrella_done,'umbrella outcome survives chapter transition');
+check(!R.locationActions().some(a=>a.id==='wire_umbrella_accept'),'completed request cannot restart next night');
+R.visit('bar','05:00');api.trade.turnIn();check(api.trade.nextNight(),'wire season continues to morning');R.visit('landing');
+check(R.locationActions().some(a=>a.id==='wire_read'),'board available in morning chapter');
+check(R.wirePosts().some(p=>p.id==='morning')&&!R.wirePosts().some(p=>p.id==='late-train'),'morning wire has current chapter notices');
+R.state().truth='vault';
+check(!R.wirePosts().some(p=>p.id==='cargo-seals'),'unavailable morning pump-seal offer not advertised');
+api.trade.start('wire-click');R.visit('landing');R.wireFilter('All');wirePanel=new TestNode();R.wireRender(wirePanel);
+const acceptWire=flatten(wirePanel).find(n=>n.tag==='button'&&textOf(n)==='Offer to find the umbrella');
+check(acceptWire&&acceptWire.events.click,'board card offers direct quest acceptance at Landing 3');
+R.familyDom({notebook:new TestNode(),scrim:new TestNode(),btnNotebook:new TestNode()});
+acceptWire.events.click();
+check(R.state().flags.wire_umbrella_started,'board acceptance handler starts the real quest');
+check(api.readSave().flags.wire_umbrella_started,'accepted request autosaves');
+R.visit('bar');wirePanel=new TestNode();R.wireRender(wirePanel);
+check(!flatten(wirePanel).some(n=>n.tag==='button'&&textOf(n)==='Offer to find the umbrella'),'accepted request cannot be accepted from its post twice');
+console.log(`Harbour Wire included: ${checks} total adventure checks.`);

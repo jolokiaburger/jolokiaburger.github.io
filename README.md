@@ -75,3 +75,5 @@ In Night Two, choose Nao's recipe, then read her festival invitation. Prepare a 
 - In Chapter Three, after Nao's free breakfast, arrange **An afternoon off**: pack Mei's free picnic, check the meeting place with Priya and return to Nao. The completed morning report opens a 12:30 vignette: join the picnic, carry the basket, or leave Nao and Haruto private family time. Low water moves it to the harbour bench. The afternoon does not change settled trading accounts.
 
 Delivery memories include bowls at Mei's counter, cloth on Sora's lantern frames and seals at Mako's pump bench. Existing saves remain compatible. Details and test limitations: `HARBOUR-REFINEMENTS.md`.
+
+**Harbour Wire.** At Landing 3, read the ringed noticeboard or choose **Read the Harbour Wire**. The Journal also has a shortcut from any quay. Filter Trading, Neighbours, Stories or Notices; new posts appear with the clock, deliveries and completed stories. Cargo notices show purchase and promised payment, with expired offers marked. Priya's umbrella request is a small optional story tracked in the Journal. Reading is free and works offline.

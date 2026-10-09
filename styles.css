@@ -1112,3 +1112,15 @@ body[data-location="market"].morning-hana-present .morning-hana-art { display: i
 #review-rack { cursor: pointer; }
 .memory-bowls .memory-bowls-art, .memory-cloth .memory-cloth-art,
 .memory-seals .memory-seals-art { display: inline; }
+
+/* Harbour Wire: warm paper cards inside the existing mobile-safe journal. */
+.wire-shortcut { width: 100%; margin-bottom: 16px; min-height: 44px; }
+.wire-intro { line-height: 1.6; font-size: 13px; }
+.wire-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.notebook .wire-filters .btn { min-height: 44px; }
+.notebook .wire-filters .btn[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.wire-post { background: #fff6df; border: 1px solid #c9b58d; border-left: 4px solid #507e7b; border-radius: 6px; padding: 14px; margin: 12px 0; overflow-wrap: anywhere; }
+.wire-post h4 { color: #263e42; margin: 8px 0; font-size: 16px; line-height: 1.35; }
+.wire-post p { color: #3d4143; line-height: 1.6; margin: 8px 0 0; }
+.wire-post .wire-meta { color: #61513e; font-size: 12px; margin-top: 0; }
+.wire-stale { border-left-color: #986b3e; background: #f4ecd9; }

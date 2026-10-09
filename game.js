@@ -519,6 +519,8 @@
         f.cf_choice ? (f.cf_card ? "Take Nao's signed recipe to Hana in Kisaragi." : "Sail with Nao to Kisaragi and join Hana's preview supper before dawn.") : missing.length ? "Next: " + missing.join("; ") + "." : "Return to Nao and choose the small festival table or a signed recipe with an evening off.",
         f.cf_shared ? "Signed recipe shared · Nao kept her afternoon with Haruto." : "Preview supper shared · Nao reserved her own small festival table.");
     }
+    if (f.wire_umbrella_started) add("wire-umbrella", "Priya · A patch of blue sky", f.wire_umbrella_done,
+      f.wire_umbrella_found ? "Return the umbrella to Priya at Landing 3; no deadline." : "Search by the Metro Quay vending machine; five minutes, no purchase.", "Priya's umbrella returned · Her thank-you is on the Harbour Wire.");
     if (f.yard_started) add("yard", "Rin · Second Helping", f.yard_done, f.yard_pump_fixed ? "Return to Rin at Starling Yard and celebrate the repaired ferry." : "Help Rin fix the bilge pump at Starling Yard; ten minutes, no parts purchase.", "Second Helping's pump repaired and launch celebrated.");
     if (f.yard_star_found) add("star", "Lam · A safe-homecoming star", f.yard_star_returned, "Return the brass keepsake to Captain Lam at Metro Quay.", "Captain Lam received his daughter's brass star.");
     if (f.n3_started) add("morning", "Festival · A table through the tide", f.n3_shared,
@@ -1087,9 +1089,9 @@
     });
     if (old.flags.exp_chart) next.flags.exp_chart = true;
     if (old.flags.ct_route) next.flags.ct_route = true;
-    ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned", "ay_started", "ay_stamp", "ay_receipt", "ay_compared", "ay_mismatch", "ay_done"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
+    ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned", "ay_started", "ay_stamp", "ay_receipt", "ay_compared", "ay_mismatch", "ay_done", "wire_umbrella_started", "wire_umbrella_found", "wire_umbrella_done"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
     next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
-    Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0 || key.indexOf("lesson:") === 0 || key.indexOf("ay_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
+    Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0 || key.indexOf("lesson:") === 0 || key.indexOf("ay_") === 0 || key.indexOf("wire_umbrella_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
     const q = MARKET.quote(TRADE, next.truth, next.seed, "bar", next.clock);
     next.start = { credits: next.credits, grams: MARKET.lots.total(next.gold), sell: q.sell, worth: MARKET.worth(next.credits, next.gold, q.sell) };
     setState(next);
@@ -1280,6 +1282,7 @@
     const action = locationActions().filter(function (a) { return a.id === actionId; })[0];
     if (!action) return;
     const cost = action.cost || 0;
+    if (action.wireBoard) { openHarbourWire(); return; }
     if (action.readingRack) transient.reviewOpen = true;
     if (cost > state.credits) { toast("Not enough credits for that."); return; }
     // A repair order is a real sale, not an adventure cash reward. Freeze this quote
@@ -2563,6 +2566,8 @@
     const body = dom.nbBody;
     body.innerHTML = "";
 
+    if (transient.wireOpen) { renderHarbourWire(body); return; }
+    body.appendChild(el("button", { class: "btn wire-shortcut", type: "button", onclick: openHarbourWire, text: "Harbour Wire · Read neighbours & notices" }));
     renderStoryProgress(body);
     renderCargoProgress(body);
     if (state.night === 2) renderSecondNightProgress(body);
@@ -2737,9 +2742,49 @@
     if (node) node.focus({ preventScroll: true });
   }
 
+  function wirePosts() {
+    return window.NEON_TIDES_WIRE ? window.NEON_TIDES_WIRE.visible(state, TRADE, conditionHolds, parseClock) : [];
+  }
+  function openHarbourWire() {
+    if (!isTrade()) return;
+    transient.wireOpen = true;
+    transient.wireFilter = "All";
+    openNotebook(true);
+  }
+  function renderHarbourWire(body) {
+    body.appendChild(el("button", { class: "btn wire-shortcut", type: "button", text: "Back to journal", onclick: function () { transient.wireOpen = false; renderNotebook(); dom.nbBody.scrollTop = 0; dom.nbBody.querySelector("button").focus({ preventScroll: true }); } }));
+    body.appendChild(el("h3", { text: "Harbour Wire" }));
+    body.appendChild(el("p", { class: "wire-intro", text: "A little wire across the water · " + formatClock(state.clock) + ". Reading is free. Posts are neighbours' words, not live quotes; check the scale and current offers before trading." }));
+    const filters = el("div", { class: "wire-filters", role: "group", "aria-label": "Filter Harbour Wire" });
+    window.NEON_TIDES_WIRE.categories.forEach(function (category) {
+      filters.appendChild(el("button", { class: "btn btn-small", type: "button", "aria-pressed": (transient.wireFilter || "All") === category ? "true" : "false", text: category, onclick: function () {
+        transient.wireFilter = category; renderNotebook();
+        const index = window.NEON_TIDES_WIRE.categories.indexOf(category);
+        dom.nbBody.querySelectorAll(".wire-filters button")[index].focus({ preventScroll: true });
+      } }));
+    });
+    body.appendChild(filters);
+    const list = el("div", { class: "wire-posts", "aria-live": "polite" });
+    const posts = wirePosts().filter(function (p) { return !transient.wireFilter || transient.wireFilter === "All" || p.category === transient.wireFilter; });
+    posts.forEach(function (p) {
+      const who = TRADE.characters[p.who] || DATA.world.characters[p.who];
+      const card = el("article", { class: "wire-post" + (p.stale ? " wire-stale" : "") }, [
+        el("p", { class: "wire-meta", text: (who ? who.name : p.who) + " · " + p.category + " · " + (p.time === null ? "Community follow-up" : (p.pinned ? "Pinned · " : "") + formatClock(p.time)) + (p.stale ? " · Offer deadline passed" : "") }),
+        el("h4", { text: p.title }), el("p", { text: p.text })
+      ]);
+      if (p.id === "umbrella" && !state.flags.wire_umbrella_started && !state.resolved) {
+        if (state.location === "landing") card.appendChild(el("button", { class: "btn btn-small", type: "button", text: "Offer to find the umbrella", onclick: function () { closeNotebook(); performTradeAction("wire_umbrella_accept"); } }));
+        else card.appendChild(el("p", { text: "Meet Priya at Landing 3 to accept this request." }));
+      }
+      list.appendChild(card);
+    });
+    if (!posts.length) list.appendChild(el("p", { text: "No posts in this category yet. Neighbours pin more as the shift unfolds." }));
+    body.appendChild(list);
+  }
   let lastFocus = null;
-  function openNotebook() {
-    lastFocus = document.activeElement;
+  function openNotebook(keepWire) {
+    if (keepWire !== true) transient.wireOpen = false;
+    if (dom.notebook.hidden) lastFocus = document.activeElement;
     renderNotebook();
     dom.toast.classList.remove("show");   // a "line you can fill in" toast must not cover the drawer's head
     clearTimeout(toastTimer);
