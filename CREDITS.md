@@ -17,6 +17,10 @@ Everything in this folder was made for Neon Tides. Nothing was copied from anoth
 | Interface text and layout | `index.html`, `styles.css`, `game.js` | Original |
 | Boat radio: rain ambience, *Lantern FM*, *Basin Lo-Fi*, the ferry's horn, engine, hull bump and bell, gold-scale/receipt cues, market ceramics/grill/repair ambience, and Nao's pentatonic opening phrase | generated at runtime in `game.js` (the *BOAT RADIO* section) | Filtered noise, a Karplus-Strong plucked-string model and oscillator synthesis through the Web Audio API. Both stations and all effects are original procedural sounds; no recorded audio, samples or sound fonts are bundled |
 
+## Kisaragi expansion
+
+`assets/scenes/kisaragi-canal.webp` and the Hana, Jun and Mako portraits in `assets/portraits/` are original illustrations created with OpenAI's built-in image-generation tool for this game. They use adult manga-inspired fine ink, crosshatching and muted amber/teal colour. The town, characters, festival invitation and parcel dialogue in `canal-town.js` are original fictional content. Scene labels and interaction targets in `index.html` are native SVG. Artwork and story follow the project's CC BY 4.0 split; code follows MIT.
+
 ## Fonts
 
 No font files are bundled and none are downloaded. The stylesheet asks for fonts that already exist on the player's device and falls back gracefully:

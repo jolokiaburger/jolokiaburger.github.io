@@ -1,0 +1,108 @@
+/* Kisaragi Canal Town and Nao's festival invitation. Load after night-two.js.
+   Shared destination; Night Two's story is installed on its cloned chapter only. */
+(function () {
+  "use strict";
+  const D = window.NEON_TIDES, T = window.NEON_TIDES_TRADE, C = window.NEON_TIDES_CHAT;
+  const say = (who, text) => ({ who, text });
+  const action = (id, kind, label, who, text, extra) => Object.assign({ id, kind, label, minutes: 0, lines: [say(who, text)] }, extra || {});
+  const loc = { id: "canal", name: "Kisaragi Canal Town", short: "Kisaragi Town", tag: "Canal Town", kicker: "Inland waterway · Tea, ceramics & a small festival", title: "Kisaragi · Lanterns Beyond the Locks", tradeOnly: true, unlockFlag: "ct_route", lockedText: "Ask Priya at Landing 3 for the canal route", ferry: { x: 720, y: 742 }, approach: "The Tern passes the old lock gates. Warm shop windows gather along a narrow canal; paper lanterns hang from a stone bridge." };
+  Object.keys(D.world.locations).forEach(id => D.world.travel.push({ between: [id, "canal"], fuel: id === "island" ? 4 : 2, minutes: id === "island" ? 55 : 40 }));
+  D.world.locations.canal = loc;
+  D.variants.forEach(v => { v.scenes.canal = { first: [loc.approach], again: [loc.approach] }; });
+  const cast = {
+    hana: { name: "Hana Tsukino", role: "Festival organiser · A table for new beginnings", color: "#e6b6c5", portrait: "assets/portraits/hana-manga.webp", artStyle: "manga" },
+    jun: { name: "Jun Arai", role: "Tea merchant · Small cargo, careful promises", color: "#b5d4b2", portrait: "assets/portraits/jun-manga.webp", artStyle: "manga" },
+    mako: { name: "Mako Senda", role: "Lockkeeper · Knows every doorstep", color: "#b1ccd9", portrait: "assets/portraits/mako-manga.webp", artStyle: "manga" }
+  };
+  Object.assign(T.characters, cast);
+  Object.keys(cast).forEach(id => {
+    T.things["canal-" + id] = cast[id].name;
+    C[id] = { thing: "canal-" + id, visits: [{ at: "canal", mode: "trade" }], lines: [] };
+  });
+  const pools = {
+    hana: ["I wanted six festival tables. Mako measured the bridge and suggested four. Very persuasive tape measure.", "A guest cook can bring one dish. Nobody has to become an entirely new person for an evening.", "Paper lanterns look effortless because somebody climbed the ladder before you arrived.", "My favourite festival memory is the rain stopping halfway through supper. We applauded the sky.", "There is a spare chair by the noticeboard. Being here is a perfectly good use for it."],
+    jun: ["The tea smells expensive. The price is written down, so you needn't guess.", "My grandmother said to warm the pot first. She was right about that and surprisingly competitive at cards.", "Small cargo fits a small ferry. Grand ambitions tend to arrive without checking the hold.", "I like a receipt with enough room for a thank-you.", "The first cup is for tasting. The second is for whatever you meant to say before you were busy tasting."],
+    mako: ["A lock gate does one thing at a time. I try to learn from it.", "Ceramic bowls travel beautifully when nobody stacks an engine on top of them.", "I know every doorstep here. Names are harder; people keep lending each other coats.", "The bridge was built before the street lamps. It has heard some excellent arguments about supper.", "Take a minute before you cast off. A checked rope is much less dramatic than an unchecked one."]
+  };
+  Object.keys(pools).forEach(id => { C[id].lines = pools[id].map((text, i) => ({ id: "ct_" + id + "_" + i, text })); });
+  function installShared(data) {
+    Object.assign(data.characters, cast);
+    Object.assign(data.things, T.things);
+    Object.assign(data.people, {
+      hana: [{ text: "Hana welcomes visiting cooks to Kisaragi's festival. One dish and a small table are enough." }],
+      jun: [{ text: "Jun sells one sealed tea case for 24 cr tonight. Sora's confirmed order pays 38 cr; fuel and time remain your costs." }],
+      mako: [{ text: "Mako tends the canal locks, lends directions and keeps a fuel pump at the mooring." }]
+    });
+    data.market.local.canal = 2;
+    data.market.dealers.canal = { name: "Jun's canal exchange", thing: "canal-jun", spread: 6, stock: 10, limit: 10, depth: 8, accepts: "any", provenance: "Assayed at Jun's canal exchange, with a dated green receipt.", buyText: "Jun weighs {grams} and wraps it with the assay slip. You pay {total}. 'Compare the return bid before the next crossing.'", sellText: "Jun checks your {grams}, pays {total}, and stamps the receipt. 'A long route deserves clear terms.'", soldOut: "Jun's ten-gram tray is empty tonight.", full: "Jun has bought ten grams from you. His allowance stays closed until tomorrow." };
+    data.scenes.canal = { first: [loc.approach, say("mako", "Welcome through the locks, skipper. Fuel here, tea by the bridge, and Hana's festival tables just beyond it."), say("jun", "A gold board, a kettle, and one sealed tea case for Sora. Have a look before you make a plan.")], again: ["Lantern reflections drift beneath the bridge. Jun clears a place at the tea counter; Mako checks the Tern's mooring.", { if: { flag: ["cf_done", "cf_attended"] }, lines: [say("hana", "Nao's little supper table made quite an evening. You can visit again without carrying a task.")] }] };
+    data.actions.canal = [
+      action("ct_jun_hello", "talk", "Visit Jun's tea counter & gold exchange", "jun", "Welcome, skipper. The current gold board is below; tea is five credits and ten minutes. There's one sealed tea case for Sora if you want a cargo trade, but saying hello costs nothing.", { thing: "canal-jun" }),
+      action("ct_board", "search", "Explore the bridge & festival noticeboard · 5 min", "hana", "Four supper tables, local ceramics, and lanterns along the canal. Guest cooks can preview a dish tonight before tomorrow's public festival. One signature, one dish, no obligation to expand a business.", { minutes: 5, once: true, sets: ["ct_notice"], thing: "canal-hana" }),
+      action("ct_refuel", "system", "Refuel by the locks · 30 cr · 10 min", "mako", "Full tank, secure cap. The harbour crossing costs two fuel and forty minutes; Hoshimi is four fuel and fifty-five. Leave room for the return.", { minutes: 10, cost: 30, effects: { refuel: true } }),
+      action("ct_tea", "order", "Roasted tea beside the canal · 5 cr · 10 min", "jun", "Warm the cup in both hands. The bridge has somewhere to be; we don't, for a minute.", { cost: 5, minutes: 10, sitting: "ct_tea", sound: "tea", thing: "canal-jun" }),
+      action("ct_meal", "order", "Canal dumplings & tea · 9 cr · 15 min", "hana", "Mushroom dumplings, pickled greens, and a seat facing the water. Supper is allowed to be the destination.", { cost: 9, minutes: 15, sound: "bowl" }),
+      action("ct_walk", "search", "Wander the ceramics arcade · 10 min", "mako", "Glazed bowls dry beneath a shop lamp. One has a tiny ferry painted inside. The potter says it will still be here when you've decided; looking costs only a little time.", { minutes: 10, once: true }),
+      action("ct_buy_tea", "search", "Buy Jun's sealed tea case · 24 cr · 5 min", "jun", "One sealed case, twenty-four credits. Sora's written order pays thirty-eight at the market; handover takes five minutes. One case tonight, no replenishment. The return crossing costs fuel and forty minutes, so the fourteen-credit margin is not fourteen credits of guaranteed profit.", { minutes: 5, cost: 24, once: true, when: { notFlag: ["ct_tea_taken"], maxClock: "05:10" }, sets: ["ct_tea_taken", "ct_tea_owned"], effects: { canalTeaBuy: true }, thing: "canal-jun" }),
+      action("ct_parcel", "talk", "An unfinished address · Help Mako find a recipient", "mako", "This parcel says 'the woman who keeps the fourth table for strangers'. No name. Could you check the festival notice and ask Jun? Bring the answer back; I'll pay twelve credits for sorting it out.", { once: true, sets: ["ct_parcel"], thing: "canal-mako" }),
+      action("ct_parcel_jun", "talk", "Ask Jun about the fourth table", "jun", "Hana saves the fourth festival table for visiting cooks. It isn't reserved for a famous name. She likes people having room to begin.", { once: true, when: { flag: ["ct_parcel"] }, sets: ["ct_recipient"] }),
+      action("ct_parcel_deliver", "talk", "Deliver the parcel to Hana · 12 cr fee", "hana", "A box of spare spoons! My sister writes addresses like riddles. Tell Mako I've got them, and keep the promised twelve credits. The table is ready now.", { once: true, when: { flag: ["ct_parcel", "ct_recipient", "ct_notice"], notFlag: ["ct_parcel_done"] }, sets: ["ct_parcel_done"], effects: { credits: 12 }, thing: "canal-hana" })
+    ];
+    data.actions.landing.push(action("ct_route", "talk", "Beyond the locks · Ask Priya about Kisaragi", "priya", "Here's the canal pilot sheet. Kisaragi is two fuel and forty minutes from the harbour quays. Mako has a fuel pump there; the tug can bring you home if you're stranded. Jun has a bounded tea order, and Hana welcomes visiting cooks. Check the clock before a long crossing.", { once: true, sets: ["ct_route"] }));
+    data.actions.market.push(action("ct_sell_tea", "search", "Deliver Jun's sealed tea to Sora · 38 cr · 5 min", "sora", "Seal intact, the right blend. Here's the agreed thirty-eight credits. I'll keep the kettle busy; your cargo account keeps the purchase separate from gold and favours.", { minutes: 5, once: true, when: { flag: ["ct_tea_owned"], notFlag: ["ct_tea_sold"], maxClock: "05:56" }, sets: ["ct_tea_sold"], effects: { canalTeaSell: true }, marketSpot: "gold", sound: "sell" }));
+    data.conversations.push({ id: "ct_tea_story", at: "canal", via: ["ct_tea"], lines: [say("jun", "Hana invited a cook who kept apologising for bringing only one dish. Everyone asked for the recipe. I don't think the apologies made it onto the card."), say("mako", "The tea case can wait while you sit. I like visitors who notice the town before they leave it.")] });
+    data.ambience.push({ at: "canal", via: ["ct_tea"], text: "A bicycle bell rings on the bridge. Jun turns the cups to warm their other sides; the canal carries lantern reflections toward home." });
+    data.ending.closing.push(
+      { if: { flag: ["ct_parcel_done"] }, text: "KISARAGI: Hana's spare spoons reached the fourth festival table. Mako crossed the mysterious parcel off the list." },
+      { if: { flag: ["ct_tea_sold"] }, text: "CANAL TRADE: Jun's tea reached Sora. Your fourteen-credit gross margin still had a journey attached to it." },
+      { if: { flag: ["ct_tea_owned"], notFlag: ["ct_tea_sold"] }, text: "CANAL TRADE: One unsold sealed tea case is set aside for the morning crew. No sale or automatic payout was awarded; a new night starts with a fresh cargo allowance." }
+    );
+  }
+  installShared(T);
+  const build = window.NEON_TIDES_NIGHT_TWO.build;
+  window.NEON_TIDES_NIGHT_TWO.build = function (base) {
+    const data = build(base);
+    installShared(data);
+    const food = { marketSpot: "food" };
+    data.actions.market.push(
+      action("cf_invitation", "talk", "Nao's festival invitation · Read Hana's letter", "nao", "Hana Tsukino has offered me a small table at Kisaragi's festival. Just one dish, signed with my name. Could you meet her while I work on the recipe? I'd like to know what I'm saying yes to. We can prepare a spoonful together; no ingredient purchase is required.", { ...food, once: true, when: { flag: ["n2_menu"] }, sets: ["cf_invited", "ct_route"] }),
+      action("cf_prepare", "search", "Help Nao prepare a festival sample · 10 min", "nao", "A little ginger, a clean recipe card, my name at the top. I thought an invitation meant I had to make something enormous. This fits in a bowl. Much better.", { ...food, once: true, minutes: 10, when: { flag: ["cf_invited"], notFlag: ["cf_done"] }, sets: ["cf_prepared"], sound: "bowl" }),
+      action("cf_accept", "talk", "Nao's choice · Take the small festival table", "nao", "A small table and no promises about next year? Yes. Let's take the Tern to Kisaragi for tonight's preview supper. I'll close my counter while I'm aboard. We can still finish our free recipe tasting together there after five.", { ...food, once: true, when: { flag: ["cf_invited", "cf_prepared", "cf_met_hana", "cf_aroma"], notFlag: ["cf_choice"] }, sets: ["cf_choice", "cf_aboard"] }),
+      action("cf_send_recipe", "talk", "Nao's choice · Send the recipe, keep her evening off", "nao", "I'd like Hana to have the recipe, but I'm keeping my afternoon with Dad. A card can make the crossing without its cook. Tell her it's a yes to sharing, and a no to a table this time.", { ...food, once: true, when: { flag: ["cf_invited", "cf_prepared", "cf_met_hana", "cf_aroma"], notFlag: ["cf_choice"] }, sets: ["cf_choice", "cf_card"] })
+    );
+    data.actions.canal.push(
+      action("cf_hana", "talk", "Meet Hana · What does the invitation promise?", "hana", "One table, one dish, one evening. No entry fee and no grand opening speech. Nao keeps her name and her recipe. Tonight's preview supper is for the crew; tomorrow is the public festival. She can come, send the recipe, or decline. An invitation should leave room for an answer.", { once: true, when: { flag: ["cf_invited"] }, sets: ["cf_met_hana"], thing: "canal-hana" }),
+      action("cf_aroma", "talk", "Ask Jun for a pairing · No purchase needed", "jun", "For smoky mushroom rice, roasted barley tea. For plum and sesame, a lighter green tea. Here are the notes for both. Nao already has enough for a sample; buying my cargo case is a separate trade.", { once: true, when: { flag: ["cf_invited"] }, sets: ["cf_aroma"], thing: "canal-jun" }),
+      action("cf_preview", "talk", "A table with her name · Join Nao's preview supper · 10 min", "hana", "Nao sets her handwritten recipe beside a small pot. Two crew members ask for seconds; she laughs and writes down one suggestion. 'I can do this size,' she says. 'And I can still go home afterward.' Hana reserves the same little table for tomorrow. A new place on Nao's terms.", { once: true, minutes: 10, sound: "opening", when: { flag: ["cf_aboard"], notFlag: ["cf_done"], maxClock: "05:50" }, sets: ["cf_done", "cf_attended"] }),
+      action("cf_preview_late", "talk", "The quiet table · Share Nao's sample before dawn", "nao", "The crew's supper has finished, but Hana saved a place for my pot and signed tomorrow's table card. We share one bowl under the bridge lantern. A quieter beginning still belongs to me.", { once: true, when: { flag: ["cf_aboard"], notFlag: ["cf_done"], minClock: "05:50", maxClock: "06:00" }, sets: ["cf_done", "cf_attended", "cf_late"] }),
+      action("cf_card_deliver", "talk", "Deliver Nao's signed recipe to Hana", "hana", "Her recipe, her name, her evening off. I'll display the card with permission and tell anyone who asks where her counter is. Please tell Nao that choosing her own pace is an excellent beginning.", { once: true, when: { flag: ["cf_card"], notFlag: ["cf_done"] }, sets: ["cf_done", "cf_shared"], thing: "canal-hana" })
+    );
+    // The original recipe remains finishable while Nao is visiting Kisaragi.
+    data.actions.market.filter(a => ["n2_wait", "n2_taste", "n2_taste_late", "n2_bowl"].includes(a.id)).forEach(a => data.actions.canal.push(JSON.parse(JSON.stringify(a))));
+    data.actions.canal.filter(a => ["n2_wait", "n2_taste", "n2_taste_late", "n2_bowl"].includes(a.id)).forEach(a => { a.when = Object.assign({}, a.when, { flag: (a.when.flag || []).concat("cf_aboard") }); });
+    data.expeditionObjectives.unshift(
+      { when: { flag: ["cf_done"] }, text: "Kisaragi festival story complete · Nao chose her own pace. Finish the recipe tasting, trade or rest." },
+      { when: { flag: ["cf_choice"] }, text: "Return to Hana in Kisaragi · Share Nao's preview supper or deliver her signed recipe before dawn." },
+      { when: { flag: ["cf_met_hana", "cf_aroma", "cf_prepared"] }, text: "Return to Nao's food counter · Let her choose the table or an evening off." },
+      { when: { flag: ["cf_invited"] }, text: "Nao's invitation · Prepare a sample with her, then meet Hana and ask Jun about tea in Kisaragi." }
+    );
+    data.ending.closing.push(
+      { if: { flag: ["cf_attended"] }, text: "NAO'S INVITATION: A small preview supper in Kisaragi gave her a table for tomorrow, with her name on it and time to go home." },
+      { if: { flag: ["cf_shared"] }, text: "NAO'S INVITATION: Her signed recipe reached Hana; Nao kept her afternoon off with Haruto. Sharing did not require growing the stall." },
+      { if: { flag: ["cf_invited"], notFlag: ["cf_done"] }, text: "NAO'S INVITATION: The crossing or handover remained unfinished. Hana keeps the invitation open; no festival completion was awarded." }
+    );
+    return data;
+  };
+  const buildChat = window.NEON_TIDES_NIGHT_TWO.buildChat;
+  window.NEON_TIDES_NIGHT_TWO.buildChat = function (base) {
+    const chat = buildChat(base);
+    chat.nao.visits.push({ at: "canal", mode: "trade", when: { flag: ["cf_aboard"] } });
+    chat.nao.lines.unshift(
+      { id: "cf_nao_table", when: { flag: ["cf_attended"] }, text: "Hana left room for a little pot and a large signature. I think I liked that order of priorities." },
+      { id: "cf_nao_card", when: { flag: ["cf_shared"] }, text: "My recipe is visiting Kisaragi. I'm visiting Dad. We both get a good afternoon." },
+      { id: "cf_nao_boat", when: { flag: ["cf_aboard"], notFlag: ["cf_done"] }, text: "I practised my introduction on the ferry. The engine was a generous audience." }
+    );
+    chat.hana.lines.unshift({ id: "cf_hana_after", when: { flag: ["cf_done"] }, text: "A festival should make room for its cooks, not decide their lives for them. Nao made a good choice." });
+    return chat;
+  };
+})();

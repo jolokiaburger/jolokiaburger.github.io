@@ -59,3 +59,9 @@ After ending Night One, continue from its morning card. Visit Nao to choose smok
 The Tern has two ingredient cargo slots for this chapter. One purchase route per night: Landing 3 sells sealed rice crates for 18 cr each; the market sells them for 26. Nao buys them for 30 each if handed over by 04:30. Alternatively carry one co-op crate for a 12 cr courier fee without buying it. Owned unopened leftovers can be returned at Landing 3 for 16 each by 05:45. Fuel, time and five-minute handovers matter; no payout occurs automatically at dawn.
 
 Gold trading follows fresh festival news, with a provisional instrument order, a confirmed co-op delivery and three possible outcomes. The second morning report closes this two-night story. See `NIGHT-TWO.md` for rules, source files and verification limits.
+
+## Kisaragi Canal Town & Nao's invitation
+
+Ask Priya at Landing 3 about Kisaragi to unlock the inland canal. The crossing costs two fuel and forty minutes each way; the town has a fuel pump, gold exchange, tea, dumplings, three new neighbours and a parcel with an unfinished address. Jun's one-case tea order costs 24 cr and pays 38 cr at Sora's scale, before fuel and time. The notebook keeps its account separate from gold.
+
+In Night Two, choose Nao's recipe, then read her festival invitation. Prepare a sample, meet Hana and ask Jun about tea. Help Nao choose a small festival table or send her signed recipe while keeping her afternoon off. You can complete the original recipe tasting in town when she travels with you. See `CANAL-TOWN.md` for the routes, deadlines and source files.

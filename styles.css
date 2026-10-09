@@ -1059,3 +1059,9 @@ body.night-two .nao-breakfast-batch { display: none; }
   .title-actions { flex-direction: row; flex-wrap: wrap; }
   .title-actions .btn { width: auto; }
 }
+
+/* Kisaragi uses the market's full composition and existing fixed phone shell. */
+body[data-mode="play"][data-location="canal"]:not(.travelling) .exp-canal { display: inline; }
+body[data-location="canal"]:not(.travelling) .hotspot { display: none; }
+.canal-label rect { fill: #172b30; fill-opacity: .92; stroke: #b9a379; }
+.canal-label text { fill: #f3dfb9; font: 20px sans-serif; }

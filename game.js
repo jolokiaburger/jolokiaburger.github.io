@@ -769,6 +769,12 @@
       state.credits += offer.revenue;
       state.flags.nb_supply_settled = true;
     }
+    if (isTrade() && effects.canalTeaBuy) state.canalTrade = { cost: 24, revenue: 0, units: 1 };
+    if (isTrade() && effects.canalTeaSell && state.canalTrade && state.canalTrade.units === 1) {
+      state.credits += 38;
+      state.canalTrade.revenue = 38;
+      state.canalTrade.units = 0;
+    }
     if (effects.clockTo) state.clock = Math.max(state.clock, parseClock(effects.clockTo));
   }
 
@@ -906,6 +912,7 @@
       if (old.flags[flag]) next.previous.flags[flag] = true;
     });
     if (old.flags.exp_chart) next.flags.exp_chart = true;
+    if (old.flags.ct_route) next.flags.ct_route = true;
     next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
     Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
     const q = MARKET.quote(SECOND_TRADE, next.truth, next.seed, "bar", next.clock);
@@ -1272,7 +1279,7 @@
   // What the trades themselves made against holding the opening gold, with food and fuel left out.
   function tradeChoicesResult() {
     const s = state.start, f = state.finish;
-    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.cargo ? state.cargo.revenue : 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
+    return Math.round(f.worth + (state.spent || 0) - (state.rewardCredits || 0) - (state.breakfastRevenue || 0) - (state.cargo ? state.cargo.revenue : 0) - (state.canalTrade ? state.canalTrade.revenue : 0) - (state.rewardGrams || 0) * f.sell - (s.credits + s.grams * f.sell));
   }
 
   // Development view: the hidden truth, every price's parts, the rumours' truth, relationships.
@@ -1450,7 +1457,7 @@
   function cameraTarget() {
     if (transient.mode === "title") return portraitPhone() ? TITLE_CROP : FULL_VIEW;
     // The market is an illustrated arcade: all three stalls must remain in view.
-    if (state && state.location === "market") return FULL_VIEW;
+    if (state && ["market", "canal"].indexOf(state.location) !== -1) return FULL_VIEW;
     if (settings.camera === "close" && state && !transient.travelling && QUAY_X[state.location] !== undefined) {
       return { x: QUAY_X[state.location], y: QUAY_Y, w: QUAY_W, h: QUAY_H };
     }
@@ -1857,6 +1864,7 @@
     const gold = !market || spot === "all" || spot === "gold" ? renderGoldGroup(nextKey) : null;
     container.appendChild(el("p", { class: "expedition-lead", text: currentObjective() }));
     if (state.night === 2) renderSecondNightProgress(container);
+    renderCanalProgress(container);
     if (market && state.flags.nb_started && (spot === "all" || spot === "food")) renderBreakfastProgress(container);
     if (gold) container.appendChild(gold);
     else if (!market) container.appendChild(el("p", { class: "market-away", text: "No open gold desk here. Compare the boards in your journal, or ask around for a lead." }));
@@ -1964,6 +1972,17 @@
   function renderSecondNightProgress(container) {
     const section = el("details", { class: "breakfast-progress nb-section" }, [el("summary", { text: "Night Two · Recipe & cargo log" })]);
     secondNightProgress().forEach(function (line) { section.appendChild(el("p", { text: line })); });
+    container.appendChild(section);
+  }
+  function renderCanalProgress(container) {
+    if (!state.flags.ct_route && !state.flags.cf_invited) return;
+    const f = state.flags, cargo = state.canalTrade;
+    const section = el("details", { class: "breakfast-progress nb-section" }, [el("summary", { text: "Kisaragi · Routes, tea & festival log" })]);
+    const lines = ["Harbour crossings: 2 fuel / 40 min each way. Hoshimi: 4 fuel / 55 min each way. Refuel in town for 30 cr / 10 min; tug recovery is available.",
+      cargo ? "Tea case · " + cargo.cost + " cr purchase / " + cargo.revenue + " cr sales · " + cargo.units + " aboard. Fuel and time extra; no automatic payout." : "Optional tea trade · One sealed case, 24 cr from Jun / 38 cr to Sora. No purchase needed for either side quest.",
+      f.ct_parcel_done ? "Address mystery complete · Hana received the spare spoons; 12 cr fee paid once." : f.ct_parcel ? "Parcel lead · Read the bridge notice and ask Jun, then deliver to Hana." : "Mako has a parcel with an unfinished address."];
+    if (f.cf_invited) lines.push(f.cf_done ? (f.cf_shared ? "Nao shared her signed recipe and kept her afternoon off." : "Nao joined the preview supper and reserved a small festival table.") : f.cf_choice ? "Decision made · Return to Hana before dawn with Nao or her signed card." : "Invitation preparation · Sample: " + (f.cf_prepared ? "ready" : "help Nao") + " / Hana: " + (f.cf_met_hana ? "met" : "visit town") + " / Pairing: " + (f.cf_aroma ? "noted" : "ask Jun") + ". Return to Nao to choose.");
+    lines.forEach(function (text) { section.appendChild(el("p", { text: text })); });
     container.appendChild(section);
   }
   function renderBreakfastProgress(container) {
@@ -2305,6 +2324,7 @@
 
     body.appendChild(el("section", { class: "nb-section" }, [el("h3", { text: "Beyond the breakwater" }), el("p", { text: currentObjective() })]));
     if (state.night === 2) renderSecondNightProgress(body);
+    renderCanalProgress(body);
     if (state.flags.nb_started) renderBreakfastProgress(body);
     const heardSection = el("section", { class: "nb-section" }, [el("h3", { text: "Rumours & discoveries (" + state.rumors.length + ")" })]);
     if (!state.rumors.length) {
@@ -2656,6 +2676,11 @@
     if (!obj.flags || !obj.used || !obj.visited || !obj.rel || !obj.seen || !obj.ambience || !obj.start) return "missing fields";
     if (["rewardCredits", "rewardGrams"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid adventure reward";
     if (["breakfastCost", "breakfastRevenue"].some(function (key) { return obj[key] !== undefined && (!Number.isFinite(obj[key]) || obj[key] < 0); })) return "invalid breakfast trade";
+    if (obj.canalTrade !== undefined) {
+      const ct = obj.canalTrade;
+      if (!ct || ct.cost !== 24 || ![0, 1].includes(ct.units) || ct.revenue !== (ct.units ? 0 : 38) || !obj.flags.ct_tea_owned || (!!obj.flags.ct_tea_sold !== (ct.units === 0))) return "invalid canal tea cargo";
+    }
+    if (obj.flags.ct_tea_owned && !obj.canalTrade) return "missing canal tea cargo";
     if (obj.breakfastSold !== undefined && (!Number.isInteger(obj.breakfastSold) || obj.breakfastSold < 0 || obj.breakfastSold > 12)) return "invalid breakfast portions";
     if (obj.night !== undefined && obj.night !== 1 && obj.night !== 2) return "unknown chapter";
     if (obj.night === 2) {
@@ -3294,7 +3319,8 @@
       ["Breakfast batch", state.breakfastCost ? (state.breakfastRevenue || 0) + " cr sales − " + state.breakfastCost + " cr stock = " + signed((state.breakfastRevenue || 0) - state.breakfastCost) + " before fuel and time" : "No extra batch bought"],
       ["Adventure reward", (state.rewardCredits || 0) + " cr · " + grams(state.rewardGrams || 0) + " of gold"],
       ["Ingredient cargo", state.cargo ? state.cargo.revenue + " cr returned − " + state.cargo.cost + " cr stock = " + signed(state.cargo.revenue - state.cargo.cost) + " before fuel/time; " + state.cargo.crates + " crate(s) unserved" + (state.cargo.courier ? "; courier fee listed as adventure reward" : "") : "No ingredient trade on Night One"],
-      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0) - (state.cargo ? state.cargo.cost : 0)) + " cr on food, tea and fuel"],
+      ["Canal tea", state.canalTrade ? state.canalTrade.revenue + " cr sales − " + state.canalTrade.cost + " cr stock = " + signed(state.canalTrade.revenue - state.canalTrade.cost) + " before fuel/time; " + state.canalTrade.units + " case aboard" : "No canal tea bought"],
+      ["Spent ashore", ((state.spent || 0) - (state.breakfastCost || 0) - (state.cargo ? state.cargo.cost : 0) - (state.canalTrade ? state.canalTrade.cost : 0)) + " cr on food, tea and fuel"],
       ["Credits", s.credits + " → " + f.credits],
       ["Gold", grams(s.grams) + " → " + grams(f.grams) + " (Mei pays " + f.sell + " a gram)"],
       ["Trades", state.trades.length ? state.trades.length + (state.trades.length === 1 ? " trade" : " trades") : "none: you held what you had"],
