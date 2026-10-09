@@ -136,3 +136,55 @@ window.NEON_TIDES_CHAT.priya.lines.unshift(
   { id: "rice_receipt", mode: "trade", when: { flag: ["n2_rice_delivered"] }, text: "Nao confirmed the rice arrived. Your receipt is filed, your fee is settled, and you may now discuss something wonderfully unrelated to paperwork." },
   { id: "canal_return", mode: "trade", when: { visited: { canal: 1, landing: 2 } }, text: "Back through the locks! Mako said your approach was tidy. High praise from someone who argues with ropes for a living." }
 );
+
+// Optional lessons are authored replies, with their own saved rotation per topic.
+window.NEON_TIDES_LESSONS = {
+  spread: { title: "Why are there two gold prices?", lines: [
+    { id: "loss", when: { tradeLoss: true }, text: "That sale came in below the purchase cost. We can read it together without calling the whole night a failure. Compare the next buyer's bid with what you actually paid; fuel and supper are separate costs." },
+    { id: "board", text: "Buy is what you pay the counter. Sell is what it pays you. The gap is the spread. Buying and immediately selling at the same board usually gives some credits to the counter, not to you." },
+    { id: "size", text: "A bigger trade changes the price against you: buying lifts that dealer's ask, selling lowers the bid. One promising gram doesn't promise the same margin for a whole tray." },
+    { id: "reserve", text: "Keep a little room in your purse for fuel. A clever trade that leaves you unable to reach its buyer is mostly a lovely calculation." }
+  ] },
+  history: { title: "Why does the Basin use gold?", lines: [
+    { id: "banks", text: "The banks kept failing. People wanted something they could carry to a scale. Your share of the Heron became four grams last winter, after the bank on Pier 2 failed twice. That's a history, not just a starting number." },
+    { id: "trust", text: "Gold doesn't remove trust. Somebody still weighs it, records where it came from and pays fairly. Mei's scale and Rin's assay slip are small promises we can actually check." },
+    { id: "machines", text: "Our wet machines need gold too. That's why an industrial order can matter as much as somebody protecting savings. But your ferry's fuel and your gold are separate supplies. Don't feed the engine your savings!" }
+  ] },
+  rumors: { title: "How should I judge a trading rumour?", lines: [
+    { id: "clock", text: "Ask who saw it, and when. A courier can repeat yesterday's true order after it has been cancelled. The notebook remembers the words and the time; it doesn't settle the question for you." },
+    { id: "events", text: "More usable salvage can put pressure on a local ask. A real industrial buyer can lift demand. But a wreck called a vault isn't an assay, and a rumour about a desk isn't an open window." },
+    { id: "visit", text: "Going to check uses minutes and fuel. Staying for tea can bring a lead, or simply good company. Decide what you want to learn before making the crossing." }
+  ] },
+  cargo: { title: "Is this cargo order worth the journey?", lines: [
+    { id: "delivery", when: { flagAny: ["ct_tea_sold", "freight_ceramics_done", "freight_seals_done", "freight_cloth_done", "n2_rice_delivered", "n3_done"] }, text: "You've made a delivery now. Purchase and payment are different entries; arrival and handover are different moments. The new offer card keeps all four beside the crossing cost." },
+    { id: "tea", text: "Jun's case costs 24 and Sora pays 38. Fourteen credits gross, before the trip. The canal takes forty minutes and two fuel from a harbour quay. It may fit a visit you already wanted; it isn't automatically worth a special trip." },
+    { id: "courier", text: "A courier crate belongs to the co-op: no purchase, twelve credits for delivery. An owned rice crate is your stock and your risk. Read which promise you're accepting." },
+    { id: "food", text: "My first tasting stays free. An optional breakfast batch might sell twelve portions at four credits, or fewer if the crew is quiet. Forty-eight is a maximum, not a queue I have already promised you." }
+  ] }
+};
+window.NEON_TIDES_REVIEW = [
+  { id: "harbour", title: "The Lantern Review · Harbour edition", byline: "From the editor's counter", lines: [
+    "A small ferry can connect a remarkable number of lives. This issue visits Nao's counter, Sora's market and the people who keep the night shift moving.",
+    "Nao keeps a place for a tired skipper. Sora keeps two prices on the board. Neither thinks the evening should be measured by a receipt alone."
+  ] },
+  { id: "summer", title: "Summer archive · Before the First Lantern", byline: "A July back issue, before the market opened", lines: [
+    "Sora wants a market where a gold scale can stand beside a supper counter. Nao has a dish she might finally put her own name beside. Beyond the locks, Hana is saving four tables for a festival.",
+    "At Starling Yard, Rin is saving a boat that other people have already written off. None of it is finished. The first lanterns are still in their boxes.",
+    { if: { everFlagAny: ["nb_done", "n2_done", "n3_breakfast"] }, notice: "Margin note, today: Nao's counter has found its welcome. The old application feels like a beginning you helped make real." },
+    { if: { everFlagAny: ["yard_done"] }, notice: "Margin note, today: Second Helping's pump is repaired. You remember the little launch celebration." },
+    { if: { everFlagAny: ["cf_done"] }, notice: "Margin note, today: the invitation became Nao's own choice. The four tables left room for her answer." }
+  ] },
+  { id: "gold", title: "Gold special · The Gold We Carry", byline: "Essays by Nao Mizuno", lines: [
+    { who: "nao", text: "A bank balance is a promise made somewhere else. A few grams wrapped in cloth are something you can bring to Mei's counter and ask her to weigh." },
+    { who: "nao", text: "A quote belongs to a place and a moment. Keeping the old number is useful; expecting the world to keep it for you is another matter." },
+    { who: "nao", text: "My first tasting bowl is free. The recipe invitation is a story choice. A paid breakfast is a sale. Keeping those things separate lets me offer a kindness without pretending it was a business error." }
+  ] },
+  { id: "halloween", title: "Halloween special · Harbour after dark", byline: "Seasonal companion fiction", lines: [
+    "Paper lanterns, playful shadows and a ferry crossing that makes ordinary lights look mysterious. The night shift has found a reason to sit a little closer to the kettle.",
+    "A seasonal story from the Review's shelf. These imagined festivities aren't a timed harbour event or a new trading order."
+  ] },
+  { id: "christmas", title: "Christmas special · A Table for the Night Shift", byline: "Seasonal companion fiction", lines: [
+    "Nao plans a modest Christmas supper. The harbour brings the company. At Sora's counter, a frame from Rin, a repair from Kenji and a light for the stairwell become a gift with no price.",
+    "Hot rice, ginger broth and room beside the stove. This imagined winter edition is a story to read, not a promise of seasonal stock on today's board."
+  ] }
+];

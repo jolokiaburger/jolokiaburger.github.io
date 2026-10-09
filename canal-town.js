@@ -18,7 +18,7 @@
     ] },
     { id: "canal-out", to: "canal", exchanges: [
       ["The last container crane falls behind. Reeds brush the banks; the old lock gate opens with a patient groan.", { who: "mako", text: "Kisaragi locks to Tern. Green lantern on the left, slow water ahead. Welcome inland, skipper." }],
-      ["You recognise the blue-tiled bathhouse at the bend. Someone on a balcony raises a cup to the Tern.", { who: "mako", text: "Back for tea or another little mystery? Your usual mooring is clear." }],
+      ["You recognise the blue-tiled bathhouse at the bend. Someone on a balcony raises a cup to the Tern.", { if: { everFlagAny: ["freight_seals_done"] }, lines: [{ who: "mako", text: "Those seals you brought are fitted. Hear the steady pump? Your receipt has become part of the lock now." }] }, { who: "mako", text: "Back for tea or another little mystery? Your usual mooring is clear." }],
       ["A kingfisher darts between the reeds. Jun's shop light appears beyond the bridge before the town sign does.", { who: "mako", text: "The lock's ready. Hana says arriving without a task counts as visiting, too." }]
     ] },
     { id: "canal-home-nao", from: "canal", when: { flag: ["cf_attended"] }, exchanges: [
@@ -145,3 +145,24 @@
     return chat;
   };
 })();
+
+// The optional afternoon is a resolved-shift vignette, never another timed trade.
+window.NEON_TIDES_CANAL_OUTING = function (data) {
+  const a = (id, label, who, text, extra) => Object.assign({ id, label, kind: "talk", minutes: 0, once: true, lines: [{ who, text }] }, extra);
+  data.characters.haruto = { name: "Haruto Mizuno", role: "Nao's father · Recipes and unhurried afternoons", color: "#d5be99" };
+  data.actions.market.push(
+    a("af_start", "Nao & Haruto · Plan an afternoon off", "nao", "After the crew breakfast I'd like a proper afternoon with Dad. Could we arrange a picnic and ask Priya about the route? Nothing to sell, no bigger stall to open. If the canal is closed, the quiet harbour bench will do.", { marketSpot: "food", when: { flag: ["n3_breakfast"] }, sets: ["af_started"] }),
+    a("af_ready", "Tell Nao the picnic and route are ready", "nao", "A picnic, a checked route, and an afternoon that isn't an assignment. Thank you. Finish your morning at your own pace. When you read the shift report, you can join us, carry the basket, or leave us a little family time.", { marketSpot: "food", when: { flag: ["af_picnic", "af_route"] }, sets: ["af_ready"] })
+  );
+  data.actions.bar.push(a("af_picnic", "Pack Mei's family picnic · 5 min · Free", "mei", "Rice balls, pickled greens and a flask of tea. I have everything here; no shopping list. Tell Haruto his opinions about sesame are welcome as long as he carries the cups.", { kind: "search", minutes: 5, when: { flag: ["af_started"] }, sets: ["af_picnic"] }));
+  data.actions.landing.push(a("af_route", "Check the afternoon route with Priya", "priya", "An outing isn't a cargo deadline. I'll mark a safe meeting place for the afternoon and leave the morning trade board alone.", { when: { flag: ["af_started"] }, sets: ["af_route"], lines: [
+    { if: { truth: ["order", "both"] }, lines: [{ who: "priya", text: "The afternoon meeting is Jun's quiet canal bench, after the gates open. The family can take the scheduled day ferry. If you join after your shift, your Tern rests; no extra fuel or fare is charged to your morning accounts." }] },
+    { if: { truth: ["vault"] }, lines: [{ who: "priya", text: "Low water rules out the canal today. I've marked the quiet harbour bench beside the market. Same picnic, no risky crossing. The afternoon won't cost your morning purse or fuel." }] }
+  ] }));
+  data.familyAfternoon = {
+    join: [{ who: "nao", text: "12:30. The counter is closed for a little while. Look, Dad: we remembered how to sit down before somebody handed us a ticket." }, { who: "haruto", text: "The sesame is excellent. I was hoping to find something to complain about, but you've made that unnecessarily difficult." }, "You share the rice balls, trade stories about the harbour and let a whole cup of tea go by without checking a price board."],
+    carry: ["12:30. You carry Mei's basket to the meeting place. Haruto takes the cups before Nao can apologise for asking.", { who: "haruto", text: "A ferry captain delivering a picnic. Admirable use of your qualifications." }, { who: "nao", text: "Thank you. We'll keep this afternoon small enough to enjoy." }, "You leave them talking beside the water. The basket has arrived; the family time belongs to them."],
+    private: ["12:30. Mei's picnic is waiting and Priya's route is checked. You wave from a little farther along the quay.", { who: "nao", text: "Dad brought the old recipe card. I brought a new one. I think we'll let them get acquainted." }, "Nao and Haruto have the afternoon to themselves. Helping them keep it private counts as keeping your promise."]
+  };
+  data.ending.closing.push({ if: { flag: ["af_ready"] }, text: "AN AFTERNOON OFF: Nao and Haruto's picnic is arranged. After the shift report, choose whether to join, carry the basket or leave them family time." });
+};

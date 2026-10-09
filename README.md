@@ -65,3 +65,13 @@ Gold trading follows fresh festival news, with a provisional instrument order, a
 Ask Priya at Landing 3 about Kisaragi to unlock the inland canal. The crossing costs two fuel and forty minutes each way; the town has a fuel pump, gold exchange, tea, dumplings, three new neighbours and a parcel with an unfinished address. Jun's one-case tea order costs 24 cr and pays 38 cr at Sora's scale, before fuel and time. The notebook keeps its account separate from gold.
 
 In Night Two, choose Nao's recipe, then read her festival invitation. Prepare a sample, meet Hana and ask Jun about tea. Help Nao choose a small festival table or send her signed recipe while keeping her afternoon off. You can complete the original recipe tasting in town when she travels with you. See `CANAL-TOWN.md` for the routes, deadlines and source files.
+
+## Trading over tea and harbour stories
+
+- Ask Nao about gold history, spreads, rumours and cargo in **Trading over tea** at the market. Topics rotate through fresh replies and remember a completed delivery or a losing sale. Talking is free.
+- Before accepting rice, sealed tea or small freight, an offer card shows purchase cost, payment, gross margin, destination, known crossing costs and time left on arrival. Margins exclude return travel, fuel purchases and other expenses.
+- Ask Rin about **The wrong golden parcel** at Starling Yard. Check Priya's dispatch copy and Kenji's part stamp, compare the records with Rin, then correct the receipt. This optional investigation does not buy gold or add purity penalties to normal trading.
+- Browse **The Lantern Review** rack at Mei's counter for harbour, summer, gold, Halloween and Christmas excerpts. Completed projects add notes to the summer archive. Reading costs no time.
+- In Chapter Three, after Nao's free breakfast, arrange **An afternoon off**: pack Mei's free picnic, check the meeting place with Priya and return to Nao. The completed morning report opens a 12:30 vignette: join the picnic, carry the basket, or leave Nao and Haruto private family time. Low water moves it to the harbour bench. The afternoon does not change settled trading accounts.
+
+Delivery memories include bowls at Mei's counter, cloth on Sora's lantern frames and seals at Mako's pump bench. Existing saves remain compatible. Details and test limitations: `HARBOUR-REFINEMENTS.md`.

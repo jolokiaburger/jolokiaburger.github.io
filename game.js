@@ -391,6 +391,8 @@
   // Every field of a condition must hold. See the top of cases.js for the list.
   function conditionHolds(cond) {
     if (!cond) return true;
+    if (cond.tradeLoss && !(state.trades || []).some(function (t) { return t.kind === "sell" && typeof t.basis === "number" && t.total < t.basis; })) return false;
+    if (cond.everFlagAny && !cond.everFlagAny.some(function (f) { return state.flags[f] || (state.previous && state.previous.flags[f]); })) return false;
     if (cond.lastStart && state.clock > parseClock(cond.lastStart)) return false;
     if (cond.freightSpace && freightHeld() >= 2) return false;
     if (cond.visited && !Object.keys(cond.visited).every(function (loc) { return (state.visited[loc] || 0) >= cond.visited[loc]; })) return false;
@@ -521,6 +523,11 @@
     if (f.yard_star_found) add("star", "Lam · A safe-homecoming star", f.yard_star_returned, "Return the brass keepsake to Captain Lam at Metro Quay.", "Captain Lam received his daughter's brass star.");
     if (f.n3_started) add("morning", "Festival · A table through the tide", f.n3_shared,
       f.n3_done ? "Join Hana's crew breakfast at the delivery location before 11:00." : !f.n3_cargo ? "Collect the stranded table kit from Rin at Starling Yard." : !f.n3_route ? "Check Priya's revised festival route at Landing 3." : "Deliver to Hana " + (state.truth === "vault" ? "at the Night Market" : "in Kisaragi") + "; start handover by 10:15.", "Festival table delivered · You joined the crew for breakfast.");
+    if (f.ay_started) add("assay", "Rin · The wrong golden parcel", f.ay_done,
+      !f.ay_receipt ? "Check the dispatch copy with Priya at Landing 3; five minutes." : !f.ay_stamp ? "Ask Kenji at Starling Yard to identify the part stamp." : !f.ay_compared ? "Compare both records with Rin at the yard; ten minutes, no stock purchase." : "Return the checked assay card to Priya and correct the receipt.", "Swapped receipt corrected · No gold or credits wagered.");
+    if (f.af_started) add("afternoon", "Nao & Haruto · An afternoon off", f.af_done,
+      !f.af_picnic ? "Pack Mei's free picnic at Kurage 33; five minutes." : !f.af_route ? "Check the afternoon meeting place with Priya at Landing 3." : !f.af_ready ? "Tell Nao at the market that the picnic and route are ready before ending the morning." : "Finish the morning, then open the afternoon vignette from your shift report.",
+      f.af_join ? "You joined Nao and Haruto for their picnic." : f.af_carry ? "You carried the basket and left them family time." : "You helped arrange a private afternoon for Nao and Haruto.");
     Object.keys(state.freight || {}).forEach(function (id) {
       const d = TRADE.freight[id], cargo = state.freight[id];
       add("freight-" + id, d.title, !cargo.units, "Deliver to " + DATA.world.locations[d.to].short + " · " + deliveryTime(d.lastStart) + ".", "Delivered · " + cargo.revenue + " cr received; " + cargo.cost + " cr purchase.");
@@ -784,8 +791,23 @@
     state.used["chat_last:" + id] = CHAT[id].lines.indexOf(line) + 1;
     return [{ type: "speech", who: id, text: line.text }];
   }
+  function lessonLines(topic) {
+    const def = window.NEON_TIDES_LESSONS[topic];
+    const pool = def.lines.filter(function (line) { return conditionHolds(line.when); }).sort(function (a, b) { return Number(!!b.when) - Number(!!a.when); });
+    const prefix = "lesson:" + topic + ":";
+    let line = pool.find(function (entry) { return !state.used[prefix + entry.id]; });
+    if (!line) {
+      const last = state.used[prefix + "last"] || 0;
+      const old = pool.findIndex(function (entry) { return def.lines.indexOf(entry) + 1 === last; });
+      line = pool[(old + 1) % pool.length];
+    }
+    state.used[prefix + line.id] = 1;
+    state.used[prefix + "last"] = def.lines.indexOf(line) + 1;
+    return [{ type: "speech", who: "nao", text: line.text }];
+  }
   function actionLines(action) {
     if (action.casual) return nextCasual(action.casual);
+    if (action.lesson) return lessonLines(action.lesson);
     const lines = expandLines(action.lines);
     if (action.directory) return lines;
     // Preserve the first reading of each distinct story response. Once read, the same
@@ -920,6 +942,10 @@
       state.credits += 38;
       state.canalTrade.revenue = 38;
       state.canalTrade.units = 0;
+    }
+    if (effects.parcelCompare && TRADE.assayQuest) {
+      const checked = MARKET.compareAssay(TRADE.assayQuest.receipt, TRADE.assayQuest.assay);
+      state.flags.ay_mismatch = checked.code === "lot-mismatch";
     }
     if (effects.clockTo) state.clock = Math.max(state.clock, parseClock(effects.clockTo));
   }
@@ -1061,9 +1087,9 @@
     });
     if (old.flags.exp_chart) next.flags.exp_chart = true;
     if (old.flags.ct_route) next.flags.ct_route = true;
-    ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
+    ["yard_pump_fixed", "yard_done", "yard_star_found", "yard_star_returned", "ay_started", "ay_stamp", "ay_receipt", "ay_compared", "ay_mismatch", "ay_done"].forEach(function (flag) { if (old.flags[flag]) next.flags[flag] = true; });
     next.cargo = { crates: 0, bought: 0, cost: 0, revenue: 0, sold: 0, returned: 0, courier: false };
-    Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
+    Object.keys(old.used).filter(function (key) { return key.indexOf("chat_") === 0 || key.indexOf("lesson:") === 0 || key.indexOf("ay_") === 0; }).forEach(function (key) { next.used[key] = old.used[key]; });
     const q = MARKET.quote(TRADE, next.truth, next.seed, "bar", next.clock);
     next.start = { credits: next.credits, grams: MARKET.lots.total(next.gold), sell: q.sell, worth: MARKET.worth(next.credits, next.gold, q.sell) };
     setState(next);
@@ -1254,6 +1280,7 @@
     const action = locationActions().filter(function (a) { return a.id === actionId; })[0];
     if (!action) return;
     const cost = action.cost || 0;
+    if (action.readingRack) transient.reviewOpen = true;
     if (cost > state.credits) { toast("Not enough credits for that."); return; }
     // A repair order is a real sale, not an adventure cash reward. Freeze this quote
     // before any action changes the clock or flags, and share the dealer's buying cap.
@@ -2022,6 +2049,7 @@
       const done = el("div", { class: "action-group" }, [el("p", { class: "action-group-label", text: "Morning" })]);
       done.appendChild(actionButton({ kind: "choice", label: "Read your morning report", key: nextKey(), onClick: showResolution }));
       done.appendChild(actionButton({ kind: "choice", label: nextNightLabel(), key: nextKey(), onClick: continueTradeStory }));
+      if (state.night === 3 && state.flags.af_ready) done.appendChild(actionButton({ kind: "choice", label: state.flags.af_done ? "Read your afternoon with Nao & Haruto" : "An afternoon off · Nao & Haruto", onClick: openFamilyAfternoon }));
       container.appendChild(done);
       return;
     }
@@ -2040,7 +2068,8 @@
     const visible = function (a) { return !a.directory && (!market || spot === "all" || !a.marketSpot || a.marketSpot === spot); };
     const here = locationActions().filter(function (a) { return a.kind !== "system" && visible(a); });
     [
-      { label: "Explore & follow leads", match: function (a) { return !a.casual && a.kind !== "order"; } },
+      { label: "Explore & follow leads", match: function (a) { return !a.casual && !a.lesson && a.kind !== "order"; } },
+      { label: "Trading over tea · Nao", match: function (a) { return !!a.lesson; }, folded: true, stateKey: "lessonOpen" },
       { label: "Food, tea & stories", match: function (a) { return a.kind === "order"; } },
       { label: "People · Free conversation", match: function (a) { return !!a.casual; }, folded: true }
     ].forEach(function (group) {
@@ -2049,6 +2078,7 @@
       const local = el(group.folded ? "details" : "div", { class: "action-group" + (group.folded ? " casual-group" : "") });
       local.appendChild(el(group.folded ? "summary" : "p", { class: "action-group-label", text: group.label }));
       available.forEach(function (action) {
+        renderCargoOffer(action, local);
         local.appendChild(actionButton({
           kind: action.casual ? "chat" : action.kind, label: marketActionLabel(action),
           key: group.folded ? null : nextKey(), disabled: !tradeActionAffordable(action),
@@ -2057,12 +2087,13 @@
         }));
       });
       if (group.folded) {
-        local.open = !!transient.chatOpen;
-        local.addEventListener("toggle", function () { transient.chatOpen = local.open; updateActionsCue(); });
+        local.open = !!transient[group.stateKey || "chatOpen"];
+        local.addEventListener("toggle", function () { transient[group.stateKey || "chatOpen"] = local.open; updateActionsCue(); });
       }
       container.appendChild(local);
     });
 
+    renderReviewShelf(container);
     renderTravelPlanner(container);
     const sys = systemActions().filter(function (a) { return a.id !== "sys_scale"; });
     const ferryActions = locationActions().filter(function (a) { return a.kind === "system" && visible(a); }).concat(sys);
@@ -2098,10 +2129,41 @@
     const q = tradeQuote();
     return !!q && goldHeld() >= action.goldSale.grams && q.canSell >= action.goldSale.grams;
   }
+  function cargoOffer(action) {
+    let def;
+    if (action.freightBuy) {
+      const d = TRADE.freight[action.freightBuy];
+      def = { title: d.title, cost: d.cost, payment: d.payment, to: d.to, lastStart: d.lastStart };
+    } else if (action.cargoBuy) def = { title: action.cargoBuy.courier ? "Co-op courier rice" : "Owned rice · " + action.cargoBuy.crates + " crate(s)", cost: action.cost || 0, payment: action.cargoBuy.courier ? 12 : action.cargoBuy.crates * 30, to: "market", lastStart: "04:25" };
+    else if (action.id === "ct_buy_tea") def = { title: "Jun's sealed tea", cost: 24, payment: 38, to: "market", lastStart: "05:55" };
+    if (!def) return null;
+    const route = state.location === def.to ? { fuel: 0, minutes: 0 } : travelCost(state.location, def.to);
+    const crossing = route ? travelMinutes(route) : null;
+    const arrival = crossing === null ? null : state.clock + actionMinutes(action) + crossing;
+    const remaining = parseClock(def.lastStart) - (arrival === null ? state.clock : arrival);
+    const routeAvailable = state.location === def.to || canTravel(def.to).ok;
+    return Object.assign(def, { margin: def.payment - def.cost, fuel: route ? route.fuel : null, crossing: crossing, arrival: arrival, reachable: routeAvailable && remaining >= 0,
+      text: "Purchase " + def.cost + " cr · Promised " + def.payment + " cr · Gross " + (def.payment - def.cost) + " cr, before fuel and other costs. Deliver to " + DATA.world.locations[def.to].short + ". " +
+        (route ? "After " + actionMinutes(action) + " min pickup: " + route.fuel + " fuel / " + crossing + " min crossing; arrive " + formatClock(arrival) + ". " : "No direct crossing. ") +
+        (remaining >= 0 ? remaining + " min left on arrival to start the 5 min handover" : "Arrival misses the handover window") + "; last start " + def.lastStart + ". " + (!routeAvailable ? "Current route unavailable. " : "") + "Return travel and any refill are extra." });
+  }
+  function renderCargoOffer(action, container) {
+    const offer = cargoOffer(action);
+    if (!offer) return;
+    container.appendChild(el("article", { class: "cargo-offer" + (offer.reachable ? "" : " cargo-warning") }, [el("strong", { text: offer.title + " · Before you accept" }), el("p", { text: offer.text })]));
+  }
+  function renderReviewShelf(container) {
+    if (state.location !== "bar") return;
+    const rack = el("details", { class: "action-group review-shelf" }, [el("summary", { text: "The Lantern Review · Read an issue" }), el("p", { class: "clue-meta", text: "Free reading · No clock time. Seasonal issues are companion stories." })]);
+    rack.open = !!transient.reviewOpen;
+    rack.addEventListener("toggle", function () { transient.reviewOpen = rack.open; updateActionsCue(); });
+    locationActions().filter(function (a) { return a.readingIssue; }).forEach(function (a) { rack.appendChild(actionButton({ kind: "talk", label: a.label, onClick: function () { performAction(a.id); } })); });
+    container.appendChild(rack);
+  }
   function marketActionLabel(action) {
     if (action.freightBuy || action.freightDeliver) {
       const d = TRADE.freight[action.freightBuy || action.freightDeliver];
-      return action.label + " · Buy " + d.cost + " cr / receive " + d.payment + " cr · " + deliveryTime(d.lastStart) + " · Fuel/time extra";
+      return action.label + " · Buy " + d.cost + " cr / receive " + d.payment + " cr · Gross " + (d.payment - d.cost) + " cr · " + deliveryTime(d.lastStart) + " · Fuel/time extra";
     }
     if (action.cargoBuy) return action.label + " · Purchase " + (action.cost || 0) + " cr · Promised " + (action.cargoBuy.courier ? "12 cr fee" : action.cargoBuy.crates * 30 + " cr") + " · " + deliveryTime("04:25") + " · Fuel/time extra";
     if (action.id === "ct_buy_tea") return action.label + " · Promised 38 cr at Sora's scale · " + deliveryTime("05:55") + " · Fuel/time extra";
@@ -2696,6 +2758,7 @@
 
   function openModal(options) {
     lastFocus = document.activeElement;
+    transient.modalAfterClose = options.onClose || null;
     dom.modalTitle.textContent = options.title;
     dom.modalBody.innerHTML = "";
     appendChildren(dom.modalBody, options.body);
@@ -2716,6 +2779,9 @@
   }
   function closeModal() {
     dom.modal.hidden = true;
+    const afterClose = transient.modalAfterClose;
+    transient.modalAfterClose = null;
+    if (afterClose) afterClose();
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
   }
 
@@ -3520,11 +3586,37 @@
       dom.resStats.appendChild(el("dt", { text: pair[0] }));
       dom.resStats.appendChild(el("dd", { text: pair[1] }));
     });
+    if (state.night === 3 && state.flags.af_ready) dom.resBody.appendChild(actionButton({ kind: "choice", label: state.flags.af_done ? "Read your afternoon with Nao & Haruto" : "An afternoon off · Nao & Haruto", onClick: openFamilyAfternoon }));
     dom.btnResContinue.textContent = "Look around";
     dom.btnResNew.textContent = nextNightLabel();
     revealResolution();
   }
 
+  function finishFamilyAfternoon(choice) {
+    if (!state || !isTrade() || state.night !== 3 || !state.resolved || !state.flags.af_ready || state.flags.af_done || !TRADE.familyAfternoon[choice]) return false;
+    state.flags.af_done = true;
+    state.flags["af_" + choice] = true;
+    saveGame();
+    openFamilyAfternoon();
+    return true;
+  }
+  function openFamilyAfternoon() {
+    if (!state || state.night !== 3 || !state.resolved || !state.flags.af_ready) return;
+    dom.resolution.hidden = true;
+    const choice = ["join", "carry", "private"].find(function (id) { return state.flags["af_" + id]; });
+    const body = [el("p", { class: "clue-meta", text: "12:30 · After the morning shift. Your trading accounts and fuel are settled; this vignette has no charges or deadline." }), el("p", { text: state.truth === "vault" ? "The quiet harbour bench, beside the market. Low water changed the address, not the afternoon." : "Jun's quiet canal bench. The family took the scheduled day ferry; the Tern rests after her shift." })];
+    if (choice) {
+      const story = el("section", { class: "family-afternoon" });
+      expandLines(TRADE.familyAfternoon[choice]).forEach(function (line) {
+        const person = line.who && TRADE.characters[line.who];
+        story.appendChild(el("p", { text: (person ? person.name + ": " : "") + line.text }));
+      });
+      body.push(story);
+    } else body.push(el("p", { text: "The picnic is packed and the meeting place checked. How would you like to help Nao and Haruto keep their afternoon?" }));
+    const actions = choice ? [] : [{ label: "Join their picnic", onClick: function () { finishFamilyAfternoon("join"); } }, { label: "Carry the basket, then leave them time", onClick: function () { finishFamilyAfternoon("carry"); } }, { label: "Leave them a private afternoon", onClick: function () { finishFamilyAfternoon("private"); } }];
+    actions.push({ label: "Back to the shift report" });
+    openModal({ title: "Nao & Haruto · An afternoon of their own", body: body, actions: actions, onClose: showTradeResolution });
+  }
   function showResolution() {
     if (isTrade()) { showTradeResolution(); return; }
     dom.btnResContinue.textContent = "Continue";

@@ -24,6 +24,8 @@
       data.ending.closing.push({ if: { flag: [flag + "_owned"], notFlag: [flag + "_done"] }, text: "UNSOLD CARGO: " + d.title + " stayed aboard. No automatic payment; the case is set aside when this shift closes." });
     });
     if (morning) data.actions.yard.find(a => a.id === "freight_seals_buy").when.truth = ["order", "both"];
+    installReadingAndAssay(data);
+    if (morning) window.NEON_TIDES_CANAL_OUTING(data);
     Object.assign(data.things, { "yard-board": "Rin's work board", "yard-ferry": "Second Helping · Rescued ferry", "yard-kettle": "Workshop kettle", "yard-kenji": "Kenji · Parts bench" });
     data.actions.yard.push(
       act("yard_board", "Read Rin's work board", "rin", "A ferry called Second Helping, a tired bilge pump, three clean mugs. Those are today's grand projects. You can help with a repair, look through the salvage ledger, or sit down. The gold assay stays separate from the odd jobs.", { once: true, thing: "yard-board", sets: ["yard_started"] }),
@@ -46,6 +48,9 @@
     data.ambience.push({ at: "yard", via: ["yard_meal"], text: "Rain ticks on the workshop roof. A test lamp glows warm beside a row of mended tools." });
     const visuals = [
       ["memory-kits", { flag: ["exp_done"] }], ["memory-kits", { priorFlag: ["exp_done"] }],
+      ["memory-bowls", { flag: ["freight_ceramics_done"] }], ["memory-bowls", { priorFlag: ["freight_ceramics_done"] }],
+      ["memory-cloth", { flag: ["freight_cloth_done"] }], ["memory-cloth", { priorFlag: ["freight_cloth_done"] }],
+      ["memory-seals", { flag: ["freight_seals_done"] }], ["memory-seals", { priorFlag: ["freight_seals_done"] }],
       ["memory-menu", { flagAny: ["nb_done", "n2_done", "n3_breakfast"] }], ["memory-menu", { priorFlag: ["nb_done"] }],
       ["memory-spoons", { flag: ["ct_parcel_done"] }], ["memory-spoons", { priorFlag: ["ct_parcel_done"] }],
       ["memory-recipe", { flag: ["cf_shared"] }], ["memory-recipe", { priorFlag: ["cf_shared"] }],
@@ -56,6 +61,23 @@
     data.sceneClasses = (data.sceneClasses || []).concat(visuals.map(v => ({ class: v[0], when: v[1] })));
     data.ending.closing.push({ if: { flag: ["yard_done"] }, text: "STARLING YARD: Second Helping's bilge pump is ready for the day crew. A rescued ferry has another beginning." }, { if: { flag: ["yard_star_returned"] }, text: "HOMEWARD STAR: Captain Lam has his daughter's brass keepsake again." }, { if: { flagAny: ["companion_island", "companion_canal"] }, text: "A QUIET VISIT: You and Nao took a little time without turning it into an errand." });
   }
+  function installReadingAndAssay(data) {
+    data.things["review-rack"] = "The Lantern Review · Magazine rack";
+    data.actions.bar.push(act("review_rack", "Browse The Lantern Review", "mei", "A fresh gold special, a summer back issue and a few seasonal stories. Choose an issue from the rack below. Reading is free; the clock can rest while you do.", { readingRack: true, directory: true, thing: "review-rack" }));
+    (window.NEON_TIDES_REVIEW || []).forEach(issue => data.actions.bar.push(act("review_" + issue.id, issue.title, "mei", "", { readingIssue: issue.id, directory: true, lines: [issue.byline].concat(issue.lines) })));
+    Object.keys(window.NEON_TIDES_LESSONS || {}).forEach(id => data.actions.market.push(act("nao_lesson_" + id, window.NEON_TIDES_LESSONS[id].title, "nao", "", { lesson: id, marketSpot: "food", when: { notFlag: ["companion_nao", "cf_aboard"] } })));
+    data.assayQuest = { receipt: { lot: "F-17", karat: 24 }, assay: { lot: "P-17", karat: 0 }, displayOnly: true };
+    data.actions.yard.push(
+      act("ay_start", "Rin's mystery · The wrong golden parcel", "rin", "This gold-coloured fitting arrived with a receipt for bullion. It's quarantined, not on my sale tray. Could you check the dispatch copy with Priya and the part stamp with Kenji? No purchase, no gold wager.", { once: true, thing: "yard-board", sets: ["ay_started"] }),
+      act("ay_stamp", "Ask Kenji to identify the parcel's stamp", "kenji", "P-17. A gold-plated brass display fitting, not a bullion lot. I have the maker's assay card. The receipt should describe a prop, not twenty-four-karat gold.", { once: true, thing: "yard-kenji", when: { flag: ["ay_started"] }, sets: ["ay_stamp"] }),
+      act("ay_compare", "Compare receipt and assay card · 10 min", "rin", "F-17 on the receipt, P-17 on the fitting. The assay card identifies plated brass. Two parcels shared a dispatch envelope; a swapped receipt made this one sound much more valuable. The gold sale tray hasn't been touched.", { once: true, kind: "search", minutes: 10, when: { flag: ["ay_receipt", "ay_stamp"] }, sets: ["ay_compared"], effects: { parcelCompare: true }, thing: "yard-board" })
+    );
+    data.actions.landing.push(
+      act("ay_receipt", "Read Priya's parcel dispatch copy · 5 min", "priya", "Receipt F-17 describes bullion. The envelope log pairs F-17 with display parcel P-17. I won't amend the record from a rumour; bring Rin's checked assay card and we'll correct the mix-up.", { once: true, kind: "search", minutes: 5, when: { flag: ["ay_started"] }, sets: ["ay_receipt"] }),
+      act("ay_finish", "Correct the parcel receipt with Priya", "priya", "P-17: plated display fitting. F-17: a separate bullion receipt, reattached to its own file. No gold bought or sold, no purse lost. Rin can release the fitting to its rightful owner. That is a very satisfying kind of paperwork.", { once: true, when: { flag: ["ay_compared", "ay_mismatch"] }, sets: ["ay_done"] })
+    );
+    data.ending.closing.push({ if: { flag: ["ay_done"] }, text: "THE WRONG GOLDEN PARCEL: You checked the fitting and corrected its swapped bullion receipt. No gold was bought or sold." });
+  }
   function chatInstall(chat) {
     if (!chat.kenji.visits.some(v => v.at === "yard")) chat.kenji.visits.push({ at: "yard", mode: "trade" });
     chat.kenji.thingsByPlace = Object.assign({}, chat.kenji.thingsByPlace, { yard: "yard-kenji", market: "exp-kenji" });
@@ -63,6 +85,7 @@
     ["yard", "island", "canal"].forEach(at => { if (!chat.nao.visits.some(v => v.at === at && v.when && (v.when.flag || []).includes("companion_nao"))) chat.nao.visits.push({ at, mode: "trade", when: { flag: ["companion_nao"] } }); });
     const reactions = {
       rin: [
+        { id: "life_assay", when: { flag: ["ay_done"] }, text: "P-17 has its own honest receipt now. You saved a display fitting from a very expensive identity crisis." },
         { id: "life_pump", when: { flag: ["yard_pump_fixed"] }, text: "Hear that calm little hum? That's your repair. Every dry floorboard aboard Second Helping will have a little of your patience in it." },
         { id: "life_pump_memory", when: { priorFlag: ["yard_pump_fixed"] }, text: "The pump you helped mend is still steady. You can visit a boat after fixing it, you know. She likes the company." },
         { id: "life_yard_return", when: { visited: { yard: 2 } }, text: "Back at the bench! I've cleared your usual patch of tabletop. No repair quota; tell me something from beyond the cranes." }
@@ -72,11 +95,12 @@
         { id: "life_attended_memory", when: { priorFlag: ["cf_attended"] }, text: "Her little preview table made everyone less nervous about their own dishes. I'll keep the same-sized table for her; a good evening needn't become a bigger obligation." }
       ],
       sora: [
+        { id: "life_cloth_memory", when: { priorFlag: ["freight_cloth_done"] }, text: "Hana's cloth from your delivery is on the lantern frames now. Come back when the lamps warm up; you'll recognise your crossing in the light." },
         { id: "life_tea_memory", when: { priorFlag: ["ct_tea_sold"] }, text: "Jun's tea was a hit with the stall crews. Someone asked whether you take passengers along that route. I said they'd have to ask the captain." },
         { id: "life_cloth", when: { flag: ["freight_cloth_done"] }, text: "The new lantern cloth is drying behind my stall. Your receipt is settled. The warm light will be the extra thank-you." }
       ],
-      mei: [{ id: "life_bowls", when: { flag: ["freight_ceramics_done"] }, text: "Jun's bowls are on the shelf. The blue one holds exactly enough broth for somebody returning from an adventure. Very scientific sizing." }],
-      mako: [{ id: "life_seals", when: { flag: ["freight_seals_done"] }, text: "Those seals are on the pump bench. Clear terms, intact cargo. You make paperwork feel almost sociable." }],
+      mei: [{ id: "life_bowls_memory", when: { priorFlag: ["freight_ceramics_done"] }, text: "The blue bowls you delivered are still doing good work. I recognise them before I recognise my own inventory numbers." }, { id: "life_bowls", when: { flag: ["freight_ceramics_done"] }, text: "Jun's bowls are on the shelf. The blue one holds exactly enough broth for somebody returning from an adventure. Very scientific sizing." }],
+      mako: [{ id: "life_seals_memory", when: { priorFlag: ["freight_seals_done"] }, text: "Your pump seals are fitted. The lock pump is steady again. A good delivery keeps helping after its receipt dries." }, { id: "life_seals", when: { flag: ["freight_seals_done"] }, text: "Those seals are on the pump bench. Clear terms, intact cargo. You make paperwork feel almost sociable." }],
       nao: [{ id: "life_view_memory", when: { priorFlag: ["companion_island"] }, text: "When the counter gets busy, I picture Aki's lighthouse sweep. A little room around a thought. I'm glad we went." }, { id: "life_canal_memory", when: { priorFlag: ["companion_canal"] }, text: "I keep thinking of that quiet bench. Nothing to serve, nothing to prove. We should be guests somewhere again." }],
       lam: [{ id: "life_star", when: { flag: ["yard_star_returned"] }, text: "The star's in my coat pocket. Every now and then I check it's there. My daughter will laugh when I tell her her little charm finally travelled home." }]
     };

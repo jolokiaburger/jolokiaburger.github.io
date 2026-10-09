@@ -15,10 +15,11 @@ context.window.matchMedia=()=>({matches:false,addEventListener(){}});
 for(const name of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js'])vm.runInContext(read(name),context,{filename:name});
 let engine=read('game.js');
 engine=engine.replace('  if (document.readyState === "loading")', `
-  window.Review = {travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
+  window.Review = {familyModal: openFamilyAfternoon, familyDom: (nodes) => Object.assign(dom,nodes), cargoOffer, finishFamilyAfternoon, travelPlan, renderTravelPlanner, freightTotals, freightHeld, storyProgress, cargoProgress, crossingLines, rememberedQuote, renderStoryProgress, renderCargoProgress, newState, newTradeState, setState, locationActions, actionLines, nextCasual, casualActions, conditionHolds, saveProblem, setEndFlags, tradeChoicesResult, canTravel, travelCost, cheapestExit, tradeActionAffordable, marketActionLabel, breakfastOffer, breakfastProgress, secondNightProgress, renderTradeActions, showTradeResolution, summaryDom: (nodes) => {Object.assign(dom,nodes);revealResolution=function(){};},
     state: () => state, activeCase: () => activeCase,
     visit: (loc, clock) => {state.location=loc;if(clock!==undefined)state.clock=parseClock(clock);},
     readSaved: () => readSave()};
+  openFamilyAfternoon = function () {};
   render = function () {}; renderKeepingFocus = function () {}; focusEncounter = function () {};
   beginCrossing = function () {};
   setMode = function () {}; positionFerry = function () {}; toast = function () {};
@@ -438,6 +439,8 @@ class TestNode {
  appendChild(child){this.children.push(child);return child;}
  setAttribute(k,v){this.attrs[k]=v;}
  addEventListener(k,fn){this.events[k]=fn;}
+ focus(){this.focused=true;}
+ querySelector(tag){return this.children.find(n=>n.tag===tag)||this.children.map(n=>n.querySelector(tag)).find(Boolean)||null;}
  set innerHTML(value){this.children=[];this.textContent=value;}
  get innerHTML(){return '';}
 }
@@ -547,4 +550,43 @@ R.state().flags.companion_nao=true;api.performAction('life_canal_nao');check(R.s
 // Older saves lacking optional freight still load; contradictory new freight is rejected.
 api.trade.start('frost-order');const older=api.readSave();delete older.freight;equal(R.saveProblem(older),null,'pre-season save remains compatible');
 const bad=JSON.parse(json(older));bad.freight={ceramics:{cost:20,revenue:36,units:1}};bad.flags.freight_ceramics_owned=true;check(R.saveProblem(bad)!==null,'contradictory freight save rejected');
+// The six refinements: story paths, economics, archived reading and saved epilogue choices.
+api.trade.start('frost-order');R.visit('market');
+const lessonResources=()=>json({credits:R.state().credits,gold:R.state().gold,clock:R.state().clock,fuel:R.state().fuel,rel:R.state().rel,rumors:R.state().rumors});
+let beforeLesson=lessonResources(),replies=[];
+for(let i=0;i<7;i++){api.performAction('nao_lesson_spread');replies.push(R.state().lastResult.lines[0].text);if(i)check(replies[i]!==replies[i-1],'topic replies do not repeat consecutively');}
+equal(lessonResources(),beforeLesson,'lessons cannot farm money, time or evidence');
+api.trade.sell(4);api.trade.buy(1);api.trade.sell(1);check(R.conditionHolds({tradeLoss:true}),'real losing sale activates lesson');api.performAction('nao_lesson_spread');check(R.state().lastResult.lines[0].text.includes('below the purchase cost'),'Nao responds to actual losing trade');
+R.state().flags.ct_tea_sold=true;api.performAction('nao_lesson_cargo');check(R.state().lastResult.lines[0].text.includes("made a delivery"),'Nao responds to completed delivery');
+const lessonSaved=api.readSave();equal(R.saveProblem(lessonSaved),null,'lesson counters save without migration');R.setState(lessonSaved);check(R.state().used['lesson:spread:loss'],'lesson memory survives reload');
+R.state().flags.companion_nao=true;check(!R.locationActions().some(a=>a.lesson),'lessons cannot summon travelling Nao to counter');
+for(const seed of ['frost-order','vault-light','two-tides']){
+ api.trade.start(seed);R.state().fuel=6;const goldStart=json(R.state().gold),purseStart=R.state().credits;
+ api.travelTo('yard');api.performAction('ay_start');api.performAction('ay_compare');check(!R.state().flags.ay_compared,'cannot compare without records');api.performAction('ay_stamp');
+ api.travelTo('landing');api.performAction('ay_receipt');api.travelTo('yard');api.performAction('ay_compare');check(R.state().flags.ay_mismatch,'record checker identifies swapped lot');api.travelTo('landing');api.performAction('ay_finish');
+ check(R.state().flags.ay_done,'parcel story completes through crossings '+seed);equal(json(R.state().gold),goldStart,'parcel quest never changes traded gold');equal(R.state().credits,purseStart,'parcel story does not wager credits');
+ const done=json(R.state());api.performAction('ay_finish');equal(json(R.state()),done,'receipt correction cannot repeat');equal(R.saveProblem(api.readSave()),null,'parcel flags autosave');
+ api.trade.turnIn();api.trade.nextNight();check(R.state().flags.ay_done,'parcel resolution carries to next chapter');R.visit('yard');check(!R.locationActions().some(a=>a.id==='ay_start'),'closed parcel story does not restart next chapter');
+}
+equal(M.compareAssay({lot:'A',karat:24},{lot:'A',karat:24}).code,'matched','matching record control');equal(M.compareAssay({lot:'A',karat:24},{lot:'A',karat:0}).code,'purity-mismatch','material mismatch control');equal(M.compareAssay(null,{}).code,'incomplete','incomplete records not accepted');
+api.trade.start('frost-order');R.visit('canal','04:30');R.state().flags.ct_route=true;const offerAction=R.activeCase().actions.canal.find(a=>a.id==='ct_buy_tea'),snapshot=json(R.state());
+let offer=R.cargoOffer(offerAction);equal(offer.margin,14,'tea gross margin');equal(offer.fuel,2,'known crossing fuel shown');equal(offer.crossing,40,'known crossing minutes shown');equal(offer.arrival,M.parseClock('05:15'),'arrival accounts for pickup');equal(json(R.state()),snapshot,'preview does not mutate save');
+R.visit('canal','05:10');offer=R.cargoOffer(offerAction);check(offer.reachable,'exact tea arrival deadline reachable');R.visit('canal','05:11');check(!R.cargoOffer(offerAction).reachable,'late-arrival purchase warns');
+beginSecond('order');R.visit('market');const localOffer=R.cargoOffer(R.activeCase().actions.market.find(a=>a.id==='n2_buy_market_1'));equal(localOffer.margin,4,'local ingredient margin');equal(localOffer.fuel,0,'same-quay handover needs no crossing');
+api.trade.start('frost-order');const readBefore=lessonResources();for(const id of ['harbour','summer','gold','halloween','christmas']){api.performAction('review_'+id);check(R.state().lastResult.lines.length>=2,'issue has readable excerpt '+id);}equal(lessonResources(),readBefore,'reading does not change resources');
+R.state().previous={flags:{cf_done:true,yard_done:true}};api.performAction('review_summer');check(R.state().lastResult.lines.filter(l=>l.type==='notice').length>=2,'archive recognises prior completed projects');panel=new TestNode();R.renderTradeActions(panel);check(textOf(panel).includes('Gold special')&&textOf(panel).includes('Summer archive'),'reading shelf exposes issue selectors');
+for(const truth of ['order','vault','both'])for(const choice of ['join','carry','private']){
+ beginSecond(truth);api.trade.turnIn();api.trade.nextNight();R.state().truth=truth;R.state().fuel=6;R.setState(R.state());
+ api.travelTo('market');api.performAction('n3_breakfast');api.performAction('af_start');api.travelTo('bar');api.performAction('af_picnic');api.travelTo('landing');api.performAction('af_route');api.travelTo('market');api.performAction('af_ready');
+ check(R.state().flags.af_ready,'picnic planned through actual travel '+truth);check(R.storyProgress().some(x=>x.id==='afternoon'&&!x.done),'picnic has independent next-step card');
+ R.visit('market','08:00');api.trade.turnIn();const accounts=()=>json({clock:R.state().clock,fuel:R.state().fuel,credits:R.state().credits,gold:R.state().gold,finish:R.state().finish,trades:R.state().trades});const settled=accounts();
+ check(R.finishFamilyAfternoon(choice),'afternoon choice accepted '+choice);equal(accounts(),settled,'afternoon cannot change settled trading accounts');check(R.storyProgress().find(x=>x.id==='afternoon').done,'afternoon outcome recorded');
+ check(!R.finishFamilyAfternoon('join'),'afternoon cannot award a second choice');equal(R.saveProblem(api.readSave()),null,'epilogue save remains valid '+truth);R.setState(api.readSave());check(R.state().flags['af_'+choice],'afternoon selection survives reload');
+}
+// Exercise the production afternoon modal and its actual choice button handlers.
+R.state().flags.af_done=false;delete R.state().flags.af_private;delete R.state().flags.af_carry;delete R.state().flags.af_join;
+const familyNodes=Object.fromEntries(['resolution','modal','modalTitle','modalBody','modalActions','modalCard'].map(k=>[k,new TestNode()]));R.familyDom(familyNodes);R.familyModal();
+check(familyNodes.resolution.hidden&&!familyNodes.modal.hidden,'afternoon avoids overlapping dialogs');check(familyNodes.modalTitle.textContent.includes('Haruto'),'family modal identifies both characters');
+let joinButton=flatten(familyNodes.modalActions).find(n=>n.tag==='button'&&textOf(n).trim()==='Join their picnic');check(joinButton&&joinButton.events.click,'production picnic choice button exists');joinButton.events.click();R.familyModal();
+check(textOf(familyNodes.modalBody).includes('Haruto Mizuno')&&textOf(familyNodes.modalBody).includes('12:30'),'completed scene includes father and afternoon time');equal(flatten(familyNodes.modalActions).filter(n=>n.tag==='button').length,1,'completed afternoon exposes only return button');
 console.log(`Passed ${checks} adventure checks (engine/data; browser layout is checked separately).`);

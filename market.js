@@ -242,7 +242,13 @@
   }
   function worth(credits, lots, sellPrice) { return Math.round(credits + totalGrams(lots) * sellPrice); }
 
+  // A bounded story record check; does not alter global lot pricing or purity rules.
+  function compareAssay(receipt, assay) {
+    if (!receipt || !assay || typeof receipt.lot !== "string" || typeof assay.lot !== "string") return { code: "incomplete", matches: false };
+    return { code: receipt.lot !== assay.lot ? "lot-mismatch" : receipt.karat !== assay.karat ? "purity-mismatch" : "matched", matches: receipt.lot === assay.lot && receipt.karat === assay.karat };
+  }
   window.NeonMarket = {
+    compareAssay: compareAssay,
     parseClock: parseClock,
     hash32: hash32,
     pickTruth: pickTruth,
