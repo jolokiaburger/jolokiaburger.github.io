@@ -1,0 +1,22 @@
+{
+  "portraits": [
+    {
+      "id": "sora",
+      "prompt": "Use case: illustration-story. Redesign an original adult game character portrait for Neon Tides. Reference image is a style and prior-role reference; change the requested appearance substantially. Square head-and-shoulders composition, fine adult manga ink linework and crosshatching with warm painterly colour, lived-in mature anime lo-fi harbour mood, matching original reference art quality. Plain dark muted teal background, amber sidelight, clear face. No text, logo or watermark. Sora Ember, woman about 38, a confident friendly gold merchant. Give her a distinct honey-blonde chin-length wavy bob with side part, light brows, gray-green eyes, subtly freckled fair skin. Dark navy structured work jacket over deep blue collared blouse, modest brass stud earrings and a small brass pin. Clothes entirely dark blue, NO cream shirt, NO terracotta apron, NO brown tied hair. Warm self-assured smile, recognizably different from brown-haired food-stall cook Nao."
+    },
+    {
+      "id": "priya",
+      "prompt": "Use case: illustration-story. Create an entirely new original face for Priya Gale, Japanese ferry clerk and office worker age 39. Input is a STYLE reference ONLY; do not copy the blonde woman's face or hair. Square head-and-shoulders portrait, dark teal uncluttered background, warm amber sidelight, fine literary adult manga ink contours and crosshatching, painterly colours, matches Neon Tides. Japanese woman with straight jet-black shoulder-length hair, tidy soft full fringe lightly parted at centre, gently rounded Japanese facial proportions, natural warm light complexion, dark brown eyes, approachable softly smiling face with subtle late-thirties laugh lines and hint of night-shift tiredness. Loosely inspired by the friendly everyday cashier atmosphere of Smoking Behind the Supermarket with You, original person not exact character. Crisp white buttoned office blouse with modest collar, navy waistcoat, blue ID lanyard with blank unreadable card, one pocket pen. No glasses, no retail logos, no text or watermark. Warm competent office-worker look distinctly different from blonde Sora and brown tied-hair Nao."
+    },
+    {
+      "id": "mei",
+      "prompt": "Use case: illustration-story. Redesign an original adult game character portrait for Neon Tides. Reference image is a style and prior-role reference; change the requested appearance substantially. Square head-and-shoulders composition, fine adult manga ink linework and crosshatching with warm painterly colour, lived-in mature anime lo-fi harbour mood, matching original reference art quality. Plain dark muted teal background, amber sidelight, clear face. No text, logo or watermark. Auntie Mei, Japanese woman about 58, warmly confident noodle-counter owner. Original interpretation loosely inspired by an older Motoko Kusanagi: sharp mature cheekbones, steady perceptive violet-gray eyes, short sculpted dark violet bob with visible silver streaks at temples, subtle wrinkles and laugh lines, calm capable bearing with a small kind smile. Charcoal high-collared work blouse, burgundy practical apron visible on shoulders/chest, one small jade earring. Mature everyday cyberpunk style, grounded approachable cook. No weapons, no combat costume, no bodysuit or sexualization, not exact Motoko face/design. No bun or cream apron."
+    }
+  ],
+  "sprites": [
+    {
+      "id": "sora",
+      "prompt": "Use case: illustration-story. Full-body transparent game sprite of the SAME original woman in the reference portrait: Sora Ember, 38, honey blonde chin-length wavy bob, freckles, gray-green eyes, dark navy work jacket with small brass buttons over a deep blue collared blouse, dark navy straight trousers, sensible dark boots. Match face, hair and outfit colours exactly to portrait. Entire figure hair to shoes inside frame, natural adult proportions, standing relaxed three-quarter toward viewer, arms close to body, empty hands, confident kind merchant smile. Fine adult manga ink and crosshatching, muted painterly warm amber sidelight and cool night fill. Single isolated figure with generous transparent margins on ALL sides, genuinely transparent background, no environment/floor/cast shadow rectangle/text/logo, no apron, no brown hair, no other person. Vertical canvas 2:3 composition."
+    }
+  ]
+}

@@ -22,13 +22,13 @@ Rei Minato, Japanese woman age 32, short layered dark hair with one side tucked 
 
 Asset: `assets/portraits/mei-manga.webp`
 
-Auntie Mei, Chinese-Japanese woman age 52, dark hair in a loose bun with silver temple strands and simple brass hairpin, jade stud earrings, faded burgundy work blouse and cream noodle-shop apron. Kind eyes with laughter lines, knowing amused smile.
+Auntie Mei, Japanese woman around 58, sculpted dark-violet bob with silver temple streaks, sharp mature cheekbones and steady violet-gray eyes. Charcoal high-collared work blouse, practical burgundy noodle-shop apron and jade earring. Calm capable bearing, subtle wrinkles and a kind smile. An original older cyberpunk interpretation inspired by Motoko Kusanagi, grounded in her everyday role as a cook.
 
 ### priya
 
 Asset: `assets/portraits/priya-manga.webp`
 
-Priya Gale, South Asian woman age 39, straight dark hair in a loose chin-length bob, rectangular thin glasses, muted teal station cardigan over a light shirt, practical lanyard. Observant slightly raised eyebrow, understated friendly half-smile.
+Priya Gale, Japanese office worker and ferry clerk around 39, straight black shoulder-length hair with neat side-swept fringe, no glasses. Crisp white blouse, navy waistcoat, blue ID lanyard and pocket pen. Approachable cashier-like workplace warmth inspired by Smoking Behind the Supermarket with You, with original facial features and uniform. Gentle smile and quiet night-shift competence.
 
 ### matte
 
@@ -76,7 +76,7 @@ Oduya, Black harbour gold broker age 48, closely cropped dark hair, dark brown s
 
 Asset: `assets/portraits/sora-manga.webp`
 
-Sora Ember, Japanese woman age 38, wavy shoulder-length dark auburn hair, soft freckles, faded rust-orange market apron over cream shirt, rolled sleeves. Welcoming confident easy smile, one practical small ear stud.
+Sora Ember, woman around 38, honey-blonde chin-length wavy bob with side part, light brows, gray-green eyes and subtle freckles. Navy structured work jacket over a deep-blue blouse, small brass earrings and pin. Confident welcoming smile; a clearly different silhouette and colour palette from Nao’s tied brown hair and terracotta apron.
 
 ### rin
 
@@ -102,3 +102,7 @@ The Lantern Market now uses `assets/scenes/lantern-market.webp`, an original 144
 The exact prompt set is recorded in `tools/night-market-art-prompts.json`. Portraits are original character designs. Sprite references are Sora's existing game portrait and the new Nao/Kenji portraits, inspected before generation. No third-party manga panels or character images were used. The native SVG stall targets, signs, dispatch notices, parcels and wish star in `index.html` remain editable code.
 
 Nao Mizuno is a 29-year-old food-stall keeper in a cream work shirt and faded terracotta apron. Kenji Arata is a 47-year-old mechanic in moss-gray workwear, with stubble and glasses pushed onto his head. Sora remains the market's gold host. The scene uses fine ink contours, painterly amber lantern light, cool harbour shadows and wet wood; the smaller sprites share that treatment.
+
+## Three-character visual refinement
+
+Sora, Priya and Mei were redesigned with the built-in image-generation tool. The exact portrait and sprite prompts are recorded in `tools/character-redesign-prompts.json`. Sora’s transparent market sprite matches her new blonde/navy portrait; Priya’s ticket-window figure and Mei’s counter figure in `index.html` match their updated office wear and violet/silver hair. Character IDs and story progress remain unchanged. The original fifteen-portrait byte count above describes the earlier art pass, not the expanded current cast.
