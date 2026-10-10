@@ -76,3 +76,7 @@ Four original portrait refinements (`assets/portraits/{aki,yumi,matte,sora}-harb
 ### Voyage start-page illustration
 
 `assets/scenes/voyage-title.webp` (2048 × 688) and its 1024 px responsive export are original illustrations generated with OpenAI’s built-in image-generation tool, using the game’s own Nao portrait as an identity reference. The Tern, lantern-lit harbour, water and fog follow the project’s art direction. Prompt: `tools/voyage-title-art-prompts.json`. These assets follow the artwork licence in `LICENSE`.
+
+### Voyage 0.10 harbour life
+
+Skippable quay arrivals, animated mooring ropes, travelling workboats and Nao/Yumi deck figures in `voyage/voyage.js` are original native Canvas artwork. New everyday exchanges, waterway encounters and logbook messages in `voyage/ports.js` are original fictional writing. Illustrated logbook entries reuse the original Voyage start-page illustration and existing portraits; no additional downloads or external assets are required. Existing artwork/story and code licences apply.

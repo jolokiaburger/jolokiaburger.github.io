@@ -134,3 +134,13 @@ Existing 0.1 Voyage saves retain their purse, stories, upgrades and discoveries.
 Run `node tools/voyage-checks.mjs`, `node tools/adventure-checks.mjs`, and `node tools/sound-checks.mjs`. Sailing checks simulate every port-to-port route through the actual steering function, not just path existence. A local canvas/DOM smoke pass also exercises startup, tabs, portraits, assisted sailing, docking and the journal. Actual browser layout, touch comfort and device performance still need player testing.
 
 Most useful feedback: Does the ferry turn comfortably? Are the quay rings easy to find? Do the four port tabs feel clear? Does the gold/cargo presentation make sense? Is the map too empty, too zoomed out, or difficult to read on your device?
+
+## Voyage 0.10 · A little more life between quays
+
+- `voyage/voyage.js` and `voyage/voyage.css`: brief skippable arrivals, gently drawn mooring ropes, safe camera easing, and small animated Nao/Yumi deck figures. Reduced motion uses a static reveal. Arrival presentation consumes no game time.
+- `voyage/ports.js` and `voyage/model.js`: three optional waterway encounters west of the central channel and along its eastern approach. Sora sells one gram for 46 cr (4 min); released yard fittings pay 8 cr (6 min); Yumi boards for free (3 min) and pays 12 cr once on mooring at Metro. Each offers a free alternative, settles once, and persists in existing saves. Nao can remain aboard with Yumi.
+- `voyage/ports.js`: fourteen characters gain rotating everyday conversations after their introductory lines. Delivery and quest reactions retain priority. Deck conversations vary with distance sailed, nearby quays, weather, cargo and story progress; reading pauses sailing.
+- `voyage/model.js` and `voyage/voyage.js`: Trading overview compares one-gram gold routes using only the live local purchase price and known remembered bids. Cargo comparisons include collection/delivery fuel, return fuel to Kurage, purchase cost, promised payment, quote age and deadline feasibility. These remain estimates; no unseen price is revealed.
+- `voyage/profile.js`: each completed voyage now keeps an illustrated entry, encounters and a relevant character’s closing message. The result includes realised gold, cargo, couriers, letter jobs, discoveries and salvage minus recorded fuel/recovery. Food, upgrades, cosmetics and unrealised gold are explicitly excluded. Old histories and Voyage saves remain compatible.
+
+Validation: `node tools/voyage-checks.mjs` covers encounter location, costs, one-time rewards, passenger coexistence, malformed/old saves, changing conversations, estimate accounting and saved logbook entries. Native Canvas smoke scenarios inspect sailing and mooring; real-device Safari/iOS testing remains outstanding.
