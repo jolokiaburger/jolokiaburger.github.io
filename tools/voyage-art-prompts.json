@@ -1,0 +1,99 @@
+{
+  "version": "0.8",
+  "tool": "Built-in image_gen",
+  "portraits": [
+    {
+      "key": "nao-relaxed",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-manga.webp",
+      "prompt": "Use case: identity-preserve. Game dialogue portrait. Edit this original Nao portrait: change only her expression to a relaxed, modest warm smile with soft open eyes. Preserve the exact adult face, brown loose tied hair, white rolled-sleeve shirt, burgundy apron, cup and warm night-harbour setting. Match the fine ink, crosshatching and muted manga colour already present. Square portrait, no text, no other character, no exaggerated anime eyes.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-a7471a4c-c0cf-41b9-a710-13ea47050ecb.png",
+      "output": "assets/portraits/nao-relaxed.webp"
+    },
+    {
+      "key": "nao-thoughtful",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-manga.webp",
+      "prompt": "Use case: identity-preserve. Edit this original game Nao portrait: change only expression to quiet thoughtful curiosity, gaze slightly aside, mouth neutral with a tiny hopeful hint. Preserve adult identity, facial features, brown loosely tied hair, white rolled-sleeve shirt, burgundy apron, cup, composition and night-harbour background. Same fine ink and crosshatched muted adult manga style. Square, no text, no tears, no oversized anime eyes.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-3743d944-412f-45d0-8076-be2c772b9787.png",
+      "output": "assets/portraits/nao-thoughtful.webp"
+    },
+    {
+      "key": "nao-pleased",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-manga.webp",
+      "prompt": "Use case: identity-preserve. Edit this original Nao game portrait: change only expression to pleased, quietly proud after sharing a successful supper; a slightly broader natural smile and bright soft eyes. Preserve her exact adult identity, face, brown loosely tied hair, white shirt and burgundy apron, cup, framing and warm night harbour. Original fine ink, crosshatching, restrained adult manga proportions. Square, no text, no exaggerated expression.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-cb7390ce-4139-4f98-b01d-0cf5ab8557c7.png",
+      "output": "assets/portraits/nao-pleased.webp"
+    },
+    {
+      "key": "rin-relaxed",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/rin-manga.webp",
+      "prompt": "Use case: identity-preserve. Production square game portrait. Preserve Rin's exact adult face, short tousled dark pixie hair, faint workshop smudges, olive work jacket and off-white shirt; same charcoal background and framing. Change only expression. Match the existing fine ink and crosshatched muted adult manga illustration. Expression: relaxed modest smile, approachable and quietly amused. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-2410992c-78b5-4c2c-9870-fe0e4ce41d5d.png",
+      "output": "assets/portraits/rin-relaxed.webp"
+    },
+    {
+      "key": "rin-thoughtful",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/rin-manga.webp",
+      "prompt": "Use case: identity-preserve. Production square game portrait. Preserve Rin's exact adult face, short tousled dark pixie hair, faint workshop smudges, olive work jacket and off-white shirt; same charcoal background and framing. Change only expression. Match the existing fine ink and crosshatched muted adult manga illustration. Expression: thoughtful, attentive, mouth almost neutral, gaze slightly to the side. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-83174ade-4bcb-4208-a9e4-ddda18482f33.png",
+      "output": "assets/portraits/rin-thoughtful.webp"
+    },
+    {
+      "key": "rin-pleased",
+      "ref": "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/rin-manga.webp",
+      "prompt": "Use case: identity-preserve. Production square game portrait. Preserve Rin's exact adult face, short tousled dark pixie hair, faint workshop smudges, olive work jacket and off-white shirt; same charcoal background and framing. Change only expression. Match the existing fine ink and crosshatched muted adult manga illustration. Expression: quietly pleased, proud warm natural smile after a successful shared task. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-093257a1-3797-49ec-89d6-d58878eefab9.png",
+      "output": "assets/portraits/rin-pleased.webp"
+    },
+    {
+      "key": "mio-relaxed",
+      "ref": "/workspace/scratch/e4f9f2f0b599/mio-preview.png",
+      "prompt": "Use case: illustration-story. Production square game portrait. The reference is the game's original native vector Mio Amami, NOT a franchise character. Translate her into a grounded adult manga portrait matching Nao and Rin: chestnut side ponytail, fine brass glasses, teal-green eyes, blue observatory work jacket, cream scarf and small constellation pin. Keep her recognizable facial structure and adult age around 35. Subtle ink linework and delicate crosshatching, muted amber/teal night-sky palette, dark observatory background, no plastic vector look. Expression: relaxed modest smile, approachable and quietly amused. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-2147c432-0207-4cb7-98e0-e62d6276a748.png",
+      "output": "assets/portraits/mio-relaxed.webp"
+    },
+    {
+      "key": "mio-thoughtful",
+      "ref": "/workspace/scratch/e4f9f2f0b599/mio-preview.png",
+      "prompt": "Use case: illustration-story. Production square game portrait. The reference is the game's original native vector Mio Amami, NOT a franchise character. Translate her into a grounded adult manga portrait matching Nao and Rin: chestnut side ponytail, fine brass glasses, teal-green eyes, blue observatory work jacket, cream scarf and small constellation pin. Keep her recognizable facial structure and adult age around 35. Subtle ink linework and delicate crosshatching, muted amber/teal night-sky palette, dark observatory background, no plastic vector look. Expression: thoughtful, attentive, mouth almost neutral, gaze slightly to the side. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-76f0e289-7264-45c3-949a-4848ec0133fa.png",
+      "output": "assets/portraits/mio-thoughtful.webp"
+    },
+    {
+      "key": "mio-pleased",
+      "ref": "/workspace/scratch/e4f9f2f0b599/mio-preview.png",
+      "prompt": "Use case: illustration-story. Production square game portrait. The reference is the game's original native vector Mio Amami, NOT a franchise character. Translate her into a grounded adult manga portrait matching Nao and Rin: chestnut side ponytail, fine brass glasses, teal-green eyes, blue observatory work jacket, cream scarf and small constellation pin. Keep her recognizable facial structure and adult age around 35. Subtle ink linework and delicate crosshatching, muted amber/teal night-sky palette, dark observatory background, no plastic vector look. Expression: quietly pleased, proud warm natural smile after a successful shared task. Natural adult anatomy, restrained eyes. No text, no smoking, no copied manga character, shoulders visible, face large, complete head inside frame.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-c2ded267-038f-4622-a11b-fbef1b4cb5af.png",
+      "output": "assets/portraits/mio-pleased.webp"
+    }
+  ],
+  "scenes": [
+    {
+      "key": "constellation-supper",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-pleased.webp",
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/mio-relaxed.webp"
+      ],
+      "prompt": "Create an original high-quality landscape 3:2 adult slice-of-life manga illustration for a gentle sci-fi harbour adventure. Match the two referenced original characters faithfully: Nao with brown tied hair, white blouse and burgundy apron, Mio with chestnut ponytail, brass round glasses, blue work jacket and cream scarf. They share roasted tea and ginger biscuits at a small wooden table with three cups and a paper star chart at Tsukimi waterfront observatory, a modest dome and telescope behind them, a little ferry moored nearby. Rain has cleared; sparse stars, distant urban lanterns, deep blue water, warm amber table lamp, quiet positive friendship. Fine ink, nuanced adult faces, soft painted muted colours, atmospheric detailed composition. No text, no logos, no collage. Landscape full scene.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-78c40e99-2bf3-416a-9a0c-2230548a4ca3.png",
+      "output": "assets/scenes/constellation-supper.webp"
+    },
+    {
+      "key": "market-breakfast",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Original high-quality landscape 3:2 adult slice-of-life manga illustration, gentle sci-fi harbour adventure. Match referenced Nao faithfully, brown loosely tied hair, white rolled sleeve blouse, burgundy apron, natural adult face. At her small Lantern Market stall she sets a tray of freshly steamed buns and ceramic tea cups on a wet wooden counter for a visiting ferry captain whose hands only are visible in foreground. First peach dawn over blue harbour, warm lanterns still lit, softly layered stalls and moored little ferry behind, quiet hopeful homecoming. Fine ink, nuanced expressions, soft muted painterly amber and teal colours. Full detailed scene, no text or logos.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-117a69b2-00d7-4da4-925a-dd0b97d1f10b.png",
+      "output": "assets/scenes/market-breakfast.webp"
+    },
+    {
+      "key": "second-helping",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/rin-pleased.webp"
+      ],
+      "prompt": "Original high-quality landscape 3:2 adult slice-of-life manga illustration for gentle sci-fi harbour adventure. Match referenced Rin faithfully, short tousled dark pixie hair, olive utility jacket over ivory shirt, adult engineer with a tiny grease smudge and warm pleased smile. She stands on a timber salvage-yard quay beside a repaired modest small ferry, one hand resting on a cleaned pump casing on a workbench. Tidy tools, coiled ropes, salvage parts, quiet warm workshop lamp, cool rainy blue harbour and sparse distant lanterns. Boat practical and weathered, no weapons, calm satisfaction after useful work. Fine ink, nuanced adult face, softly painted muted colours, cinematic full scene. No text or logos.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-21a4eb6e-2b1c-448d-bd62-5f205feea032.png",
+      "output": "assets/scenes/second-helping.webp"
+    }
+  ]
+}

@@ -106,3 +106,9 @@ Nao Mizuno is a 29-year-old food-stall keeper in a cream work shirt and faded te
 ## Three-character visual refinement
 
 Sora, Priya and Mei were redesigned with the built-in image-generation tool. The exact portrait and sprite prompts are recorded in `tools/character-redesign-prompts.json`. Sora’s transparent market sprite matches her new blonde/navy portrait; Priya’s ticket-window figure and Mei’s counter figure in `index.html` match their updated office wear and violet/silver hair. Character IDs and story progress remain unchanged. The original fifteen-portrait byte count above describes the earlier art pass, not the expanded current cast.
+
+## Voyage 0.8: expressions and illustrated memories
+
+Nine original 512 × 512 portraits give Nao, Rin and Mio relaxed, thoughtful and pleased expressions. Mio’s chestnut side ponytail, brass glasses, blue work jacket, cream scarf and constellation pin carry forward her original SVG design into the illustrated portrait style. Nao and Rin use their existing game portraits as identity references. Three 960 × 640 optional scenes show the constellation supper, Nao’s dawn breakfast counter and Rin with Second Helping. Built-in image generation produced every image individually; Pillow only downscaled and exported WebP (portraits quality 82, scenes 80). Full prompts and reference/source paths are in `tools/voyage-art-prompts.json`. No third-party character images or manga panels were used.
+
+Canvas figures remain native drawing code with cast-specific palettes, hair and accessories. Shoreline shading, slow telescope movement, steam, rope slack and work light are decorative and do not alter navigation geometry. All motion follows the existing reduced-motion setting. Twelve images total less than one megabyte; the three larger scenes load only when opened.

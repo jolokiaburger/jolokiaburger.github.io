@@ -64,3 +64,7 @@ The Voyage 0.5 harbour-board posts, trading notes, constellation-supper story an
 Voyage 0.6 encounter visitors, Nao’s post-supper crossing dialogue, breakfast exchanges and closing harbour-wire messages in `voyage/ports.js` are original fictional writing. The dawn palette and breakfast signage in `voyage/voyage.js` are original Canvas/CSS work. Nao’s passenger portrait reuses the existing original game artwork.
 
 Voyage 0.7’s rice-parcel, filter and star-chart contracts, working-harbour notices and follow-up letters in `voyage/ports.js` are original fictional content. Ferry palette choices and the CSS preview are original project artwork. The captain-profile code in `voyage/profile.js` follows the existing MIT code licence; writing and artwork follow CC BY 4.0.
+
+### Voyage 0.8 artwork
+
+Original Nao, Rin and Mio expression portraits and three optional story illustrations were generated with the built-in image-generation tool using this project’s own character designs as references. Prompt provenance: `tools/voyage-art-prompts.json`. Exports: `assets/portraits/{nao,rin,mio}-{relaxed,thoughtful,pleased}.webp` and `assets/scenes/{constellation-supper,market-breakfast,second-helping}.webp`. No external manga panels, branded characters or downloaded artwork were used. These assets follow the artwork licence in `LICENSE`.

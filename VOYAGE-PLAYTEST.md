@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.7
+# Neon Tides Voyage · Playtest 0.8
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,16 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Familiar faces, warmer quays · 0.8
+
+- Nao, Rin and Mio have relaxed, thoughtful and pleased portrait variants. Plans use thoughtful faces; successful handovers, repairs and supper use pleased faces. Casual replies retain their normal or completed-story mood. No extra dialogue click is required.
+- All fourteen quay figures have distinct hair, clothing and accessories matching the cast. Nao leaves her market figure while aboard and appears at the canal or observatory when moored there for her story.
+- Small kettle steam, slow telescope adjustment, slack rope movement and a softly breathing work lamp add activity. System reduced motion freezes their movement. Shallow shoreline bands, submerged quay walls, shadows and small lantern reflections add depth without changing safe water or collision geometry.
+- Three optional illustrations unlock after constellation supper, Nao’s market breakfast and Second Helping’s repair. **View moment** appears in relevant conversations and the Journal. Completed voyages retain those buttons in the captain’s history. Viewing is free, pauses sailing and never auto-opens over the map. Images have descriptive alternative text and a readable fallback if an image fails to load.
+- Existing saves and histories remain valid. Older histories have no image record; existing supper/repair flags unlock their images in the current journal. A market breakfast played before 0.8 needs another breakfast visit to create its new memory flag.
+
+All twelve new images are original, generated with the built-in image-generation tool from this game’s own character references. The exact prompts are in `tools/voyage-art-prompts.json`. Portraits are 512 × 512 WebP; optional scenes are 960 × 640 WebP. No image service runs during play.
 
 ## Familiar water, another night · 0.7
 
@@ -102,7 +112,7 @@ Existing 0.1 Voyage saves retain their purse, stories, upgrades and discoveries.
 
 ## Files and validation
 
-`world-map.js`: navigable land, ports, landmarks. `navigation.js`: steering, collisions and safe assisted routing. `ports.js`: adapted character text, cargo contracts and market events. `model.js`: time, cargo, fuel, gold, upgrades, recovery and save validation. `voyage.js`: Canvas map, HUD, People/Market/Cargo/Services panels, input, dialogs and autosave. `voyage.css`: desktop/mobile views. `sound.js`: optional ferry and weather synthesis; `../halloween-radio.js`: shared procedural radio. `../assets/portraits/mio.svg`: original observatory portrait. No build or dependencies needed to play.
+`world-map.js`: navigable land, ports, landmarks. `navigation.js`: steering, collisions and safe assisted routing. `ports.js`: adapted character text, cargo contracts and market events. `model.js`: time, cargo, fuel, gold, upgrades, recovery and save validation. `voyage.js`: Canvas map, HUD, People/Market/Cargo/Services panels, input, dialogs and autosave. `voyage.css`: desktop/mobile views. `sound.js`: optional ferry and weather synthesis; `../halloween-radio.js`: shared procedural radio. `../assets/portraits/mio-{relaxed,thoughtful,pleased}.webp`: observatory portraits; `mio.svg` remains as the original design reference. No build or dependencies needed to play.
 
 Run `node tools/voyage-checks.mjs`, `node tools/adventure-checks.mjs`, and `node tools/sound-checks.mjs`. Sailing checks simulate every port-to-port route through the actual steering function, not just path existence. A local canvas/DOM smoke pass also exercises startup, tabs, portraits, assisted sailing, docking and the journal. Actual browser layout, touch comfort and device performance still need player testing.
 
