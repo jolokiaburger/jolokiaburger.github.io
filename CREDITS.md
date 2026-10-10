@@ -68,3 +68,7 @@ Voyage 0.7’s rice-parcel, filter and star-chart contracts, working-harbour not
 ### Voyage 0.8 artwork
 
 Original Nao, Rin and Mio expression portraits and three optional story illustrations were generated with the built-in image-generation tool using this project’s own character designs as references. Prompt provenance: `tools/voyage-art-prompts.json`. Exports: `assets/portraits/{nao,rin,mio}-{relaxed,thoughtful,pleased}.webp` and `assets/scenes/{constellation-supper,market-breakfast,second-helping}.webp`. No external manga panels, branded characters or downloaded artwork were used. These assets follow the artwork licence in `LICENSE`.
+
+### Voyage 0.9 character refinements
+
+Four original portrait refinements (`assets/portraits/{aki,yumi,matte,sora}-harbour.webp`) use the game’s existing designs as identity references and its own Nao artwork as a treatment reference. Generated with the built-in image-generation tool; prompt set: `tools/voyage-09-art-prompts.json`. They follow the artwork licence in `LICENSE`. Sea discoveries and ferry detail are original native Canvas code; dockside ambience is procedural Web Audio synthesis.

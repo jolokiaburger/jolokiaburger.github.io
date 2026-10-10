@@ -213,9 +213,9 @@ window.NEON_TIDES = (function () {
       teo:   { name: "Rei Minato", role: "Courier captain · Night routes",          color: "#ffb04a", portrait: "assets/portraits/rei-manga.webp", artStyle: "manga" },
       mei:   { name: "Auntie Mei",        role: "Keeper of the hearth",           color: "#ff7a3d", portrait: "assets/portraits/mei-manga.webp", artStyle: "manga" },
       priya: { name: "Priya Gale",        role: "Keeper of the crossings",    color: "#3df5ff", portrait: "assets/portraits/priya-manga.webp", artStyle: "manga" },
-      matte: { name: "Matte Rook",        role: "Sentinel of Pier 9",    color: "#9b93d6", portrait: "assets/portraits/matte-manga.webp", artStyle: "manga" },
+      matte: { name: "Matte Rook",        role: "Sentinel of Pier 9",    color: "#9b93d6", portrait: "assets/portraits/matte-harbour.webp", artStyle: "manga" },
       dex:   { name: "Dex Swift",         role: "Starlight courier",               color: "#ffb04a", portrait: "assets/portraits/dex-manga.webp", artStyle: "manga" },
-      yumi:  { name: "Yumi Sol",     role: "Harbour healer", color: "#2fbfa8", portrait: "assets/portraits/yumi-manga.webp", artStyle: "manga" },
+      yumi:  { name: "Yumi Sol",     role: "Harbour healer", color: "#2fbfa8", portrait: "assets/portraits/yumi-harbour.webp", artStyle: "manga" },
       lam:   { name: "Captain Lam",           role: "Tidewise engineer",      color: "#c4b0ff", portrait: "assets/portraits/lam-manga.webp", artStyle: "manga" },
       radio: { name: "Bengt",             role: "Tug captain · Channel 9",                 color: "#c9bdd9", portrait: "assets/portraits/radio-manga.webp", artStyle: "manga" }
     },

@@ -1,0 +1,46 @@
+{
+  "version": "0.9",
+  "tool": "Built-in image_gen",
+  "portraits": [
+    {
+      "id": "aki",
+      "output": "assets/portraits/aki-harbour.webp",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/aki-manga.webp",
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Refine the original game character in reference image 1; reference image 2 (Nao) is ONLY the benchmark for fine ink, natural adult manga faces, softly painted detail and inviting amber harbour light. Preserve image 1 character identity, age, facial features, hair, gender presentation and costume exactly. One original character only, no Nao in output. Square chest-up portrait, natural proportions, calm thoughtful half-smile; shoulder-length dark hair, violet knitted cardigan. Sheltered lighthouse doorway with thermos, soft gold lamp and blue rainy harbour visible behind. Keep face clearly legible in small dialogue portrait. Quiet positive slice-of-life science fiction harbour atmosphere, no heroic armour or glamour pose, no text, logos, collage or extra people.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-1c90bdb6-e2ff-4b3a-98a5-1424cd73e13d.png"
+    },
+    {
+      "id": "yumi",
+      "output": "assets/portraits/yumi-harbour.webp",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/yumi-manga.webp",
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Refine the original game character in reference image 1; reference image 2 (Nao) is ONLY the benchmark for fine ink, natural adult manga faces, softly painted detail and inviting amber harbour light. Preserve image 1 character identity, age, facial features, hair, gender presentation and costume exactly. One original character only, no Nao in output. Square chest-up portrait, natural proportions, calm welcoming gentle expression; brown tied-back hair, sage scrubs and grey coat. Metro clinic shelter on a tea break, warm window light and distant blue train windows behind. Keep face clearly legible in small dialogue portrait. Quiet positive slice-of-life science fiction harbour atmosphere, no heroic armour or glamour pose, no text, logos, collage or extra people.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-4e8ef440-8c98-447b-834b-419b4342d730.png"
+    },
+    {
+      "id": "matte",
+      "output": "assets/portraits/matte-harbour.webp",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/matte-manga.webp",
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Refine the original game character in reference image 1; reference image 2 (Nao) is ONLY the benchmark for fine ink, natural adult manga faces, softly painted detail and inviting amber harbour light. Preserve image 1 character identity, age, facial features, hair, gender presentation and costume exactly. One original character only, no Nao in output. Square chest-up portrait, natural proportions, calm restrained reassuring expression, tired adult man with dark greying tousled hair and stubble, navy weatherproof coat over grey shirt. Cold-store office doorway, warm tea thermos, soft amber desk light and cool harbour refrigeration pipes behind. Keep face clearly legible in small dialogue portrait. Quiet positive slice-of-life science fiction harbour atmosphere, no heroic armour or glamour pose, no text, logos, collage or extra people.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-0d2b99e9-0186-4eae-9e25-857690a1c949.png"
+    },
+    {
+      "id": "sora",
+      "output": "assets/portraits/sora-harbour.webp",
+      "refs": [
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/sora-manga.webp",
+        "/workspace/scratch/e4f9f2f0b599/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Refine the original game character in reference image 1; reference image 2 (Nao) is ONLY the benchmark for fine ink, natural adult manga faces, softly painted detail and inviting amber harbour light. Preserve image 1 character identity, age, facial features, hair, gender presentation and costume exactly. One original character only, no Nao in output. Square chest-up portrait, natural proportions, calm confident friendly smile; blonde wavy bob, freckles, navy structured jacket and deep-blue blouse, brass earrings. Behind her Lantern Market gold counter with a small brass scale and receipt book, warm paper lanterns and cool harbour water behind. Keep face clearly legible in small dialogue portrait. Quiet positive slice-of-life science fiction harbour atmosphere, no heroic armour or glamour pose, no text, logos, collage or extra people.",
+      "source": "/workspace/scratch/e4f9f2f0b599/generated_images/exec-46fb67a9-7aab-49a4-b1c2-fb4a7b9c3bc4.png"
+    }
+  ]
+}

@@ -22,3 +22,5 @@ W.weather=function(s){let hash=0;for(const c of s.seed)hash=(hash*31+c.charCodeA
  for(const name of types)result[name]=(a===name?1-blend:0)+(b===name?blend:0);return result;};
 W.discoveryPosition=function(s,d){return {x:d.x+Math.sin(s.clock*.08+d.x)*6,y:d.y+Math.cos(s.clock*.05+d.y)*4};};
 })();
+
+(function(){const W=window.VoyageWorld;W.discoveries.push({id:'pontoon',kind:'pontoon',x:1745,y:500,name:'The sheltered tea pontoon'},{id:'weather',kind:'station',x:2590,y:710,name:'The retired weather station'},{id:'flowers',kind:'flowers',x:1815,y:1070,name:'A flower seller on the tide'});})();

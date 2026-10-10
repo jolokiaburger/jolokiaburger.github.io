@@ -28,9 +28,9 @@
     ] }
   ];
   const cast = {
-    sora: { name: "Sora Ember", role: "Lantern market host", color: "#ffd08a", portrait: "assets/portraits/sora-manga.webp", artStyle: "manga" },
+    sora: { name: "Sora Ember", role: "Lantern market host", color: "#ffd08a", portrait: "assets/portraits/sora-harbour.webp", artStyle: "manga" },
     rin: { name: "Rin Starling", role: "Salvage engineer", color: "#8aead9", portrait: "assets/portraits/rin-manga.webp", artStyle: "manga" },
-    aki: { name: "Aki Hoshimi", role: "Keeper of the guiding light", color: "#bcb5ff", portrait: "assets/portraits/aki-manga.webp", artStyle: "manga" }
+    aki: { name: "Aki Hoshimi", role: "Keeper of the guiding light", color: "#bcb5ff", portrait: "assets/portraits/aki-harbour.webp", artStyle: "manga" }
   };
   Object.assign(T.characters, cast);
   Object.keys(cast).forEach(function (id) { T.things["exp-" + id] = cast[id].name; });

@@ -84,10 +84,12 @@ saved.set(R.settingsKey,JSON.stringify({station:'ghost',effects:false}));R.loadS
 const ferryCtx=new context.window.AudioContext(),ferryStart=nodes.length,ferry=context.window.VoyageSound.create(ferryCtx,ferryCtx.destination);
 check(!ferry.cue('depart'),'ferry sounds start muted');ferry.enable(true,.6);const ferryState={docked:null,ended:false,fuel:6,ship:{speed:86}};ferry.update(ferryState,{mist:0,rain:1},true);
 const continuous=nodes.slice(ferryStart),engineTone=continuous.find(n=>n.kind==='oscillator');check(engineTone.frequency.value>42&&engineTone.frequency.value<70,'engine hum follows speed softly');
-check(continuous.filter(n=>n.kind==='buffer'&&n.loop).length===3,'wake, wind and rain textures available');check(ferry.cue('depart')&&ferry.cue('moor'),'departure and mooring cues play when enabled');
+check(continuous.filter(n=>n.kind==='buffer'&&n.loop).length===6,'wake, wind, rain and three dockside textures available');check(ferry.cue('depart')&&ferry.cue('moor'),'departure and mooring cues play when enabled');
 const ferryNotes=nodes.slice(ferryStart).filter(n=>n.kind==='oscillator'&&n.stopped!==undefined);check(ferryNotes.every(n=>n.type==='sine'&&n.stopped-n.started<1.5),'ferry cues use quiet bounded tones');
 ferry.enable(false,.6);check(continuous[0].gain.value===0,'effects off mutes its separate bus');check(!ferry.cue('moor'),'muted ferry cue rejected');
 ferryCtx.state='suspended';ferry.enable(true,.6);check(!ferry.cue('depart'),'ferry cue cannot resume a suspended context');ferry.stop();for(const f of timers.splice(0))f();check(nodes.slice(ferryStart).every(n=>n.disconnected),'ferry graph fully disconnects after stop');
+// Local textures stay quiet, opt-in and fade by actual distance.
+const places=context.window.VoyageSound;for(const [id,type,x,y]of [['market','kettle',1280,830],['yard','workshop',960,1360],['pier','cold',1990,450]]){const at=places.mix({docked:id,ended:false,ship:{x,y}});check(at[type]===1,'docked soundscape fully present '+id);const away=places.mix({docked:null,ended:false,ship:{x:x+400,y}});check(away[type]<at[type],'soundscape fades away '+id);check(Object.values(at).every(v=>v>=0&&v<=1),'distance mix bounded');}check(Object.values(places.mix({ended:true,ship:{}})).every(v=>v===0),'ended voyage has no place textures');
 // Browsers without Web Audio still play and save normally.
 R.radio.ctx=null;delete context.window.AudioContext;api.radio.setEffects(true);check(!R.settings.effects,'unavailable audio leaves effects off');
 console.log(`Passed ${checks} sound checks (mock Web Audio; listening and device QA still required).`);
