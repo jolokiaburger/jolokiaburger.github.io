@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.5
+# Neon Tides Voyage · Playtest 0.5.1
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,10 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Camera fix · 0.5.1
+
+The camera centres the ferry and nearby quay/discovery in the area between the measured route controls, action buttons and touch pad. It can pan beyond world boundaries, so upper-edge water is reachable below the menu. A safety bound keeps the ferry clear immediately after zooming or resizing. Empty space beside the course selector passes clicks to the sea. `voyage/camera.js` contains the pure framing rules; rendering and hit-testing share the same camera transform in `voyage/voyage.js`.
 
 ## Stories across the water · 0.5
 
