@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.5.1
+# Neon Tides Voyage · Playtest 0.6
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,16 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## A night worth bringing home · 0.6
+
+- **Destination previews:** choose Plan your next destination in People, select a quay in the Journal chart, or use Set course while sailing. A preview shows local neighbours, fuel availability, cargo requests, unlocked jobs, active story steps and route estimates. Reading costs nothing and does not fetch unseen gold quotes. Cast off & set course is explicit; closing the preview commits nothing.
+- **Encounter visitors:** each of the three existing discoveries has its original encounter and two seeded variants. Meet a fisherman or breakfast skipper, salvage released tea boxes or a survey chest, and read day-crew thanks or a folded star map. Labels, fuel/time costs and rewards remain explicit. The same seed has the same visitors. Resolved variants are saved, pay once and retain their specific journal outcome; older completed discoveries retain their original wording.
+- **Trading feedback:** successful sales show revenue, purchase basis and realised result before fuel in the log and Market; the short toast shows revenue and result. Local harbour notices explain only events that have already occurred: recycled gold at 00:20, market crews at 00:55 and instruments at 02:00. No hidden future price is exposed. Fuel purchases and tug fees have separate report totals. Older saves begin a partial expense ledger at migration time; the report explicitly marks unavailable earlier expenses. Older sales without a purchase basis are excluded from realised results and labelled.
+- **Nao aboard:** her existing portrait appears beside Crossing moment and in its reading panel. Four fresh post-supper lines reflect her recipe, the star map and the homeward crossing. The portrait uses the existing action area, with no new floating panel covering the sea.
+- **Morning:** from 05:00 to 06:00 the water gradually brightens, with a gentle warm daylight tint and breakfast signage. Mei and Nao offer breakfast (4 cr, eight minutes) through People from 05:00. At dawn the closing harbour wire shares messages reflecting tea, Nao’s whereabouts, sky watching, supper and repairs. Finishing earlier uses evening wording. Messages grant no rewards and do not teleport the ferry or falsely return Nao home.
+
+The optional `encounters` and `expenses` save fields retain version 1 compatibility. Tests cover preview side effects, all encounter visitors, duplicate rewards, expense migration, sale basis, breakfast timing and contextual endings. Native Canvas/mock-DOM checks exercise the new controls; real-browser phone layout still needs playtesting.
 
 ## Camera fix · 0.5.1
 

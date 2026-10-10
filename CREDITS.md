@@ -60,3 +60,5 @@ The top-down harbour, ferry, quay details, discoveries, weather and observatory 
 Voyage ferry and weather effects (`voyage/sound.js`) and Ghost Tide FM (`halloween-radio.js`) are original procedural Web Audio synthesis. They use no recorded samples. Artwork and story are CC BY 4.0; code is MIT, following the existing licence split.
 
 The Voyage 0.5 harbour-board posts, trading notes, constellation-supper story and completion reactions in `voyage/ports.js` and `voyage/model.js` are original writing. Additional clock tower, market shutters, train, yard gantry, banners and supper table in `voyage/voyage.js` are original native Canvas artwork. The existing licence split applies.
+
+Voyage 0.6 encounter visitors, Nao’s post-supper crossing dialogue, breakfast exchanges and closing harbour-wire messages in `voyage/ports.js` are original fictional writing. The dawn palette and breakfast signage in `voyage/voyage.js` are original Canvas/CSS work. Nao’s passenger portrait reuses the existing original game artwork.
