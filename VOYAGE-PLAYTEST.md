@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.3
+# Neon Tides Voyage · Playtest 0.3.1
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,10 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Boat and waterfront detail · 0.3.1
+
+The Tern now has deck rails, wheelhouse glazing, its nameplate, aerial, life ring, rope coil, navigation lights, visible case cargo and a softer curved wake. Moored and passing boats have fishing, tug, passenger-ferry and cargo-barge silhouettes. Waterfronts add ladders, fenders, cleats, mooring lines, rescue rings, rope coils, dock carts, nets and local freight equipment. These are visual details; sailing routes and save rules are unchanged. Reduced motion keeps wakes off and ambient details still.
 
 ## Refinement update · 0.3
 

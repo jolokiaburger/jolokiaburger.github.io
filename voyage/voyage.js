@@ -67,7 +67,47 @@ function tree(x,y,r){ctx.fillStyle='#0c282b77';ctx.beginPath();ctx.ellipse(x+4,y
 // Small, readable silhouettes and distinct working waterfronts.
 function neighbour(x,y,coat,phase){ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(phase+x)*.045);ctx.fillStyle='#071f2780';ctx.beginPath();ctx.ellipse(3,5,7,10,0,0,TAU);ctx.fill();rounded(-5,-3,10,13,3,coat);ctx.fillStyle='#d2b69c';ctx.beginPath();ctx.arc(0,-5,4,0,TAU);ctx.fill();line(-3,10,-3,15,'#182e37',2);line(3,10,3,15,'#182e37',2);ctx.restore();}
 function sign(x,y,label,ink){ctx.font='600 11px system-ui';const w=ctx.measureText(label).width;rounded(x-w/2-8,y-14,w+16,22,3,'#122d35','#6f8175');ctx.fillStyle=ink;ctx.textAlign='center';ctx.fillText(label,x,y+1);}
-function skiff(x,y,angle,color){ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.fillStyle='#051e2780';ctx.beginPath();ctx.ellipse(2,3,25,9,0,0,TAU);ctx.fill();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(24,0);ctx.quadraticCurveTo(10,-10,-20,-7);ctx.lineTo(-23,0);ctx.lineTo(-20,7);ctx.quadraticCurveTo(10,10,24,0);ctx.fill();rounded(-12,-5,17,10,2,'#304e58');line(9,-6,9,6,'#8c9c91',2);ctx.restore();}
+function ropeCoil(x,y){ctx.strokeStyle='#b5a180';ctx.lineWidth=1;for(let r=2;r<=6;r+=2){ctx.beginPath();ctx.ellipse(x,y,r,r*.65,0,0,TAU);ctx.stroke();}line(x+6,y,x+11,y+4,'#b5a180',1);}
+function lifeRing(x,y){ctx.strokeStyle='#c48b69';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,5,0,TAU);ctx.stroke();line(x-5,y,x-3,y,'#eee0b7',2);line(x+3,y,x+5,y,'#eee0b7',2);}
+function vessel(x,y,angle,color,kind,scale){ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.scale(scale||1,scale||1);
+ ctx.fillStyle='#051e2780';ctx.beginPath();ctx.ellipse(2,3,29,12,0,0,TAU);ctx.fill();ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(29,0);ctx.quadraticCurveTo(12,-13,-24,-9);ctx.lineTo(-27,0);ctx.lineTo(-24,9);ctx.quadraticCurveTo(12,13,29,0);ctx.fill();
+ line(-20,-8,14,-8,'#c6c2a777',1);line(-20,8,14,8,'#c6c2a777',1);line(15,-7,23,0,'#c6c2a777',1);line(15,7,23,0,'#c6c2a777',1);
+ rounded(-10,-6,20,12,2,'#355563','#829e9d');rounded(4,-5,5,10,1,'#b3c6b9');line(-3,-5,-3,5,'#adc2bb',1);line(-17,-5,-17,5,'#8e9b8c',1);
+ ctx.fillStyle='#152b30';for(const y of [-10,10]){ctx.beginPath();ctx.ellipse(-14,y,3,2,0,0,TAU);ctx.fill();}
+ if(kind==='tug'){rounded(-5,-4,6,8,1,'#d4bd81');ctx.fillStyle='#20303a';ctx.beginPath();ctx.arc(-14,0,4,0,TAU);ctx.fill();line(-15,0,-22,0,'#b4a27e',2);}
+ if(kind==='fishing'){line(-17,0,16,0,'#aab4a0',1);line(-9,-6,3,5,'#aab4a0',1);rounded(-23,-5,7,10,1,'#7b8c76');for(let i=0;i<4;i++)line(-22+i*2,-4,-22+i*2,4,'#b0b59466',1);}
+ if(kind==='barge'){rounded(-22,-7,13,14,1,'#8b8270');rounded(-7,-7,13,14,1,'#698995');for(let i=-20;i<5;i+=4)line(i,-6,i,6,'#cad0b04a',1);rounded(10,-5,9,10,2,'#bdc0a8');}
+ if(kind==='ferry'){rounded(-15,-6,30,12,2,'#718d92');for(let i=-12;i<12;i+=7)rounded(i,-4,4,8,1,'#d9c390');}
+ ctx.fillStyle='#c3947a';ctx.fillRect(11,-9,3,2);ctx.fillStyle='#90b89d';ctx.fillRect(11,7,3,2);ctx.restore();}
+function skiff(x,y,angle,color){vessel(x,y,angle,color,'fishing',.85);}
+function waterfrontDetails(phase){
+ // Shore equipment stays outside the captain's mooring circle.
+ for(const p of W.ports){const vertical=p.shore.x===p.x;ctx.save();ctx.translate(p.shore.x,p.shore.y);if(!vertical)ctx.rotate(Math.PI/2);if(vertical&&p.shore.y>p.y)ctx.rotate(Math.PI);
+ line(-95,-5,95,-5,'#a8afa077',2);for(let i=-90;i<=90;i+=30){if(Math.abs(i)<45)continue;rounded(i-4,-9,8,8,2,'#374b4d','#7c8c80');line(i,-7,i+9,-14,'#b2a48488',1);ctx.strokeStyle='#152a30';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(i,4,4,7,0,0,TAU);ctx.stroke();}
+ // Ladder, ring, rope and stacked freight on the landward edge.
+ line(69,-4,69,15,'#a7b6ad',2);line(79,-4,79,15,'#a7b6ad',2);for(let y=1;y<=13;y+=5)line(69,y,79,y,'#9fae9f',1);ropeCoil(-65,-18);lifeRing(84,-19);crate(-89,-31,13);rounded(49,-28,12,17,2,'#5f8186','#93aaa2');ctx.restore();
+ }
+ vessel(137,380,0,'#718d86','tug',1.15);line(120,367,109,322,'#a49b7b66',1);ropeCoil(109,311);
+ vessel(153,1017,0,'#839895','ferry',1.2);line(145,1030,145,1060,'#adab8b66',1);
+ vessel(2395,571,0,'#627c87','barge',1.4);line(2372,555,2372,520,'#a6b4a166',1);
+ vessel(2229,1484,Math.PI/2,'#869587','fishing',1);line(2238,1503,2290,1510,'#b7a28166',1);
+ // Worktables, dock carts and drying nets give each quay its own trade.
+ rounded(442,295,24,13,2,'#6f867a');line(447,306,447,312,'#24383a',3);line(461,306,461,312,'#24383a',3);ropeCoil(459,287);
+ for(let i=0;i<4;i++){line(1545+i*10,315,1545+i*10,328,'#949b7b66',1);line(1545,315+i*4,1575,315+i*4,'#949b7b66',1);}line(1542,313,1579,313,'#afa285',2);
+ rounded(1575,897,34,15,2,'#987854');crate(1578,900,10);lifeRing(1651,912);
+ rounded(771,1500,13,24,2,'#4f7179','#9eaa94');rounded(771,1540,13,24,2,'#4f7179','#9eaa94');ropeCoil(787,1580);lifeRing(1037,1493);
+ rounded(2426,440,37,13,2,'#536f76');for(let i=0;i<3;i++)rounded(2430+i*10,442,7,8,1,'#cad0b1');line(2429,454,2429,461,'#172d33',3);line(2460,454,2460,461,'#172d33',3);
+ ropeCoil(2140,1467);lifeRing(2320,1523);rounded(2000,1650,61,6,1,'#a59376');for(let i=0;i<4;i++)line(2007+i*14,1651,2007+i*14,1663,'#7e9181',2);
+ rounded(1453,1587,27,14,2,'#847c68');ropeCoil(1500,1589);lifeRing(1392,1560);
+}
+function ternArt(phase){const s=state.ship;if(state.docked){const p=W.ports.find(p=>p.id===state.docked),vertical=p.shore.x===p.x;for(const d of [-1,1])line(s.x+(vertical?d*9:0),s.y+(vertical?0:d*9),p.shore.x+(vertical?d*20:0),p.shore.y+(vertical?0:d*20),'#c8b48e88',1);}ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);
+ if(s.speed>2&&!reduced){const length=16+s.speed*.28;for(const y of [-8,8]){ctx.strokeStyle='#aecfc447';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-25,y);ctx.quadraticCurveTo(-35,y*1.7,-25-length,y*2.2);ctx.stroke();}for(let i=0;i<3;i++){const x=-30-i*10-(phase*14)%10;line(x,-3-i,x+5,3+i,'#c7ded02e',1);}}
+ vessel(0,0,0,'#c5b78f','',1);rounded(-10,-7,23,14,3,'#496d78','#a7b8a7');rounded(6,-5,5,10,1,'#ead1a2');line(-6,-5,-6,5,'#a0b7b0',1);ctx.font='600 6px system-ui';ctx.fillStyle='#ddd8ba';ctx.textAlign='center';ctx.fillText('TERN',-1,2);
+ rounded(-15,-4,3,8,1,'#273e48');ropeCoil(20,0);lifeRing(-20,0);line(-3,-9,-3,-15,'#afc0b1',1);line(-5,-15,-1,-15,'#afc0b1',1);
+ const cargo=M.held(state);for(let i=0;i<Math.min(cargo,3);i++)rounded(-24+i*4,-5,3,5,1,'#c2a577');
+ light(12,-10,9,'#dc8e6e30');light(12,10,9,'#a3c89530');light(24,0,20,'#f0d5a327');
+ ctx.restore();
+}
 function quayDetails(phase){
  // Kurage: orange jellyfish, striped awning, stools, bowls and steam.
  sign(1310,275,'KURAGE 33','#80d4d4');light(1330,294,29,'#f5a96b44');
@@ -132,15 +172,15 @@ function mapArt(now){const phase=reduced?0:now*.0002;ctx.fillStyle='#15343e';ctx
  [[1214,320],[1438,294],[468,271],[1011,1446],[2040,1487]].forEach(([x,y])=>crate(x,y,16));
  // Central island stays a readable navigational obstacle, rather than a new port.
  for(let i=0;i<16;i++){const x=748+(i*47)%156,y=505+(i*61)%169;light(x,y,17,'#08252750');ctx.fillStyle=i%2?'#5e7966':'#6d8469';ctx.beginPath();ctx.arc(x,y,10+i%5,0,TAU);ctx.fill();}
- quayDetails(phase);
+ quayDetails(phase);waterfrontDetails(phase);
  W.beacons.forEach((b,i)=>{ctx.fillStyle='#8e9c89';ctx.beginPath();ctx.arc(b.x,b.y,6,0,TAU);ctx.fill();light(b.x,b.y,25,'#a9d9c426');line(b.x,b.y-3,b.x,b.y+4,'#e0cb90',3);});
  if(!state.flags.salvage){const b=W.salvage;light(b.x,b.y,45,'#e0b86a33');ctx.fillStyle='#b79762';ctx.beginPath();ctx.arc(b.x,b.y,5,0,TAU);ctx.fill();for(let i=0;i<6;i++)line(b.x-22+i*8,b.y+11,b.x-18+i*8,b.y-7,'#7d9876',2);}
  if(!reduced){for(let i=0;i<65;i++){const x=(i*127+now*.012)%W.width,y=(i*173+now*.038)%W.height;if(N.water(x,y))line(x,y,x-3,y+8,'#b8d1d010',1);}}
  for(const p of W.ports){const y=p.y+45;for(let i=0;i<3;i++)line(p.x-12-i*5,y+i*12,p.x+13+i*5,y+i*12,p.color+'18',2);}
- for(let i=0;i<3;i++){const x=580+i*450,y=180+(state.clock*3+i*280)%900;if(N.water(x,y,25)){ctx.save();ctx.translate(x,y);rounded(-5,-12,10,25,3,'#77867d','#a5b5a0');line(-5,16,-11,28,'#9bc2b32a',1);line(5,16,11,28,'#9bc2b32a',1);ctx.restore();}}
+ for(let i=0;i<3;i++){const x=580+i*450,y=180+((reduced?1420:state.clock)*3+i*280)%900;if(N.water(x,y,25)){vessel(x,y,Math.PI/2,'#71877e',i===1?'tug':'fishing',.65);if(!reduced){line(x-5,y-16,x-9,y-30,'#9bc2b32a',1);line(x+5,y-16,x+9,y-30,'#9bc2b32a',1);}}}
  W.ports.forEach(dockArt);
  if(path.length){ctx.setLineDash([5,9]);ctx.strokeStyle='#cfce9677';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(state.ship.x,state.ship.y);path.forEach(p=>ctx.lineTo(p.x,p.y));ctx.stroke();ctx.setLineDash([]);}
- const s=state.ship;ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);if(s.speed>2&&!reduced){line(-24,-7,-46-s.speed*.15,-16,'#abcac43a',2);line(-24,7,-46-s.speed*.15,16,'#abcac43a',2);}ctx.fillStyle='#041a2488';ctx.beginPath();ctx.ellipse(2,3,27,13,0,0,TAU);ctx.fill();ctx.fillStyle='#c3b38c';ctx.beginPath();ctx.moveTo(29,0);ctx.quadraticCurveTo(13,-14,-23,-10);ctx.lineTo(-26,0);ctx.lineTo(-23,10);ctx.quadraticCurveTo(13,14,29,0);ctx.fill();rounded(-17,-8,30,16,3,'#46616a','#879c94');rounded(-4,-6,13,12,2,'#dfc18b');line(-11,-7,-11,7,'#a39c83',2);light(23,0,24,'#e7d6a02a');ctx.restore();
+ ternArt(phase);
 }
 function draw(now){const rect=canvas.getBoundingClientRect(),ratio=Math.min(devicePixelRatio||1,2);if(rect.width!==width||rect.height!==height){width=rect.width;height=rect.height;canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);}ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,width,height);ctx.fillStyle='#15343e';ctx.fillRect(0,0,width,height);camera.scale=Math.max(.48,Math.min(1,width/1120,height/760));const viewW=width/camera.scale,viewH=height/camera.scale;
  const targetX=state.docked&&width>750?Math.max(0,state.ship.x-(width-480)/camera.scale*.5):Math.max(0,Math.min(W.width-viewW,state.ship.x-viewW*.5)),targetY=Math.max(0,Math.min(W.height-viewH,state.ship.y-viewH*.5));camera.x+=(targetX-camera.x)*(reduced?1:.08);camera.y+=(targetY-camera.y)*(reduced?1:.08);
