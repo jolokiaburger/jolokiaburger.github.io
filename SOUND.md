@@ -35,3 +35,12 @@ Classic’s radio now includes **Ghost Tide FM** after Basin Lo-Fi. Voyage’s n
 The shared `halloween-radio.js` station generates two filtered sea/wind noise beds, slow wave and gust modulation, a muted sine bass pulse and distant minor chords at 72 BPM. It has no samples or network requests. Retuning fades the private audio graph, stops its sources and clears its scheduler. Classic sound effects remain independently controlled.
 
 While selected, Ghost Tide FM adds pumpkin-orange interface accents. Voyage also warms the sea haze and quay rings and places small jack-o’-lanterns beside the quays. Changing the station to Off restores the usual palette. Theme selection changes no prices, clocks, quests or collision rules; reduced motion remains honoured. Automated graph and cleanup checks run with `node tools/sound-checks.mjs`; the final mix still needs listening on real headphones and phone speakers.
+
+
+## Voyage 0.4 · Independent ferry and weather sounds
+
+Voyage’s Radio panel has a separate Harbour sounds switch and volume control. It starts Off; enabling it requires a user gesture, and reopening asks for another tap. Preferences use `neon-tides:voyage:sound:v1`, independently of the radio and Classic.
+
+`voyage/sound.js` generates a quiet low engine, filtered wake, wind and rain, a soft departure horn and a gentle mooring bell. Speed controls the engine and wake; cosmetic weather controls wind and rain. Paused sailing, open panels and hidden tabs silence sailing ambience. Effects and radio share the browser context and limiter but have separate buses; turning music Off leaves enabled effects available. No samples or downloads are used.
+
+Mock Web Audio checks cover default mute, bounded levels, independent controls, context gating and cleanup. Real-device listening, touch interaction and browser autoplay behaviour remain player-test tasks.

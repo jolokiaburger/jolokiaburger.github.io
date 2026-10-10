@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-labelledby="title desc">
+<title id="title">Mio Amami</title><desc id="desc">An adult astronomer with chestnut hair, fine brass glasses, a blue observatory jacket and a warm scarf, against an outer-bay night sky.</desc>
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#182d46"/><stop offset="1" stop-color="#49616c"/></linearGradient><linearGradient id="coat" x2="1" y2="1"><stop stop-color="#657f91"/><stop offset="1" stop-color="#263f59"/></linearGradient><linearGradient id="hair" x2="1" y2="1"><stop stop-color="#8c6758"/><stop offset="1" stop-color="#423d46"/></linearGradient><linearGradient id="skin" x2="1" y2="1"><stop stop-color="#efc6ab"/><stop offset="1" stop-color="#c88f80"/></linearGradient><radialGradient id="glow"><stop stop-color="#d6cbaa" stop-opacity=".24"/><stop offset="1" stop-color="#d6cbaa" stop-opacity="0"/></radialGradient></defs>
+<path fill="url(#sky)" d="M0 0h400v400H0z"/><circle cx="315" cy="82" r="135" fill="url(#glow)"/>
+<g fill="#c6d5d0" opacity=".65"><circle cx="45" cy="56" r="1.6"/><circle cx="112" cy="30" r="1"/><circle cx="278" cy="36" r="1.3"/><circle cx="332" cy="113" r="1.7"/><circle cx="371" cy="44" r="1"/><circle cx="36" cy="184" r="1"/></g>
+<path d="M275 176a89 89 0 0 1 125 3v87H275z" fill="#70898b" opacity=".4"/><path d="M336 91v90m-59 1h123" stroke="#a7bdb4" opacity=".25" fill="none"/>
+<path d="M0 324q75-20 125-1t101-4 174-8v89H0z" fill="#132c3c"/><path d="M21 345h61m245-14h40m-255 23h101" stroke="#b0c9c3" opacity=".22"/>
+<!-- An original vector portrait; no external fonts or assets. -->
+<path d="M111 222q-36-85 3-138 22-36 79-40 67-6 99 44 36 60 9 150l-41 52-122-2z" fill="#34313d"/>
+<path d="M124 191q-41 39-17 115l43 2 29-102z" fill="url(#hair)"/>
+<path d="M55 400q-7-67 22-88 39-30 90-39h69q57 15 89 44 24 27 28 83z" fill="url(#coat)"/>
+<path d="M167 229v55q30 31 62-2l-4-64z" fill="url(#skin)"/><path d="M169 239q28 22 57-1v23q-28 23-57-1z" fill="#ae7d73" opacity=".5"/>
+<path d="M128 135q4-60 71-60t76 68l-9 60q-5 32-32 59-30 25-55 8-39-22-47-61z" fill="url(#skin)"/>
+<path d="M134 164q-12-22-20-1t19 31m135-30q19-22 22-2t-21 34" fill="#d49e8b"/>
+<path d="M123 158q-7-70 27-90 49-27 97-11 43 15 42 80l-18 41-7-53q-34-9-57-31-20 23-73 42l-2 45z" fill="url(#hair)"/>
+<path d="M152 74q42-14 79 0m-91 46q40-6 59-26m59-7q19 20 22 39" fill="none" stroke="#b18a70" stroke-width="4" opacity=".44" stroke-linecap="round"/>
+<path d="M144 162q16-11 33-3m44-1q15-8 30 3" fill="none" stroke="#654c49" stroke-width="3" stroke-linecap="round"/>
+<path d="M145 180q14-13 30-1m48-1q14-10 28 1" fill="#e8d6c6" stroke="#4d4348" stroke-width="2"/>
+<ellipse cx="162" cy="178" rx="5" ry="7" fill="#688783"/><ellipse cx="235" cy="177" rx="5" ry="7" fill="#688783"/><ellipse cx="163" cy="179" rx="2.2" ry="5" fill="#303c48"/><ellipse cx="234" cy="178" rx="2.2" ry="5" fill="#303c48"/><circle cx="160" cy="175" r="1.6" fill="#f5e8cf"/><circle cx="232" cy="174" r="1.6" fill="#f5e8cf"/>
+<g fill="none" stroke="#ccae82" stroke-width="2"><rect x="137" y="166" width="48" height="28" rx="10"/><rect x="215" y="165" width="45" height="28" rx="10"/><path d="M185 175q16-7 30-1m-78 2-13-8m136 7 12-7"/></g>
+<path d="M195 180l-5 30 11 3" fill="none" stroke="#b78073" stroke-width="2" stroke-linecap="round"/><path d="M182 233q16 8 33-1" fill="none" stroke="#945e61" stroke-width="2.5" stroke-linecap="round"/><path d="M185 240q14 4 23 0" stroke="#f2c6ac" fill="none"/>
+<path d="M149 211q10 5 16 3m67-1 16-3" stroke="#b47d75" opacity=".4" fill="none"/>
+<path d="M156 269q34 32 78-1l27 32-33 35-63-5-28-36z" fill="#c7b19a"/><path d="M153 282q30 23 79 10m-74 18 65 8" fill="none" stroke="#9c8575" stroke-width="4"/>
+<path d="M133 292l-29 50 48 33 13-49m81-38 34 58-51 30-1-49" fill="#435f75" stroke="#8ca0a4" stroke-width="2"/>
+<path d="M174 337v63m43-63v63" stroke="#a9b5ad" opacity=".55"/><path d="M80 366h56v34m128-34h57v34" stroke="#91a4a7" fill="none" stroke-width="2"/>
+<circle cx="282" cy="336" r="12" fill="#1f3b53" stroke="#b8b9a5"/><path d="m275 337 6-7 7 5-4 8z" fill="none" stroke="#d8cda7"/><g fill="#eee0b8"><circle cx="275" cy="337" r="1.6"/><circle cx="281" cy="330" r="1.6"/><circle cx="288" cy="335" r="1.6"/><circle cx="284" cy="343" r="1.6"/></g>
+</svg>

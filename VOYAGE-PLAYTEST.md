@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.3.2
+# Neon Tides Voyage · Playtest 0.4
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,17 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## The wider night · 0.4
+
+- **Harbour sounds:** open Radio and turn Harbour sounds on independently of music. Quiet engine and wake follow sailing; wind and rain follow weather; departures have a low soft horn and mooring a gentle bell. Effects start Off, with separate 30%, 60% and 100% volume. Remembered settings require a tap after reopening. Panels, pauses and hidden tabs silence sailing ambience.
+- **Discoveries:** look for a drifting survey chest, a resting delivery boat and a lantern message. Approach their dotted ring and choose Explore. Costs appear before committing; each outcome can be claimed once. Recovering the chest takes eight minutes and earns 18 cr. Helping the boat uses 0.6 fuel and ten minutes for 20 cr; arranging help by radio uses five minutes without fuel or payment. Reading the letter uses five minutes. Leaving a discovery also records its outcome.
+- **Cargo planner:** the Journal lists paid cost, promised payment, destination, remaining delivery time and estimated route fuel for cargo aboard. Compare two available orders, including collection, release waits, return fuel and handover deadlines. Estimates exclude manoeuvres, refuelling time and detours; handover takes another five minutes. Fuel credit estimates use the full-tank rate and are not a guarantee of net profit.
+- **Nao aboard:** crossing moments vary with destination, weather, visits and shared memories. After completing her festival return, invite her on another outing at Lantern Market. The original festival outcome stays completed; bring her back to finish the new outing.
+- **Weather:** seeded clear water, rain and mist blend through the night. Weather is cosmetic: it does not change speed, fuel or prices. Quay markers remain above the haze; reduced motion removes animated rain.
+- **Tsukimi Observatory:** ask Kenji at Lantern Market about Mio’s gold-contact kit. It opens at 00:40, costs 54 cr and pays 100 cr at Tsukimi if handover starts by 04:50. The outer-bay quay has a fuel pump, cocoa and astronomer Mio Amami. Delivering the kit unlocks a twelve-minute sky watch. Nao can join it, or share a six-minute return watch if you went alone first. The calibrated dome and telescope reflect delivery progress.
+
+Older Voyage saves gain optional discovery records without a save-format change. Radio preferences use `neon-tides:voyage:radio:v1`; ferry effects use `neon-tides:voyage:sound:v1`. Neither changes Classic settings.
 
 ## Ghost Tide FM · 0.3.2
 
@@ -35,13 +46,13 @@ The Tern now has deck rails, wheelhouse glazing, its nameplate, aerial, life rin
 - Time advances only during movement and explicitly labelled activities. Conversations, trading, journal reading and panels pause it. Background tabs do not advance time.
 - Start: 360 cr, 2 g gold, full tank. Gold lots use the existing deterministic `market.js` pricing, spreads, dealer impact and stock caps.
 - Small tea courier contract: no stock purchase, one payment, deadline checked at handover start. Fuel is the captain's cost.
-- Landing 3, Starling Yard or Kisaragi refuel: 30 cr, 10 min, tank filled to 6. Market engine tuning: 80 cr, 15 min, 15% more speed and 20% less fuel per distance. Upgrade once.
+- Landing 3, Starling Yard, Kisaragi or Tsukimi refuel: 30 cr, 10 min, tank filled to 6. Market engine tuning: 80 cr, 15 min, 15% more speed and 20% less fuel per distance. Upgrade once.
 - Out of fuel: the tug recovers you to Landing 3 in 20 min for up to 20 cr, including free recovery if penniless. No combat, hull damage or permanent death in this stage.
 - Closing/reopening resumes the Voyage save. Corrupt or incompatible Voyage saves start fresh without altering Classic. Storage-blocked browsers still play for the session.
 
 ## Scope
 
-This is the expanded sailing stage of the intended new full game. Eight quays are navigable: Kurage 33, Landing 3, Lantern Market, Metro Quay, Starling Yard, Frostline, Kisaragi and Hoshimi. Thirteen characters have fresh casual replies, with contextual reactions after story progress. Classic remains the complete previous game.
+This is the expanded sailing stage of the intended new full game. Nine quays are navigable: Kurage 33, Landing 3, Lantern Market, Metro Quay, Starling Yard, Frostline, Kisaragi, Hoshimi and Tsukimi. Fourteen characters have fresh casual replies, with contextual reactions after story progress. Classic remains the complete previous game.
 
 ## New routes and stories
 
@@ -51,13 +62,13 @@ This is the expanded sailing stage of the intended new full game. Eight quays ar
 - **Shared hold:** tea, lighthouse kit and stock cases share two slots. Kenji’s cargo racks at Lantern Market cost 65 cr and ten minutes, adding a third slot. Gold and Nao do not occupy case slots.
 - **Journal:** lists several active stories and completed outcomes, with a Track action for the objective line. The Basin chart marks visited quays and lets you set a course after casting off. Remembered gold boards include their observation time.
 
-Buildings now have roof tiles, skylights, warm windows, quay reflections, trees and cargo stacks. New landmarks include the yard crane and repair ferry, Metro platforms, Frostline chillers, Kisaragi’s canal bridge and lantern table, and Hoshimi’s sweeping lighthouse. Small workboats and restrained rain add movement. The map remains procedural Canvas artwork for playtesting; final painted environments, the broader chapters, Harbour Wire and radio remain future stages.
+Buildings now have roof tiles, skylights, warm windows, quay reflections, trees and cargo stacks. New landmarks include the yard crane and repair ferry, Metro platforms, Frostline chillers, Kisaragi’s canal bridge and lantern table, and Hoshimi’s sweeping lighthouse. Small workboats and restrained rain add movement. The map remains procedural Canvas artwork for playtesting; final painted environments, the broader chapters, Harbour Wire and additional radio stations remain future stages.
 
 Existing 0.1 Voyage saves retain their purse, stories, upgrades and discoveries. If you ended an early voyage before dawn, **Continue this voyage** on the report reopens it for the new destinations. Dawn-ended voyages need a fresh start. Classic saves remain separate.
 
 ## Files and validation
 
-`world-map.js`: navigable land, ports, landmarks. `navigation.js`: steering, collisions and safe assisted routing. `ports.js`: adapted character text, cargo contracts and market events. `model.js`: time, cargo, fuel, gold, upgrades, recovery and save validation. `voyage.js`: Canvas map, HUD, People/Market/Cargo/Services panels, input, dialogs and autosave. `voyage.css`: desktop/mobile views. No build or dependencies needed to play.
+`world-map.js`: navigable land, ports, landmarks. `navigation.js`: steering, collisions and safe assisted routing. `ports.js`: adapted character text, cargo contracts and market events. `model.js`: time, cargo, fuel, gold, upgrades, recovery and save validation. `voyage.js`: Canvas map, HUD, People/Market/Cargo/Services panels, input, dialogs and autosave. `voyage.css`: desktop/mobile views. `sound.js`: optional ferry and weather synthesis; `../halloween-radio.js`: shared procedural radio. `../assets/portraits/mio.svg`: original observatory portrait. No build or dependencies needed to play.
 
 Run `node tools/voyage-checks.mjs`, `node tools/adventure-checks.mjs`, and `node tools/sound-checks.mjs`. Sailing checks simulate every port-to-port route through the actual steering function, not just path existence. A local canvas/DOM smoke pass also exercises startup, tabs, portraits, assisted sailing, docking and the journal. Actual browser layout, touch comfort and device performance still need player testing.
 

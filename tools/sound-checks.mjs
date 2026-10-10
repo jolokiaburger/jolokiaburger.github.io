@@ -16,7 +16,7 @@ class Audio {
  resume(){this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}
 }
 const context=vm.createContext({console,window:{AudioContext:Audio,matchMedia:()=>({matches:false,addEventListener(){}}),localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)}},document:{hidden:false,readyState:'loading',addEventListener(){}},location:{search:'',protocol:'file:'},URLSearchParams,setTimeout(fn){timers.push(fn);return timers.length;},clearTimeout(){},setInterval(){return 1;},clearInterval(){}});
-for(const p of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js','release.js','halloween-radio.js'])vm.runInContext(read(p),context);
+for(const p of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js','release.js','halloween-radio.js','voyage/sound.js'])vm.runInContext(read(p),context);
 let source=read('game.js').replace('  if (document.readyState === "loading")',`
  window.SoundReview={soundCue,marketAmbience,radio,settings,loadSettings,settingsKey:SETTINGS_KEY,visit:(loc,clock)=>{state.location=loc;state.clock=parseClock(clock);transient.mode="play";transient.marketSpot="all";},state:()=>state};
  render=function(){};renderKeepingFocus=function(){};focusEncounter=function(){};positionFerry=function(){};toast=function(){};setMode=function(){};showResolution=function(){};debugMarket=function(){};
@@ -80,6 +80,14 @@ api.radio.setStation('off');for(const f of timers.splice(0))f();check(ghostLoops
 // radioStatic is an existing finite transition outside the station's own graph.
 check(ghostNodes.filter(n=>n.loop||n.kind==='oscillator').every(n=>n.disconnected),'station sources disconnect on exit');
 saved.set(R.settingsKey,JSON.stringify({station:'ghost',effects:false}));R.loadSettings();check(R.settings.station==='ghost','Halloween choice restores as a valid setting');
+// Voyage ferry sounds: separate, opt-in bus and a speed-responsive engine.
+const ferryCtx=new context.window.AudioContext(),ferryStart=nodes.length,ferry=context.window.VoyageSound.create(ferryCtx,ferryCtx.destination);
+check(!ferry.cue('depart'),'ferry sounds start muted');ferry.enable(true,.6);const ferryState={docked:null,ended:false,fuel:6,ship:{speed:86}};ferry.update(ferryState,{mist:0,rain:1},true);
+const continuous=nodes.slice(ferryStart),engineTone=continuous.find(n=>n.kind==='oscillator');check(engineTone.frequency.value>42&&engineTone.frequency.value<70,'engine hum follows speed softly');
+check(continuous.filter(n=>n.kind==='buffer'&&n.loop).length===3,'wake, wind and rain textures available');check(ferry.cue('depart')&&ferry.cue('moor'),'departure and mooring cues play when enabled');
+const ferryNotes=nodes.slice(ferryStart).filter(n=>n.kind==='oscillator'&&n.stopped!==undefined);check(ferryNotes.every(n=>n.type==='sine'&&n.stopped-n.started<1.5),'ferry cues use quiet bounded tones');
+ferry.enable(false,.6);check(continuous[0].gain.value===0,'effects off mutes its separate bus');check(!ferry.cue('moor'),'muted ferry cue rejected');
+ferryCtx.state='suspended';ferry.enable(true,.6);check(!ferry.cue('depart'),'ferry cue cannot resume a suspended context');ferry.stop();for(const f of timers.splice(0))f();check(nodes.slice(ferryStart).every(n=>n.disconnected),'ferry graph fully disconnects after stop');
 // Browsers without Web Audio still play and save normally.
 R.radio.ctx=null;delete context.window.AudioContext;api.radio.setEffects(true);check(!R.settings.effects,'unavailable audio leaves effects off');
 console.log(`Passed ${checks} sound checks (mock Web Audio; listening and device QA still required).`);
