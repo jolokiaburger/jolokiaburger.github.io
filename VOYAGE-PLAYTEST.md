@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.4
+# Neon Tides Voyage · Playtest 0.5
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,16 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Stories across the water · 0.5
+
+- **Harbour board:** read it through People at any quay, or the Journal. Neighbours post requests, casual remarks and notices reflecting deliveries, repairs and the new supper. Reading is free and pauses sailing. Cargo notices show fixed costs, payments, release times and destinations.
+- **Trading talk:** the board and character conversations add trading notes to the Journal. Each note shows author, posting time, first hearing time and elapsed minutes. Re-reading preserves the first hearing time. Outlooks describe existing co-op supply, crew demand and instrument demand; they promise no profit. Fixed cargo contracts are labelled separately. Market has a Local trading talk button.
+- **Constellation supper:** after sharing the sky watch with Nao, talk to her to plan supper. Collect Jun’s roasted tea at Kisaragi (6 cr, 5 minutes) and Mei’s ginger biscuits at Kurage 33 (4 cr, 5 minutes), in either order. The small recipe basket uses no freight slot. Bring Nao aboard, sail to Tsukimi and share the supper with Mio (free, 12 minutes). The Journal tracks each next step; the board, character reactions and observatory table reflect completion. Bring Nao home when ready. There is no additional deadline, but dawn still ends the voyage.
+- **Navigation:** selecting a quay displays estimated arrival, sailing minutes, route fuel and a low-fuel warning. Estimates use safe assisted routing and reflect engine upgrades; turns, detours and stops need extra allowance. Manual steering, Stop and Escape clear the destination. View switches between close and wide; keyboard, touch and water-click targeting use the same camera transform.
+- **Waterfronts:** a kitchen chimney, harbour clock tower, yard gantry and workers, canal banners and observatory supper table give quays distinct shapes. Market counters move into morning preparation after 03:30; Metro’s last train gives way to a departure notice after 01:40; Frostline’s unloading crew arrives after 02:00. Details stay decorative and do not change collisions. Reduced motion keeps ambient drawing still.
+
+Existing saves preserve all earlier stories and gain an empty trading notebook; the save version remains 1. The new supper depends on the shared Nao sky-watch outcome, not a fresh voyage.
 
 ## The wider night · 0.4
 

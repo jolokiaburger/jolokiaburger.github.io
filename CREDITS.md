@@ -58,3 +58,5 @@ Updated Sora, Priya and Mei portraits and Sora’s matching market sprite were c
 The top-down harbour, ferry, quay details, discoveries, weather and observatory are original Canvas drawings in `voyage/voyage.js`, with navigable geography in `voyage/world-map.js`. Mio Amami’s portrait (`assets/portraits/mio.svg`) is an original native SVG illustration. Her character, gold-contact kit, sky watch and expanded Nao dialogue are original fictional writing in `voyage/ports.js` and `voyage/model.js`.
 
 Voyage ferry and weather effects (`voyage/sound.js`) and Ghost Tide FM (`halloween-radio.js`) are original procedural Web Audio synthesis. They use no recorded samples. Artwork and story are CC BY 4.0; code is MIT, following the existing licence split.
+
+The Voyage 0.5 harbour-board posts, trading notes, constellation-supper story and completion reactions in `voyage/ports.js` and `voyage/model.js` are original writing. Additional clock tower, market shutters, train, yard gantry, banners and supper table in `voyage/voyage.js` are original native Canvas artwork. The existing licence split applies.
