@@ -1,4 +1,4 @@
-# Neon Tides Voyage · Playtest 0.6
+# Neon Tides Voyage · Playtest 0.7
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
 
@@ -11,6 +11,16 @@ Open the main game link and choose **Voyage**, or open `voyage/index.html` direc
 5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
 6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
 7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
+
+## Familiar water, another night · 0.7
+
+- **Captain’s history:** the Journal and Services show the latest twelve completed voyages, seeds, realised gold results, cargo result before fuel, discoveries, fuel purchases and shared moments. Finishing again or continuing and re-finishing updates the same entry. Active voyages are not archived. Finishing early counts as a completed voyage; reaching dawn is not required.
+- **Different nights:** fresh voyages keep the five existing cargo requests and add one seeded request: Mei’s rice parcels (Kurage → Metro, 16/34 cr, release 00:20, deadline 04:20), Rin’s filters (yard → Landing, 22/46 cr, release 00:00, deadline 04:30), or Mio’s star charts (observatory → Kisaragi, 14/44 cr, release 00:40, deadline 05:20). The same seed selects the same request and demand pattern. Co-op supply and crew/instrument demand magnitudes vary, with unchanged event times. The board’s Tonight’s working harbour notice signals relative demand without promising profit. Older voyages without `demandVersion` preserve their original requests and market terms; start a fresh voyage for the new patterns.
+- **Reservation:** reserve one uncollected request through the board. No credits or hold slot are taken. The Journal tracks the collection quay, release, cost and deadline; Cargo and board show collected/delivered status. Cancel before collecting for free. Collection uses the usual purchase and five-minute rules and clears the reservation. Other cargo remains available. Reserving does not extend a deadline, waive a purchase or promise spare hold space. Collected cases follow the existing delivery/expired-unload rules.
+- **Ferry choices:** Services at Lantern Market or Starling Yard offers previews of three hull colours and three cabin lamps. Blue paint costs 12 cr, plum paint 14 cr, mint or rose lamps 8 cr; original choices are owned and free. A nameplate costs 5 cr once, then can be changed freely (up to twelve letters, numbers, spaces, apostrophes or hyphens). Previewing is free; buying/applying is explicit and takes no clock time. Owned styles carry between voyages, but money and gameplay upgrades do not. Cosmetics change no fuel, speed, capacity or dialogue identity.
+- **Letters:** meaningful completed stories can produce letters from Nao, Mio, Rin, Aki or Jun. Read them in the Journal or captain’s history and mark them read. They survive starting a fresh voyage and do not unlock or complete quests. Reopening a report does not duplicate letters; a changed outcome updates the letter and marks it new. Letters belong to the latest twelve recorded voyages, with a maximum of forty-eight.
+
+History, letters and cosmetics use `neon-tides:voyage:profile:v1`, separately from `neon-tides:voyage:v1`. A corrupt profile resets only that profile, with a notice; the active voyage remains intact. Storage-blocked sessions retain these features in memory but cannot persist them. `voyage/profile.js` owns profile validation, deduplicated records and cosmetic transactions. The optional `uid`, `reservation` and `demandVersion` fields keep older voyage saves compatible.
 
 ## A night worth bringing home · 0.6
 

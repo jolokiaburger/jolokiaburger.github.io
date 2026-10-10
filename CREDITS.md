@@ -62,3 +62,5 @@ Voyage ferry and weather effects (`voyage/sound.js`) and Ghost Tide FM (`hallowe
 The Voyage 0.5 harbour-board posts, trading notes, constellation-supper story and completion reactions in `voyage/ports.js` and `voyage/model.js` are original writing. Additional clock tower, market shutters, train, yard gantry, banners and supper table in `voyage/voyage.js` are original native Canvas artwork. The existing licence split applies.
 
 Voyage 0.6 encounter visitors, Nao’s post-supper crossing dialogue, breakfast exchanges and closing harbour-wire messages in `voyage/ports.js` are original fictional writing. The dawn palette and breakfast signage in `voyage/voyage.js` are original Canvas/CSS work. Nao’s passenger portrait reuses the existing original game artwork.
+
+Voyage 0.7’s rice-parcel, filter and star-chart contracts, working-harbour notices and follow-up letters in `voyage/ports.js` are original fictional content. Ferry palette choices and the CSS preview are original project artwork. The captain-profile code in `voyage/profile.js` follows the existing MIT code licence; writing and artwork follow CC BY 4.0.
