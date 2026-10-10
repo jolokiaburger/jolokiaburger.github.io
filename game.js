@@ -3117,7 +3117,8 @@
     { id: "off",     name: "Off",         sub: "music off" },
     { id: "rain",    name: "Rain only",   sub: "harbour ambience" },
     { id: "lantern", name: "Lantern FM",  sub: "ambient · plucked strings" },
-    { id: "basin",   name: "Basin Lo-Fi", sub: "hypnotic techno" }
+    { id: "basin",   name: "Basin Lo-Fi", sub: "hypnotic techno" },
+    { id: "ghost", name: "Ghost Tide FM", sub: "Halloween · sea haze · 72 bpm" }
   ];
   const radio = { ctx: null, master: null, reverb: null, rainGain: null, noise: null, stop: null, plucks: {}, sfxPlayed: 0, effects: null, lastCue: -Infinity, ambientTimer: null };
 
@@ -3213,10 +3214,11 @@
     const ctx = radio.ctx;
     if (ctx.state === "suspended") resumeAudio();
     stopMusic();
-    if (!quiet) radioStatic(ctx.currentTime);
-    radio.rainGain.gain.setTargetAtTime(station.id === "rain" ? 0.09 : 0.035, ctx.currentTime, 0.6);
+    if (!quiet && station.id !== "ghost") radioStatic(ctx.currentTime);
+    radio.rainGain.gain.setTargetAtTime(station.id === "rain" ? 0.09 : station.id === "ghost" ? 0.012 : 0.035, ctx.currentTime, 0.6);
     if (station.id === "lantern") radio.stop = startLanternFM();
     if (station.id === "basin") radio.stop = startBasinLoFi();
+    if (station.id === "ghost") radio.stop = window.NeonGhostRadio.start(ctx, radio.master);
   }
   function stopMusic() { if (radio.stop) { radio.stop(); radio.stop = null; } }
 
@@ -3243,6 +3245,7 @@
     if (resumed && resumed.then) resumed.then(applyMood, function () { /* a refused resume waits for a gesture */ });
   }
   function renderRadio() {
+    if (document.body) document.body.classList.toggle("halloween-radio", settings.station === "ghost");
     if (!dom.radioName) return;
     const station = stationById(settings.station);
     dom.radioName.textContent = station.name;

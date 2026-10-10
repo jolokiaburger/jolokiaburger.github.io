@@ -27,3 +27,11 @@ Ambient cues only play during an active gold night at the market. They pause dur
 Run `node tools/adventure-checks.mjs` for gameplay regression checks and `node tools/sound-checks.mjs` for the mock Web Audio contract checks. The latter covers successful/failed trades, opening replay prevention, bounded sources and full node cleanup, softened interaction frequencies and levels, cooldowns, location/visibility gating, independent mute, old settings and missing audio support.
 
 These checks do not establish how the mix sounds on speakers or actual browser autoplay behavior. Listening on desktop headphones, a phone speaker and Safari/iOS remains to be done. Start at 30% for a first listening pass; tune the per-cue synthesis levels in `game.js` after that play-test.
+
+## Ghost Tide FM · Halloween special
+
+Classic’s radio now includes **Ghost Tide FM** after Basin Lo-Fi. Voyage’s new **Radio** button (also `R`) offers Ghost Tide FM and Off, with volume at 30%, 60% or 100%. Starts only when you explicitly tune; a remembered Voyage station asks you to tap to listen after reopening.
+
+The shared `halloween-radio.js` station generates two filtered sea/wind noise beds, slow wave and gust modulation, a muted sine bass pulse and distant minor chords at 72 BPM. It has no samples or network requests. Retuning fades the private audio graph, stops its sources and clears its scheduler. Classic sound effects remain independently controlled.
+
+While selected, Ghost Tide FM adds pumpkin-orange interface accents. Voyage also warms the sea haze and quay rings and places small jack-o’-lanterns beside the quays. Changing the station to Off restores the usual palette. Theme selection changes no prices, clocks, quests or collision rules; reduced motion remains honoured. Automated graph and cleanup checks run with `node tools/sound-checks.mjs`; the final mix still needs listening on real headphones and phone speakers.

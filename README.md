@@ -2,9 +2,9 @@
 
 Open `index.html` to choose **Voyage** or **Classic**.
 
-**Voyage 0.3.1** expands the top-down sailing game to eight quays and thirteen characters. Trade gold and sealed cargo, deliver Mei's tea, help Rin and Aki keep the lighthouse turning, take Nao to Kisaragi and bring her home. Distinct quay details, optional crossing conversations, timed buyer requests and route estimates deepen the voyages. The journal tracks several stories; the shared cargo hold can be upgraded. WASD/arrows or touch buttons steer; Set course assists. Existing Voyage saves continue, and Classic keeps its separate save. See `VOYAGE-PLAYTEST.md` for controls, scope and feedback.
+**Voyage 0.3.2** expands the top-down sailing game to eight quays and thirteen characters. Trade gold and sealed cargo, deliver Mei's tea, help Rin and Aki keep the lighthouse turning, take Nao to Kisaragi and bring her home. Distinct quay details, optional crossing conversations, timed buyer requests and route estimates deepen the voyages. Ghost Tide FM adds mellow Halloween sea ambience and warm pumpkin accents while tuned. The journal tracks several stories; the shared cargo hold can be upgraded. WASD/arrows or touch buttons steer; Set course assists. Existing Voyage saves continue, and Classic keeps its separate save. See `VOYAGE-PLAYTEST.md` for controls, scope and feedback.
 
-**Classic 4.6** at `classic.html` keeps all existing chapters, locations, sound and stories. Web-hosted Classic uses the original save key and can continue existing shifts. Its rules follow below.
+**Classic 4.6.1** at `classic.html` keeps all existing chapters, locations, sound and stories. Web-hosted Classic uses the original save key and can continue existing shifts. Its rules follow below.
 
 A warm trading adventure in a rain-soaked neon harbour. You run the night ferry *Tern* with a little physical gold, a few hundred credits and most of a tank. Gold is the Basin's money of last resort, and the metal its wet machines run on. Tonight the noodle bar is full of rumours that point in opposite directions.
 

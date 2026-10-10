@@ -1157,3 +1157,11 @@ body[data-location="canal"] .awning-drip, body[data-location="island"] .awning-d
 .release-link:focus-visible { outline: 2px solid #e6c891; outline-offset: 4px; border-radius: 2px; }
 .release-notes { padding-left: 20px; line-height: 1.65; }
 .release-notes li + li { margin-top: 10px; }
+
+/* Ghost Tide FM: pumpkin light on suitable accents, with readable story text. */
+body.halloween-radio{--cyan:#ffc38e;--cyan-dim:#db874b;--magenta:#f1a35e;--purple:#ac8bba;--amber:#ffcd91;--amber-bright:#ffdcaa;--surface-700:#665143}
+body.halloween-radio .radio-btn[data-on="true"] .radio-name::before{background:#ffac61;box-shadow:0 0 9px #ffac61}
+body.halloween-radio .neon-text{filter:sepia(.45) saturate(.85)}
+body.halloween-radio .inst{border-color:#9d704b}
+
+body.halloween-radio .tube-cyan,body.halloween-radio .tube-cyan-shift{stroke:#ffc58f;fill:#ffc58f}body.halloween-radio .lantern{filter:sepia(.4) saturate(1.2)}

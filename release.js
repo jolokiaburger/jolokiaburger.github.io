@@ -2,13 +2,12 @@
 (function () {
   "use strict";
   window.NEON_TIDES_RELEASE = {
-    version: "4.6",
-    date: "2026-10-09",
-    dateLabel: "9 Oct 2026",
+    version: "4.6.1",
+    date: "2026-10-10",
+    dateLabel: "10 Oct 2026",
     notes: [
-      "A warmer harbour, with new details, greetings and signs of your adventures.",
-      "Pin Harbour Wire posts and easily spot new messages.",
-      "Help supply the festival: carry cargo for a fee or trade your own stock. Ask Priya at Landing 3."
+      "Radio (R): tune Ghost Tide FM for mellow Halloween music, waves and harbour wind.",
+      "Pumpkin-orange accents glow while Ghost Tide FM is tuned."
     ]
   };
 })();

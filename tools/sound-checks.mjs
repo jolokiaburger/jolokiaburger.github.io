@@ -16,7 +16,7 @@ class Audio {
  resume(){this.state='running';return Promise.resolve();}suspend(){this.state='suspended';return Promise.resolve();}
 }
 const context=vm.createContext({console,window:{AudioContext:Audio,matchMedia:()=>({matches:false,addEventListener(){}}),localStorage:{getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v),removeItem:k=>saved.delete(k)}},document:{hidden:false,readyState:'loading',addEventListener(){}},location:{search:'',protocol:'file:'},URLSearchParams,setTimeout(fn){timers.push(fn);return timers.length;},clearTimeout(){},setInterval(){return 1;},clearInterval(){}});
-for(const p of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js','release.js'])vm.runInContext(read(p),context);
+for(const p of ['cases.js','trade.js','market.js','dialogue.js','expansion.js','night-market.js','night-two.js','canal-town.js','harbour-life.js','morning-after.js','harbour-wire.js','release.js','halloween-radio.js'])vm.runInContext(read(p),context);
 let source=read('game.js').replace('  if (document.readyState === "loading")',`
  window.SoundReview={soundCue,marketAmbience,radio,settings,loadSettings,settingsKey:SETTINGS_KEY,visit:(loc,clock)=>{state.location=loc;state.clock=parseClock(clock);transient.mode="play";transient.marketSpot="all";},state:()=>state};
  render=function(){};renderKeepingFocus=function(){};focusEncounter=function(){};positionFerry=function(){};toast=function(){};setMode=function(){};showResolution=function(){};debugMarket=function(){};
@@ -68,6 +68,18 @@ saved.set(R.settingsKey,JSON.stringify({station:'lantern'}));R.loadSettings();ch
 saved.set(R.settingsKey,JSON.stringify({station:'off',effects:false,effectsVolume:0.3}));R.loadSettings();check(!R.settings.effects&&R.settings.effectsVolume===0.3,'saved independent mute and volume restored');
 // Actual action hooks: the celebration follows successful opening, never render/reload.
 api.trade.start('two-tides');R.visit('market','05:00');api.performAction('nb_start');api.radio.setEffects(true);step();count=R.radio.sfxPlayed;api.performAction('nb_open');check(R.radio.sfxPlayed===count+1,'Nao opening emits one flourish');step();api.performAction('nb_open');check(R.radio.sfxPlayed===count+1,'completed opening cannot replay its flourish');
+// Halloween station shares the existing music bus and cleans its private graph on retuning.
+check(api.radio.stations.some(s=>s.id==='ghost'),'Halloween station available in Classic');
+const ghostBegin=nodes.length;api.radio.setStation('ghost');check(api.radio.state().station==='ghost','Halloween station selected');
+const ghostNodes=nodes.slice(ghostBegin),ghostLoops=ghostNodes.filter(n=>n.loop);
+check(ghostLoops.length===2,'sea and wind beds loop independently');check(context.window.NeonGhostRadio.bpm===72,'slow 72 BPM tempo');
+check(ghostNodes.filter(n=>n.kind==='oscillator').every(n=>['sine','triangle'].includes(n.type)),'no harsh sawtooth oscillator');
+check(ghostNodes.filter(n=>n.kind==='filter').every(n=>n.frequency.value<=980),'station uses faded low-frequency filters');
+check(ghostNodes.filter(n=>n.kind==='gain').every(n=>n.gain.events.every(e=>Number.isFinite(e.v)&&e.v>=0)),'envelopes are finite and nonnegative');
+api.radio.setStation('off');for(const f of timers.splice(0))f();check(ghostLoops.every(n=>n.stopped!==undefined),'turning off stops both environmental loops');
+// radioStatic is an existing finite transition outside the station's own graph.
+check(ghostNodes.filter(n=>n.loop||n.kind==='oscillator').every(n=>n.disconnected),'station sources disconnect on exit');
+saved.set(R.settingsKey,JSON.stringify({station:'ghost',effects:false}));R.loadSettings();check(R.settings.station==='ghost','Halloween choice restores as a valid setting');
 // Browsers without Web Audio still play and save normally.
 R.radio.ctx=null;delete context.window.AudioContext;api.radio.setEffects(true);check(!R.settings.effects,'unavailable audio leaves effects off');
 console.log(`Passed ${checks} sound checks (mock Web Audio; listening and device QA still required).`);
