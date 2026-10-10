@@ -72,3 +72,7 @@ Original Nao, Rin and Mio expression portraits and three optional story illustra
 ### Voyage 0.9 character refinements
 
 Four original portrait refinements (`assets/portraits/{aki,yumi,matte,sora}-harbour.webp`) use the game’s existing designs as identity references and its own Nao artwork as a treatment reference. Generated with the built-in image-generation tool; prompt set: `tools/voyage-09-art-prompts.json`. They follow the artwork licence in `LICENSE`. Sea discoveries and ferry detail are original native Canvas code; dockside ambience is procedural Web Audio synthesis.
+
+### Voyage start-page illustration
+
+`assets/scenes/voyage-title.webp` (2048 × 688) and its 1024 px responsive export are original illustrations generated with OpenAI’s built-in image-generation tool, using the game’s own Nao portrait as an identity reference. The Tern, lantern-lit harbour, water and fog follow the project’s art direction. Prompt: `tools/voyage-title-art-prompts.json`. These assets follow the artwork licence in `LICENSE`.
