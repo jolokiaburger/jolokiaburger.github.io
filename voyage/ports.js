@@ -187,3 +187,26 @@ P.everyday={
 const end=P.endMessages;P.endMessages=function(s){const rows=end(s);if(s.flags.yumiAboard||s.flags.yumiLiftDone)rows.push({who:'yumi',text:s.flags.yumiLiftDone?'The last connection was your ferry. I am home at Metro, with twelve credits settled and a much better story than a cancelled taxi.':'I’m still aboard as this voyage closes. I’ll call the next connection; thank you for the sheltered crossing.'});return rows;};
 P.casual=function(s,id,n){const pool=P.everyday[id]||[];if(!pool.length)return null;return pool[(Math.floor(n/2)+(s.visits[s.docked]||1)-1)%pool.length];};
 })();
+
+/* Kisaragi festival and memories that survive a fresh voyage. */
+(function(){const P=window.VoyagePorts;
+P.memoryTags=['festival','supper','preview','tea','repair','lighthouse','lift','delivery','sky','meal','service','trade','visit'];
+P.memoryLines={
+ nao:{festival:'Hana still has my festival sign. My name beside that little pot… I remember how easy it felt to breathe once everyone sat down.',supper:'Mio’s map is behind my recipe card. Our biscuit constellation is still the most useful one in my kitchen.',preview:'I kept the recipe from our first visit to Hana. One table was a perfectly good beginning.',tea:'That first case of Mei’s tea became so many warm cups. I remember the ferry that brought it.',meal:'I remember making room for you by the kettle. The stool is ready whenever you are.'},
+ mei:{tea:'You brought my tea safely to Nao on another night. Good deliveries leave more than receipts.',festival:'Nao sent a sketch of the festival table. My rice basket had quite an evening.',supper:'The ginger biscuits reached the stars with you. I still rather like saying that.',meal:'We have shared a warm bowl before. There is always room for another.'},
+ hana:{festival:'The spare stool from our festival is still here. So is Nao’s sign; I asked before keeping it.',preview:'I remember your first little supper with Nao. A festival should make room for that kind of courage.'},
+ mako:{festival:'Those festival lanterns are packed for another evening. I left your careful knot tied to the first one.'},
+ jun:{festival:'The citrus crate became a festival table. That is a lovely journey for twelve ordinary credits.',supper:'Three cups under Mio’s stars. Nao’s sketch made it all the way back to my tea shelf.'},
+ rin:{repair:'Second Helping has carried several shifts since we cleaned that valve. Your patient ten minutes are still working.',lighthouse:'Aki says the mechanism you carried is steady. A useful crossing can keep travelling long after the ferry docks.'},
+ aki:{lighthouse:'I remember your kit arriving dry. Every steady sweep since has a little of that crossing in it.'},
+ yumi:{lift:'Your ferry turned my cancelled connection into a homecoming. I still sketch its little cabin when the ward is quiet.'},
+ mio:{sky:'I saved the exposure from your visit. The dome remembers in light; I remember the company.',supper:'I can name those stars, but I remember our three cups more clearly. Thank you for that other kind of astronomy.'},
+ sora:{trade:'We have balanced the scale together before. I like a captain who reads both sides of a promise.'},
+ priya:{trade:'There is an earlier Tern receipt in my drawer. Dry paper, careful numbers. A good introduction.'},
+ matte:{delivery:'Your earlier delivery reached the right desk, seal intact. The night crew remembers useful people.'}
+};
+P.memoryLine=function(id,tag){return P.memoryLines[id]?.[tag]||(tag==='delivery'?'I remember the sealed case you brought on another voyage. The work continued after you sailed.':tag==='meal'?'We have shared a little warmth before. Shall we make room for another cup?':tag==='service'?'The Tern’s fittings have seen another night. I remember helping make them ready.':tag==='trade'?'We have read the scales together before. A careful receipt is worth remembering.':tag==='visit'?'I remember the Tern’s light from an earlier voyage. Welcome back; you already know where the dry corner is.':null);};
+const board=P.board;P.board=function(s){const rows=board(s);if(s.flags.naoPreview)rows.push({who:'hana',at:1420,title:s.flags.festivalDone?'A little festival to remember':'Kisaragi’s festival invitation',text:s.flags.festivalAccepted?window.VoyageModel.festivalStory(s).text:'Nao’s preview table has room to become a little festival. Speak to Hana in Kisaragi. Supplies cost 12 cr; the celebration costs 4 cr. No stall income is credited to your purse.'});return rows;};
+const end=P.endMessages;P.endMessages=function(s){const rows=end(s);if(s.flags.festivalDone)rows.push({who:'hana',text:'Mako’s lanterns, Jun’s citrus, Mei’s rice and Nao’s own little '+(s.flags.festivalRiceMenu?'sesame-rice':'soup')+' table. You helped an invitation become an evening people will remember.'});return rows;};
+const follow=P.followup;P.followup=function(s){const rows=follow(s);if(s.flags.festivalDone){const message='The festival sign is safely folded. Nao asked me to keep it for another small evening. We made something big enough for everyone who was there, without asking it to be bigger. Thank you, captain.';if(rows.length>=4)rows.pop();rows.push({who:'hana',text:message});}return rows;};
+})();

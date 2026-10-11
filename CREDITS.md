@@ -80,3 +80,7 @@ Four original portrait refinements (`assets/portraits/{aki,yumi,matte,sora}-harb
 ### Voyage 0.10 harbour life
 
 Skippable quay arrivals, animated mooring ropes, travelling workboats and Nao/Yumi deck figures in `voyage/voyage.js` are original native Canvas artwork. New everyday exchanges, waterway encounters and logbook messages in `voyage/ports.js` are original fictional writing. Illustrated logbook entries reuse the original Voyage start-page illustration and existing portraits; no additional downloads or external assets are required. Existing artwork/story and code licences apply.
+
+### Voyage 0.11 festival and memories
+
+Kisaragi’s festival lanterns, table, supplies, visitors and route markers are original native Canvas drawings in `voyage/voyage.js`. Festival dialogue, cross-voyage memories and follow-up messages in `voyage/ports.js` are original fictional writing. No new third-party artwork or audio is bundled; the existing code/artwork/story licence split applies.
