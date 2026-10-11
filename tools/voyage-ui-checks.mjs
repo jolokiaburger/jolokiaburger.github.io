@@ -51,14 +51,14 @@ export function boot(setup=()=>{},options={}) {
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/leisure-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
-  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L}=context.window;
+  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N}=context.window;
   const state=M.create('ui-audit');
   if(!options.welcome)Object.assign(state.flags,{welcome:true,continuitySeen:true});
   const moor=id=>{const port=W.ports.find(p=>p.id===id);state.docked=id;state.ship={x:port.x,y:port.y,angle:0,speed:0};};
-  setup({state,M,P,Pr,L,saved,moor});
+  setup({state,M,P,Pr,L,H,C,N,saved,moor});
   saved.set(KEY,options.rawSave??JSON.stringify(state));
   vm.runInContext(fs.readFileSync(root+'voyage/voyage.js','utf8'),context,{filename:'voyage/voyage.js'});
   const find=(id,label)=>walk(nodes.get(id)).find(n=>n.textContent.startsWith(label));
@@ -67,7 +67,7 @@ export function boot(setup=()=>{},options={}) {
   const current=()=>context.window.NeonVoyage.getState();
   const advance=ms=>{const end=elapsed+ms;for(;;){const due=[...timers].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!due)break;timers.delete(due[0]);elapsed=due[1].at;due[1].fn();}elapsed=end;};
   const key=(key,editing=false)=>documentEvents.keydown({key,repeat:false,target:{closest:()=>editing},preventDefault(){}});
-  return {pastimes:context.window.NeonVoyage.pastimes,nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
+  return {context,neighbours:context.window.NeonVoyage.neighbours,pastimes:context.window.NeonVoyage.pastimes,nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
 }
 
 // Assisted arrival: a brief notice leaves docking enabled and clears on mooring.
@@ -333,4 +333,97 @@ check(journeyText.includes('Next')&&journeyText.includes('ETA')&&journeyText.inc
 equal(journeyUI.saved.get('neon-tides:save:v1'),'classic-unchanged','new activity integration preserves Classic save');
 const fuelUI=boot(({state,moor,M})=>{M.action(state,'accept-tea');moor('landing');state.docked=null;state.fuel=.1;state.voyage={distance:0,from:'bar',to:'market',line:{speaker:'Captain',text:'Crossing'}};});
 fuelUI.click(fuelUI.find('journey-strip','Set course to Landing 3 fuel pump'));equal(fuelUI.current().voyage.to,'landing','fuel-strip shortcut sets a course to the reachable pump');
+
+// 0.16: conversations remain in the quay; topics and choices remember learning without charging.
+const topicsUI=boot();
+topicsUI.person('Mei Kusanagi');
+const topicDetails=walk(topicsUI.nodes.get('port-content')).find(n=>n.className==='conversation-topics');
+check(topicDetails,'inline conversation topic section exists');equal(topicDetails.open,false,'topic section opens only by choice');
+topicDetails.open=true;
+const topicClock=topicsUI.current().clock,topicPurse=topicsUI.current().credits;
+topicsUI.click(topicsUI.find('port-content','How would you cook a harbour catch?'));
+check(!topicsUI.nodes.get('panel').open,'reading a dockside topic does not open a modal');
+check(topicsUI.current().neighbours.learned.includes('lantern'),'topic learns the actual recipe');
+equal(topicsUI.current().clock,topicClock,'topic reading pauses clock');equal(topicsUI.current().credits,topicPurse,'topic reading free');
+topicsUI.click(topicsUI.find('port-content','“I’ll write down your lantern catch bowl.'));
+equal(topicsUI.current().neighbours.replies['mei-broth'],'learn','chosen full reply saved');
+check(walk(topicsUI.nodes.get('port-content')).some(n=>n.className==='npc-reply'&&!n.hidden&&n.textContent.includes('leave a line')),'NPC gives the matching reply');
+check(JSON.parse(topicsUI.saved.get(PROFILE)).neighbours.facts.includes('mei-broth'),'attributed knowledge persists in profile');
+check(!topicsUI.nodes.get('port-back').hidden,'fixed person Back is visible');
+topicsUI.click(topicsUI.nodes.get('port-back'));equal(topicsUI.nodes.get('port-back').hidden,true,'fixed Back returns to people');
+
+// Scroll positions are distinct per quay/tab/person and survive a return visit.
+const scrollUI=boot();scrollUI.nodes.get('port-content').scrollTop=144;
+scrollUI.click(scrollUI.groups['[data-tab]'].find(n=>n.dataset.tab==='market'));equal(scrollUI.nodes.get('port-content').scrollTop,0,'new tab begins at top');
+scrollUI.nodes.get('port-content').scrollTop=33;scrollUI.click(scrollUI.groups['[data-tab]'].find(n=>n.dataset.tab==='people'));
+equal(scrollUI.nodes.get('port-content').scrollTop,144,'return restores People scroll');
+scrollUI.click(scrollUI.groups['[data-tab]'].find(n=>n.dataset.tab==='market'));equal(scrollUI.nodes.get('port-content').scrollTop,33,'return restores Market scroll');
+
+// New fare terms and optional route choice go through actual visible callbacks.
+const boardUI=boot(({state,moor,M})=>{moor('landing');M.advance(state,70);});
+boardUI.neighbours.trip('priya');boardUI.click(boardUI.find('panel-content','Offer a direct crossing'));
+equal(boardUI.current().neighbours.rides.priya.stage,'aboard','fare boarding callback works');
+boardUI.click(boardUI.find('panel-content','Suggest a thermos stop instead'));
+equal(boardUI.current().neighbours.rides.priya.route,'tea','route dialogue choice changes tracked route');
+check(boardUI.current().track==='ride-priya','passenger objective tracked');
+check(!boardUI.nodes.get('panel-back').hidden,'fixed modal Back available');
+boardUI.click(boardUI.nodes.get('panel-back'));check(boardUI.find('panel-content','Passenger trips · People across the water'),'fixed Back follows actual panel action');
+boardUI.click(boardUI.nodes.get('panel-close'));boardUI.person('Priya Gale');
+check(walk(boardUI.nodes.get('port-content')).some(n=>n.textContent.includes('Aboard the Tern')),'passenger role shows actual aboard status');
+
+const fareUI=boot(({state,moor,H,M})=>{moor('landing');M.advance(state,70);H.ride(state,'priya','board','tea');moor('metro');state.docked=null;state.ship.x-=20;});
+const beforeFare=fareUI.current().credits;fareUI.click(fareUI.nodes.get('dock-button'));
+equal(fareUI.current().credits,beforeFare,'docking does not automatically pay the new fare');
+fareUI.neighbours.trip('priya');fareUI.click(fareUI.find('panel-content','Disembark at Metro Quay'));
+equal(fareUI.current().credits,beforeFare+18,'explicit destination control pays promised fare');
+equal(fareUI.current().neighbours.rides.priya.stage,'done','fare completed through actual UI');
+check(JSON.parse(fareUI.saved.get(PROFILE)).charms.includes('ticket'),'earned ticket persisted');
+equal(fareUI.saved.get('neon-tides:save:v1'),'classic-unchanged','passenger UI leaves Classic save alone');
+
+// Recipe ingredients remain a free draft until a full, explicit serving.
+const recipeUI=boot(({state,moor,C,L})=>{C.read(state,'mei','mei-broth');L.cast(state);L.reel(state);moor('market');});
+recipeUI.neighbours.recipe('lantern');const recipeClock=recipeUI.current().clock,recipeCash=recipeUI.current().credits;
+check(recipeUI.find('panel-content','Place all ingredients before serving').disabled,'unfinished tray cannot be served');
+for(const label of ['Gentle miso','Spring greens','Roasted tea'])recipeUI.click(recipeUI.find('panel-content',label));
+equal(recipeUI.current().clock,recipeClock,'draft ingredient choices cost no time');equal(recipeUI.current().credits,recipeCash,'draft ingredient choices free');
+check(recipeUI.find('panel-content','Place all ingredients before serving').disabled,'fish recipe needs an explicit catch');
+const fishName=recipeUI.context.window.VoyageLeisure.fish[recipeUI.current().leisure.fishing.catches[0].id].name;
+recipeUI.click(recipeUI.find('panel-content',fishName));recipeUI.click(recipeUI.find('panel-content','Share the bowl'));
+equal(recipeUI.current().clock,recipeClock+6,'serving costs full six minutes');
+equal(recipeUI.current().leisure.fishing.catches[0].outcome,'cooked','serving consumes selected kept fish');
+check(recipeUI.current().neighbours.recipes[0].matched,'assembled recipe matches authored dish');
+equal(recipeUI.current().credits,recipeCash,'recipe serving free');
+const draftUI=boot(({state,moor,C})=>{moor('canal');C.read(state,'jun','jun-garden');moor('market');});
+draftUI.neighbours.recipe('garden');const draftClock=draftUI.current().clock;
+draftUI.click(draftUI.find('panel-content','Gentle miso'));draftUI.click(draftUI.find('panel-content','Leave the tray'));
+equal(draftUI.current().clock,draftClock,'leaving partial recipe charges nothing');equal(draftUI.current().neighbours.recipes.length,0,'leaving records no false serving');
+
+// Favour and evidence interpretations use visible labels and update the board truthfully.
+const favourUI=boot(({state,moor,H,C})=>{moor('landing');H.favour(state,'bell','accept');C.read(state,'priya','priya-bell');moor('canal');C.read(state,'mako','mako-bell');moor('landing');});
+favourUI.neighbours.favourView('bell');const bellClock=favourUI.current().clock;
+favourUI.click(favourUI.find('panel-content','Keep the tale as a labelled harbour legend'));
+equal(favourUI.current().neighbours.favours.bell.answer,'legend','chosen mystery interpretation saved');equal(favourUI.current().clock,bellClock+3,'comparison time explicit');
+check(JSON.parse(favourUI.saved.get(PROFILE)).charms.includes('bell'),'bell keepsake earned once');
+const blockedBell=boot(({state,moor,H})=>{moor('landing');H.favour(state,'bell','accept');});
+blockedBell.neighbours.favourView('bell');check(blockedBell.find('panel-content','Publish the checked maintenance account').disabled,'cannot resolve mystery without records');
+
+// Opt-in guide has truthful feedback; default sailing has no guide.
+const practiceUI=boot(({state,moor})=>{moor('market');state.docked=null;state.ship.x-=20;state.neighbours.practice=true;});
+practiceUI.frame(1000);check(!practiceUI.nodes.get('dock-guide').hidden,'enabled practice guide appears near a quay');
+check(practiceUI.nodes.get('dock-guide').classList.contains('gentle'),'slow aligned guide is green');
+practiceUI.click(practiceUI.nodes.get('dock-button'));equal(practiceUI.current().neighbours.landings[0].grade,'gentle','landing graded at actual docking');
+check(practiceUI.nodes.get('arrival-text').textContent.startsWith('Gentle landing.'),'arrival explains the practice result');
+check(JSON.parse(practiceUI.saved.get(PROFILE)).neighbours.gentle.includes('market'),'practice progress persists');
+const noGuide=boot(({state,moor})=>{moor('market');state.docked=null;state.ship.x-=20;});noGuide.frame(1000);check(noGuide.nodes.get('dock-guide').hidden,'practice does not appear by default');
+
+// New illustrated seats have functioning controls and stable production asset paths.
+for(const [port,file,title]of [['metro','metro','A seat by Metro'],['yard','yard','Rin’s workshop'],['observatory','observatory','Mio’s dockside']]) {
+  const r=boot(({moor})=>moor(port));r.click(r.find('port-content','Take a closer dockside seat'));
+  check(r.find('panel-content',title),'correct dockside seat title');
+  check(walk(r.nodes.get('panel-content')).some(n=>n.src==='../assets/scenes/'+file+'-dockside.webp'&&n.alt),'new illustration has correct source and descriptive alt');
+  check(!r.nodes.get('panel-back').hidden,'seat return is fixed outside scrolling content');
+  r.click(r.nodes.get('panel-back'));check(!r.nodes.get('panel').open,'fixed seat Back returns to the quay');
+}
+const readUI=boot(({state,moor,C})=>{moor('observatory');C.read(state,'mio','mio-depth');});
+readUI.neighbours.notebook();check(walk(readUI.nodes.get('panel-content')).some(n=>n.href?.startsWith('https://science.nasa.gov/')&&n.rel==='noopener noreferrer'),'science note links directly to its primary source');
 console.log(`Passed ${checks} Voyage DOM integration checks (browser layout is not covered).`);

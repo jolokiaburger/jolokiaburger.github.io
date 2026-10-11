@@ -7,12 +7,21 @@ import {boot} from './voyage-ui-checks.mjs';
 const out = process.argv[2];
 if (!out) throw Error('Usage: node tools/voyage-render-checks.mjs <output-directory>');
 fs.mkdirSync(out, {recursive: true});
+const rect=(left,top,width,height)=>({left,top,right:left+width,bottom:top+height,width,height});
+function layout(r,width=1280,height=720) {
+  const phone=width<=750,landscape=phone&&height<=400;
+  r.nodes.get('sea').rect=rect(0,0,width,height);
+  r.nodes.get('sailing-top').rect=rect(16,16,width-32,120);
+  r.nodes.get('sailing-bottom').rect=rect(16,height-90,width-32,74);
+  r.nodes.get('touch-pad').rect=rect(16,height-130,120,114);
+  r.nodes.get('port').rect=phone&&!landscape?rect(8,height*.22,width-16,height*.78-8):rect(phone?width*.35:width-468,8,phone?width*.65-8:460,height-16);
+}
 for (const [id, port] of [['market-lights','market'],['canal-lanterns','canal'],['lighthouse-beam','island']]) {
   const r = boot(({state, moor, L}) => {
     moor('metro'); L.acceptPhotos(state, 'yumi'); moor('observatory'); L.acceptPhotos(state, 'mio');
     moor(port); state.docked = null; state.ship.x -= 30;
   }, {canvasFactory: createCanvas});
-  r.frame(1000); r.click(r.nodes.get('photo-button'));
+  layout(r);r.frame(1000); r.click(r.nodes.get('photo-button'));
   r.click(r.find('panel-content','Take photograph'));
   const image = JSON.parse(r.saved.get('neon-tides:voyage:profile:v1')).album[0];
   assert.equal(image.id, id); assert.ok(image.image.length <= 250000);
@@ -21,8 +30,20 @@ for (const [id, port] of [['market-lights','market'],['canal-lanterns','canal'],
   fs.writeFileSync(out + '/' + id + extension, bytes);
   console.log(id + ': ' + bytes.length + ' bytes; actual game scenery rendered.');
 }
-for (const charm of ['fish','cup','pennant','star']) {
+for (const charm of ['fish','cup','pennant','star','ticket','ribbon','bell','bowl','rope']) {
   const r = boot(({saved,Pr}) => { const p=Pr.create();Pr.hydrate(p);p.charms=[charm];p.look.charm=charm;saved.set('neon-tides:voyage:profile:v1',JSON.stringify(p)); }, {canvasFactory: createCanvas, reduced: true});
-  r.frame(1000); fs.writeFileSync(out + '/tern-' + charm + '.png', r.nodes.get('sea').native.toBuffer('image/png'));
+  layout(r);r.frame(1000); fs.writeFileSync(out + '/tern-' + charm + '.png', r.nodes.get('sea').native.toBuffer('image/png'));
 }
+for(const id of ['priya','lam','rin']) {
+  const r=boot(({state,moor,H,M})=>{const d=H.rides[id];moor(d.from);M.advance(state,d.opens-state.clock);H.ride(state,id,'board');state.docked=null;state.ship.x+=100;}, {canvasFactory:createCanvas,reduced:true});
+  layout(r);r.frame(1000);fs.writeFileSync(out+'/passenger-'+id+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+}
+for(const [name,width,height]of [['portrait',390,640],['landscape',740,330]]) {
+  const r=boot(()=>{}, {canvasFactory:createCanvas,reduced:true});layout(r,width,height);r.frame(1000);
+  assert.equal(r.nodes.get('sea').width,width);assert.equal(r.nodes.get('sea').height,height);
+  fs.writeFileSync(out+'/phone-camera-'+name+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+}
+const guide=boot(({state,moor})=>{moor('market');state.docked=null;state.ship.x-=20;state.neighbours.practice=true;},{canvasFactory:createCanvas,reduced:true});
+layout(guide);guide.frame(1000);assert.equal(guide.nodes.get('dock-guide').hidden,false);
+fs.writeFileSync(out+'/gentle-docking-guide.png',guide.nodes.get('sea').native.toBuffer('image/png'));
 console.log('Native Canvas photograph and decoration renders complete; browser layout remains untested.');

@@ -188,7 +188,7 @@
     if(c.tie)ellipse(ctx,5,-9,2.6,4.5,c.hair);
     for(let i=0;i<3;i++)stroke(ctx,-3+i*2,-10,-2+i*2,-8,'#d4c5a32d',.55);
     if(c.silver)stroke(ctx,3,-10,4,-5,'#c2c9be',1.1);
-    stroke(ctx,-2.5,-5.4,-1,-5.4,'#514847',.6);stroke(ctx,1,-5.4,2.5,-5.4,'#514847',.6);stroke(ctx,-.8,-2.1,.8,-2.1,'#9b7669',.55);
+    const blink=!reduced&&((phase*5+x*.03)%6.8)<.16;if(blink){stroke(ctx,-2.5,-5.4,-1,-5.4,'#514847',.6);stroke(ctx,1,-5.4,2.5,-5.4,'#514847',.6);}else{ellipse(ctx,-1.8,-5.4,.55,.75,'#514847');ellipse(ctx,1.8,-5.4,.55,.75,'#514847');}stroke(ctx,-.8,-2.1,.8,-2.1,'#9b7669',.55);
     if(['lam','matte','kenji'].includes(id)){stroke(ctx,-2,-1.7,2,-1.7,'#78716a',.55);stroke(ctx,-3,-4.1,-2,-3.9,'#b09079',.5);}
     if(c.glasses){ctx.strokeStyle='#c3b890';ctx.lineWidth=.6;ctx.strokeRect(-3.5,-6.4,2.6,2.2);ctx.strokeRect(.9,-6.4,2.6,2.2);stroke(ctx,-.9,-5.5,.9,-5.5,'#c3b890',.6);}
     if(c.cap){box(ctx,-5,-12,10,3,1,c.coat);stroke(ctx,-5,-9,5,-9,'#b5ad8c',.8);}

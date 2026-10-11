@@ -2,6 +2,8 @@
 
 **Reviewed:** Voyage 0.11. **Fix release:** 0.12, 11 October 2026.
 
+**Latest follow-up:** Voyage 0.16, 11 October 2026; scope and validation are recorded at the end of this audit.
+
 This is a critical review by the coding assistant, using a game-development and QA lens. It is not an independent human review or a substitute for observing players. Voyage is the current game; Classic received regression checks for the shared repository and assets.
 
 ## Verdict
@@ -89,3 +91,19 @@ Fishing callbacks are disposed when a panel closes or changes, and verify the vo
 `voyage/travel-plan.js` checks reachable pumps, the full 30-cr/10-min refill, current purse, pickup funding/capacity, release waits, handovers, deadlines and return to Kurage. It considers useful early refills and caches route geometry with a size bound. Net cash, gross margin, fuel used and the ending tank have distinct labels. Starting fuel is already aboard; its earlier purchase is excluded from this net-cash estimate. Combined two-order planning retains its existing conditional refuelling warning. Navigation geometry, market prices and Classic rules are unchanged.
 
 Validation includes 677 focused activity/save/budget assertions, 285 DOM checks and real native Canvas renders of all photo views and all decorations. This is automated inspection, not independent player observation. Browser CSS, mobile touch comfort, Safari/iOS and real-phone performance remain outstanding.
+
+## People across the water · Voyage 0.16
+
+All six requested additions now work on existing routes: three finite passenger fares, four neighbour favours, three learned recipes, optional docking practice, dock GUI refinements and three illustrated seats. The requested dialogue direction adds 28 optional topics, full player replies and an attributed knowledge notebook. A small evidence-based bell investigation allows two clearly labelled interpretations. `VOYAGE-NEIGHBOURS.md` records exact terms, costs, source files and limitations.
+
+The new model, conversation, profile and UI concerns are separate modules. Money changes only through a guarded explicit fare handover or the late-crew favour; docking, reading, recipe drafts and dawn grant no automatic fare. Optional tea stops do not prevent a direct homecoming. Passenger and recipe baskets remain outside freight capacity. All paid/consuming actions require their full duration before dawn, including settlement exactly at 06:00. Closing a fare or favour preserves an honest closed outcome without payment. Consumed fish have a corresponding real serving/gift record and cannot be reused.
+
+The optional voyage/profile records accept older saves before hydration, reject unknown or inherited IDs and duplicate/inconsistent records, and bound persistent knowledge and landings. Current-voyage learning reconciles with the profile at load; fresh voyages restore recipes and practice without restoring cash, catches, passengers or completed jobs. Five additional charms follow the existing ownership rules. Classic's scripts, original assets and separate storage key are unchanged.
+
+Conversation choices stay inside the quay view and never appear automatically. Full replies are visible before selection. Practical topics describe actual game rules and never expose unseen prices. The notebook separates rules/outlooks, history/rumours and recipes/science, attributes the speaker and keeps first-heard times. The two science notes link to primary USGS/NASA material; the Basin economy and bell lore are fictional. The choice requiring Mako's evidence is gated on the account the player actually heard.
+
+Port/dialog return controls stay outside scrolling content, and port scroll is remembered by quay/tab/person. Explicit phone header grid positions avoid implicit placement; phone camera framing uses the measured exposed sea above/beside the port pane. New scene art preserves the established cast. Luggage, approach marks, keepsakes and reduced-motion-aware blinks remain native drawings; approach grading does not change collisions, fuel or docking eligibility.
+
+Validation: **775** new model/profile assertions, **401** total DOM integration checks, **71,627** engine assertions, **677** pastimes checks, **3,211** Classic checks and **134** mocked audio checks. Native Canvas inspection covers photo scenery, all nine charms, three passengers, docking marks and portrait/landscape camera framing. Counts describe assertions, including simulated navigation frames, not independent play sessions. The checks do not render browser CSS or establish whether the additions are fun.
+
+Browser access was declined earlier in this session. Real-browser CSS/focus, touch comfort, Safari/iOS, physical-phone performance and listening remain outstanding; the 0.16 manual checklist is in `VOYAGE-PLAYTEST.md`. The combined cargo planner's conditional fuel estimate and large renderer remain known limitations. The next evaluation should observe the existing loop on phones before expanding the Basin further.

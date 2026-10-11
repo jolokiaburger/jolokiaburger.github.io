@@ -41,7 +41,7 @@
     if (!record(l) || !record(l.fishing) || !record(l.photos)) return false;
     const f = l.fishing, p = l.photos;
     if (!Number.isInteger(f.casts) || f.casts < 0 || f.casts > 6 || typeof f.relaxed !== 'boolean' || !Array.isArray(f.catches) || f.catches.length !== f.casts) return false;
-    if (!f.catches.every(c => record(c) && owns(fish, c.id) && W.ports.some(q => q.id === c.port) && at(c.at, s.clock) && ['kept', 'released', 'shared'].includes(c.outcome))) return false;
+    if (!f.catches.every(c => record(c) && owns(fish, c.id) && W.ports.some(q => q.id === c.port) && at(c.at, s.clock) && ['kept', 'released', 'shared', 'cooked', 'gifted'].includes(c.outcome))) return false;
     if (f.catches.filter(c => c.outcome === 'kept').length > 3) return false;
     if (f.pending !== null && (!record(f.pending) || !owns(fish, f.pending.id) || f.pending.port !== s.docked || f.pending.index !== f.casts || !at(f.pending.at, s.clock) || f.casts >= 6 || f.catches.filter(c => c.outcome === 'kept').length >= 3)) return false;
     if (!Array.isArray(l.kitchen) || l.kitchen.length > 3 || !l.kitchen.every((r, i) => record(r) && r.customer === customers[i].id && at(r.at, s.clock) && typeof r.matched === 'boolean' && record(r.dish) && Object.keys(dishes).every(k => owns(dishes[k], r.dish[k])))) return false;
