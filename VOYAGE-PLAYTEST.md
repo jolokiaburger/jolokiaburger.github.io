@@ -155,3 +155,18 @@ Validation: `node tools/voyage-checks.mjs` covers encounter location, costs, one
 - `voyage/model.js` / `voyage/profile.js`: the ledger records all actual purse movements in categories, retaining totals and the latest 200 transactions. Meals, upgrades, paint, gifts and festival spending are included. Cash change is separate from realised gold profit and cash-plus-stock at purchase cost. Gold basis is grams × per-gram cost; deliverable held cargo retains purchase cost, expired cargo is written down, and upgrades/gifts have zero stock value. This is a cost-based book value, not a guaranteed resale valuation. Older saves start an explicitly partial ledger from their current purse and inventory. Completed history accounting is an immutable snapshot.
 
 Checks: `node tools/voyage-checks.mjs` covers both festival branches, exact costs, blocked/repeated actions, combined precedence and capacity, funding pickups, expired inventory, gold basis, immutable accounting and profile migration. DOM/Canvas smoke scenarios cover the festival controls, ledger, route saving and the compact interface, including a phone-sized viewport and reduced motion. Real-device Safari/iOS remains unverified.
+
+## Voyage 0.12 · Gameplay and dialogue audit
+
+A critical review of 0.11 is recorded in `VOYAGE-AUDIT.md`, with reproducible findings, fixes and remaining play-test questions.
+
+- Expired tea/lighthouse cases can be unloaded at any quay through Cargo or Journal. Closed requests release their cargo slot without payment and remain visible as outcomes.
+- Optional activities require their full advertised time before 06:00. Exact-dawn completion is allowed. The tug remains available in the final minutes and shows its actual duration.
+- First-voyage guidance leads directly to Mei's tea crossing; Ferry tools reopens help. Active stories come first in the Journal, with next-quay previews; outcomes and detailed planning are folded. Buttons explain common time, purse and capacity limits. Close stays visible while long panels scroll.
+- Festival destination markers follow their written next steps. Unloading a case refreshes the combined route. Routes needing refuelling explicitly remain conditional on its extra budget and time.
+- The logbook and new history rows separate held inventory from settled cargo results. Expired purchases are written down once; older summaries keep their numbers and show their earlier basis.
+- Gold route comparisons support one or three grams. New voyages price Sora's travelling gram at 86 cr; existing voyages preserve the older 46-cr offer. No unseen quote is supplied.
+- Delivery and festival reactions have distinct voices, repeat dialogue notices the night's progress, and late Metro crossings acknowledge the last train. Current reactions take precedence over old memories without losing trading news.
+- Invalid saves/history fail safely, with a notice and the unreadable original retained locally where storage permits. Valid earlier saves continue.
+
+Checks: run `node tools/voyage-checks.mjs`, `node tools/voyage-ui-checks.mjs`, `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. The new UI script has no dependencies and checks DOM behaviour; it does not verify CSS, touch comfort or real-browser rendering.
