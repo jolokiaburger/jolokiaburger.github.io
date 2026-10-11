@@ -37,7 +37,7 @@ Repeated conversations use authored pools, not an endless text generator. They w
 
 Not every cargo order should be profitable as a dedicated round trip. The pump seals pay a 14-cr gross margin, while their outbound sailing alone uses about 2.68 fuel, or 13.4 cr at the full-tank rate. They make more sense as work along an existing route than as a guaranteed money-maker. The comparisons expose collection and homeward costs; no blanket increase to every payment was made.
 
-Refuelling remains outside the route planner's time/budget simulation. A route needing fuel is now described as conditional, with each refill's 30-cr/10-min cost stated. Turns, detours and actual dealer allowances also remain practical limits on an estimate. A map calculation is not a guaranteed arrival or resale price.
+In the 0.12 review, refuelling remained outside the route planner's time/budget simulation. Voyage 0.15 adds a separate simulation to individual cargo offers and the journey strip; the two-order planner still uses its older distance estimate. A route needing fuel is now described as conditional, with each refill's 30-cr/10-min cost stated. Turns, detours and actual dealer allowances also remain practical limits on an estimate. A map calculation is not a guaranteed arrival or resale price.
 
 ## Engineering changes
 
@@ -76,3 +76,16 @@ The next refinement responds to reported interface confusion: the first-voyage g
 Jun, Hana and Mako's 512 px scene portraits left comparatively little detail for their faces. New 1024 px portraits use closer framing while retaining their identities and clothes. Only Voyage references change; Classic and the older image files are preserved. Exact prompts: `tools/voyage-14-art-prompts.json`.
 
 Validation: **71,619** Voyage engine assertions, **168** DOM integration checks, **3,211** Classic checks and **134** mocked audio checks pass. The UI checks cover startup, legacy announcements, optional help, keyboard Menu, countdown boundaries, redocking, dismissal, reduced motion and recovery data retention. They do not render CSS. Live-browser layout and physical-phone testing remain outstanding; no browser screenshot or device result is claimed. The fuel-planner limitation described above remains unchanged in this release.
+
+
+## Harbour pastimes and interface follow-through · Voyage 0.15
+
+The requested six additions are implemented within the existing Basin: fishing, Nao's kitchen shift, photo errands/album, a journey strip and individual fuel-stop budgets, refreshed Mei/Priya expressions, and three illustrated dockside views. `VOYAGE-HARBOUR-LIFE.md` documents exact rules and limitations.
+
+New activity data is optional under `leisure`; old saves are accepted before empty defaults are added. Profile album/notebook/decorations are also optional. The validators reject unknown/inherited IDs, duplicate rewards/records, invalid timestamps, oversized thumbnail strings and unsafe image types. Fish use their own basket; kitchen ingredients and photographs do not take freight slots. Cash awards are fixed, finite per voyage, recorded in the existing ledger and included in the illustrated voyage result. Draft kitchen choices, cast waiting and menu navigation are free. The full game-time cost must fit before dawn, including exact-dawn settlement.
+
+Fishing callbacks are disposed when a panel closes or changes, and verify the voyage/line before acting. A pending line survives reload without forcing the panel. Departure packs it away. Normal bites remain available indefinitely; relaxed mode automates reeling. Photo previews render native game artwork rather than requesting camera access or uploading images. Album storage is bounded to three small captures.
+
+`voyage/travel-plan.js` checks reachable pumps, the full 30-cr/10-min refill, current purse, pickup funding/capacity, release waits, handovers, deadlines and return to Kurage. It considers useful early refills and caches route geometry with a size bound. Net cash, gross margin, fuel used and the ending tank have distinct labels. Starting fuel is already aboard; its earlier purchase is excluded from this net-cash estimate. Combined two-order planning retains its existing conditional refuelling warning. Navigation geometry, market prices and Classic rules are unchanged.
+
+Validation includes 677 focused activity/save/budget assertions, 285 DOM checks and real native Canvas renders of all photo views and all decorations. This is automated inspection, not independent player observation. Browser CSS, mobile touch comfort, Safari/iOS and real-phone performance remain outstanding.

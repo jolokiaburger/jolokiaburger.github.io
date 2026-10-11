@@ -131,3 +131,12 @@ The sailing map keeps native Canvas art. `voyage/harbour-art.js` adds translucen
 Jun, Hana and Mako's older portraits were inspected against Nao's finer illustration. Their wider scene framing gave the faces fewer source pixels than the newer portraits. Three individually generated replacements use their own portraits as identity references and Nao only as the rendering and lighting reference. Jun keeps his glasses, dark shirt and green tea-shop apron; Hana keeps her half-tied dark hair, dusty-rose overshirt and clipboard; Mako keeps their salt-and-pepper hair, mature face, rust scarf and weathered work jacket.
 
 The new `assets/portraits/{jun,hana,mako}-harbour.webp` files are 1024 × 1024, WebP quality 86, with closer chest-up framing. Built-in image generation supplied the drawn detail; Pillow only resized and exported the production files. Original portraits remain intact and Classic retains its original references. Full prompts, references and source paths are in `tools/voyage-14-art-prompts.json`.
+
+
+## Voyage 0.15 · A closer seat and familiar expressions
+
+Mei and Priya each receive relaxed, thoughtful and pleased 1024 × 1024 WebP portraits. Their own previous portraits are identity references; Nao's established art is a style reference only. Fine ink, textured shadow, adult proportions and warm working places remain the quality target. Three 1440 × 960 WebP scenes show Mei's kitchen, Nao's lantern counter and Jun's canal tea table. Scenes open only on request, with functional controls beside the illustration.
+
+All nine assets use the built-in image-generation tool and quality-86 WebP exports. Their exact prompts, source references/paths, output paths, byte counts and hashes are in `tools/voyage-15-art-prompts.json`. Original assets remain; only Voyage selects the new Mei/Priya portraits. Fish and bowl illustrations are local SVG code in `voyage/leisure-ui.js`; photo markers and keepsakes are native Canvas in `voyage/voyage.js`. Player postcards capture that actual native harbour art, not generated placeholder photographs. Steam and float bobbing respect reduced motion.
+
+The cast was reviewed at displayed scale; this pass targets two frequent faces and does not claim every portrait was redrawn. Native Canvas photo and decoration renders were inspected separately from mock DOM tests. Actual browser CSS and phone readability remain unverified.

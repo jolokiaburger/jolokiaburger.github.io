@@ -1,0 +1,156 @@
+{
+  "release": "Voyage 0.15",
+  "tool": "built-in imagegen",
+  "jobs": [
+    {
+      "file": "mei-relaxed-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/mei-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Mei, an older Japanese woman around 58, short dark-violet-black hair with silver strands, mature cheekbones and subtle wrinkles, jade stud earring, charcoal work blouse and burgundy apron. Expression: Calm, welcoming, subtle half-smile. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-292cad7a-0b00-4808-b591-d67f16956e16.png",
+      "output": "assets/portraits/mei-relaxed-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 174622,
+      "sha256": "6bd2a7291b774e81c0cea3dc16d70e0ac0e76967ac4e059078478f66b9166d64"
+    },
+    {
+      "file": "mei-thoughtful-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/mei-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Mei, an older Japanese woman around 58, short dark-violet-black hair with silver strands, mature cheekbones and subtle wrinkles, jade stud earring, charcoal work blouse and burgundy apron. Expression: Listening thoughtfully, eyes attentive, mouth relaxed; no sadness or exaggerated frown. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-130eed1d-114e-458b-b8d3-19d5accaf489.png",
+      "output": "assets/portraits/mei-thoughtful-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 206924,
+      "sha256": "7dd0d814c82006d989c94464ffc996f41451c9a3d5776228ee66322010d9c848"
+    },
+    {
+      "file": "mei-pleased-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/mei-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Mei, an older Japanese woman around 58, short dark-violet-black hair with silver strands, mature cheekbones and subtle wrinkles, jade stud earring, charcoal work blouse and burgundy apron. Expression: A warm, quietly pleased smile after a helpful crossing; no cartoon grin. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-a67f6474-c07a-47b1-9048-db64b1e004b4.png",
+      "output": "assets/portraits/mei-pleased-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 186506,
+      "sha256": "e16eaed103f0f88c0babcc238d6f1d5556e848447757341fccdcb806c7f55d8f"
+    },
+    {
+      "file": "priya-relaxed-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/priya-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Priya, a Japanese harbour clerk around 39, straight dark shoulder-length hair and bangs, white blouse, navy waistcoat, blue ID lanyard and pocket pen. Expression: Calm, welcoming, subtle half-smile. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-d4f22f53-31d1-4aa0-9e90-6a3c187eb60d.png",
+      "output": "assets/portraits/priya-relaxed-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 173866,
+      "sha256": "120063d215122d6942f3ab7e5491897a64cd82dad7035b214b8451bce87017c5"
+    },
+    {
+      "file": "priya-thoughtful-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/priya-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Priya, a Japanese harbour clerk around 39, straight dark shoulder-length hair and bangs, white blouse, navy waistcoat, blue ID lanyard and pocket pen. Expression: Listening thoughtfully, eyes attentive, mouth relaxed; no sadness or exaggerated frown. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-a272e289-0a4e-46a4-a594-ce022fab0160.png",
+      "output": "assets/portraits/priya-thoughtful-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 162392,
+      "sha256": "aea4c6e0f00615fce2b2c6634d2c22d7ba7b80da89890b0e6de62d03a6554547"
+    },
+    {
+      "file": "priya-pleased-harbour",
+      "type": "portrait",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/priya-manga.webp",
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: identity-preserve. Asset type: 1024 by 1024 square character portrait for Neon Tides Voyage. Image 1 is the exact identity, hair, age, facial features and costume reference; preserve it. Image 2 is style and warm harbour texture only, do not copy its face. Priya, a Japanese harbour clerk around 39, straight dark shoulder-length hair and bangs, white blouse, navy waistcoat, blue ID lanyard and pocket pen. Expression: A warm, quietly pleased smile after a helpful crossing; no cartoon grin. Keep her head fully inside the square and face large and readable, shoulder-up with 75 percent character and a softly detailed workplace behind her. Mei belongs beside a warm kitchen; Priya beside a harbour ticket-office lamp and papers. Fine ink linework, textured painterly shadows, grounded adult JRPG / slice-of-life anime illustration, amber night light and muted blue shadows. High detail at native resolution. No text, logo or watermark. This is the same character as Image 1, not a new design.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-4088d833-a5b0-4a6e-8dc7-c35cc4c72125.png",
+      "output": "assets/portraits/priya-pleased-harbour.webp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "bytes": 188698,
+      "sha256": "0948c07976bb9a66caf9db3f84ca2803f90d3ab2371843cc1476d11f1e5983ec"
+    },
+    {
+      "file": "mei-dockside",
+      "type": "scene",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/mei-manga.webp"
+      ],
+      "prompt": "Use case: illustration-story / identity-preserve. Asset type: 1536 by 1024 landscape close dockside scene for Neon Tides Voyage, ratio 3:2. Input image is the exact character identity, hair, face, age, clothes and illustration style reference; preserve all. Mei at her small Kurage harbour kitchen counter: steaming broth pot, ceramic noodle bowls, stacked cups, burgundy apron and charcoal blouse, older face, short dark violet-black hair with silver streaks and jade earring. A rain-dark kitchen window shows the harbour lights. Seated visitor eye level at the counter, character in the upper central area with hands visible naturally and inviting working counter in foreground. Small intimate everyday harbour scene, grounded adult slice-of-life anime/JRPG illustration, very fine ink linework and richly textured painted materials, warm amber light against muted rainy blue and teal harbour tones. Enough readable detail for a phone and desktop scene. Gentle steam, no dramatic action. One character only. No text, logos, watermark, UI, borders, duplicate faces or extra people.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-dfa856f5-eee3-4481-8e53-c05e48821326.png",
+      "output": "assets/scenes/mei-dockside.webp",
+      "dimensions": [
+        1440,
+        960
+      ],
+      "bytes": 260768,
+      "sha256": "fcf9a121c1a7b131c9847958c9e62323d2c9c46550c4abc763805a5859fdead9"
+    },
+    {
+      "file": "nao-dockside",
+      "type": "scene",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/nao-relaxed.webp"
+      ],
+      "prompt": "Use case: illustration-story / identity-preserve. Asset type: 1536 by 1024 landscape close dockside scene for Neon Tides Voyage, ratio 3:2. Input image is the exact character identity, hair, face, age, clothes and illustration style reference; preserve all. Nao at her lantern market food counter: cream rolled-sleeve blouse, faded terracotta apron, warm brown tied-back hair and familiar adult face, a freshly prepared noodle bowl, tea cup, wooden counter, stacked ceramics, lantern light and neon harbour rain in the distance. Seated visitor eye level at the counter, character in the upper central area with hands visible naturally and inviting working counter in foreground. Small intimate everyday harbour scene, grounded adult slice-of-life anime/JRPG illustration, very fine ink linework and richly textured painted materials, warm amber light against muted rainy blue and teal harbour tones. Enough readable detail for a phone and desktop scene. Gentle steam, no dramatic action. One character only. No text, logos, watermark, UI, borders, duplicate faces or extra people.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-6bc093a4-779c-45ab-af77-31c5d639b142.png",
+      "output": "assets/scenes/nao-dockside.webp",
+      "dimensions": [
+        1440,
+        960
+      ],
+      "bytes": 291212,
+      "sha256": "6d8c24b866a719b7017731a5ed74613e46ac280b0f4ea29bc99b403601585c50"
+    },
+    {
+      "file": "jun-dockside",
+      "type": "scene",
+      "references": [
+        "/workspace/scratch/d675acf748ac/neon-tides/assets/portraits/jun-harbour.webp"
+      ],
+      "prompt": "Use case: illustration-story / identity-preserve. Asset type: 1536 by 1024 landscape close dockside scene for Neon Tides Voyage, ratio 3:2. Input image is the exact character identity, hair, face, age, clothes and illustration style reference; preserve all. Jun beside his canal tea table: familiar adult man with salt-and-pepper dark hair and fine glasses, charcoal work shirt, green apron, small ceramic kettle, roasted tea and cups, shelf of tea tins, canal bridge and amber lantern reflections beyond the open window. Seated visitor eye level at the counter, character in the upper central area with hands visible naturally and inviting working counter in foreground. Small intimate everyday harbour scene, grounded adult slice-of-life anime/JRPG illustration, very fine ink linework and richly textured painted materials, warm amber light against muted rainy blue and teal harbour tones. Enough readable detail for a phone and desktop scene. Gentle steam, no dramatic action. One character only. No text, logos, watermark, UI, borders, duplicate faces or extra people.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-6bb560ee-84d8-4f14-807d-6278b221fce1.png",
+      "output": "assets/scenes/jun-dockside.webp",
+      "dimensions": [
+        1440,
+        960
+      ],
+      "bytes": 281436,
+      "sha256": "11265078e84093ffa370113f17335b4b5938dbce89cf76a7dc4bac370cbf9cd9"
+    }
+  ]
+}

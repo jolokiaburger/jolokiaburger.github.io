@@ -29,6 +29,21 @@ body.halloween-radio{--amber:#ffc084;--line:#745b48}body.halloween-radio .topbar
 @media(max-width:750px){.entry-body{padding:14px}}
 @media(prefers-reduced-motion:reduce){.arrival-card{animation:none}}
 
+/* 0.15: small activities, actual harbour photographs and deliberate close views. */
+.sailing-top{display:flex;flex-direction:column;align-items:flex-start}.journey-strip{order:-2;display:flex;flex-direction:column;gap:5px;max-width:430px;padding:10px 13px;background:#162e36ee;border:1px solid #82967d;border-left:3px solid #b4c69b;border-radius:8px;font-size:12px;margin:4px 0;pointer-events:none}.courses{order:-1}
+.journey-strip[hidden]{display:none}.journey-strip strong{color:#eee0b7}.journey-strip span{line-height:1.4}.journey-warning{color:#ffc795!important}
+#route-status{display:none}.travel-budget{border-top:1px solid #6c8074;margin-top:12px;padding-top:12px}.travel-budget p{font-size:12px;line-height:1.6}
+.pastime-card{border:1px solid var(--line);border-radius:10px;background:#1c353c;padding:16px;margin:14px 0}.pastime-card button{margin:5px 7px 5px 0}
+.activity-host{display:flex;align-items:center;gap:12px;margin:14px 0}.activity-portrait{width:72px;height:72px;object-fit:cover;border-radius:9px;border:1px solid #768379}
+.dish-art{display:block;width:min(100%,400px);height:auto;margin:12px auto;border-radius:14px}.recipe-options{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.recipe-options h3{flex-basis:100%;margin:0 0 4px;font-size:14px;color:var(--amber)}.recipe-options button[aria-pressed=true]{background:#d2b787;color:#17313a;border-color:#e8ce9f}
+.activity-notice{padding:12px;border-left:3px solid #e9a15c;background:#403228;color:#ffe0ba}.fishing-water{position:relative;height:180px;overflow:hidden;border:1px solid #6e908d;border-radius:16px;background:radial-gradient(ellipse at 50% 95%,#be995f33,transparent 65%),repeating-linear-gradient(178deg,#24434d 0 12px,#284b55 13px 15px,#24434d 16px 27px)}
+.fishing-float{position:absolute;left:calc(50% - 12px);top:88px;font-size:24px;color:#f2b58d;text-shadow:0 12px 0 #d9b97633;animation:float-bob 2.6s ease-in-out infinite}.fishing-water.bite{border-color:#e8c18d}.fishing-water.bite .fishing-float{color:#fff0ba;animation:none}.fishing-message{min-height:3.2em}
+.postcard{background:#e4d7b7;color:#28393c;padding:12px;border-radius:8px;margin:18px 0}.postcard h3{font:21px Georgia,serif;margin-bottom:5px}.postcard p{font-size:12px;margin-bottom:4px}.postcard-image{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:7px;background:#25424d}
+.dockside-scene{position:relative;overflow:hidden;border-radius:12px;border:1px solid #927e61}.dockside-art{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}.dockside-steam{position:absolute;left:48%;top:62%;width:7%;height:12%;border-radius:50%;background:linear-gradient(0deg,transparent,#f3e4c822,transparent);filter:blur(5px);animation:kettle-steam 5s ease-in-out infinite;pointer-events:none}
+@keyframes float-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}@keyframes kettle-steam{0%,100%{opacity:.3;transform:translateY(4px)}50%{opacity:.8;transform:translateY(-7px)}}
+@media(max-width:750px){.journey-strip{font-size:11px;padding:8px 10px;max-width:100%}.activity-portrait{width:60px;height:60px}.pastime-card{padding:12px}.recipe-options button{flex:1;min-width:110px}.fishing-water{height:150px}.postcard h3{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.fishing-float,.dockside-steam{animation:none}}
+
 /* 0.11: essentials stay visible; route details and recovery live behind deliberate controls. */
 .objective-details{max-width:420px;margin-bottom:7px;border:1px solid #65807955;border-radius:8px;background:#102732e8;color:#e6cfaa}.objective-details summary{cursor:pointer;min-height:40px;padding:10px 13px;font-size:12px;line-height:1.4}.objective-details summary:focus-visible{outline:2px solid #edcf9b;outline-offset:3px}.objective-details #objective{border:0;background:transparent;margin:0;padding:0 13px 12px;font-size:12px}.sailing-bottom #navigation-hint{display:none}#tools-button{color:#c8d4ce}.sailing-bottom{justify-content:flex-end}.sailing-bottom>div{align-items:center}#panel-content summary{cursor:pointer;min-height:40px}
 @media(max-width:750px){.objective-details summary{min-height:38px;padding:8px 11px;font-size:11px}.sailing-top{max-height:32%;}.sailing-bottom{max-height:27%}#resources{font-size:11px}.courses label{display:none}}
@@ -64,3 +79,5 @@ main{height:auto;min-height:0}
  .arrival-card strong{font-size:18px}
 }
 @media(prefers-reduced-motion:reduce){.arrival-card{animation:none}}
+
+.journey-strip button{pointer-events:auto;font-size:11px;padding:7px 10px;align-self:flex-start}

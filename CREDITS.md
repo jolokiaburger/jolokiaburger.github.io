@@ -93,3 +93,8 @@ Mio’s three refined portraits (`assets/portraits/mio-{relaxed,thoughtful,pleas
 ### Voyage 0.14 canal portraits
 
 `assets/portraits/jun-harbour.webp`, `hana-harbour.webp` and `mako-harbour.webp` are original images made with OpenAI's built-in image-generation tool from the game's own character portraits. Nao's artwork served only as a rendering and lighting reference. The original faces, ages, clothing and roles were retained; no third-party characters or panels were used. Exact prompts and references: `tools/voyage-14-art-prompts.json`. The existing artwork licence applies.
+
+
+### Voyage 0.15 harbour life
+
+Six original Mei/Priya expression portraits and three dockside illustrations (Mei, Nao, Jun) were generated with the built-in image-generation tool, using their existing character art as identity references, and exported as local WebP assets. Exact prompts and provenance: `tools/voyage-15-art-prompts.json`. Original files and Classic remain intact. Native SVG dish/fish illustrations, Canvas photograph rendering, markers and ferry keepsakes are authored in `voyage/leisure-ui.js` and `voyage/voyage.js`. No image-generation service runs during play.
