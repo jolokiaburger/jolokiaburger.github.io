@@ -14,7 +14,7 @@ The largest weaknesses were unreliable edge cases and misleading feedback: a mis
 
 | ID / severity | Evidence in 0.11 | Change in 0.12 |
 | --- | --- | --- |
-| A01 · High | Expired tea and lighthouse couriers still occupied both hold slots, with no way to unload them. | Unload expired couriers at any quay through Cargo or Journal. No payment/refund; the story is marked **Closed**, capacity is released, and delivery cannot pay later. |
+| A01 · High | Expired tea and lighthouse couriers still occupied both hold slots, with no way to unload them. | Unload expired couriers at any quay through Cargo or Journal. No payment/refund; the story is marked **Closed**, capacity is released, and delivery cannot pay later. Closed couriers are not saved as successful story memories. |
 | A02 · High | Buying an eight-minute breakfast at 05:58 charged 4 cr, advanced only two minutes and marked it complete. Other optional activities had the same pattern. | A shared activity budget rejects an action that cannot finish by dawn. Buttons explain the time/cash/hold limit. An activity ending exactly at 06:00 is allowed. Sea discoveries and boat encounters follow the same timing rule. |
 | A03 · High | A save with `finds: {toString: 'read'}` threw during validation. Inherited character names, negative trades and future quote times could be accepted. | Validate object shapes and own content IDs before following references. Check positive trade amounts, timestamps, cargo terminals and menu consistency. Malformed history receipts are rejected before rendering. |
 | A04 · Medium | Invalid voyage data was replaced at startup; a JSON failure in captain history was silently reset. | Keep the unreadable original in a separate local recovery slot where storage permits, and display a recovery notice. Voyage and history recovery remain independent of Classic. |
@@ -52,7 +52,7 @@ The save format remains version 1. Optional fields allow earlier saves to load; 
 
 ## Validation
 
-- `node tools/voyage-checks.mjs`: **71,616 assertions**, including simulated steering for every port pair, existing story branches, and the new expiry/dawn/inventory/migration regressions. The large count includes assertions on individual navigation frames; it is not a count of distinct play sessions.
+- `node tools/voyage-checks.mjs`: **71,619 assertions**, including simulated steering for every port pair, existing story branches, and the new expiry/dawn/inventory/migration regressions. The large count includes assertions on individual navigation frames; it is not a count of distinct play sessions.
 - `node tools/voyage-ui-checks.mjs`: **84 DOM integration assertions** covering the first crossing, blocked capacity, courier recovery, exact-dawn meals, tug cancellation, reaction/memory ordering, legacy/current prices, quantity selection and unreadable-save recovery.
 - `node tools/adventure-checks.mjs`: **3,211 Classic engine/data assertions** passed.
 - `node tools/sound-checks.mjs`: **134 mocked Web Audio assertions** passed. No audio changes were needed in this audit.
