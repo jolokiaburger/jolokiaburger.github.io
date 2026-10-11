@@ -136,7 +136,7 @@ P.availableArt=function(s){return Object.keys(P.illustrations).filter(id=>({supp
 
 /* 0.9: requests from earlier voyages and a small evening at the market. */
 (function(){'use strict';const P=window.VoyagePorts;
-for(const id of ['aki','yumi','matte','sora'])P.characters[id].portrait='../assets/portraits/'+id+'-harbour.webp';
+for(const id of ['aki','yumi','matte','sora','jun','hana','mako'])P.characters[id].portrait='../assets/portraits/'+id+'-harbour.webp';
 P.letterJobs={
  lenses:{title:'Mio’s salt-air lens parts',who:'mio',from:'yard',to:'observatory',source:'rin',recipient:'mio',cost:24,payment:58,deadline:1740,case:true,invitation:'On another night, could you collect Rin’s sealed lens parts? Twenty-four at the yard; I can pay fifty-eight on delivery here by 05:00. Fuel is extra.',outcome:'The new lens seal is fitted. Fifty-eight credits, as promised. Our next clear patch has a patient little ferry behind it.'},
  survey:{title:'Rin’s weather-station inspection',who:'rin',from:'yard',to:'yard',source:'rin',recipient:'rin',cost:0,payment:24,deadline:1750,case:false,invitation:'Next voyage, collect my free inspection checklist, visit the old weather station east of Frostline, then report here by 05:10. Twenty-four credits for the survey; no salvage purchase.',outcome:'Dry cabinet, sound mooring, no urgent repair. Twenty-four credits for the inspection. Leaving good equipment alone is useful work, too.'},

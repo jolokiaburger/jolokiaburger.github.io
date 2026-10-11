@@ -1,6 +1,19 @@
-# Neon Tides Voyage · Playtest 0.13
+# Neon Tides Voyage · Playtest 0.14
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+
+## A clearer welcome and docking · 0.14
+
+- **Help when you want it:** new and existing voyages open directly at the harbour. The automatic welcome guide and older release announcement are removed. Mei's optional tea job stays in People and the objective hint. Choose **Menu → How to play** for the full guide and its Talk to Mei shortcut. Menu is in the header at sea and alongside; M opens it on a keyboard.
+- **Clear arrivals:** an orange **Docked at…** message sits inside the port panel, below its tabs. It cannot cover Cast off or the tabs. **Closes in 6 s** counts down to automatic dismissal; **Dismiss** closes it immediately. Opening a menu or casting off also clears it. Countdown time is real time and never advances the voyage clock or charges credits. Reduced motion keeps the same six-second reading time without an entrance animation. The countdown does not announce every second to screen readers.
+- **Header layout:** the phone header groups Menu, Journal and Pause above Radio and the purse. The map fills the remaining height instead of assuming a fixed phone header height.
+- **Closer canal portraits:** Jun, Hana and Mako have newly drawn 1024 × 1024 portraits with larger faces, finer ink and warm place context. Their own faces, ages, clothing and roles remain recognisable. Original exports stay available, and Classic's references are unchanged. Prompts and source references: `tools/voyage-14-art-prompts.json`.
+
+`voyage/voyage.js`, `voyage/index.html` and `voyage/voyage.css` own the interface changes; `voyage/ports.js` selects the new portraits. Gameplay rules, Classic code and save version 1 are unchanged. Save recovery notices still appear and can be reread in Menu.
+
+Verification: `node tools/voyage-ui-checks.mjs` passes **168 DOM integration checks**, covering optional help, legacy startup, docking countdowns, dismissal, redocking, reduced motion, usable port tabs and save recovery. The engine suite passes **71,619 assertions**; Classic passes **3,211**; mocked audio passes **134**. These are automated results, not browser CSS or physical-phone testing.
+
+Next browser/phone checks: open a fresh voyage and an older save without dismissing a guide; use Menu while docked and sailing; dock, use every port tab during the countdown, and cast off before it ends. Check 320/390 px widths and a short landscape view for readable controls and scrollable content. Inspect Jun, Hana and Mako in both People and conversation. Safari/iOS, touch comfort, sound quality and device performance remain unverified.
 
 ## Little life in the water · 0.13
 
@@ -15,7 +28,7 @@ Verification: the engine suite passes 71,619 assertions; DOM integration passes 
 
 ## First route to try
 
-1. Close the welcome guide. At Kurage 33, select Mei under People and collect her free tea case (5 minutes).
+1. At Kurage 33, select Mei under People and collect her free tea case (5 minutes). Menu → How to play is available if you want guidance.
 2. Cast off. Steer with WASD or arrow keys, use the touch direction buttons, or choose **Night Market** in Set course. Manual steering cancels assistance. The boat turns toward your chosen direction and slows when you release it; Stop holds position immediately.
 3. Enter the quay's dotted ring and press **Dock** or E. The assisted route stops near the port; it does not dock without your choice.
 4. Speak to Nao and deliver the tea: 24 cr, 5-minute handover, start by 03:40. Have a bun, or chat again for different replies.
@@ -113,7 +126,7 @@ The Tern now has deck rails, wheelhouse glazing, its nameplate, aerial, life rin
 
 ## Controls and rules
 
-- WASD/arrows or held touch buttons: direct steering. J: Journal. P: pause. E: dock. Escape: cancel course/stop, or dismiss an open panel.
+- WASD/arrows or held touch buttons: direct steering. J: Journal. M: Menu and optional help. P: pause. E: dock. Escape: cancel course/stop, or dismiss an open panel.
 - Click open water for an assisted course. The Set course selector work with keyboard and touch too. Assisted routes avoid land; manual steering remains available.
 - Time advances only during movement and explicitly labelled activities. Conversations, trading, journal reading and panels pause it. Background tabs do not advance time.
 - Start: 360 cr, 2 g gold, full tank. Gold lots use the existing deterministic `market.js` pricing, spreads, dealer impact and stock caps.

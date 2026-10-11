@@ -24,10 +24,9 @@ body.halloween-radio{--amber:#ffc084;--line:#745b48}body.halloween-radio .topbar
 .story-illustration{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:3/2;object-fit:contain;border-radius:10px;background:#142b34;margin:10px 0 18px}#panel-content .story-illustration[hidden]{display:none} .dialogue-head img{object-fit:cover} @media(prefers-reduced-motion:reduce){.story-illustration{animation:none;transition:none}}
 
 /* Brief, skippable mooring reveal; sailing controls keep their existing safe viewport. */
-.arrival-card{position:absolute;left:24px;top:120px;max-width:min(360px,calc(100% - 48px));padding:16px 20px;background:#16313bed;border:1px solid #c5b18b80;border-radius:12px;box-shadow:0 12px 35px #081e2855;z-index:4;animation:arrival-in .45s ease-out}.arrival-card[hidden]{display:none}.arrival-card strong{font:24px Georgia,serif}.arrival-card p{font-size:13px;line-height:1.5}.arrival-card #arrival-label{color:#dbc08d;font-size:11px;letter-spacing:2px;margin:0 0 8px}.arrival-card button{min-height:38px;margin-top:4px}
 .voyage-entry{overflow:hidden;padding:0!important}.entry-art{display:block;width:100%;height:auto;aspect-ratio:3/1;object-fit:cover}.entry-body{padding:18px}.entry-result{color:#e5ca98;font:27px Georgia,serif}.entry-closing{display:flex;gap:14px;align-items:flex-start;margin:16px 0}.entry-closing img{width:64px;height:64px;object-fit:cover;border-radius:8px}.entry-closing p{margin:0;line-height:1.6}.opportunity{border-left:3px solid #b4c9a5;padding-left:14px}
 @keyframes arrival-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(max-width:750px){.arrival-card{top:10px;left:10px;max-width:calc(100% - 20px);padding:12px 16px}.arrival-card p{margin:6px 0}.entry-body{padding:14px}}
+@media(max-width:750px){.entry-body{padding:14px}}
 @media(prefers-reduced-motion:reduce){.arrival-card{animation:none}}
 
 /* 0.11: essentials stay visible; route details and recovery live behind deliberate controls. */
@@ -40,3 +39,28 @@ dialog{padding:0;overflow:hidden}dialog[open]{display:flex;flex-direction:column
 /* Brief sailing notices sit above the measured action row and always pass taps through. */
 #toast{max-width:min(520px,calc(100% - 24px));padding:8px 13px;font-size:12px;line-height:1.45;box-shadow:0 4px 18px #051a2850;transition:opacity .12s ease-out;pointer-events:none}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
+
+/* 0.14: menus remain available at sea and alongside; arrivals belong to the port. */
+body{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr)}
+main{height:auto;min-height:0}
+.arrival-card{position:static;display:flex;flex-direction:column;flex-shrink:0;min-height:0;max-height:40%;margin:12px 20px 0;padding:12px 14px;border:1px solid #e9a15c;border-left:4px solid #ffb16b;border-radius:10px;background:linear-gradient(135deg,#513320,#342c27);color:#fff0d8;animation:arrival-in .3s ease-out}
+.arrival-card[hidden]{display:none}
+.arrival-card #arrival-label{flex-shrink:0;margin:0 0 6px;color:#ffc285;font-size:10px;letter-spacing:1px}
+.arrival-card strong{flex-shrink:0;font:20px Georgia,serif}
+.arrival-card #arrival-text{min-height:0;overflow:auto;margin:8px 0;font-size:12px;line-height:1.5}
+.arrival-card footer{display:flex;flex-shrink:0;align-items:center;justify-content:space-between;gap:10px}
+#arrival-countdown{font-size:11px;font-variant-numeric:tabular-nums;color:#f2c397}
+.arrival-card button{min-height:44px;padding:8px 12px;font-size:12px;background:#68432a;border-color:#cb915d;color:#fff0d8}
+.arrival-card button:hover{background:#815133;border-color:#ffd0a0}
+.storage-notice{padding:12px;border-left:3px solid #e9a15c;color:#ffe0ba;background:#403228}
+@media(max-width:750px){
+ .topbar{height:auto;min-height:144px;display:grid;grid-template-columns:minmax(0,1fr) repeat(3,auto);gap:6px}
+ .brand{margin:0;font-size:clamp(13px,3.8vw,17px);letter-spacing:2px;white-space:normal}
+ .brand small{font-size:8px;letter-spacing:1px}
+ .topbar button{padding:8px}
+ #radio-button,#resources{grid-column:1/-1}
+ #resources{min-width:0}
+ .arrival-card{margin:8px 16px 0;padding:10px 12px}
+ .arrival-card strong{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){.arrival-card{animation:none}}

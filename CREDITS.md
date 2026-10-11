@@ -88,3 +88,8 @@ Kisaragi’s festival lanterns, table, supplies, visitors and route markers are 
 ### Voyage 0.13 artwork
 
 Mio’s three refined portraits (`assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp`) are original images made with OpenAI’s built-in image-generation tool, using the game’s own Mio designs and Nao artwork as references. Prompts and reference provenance: `tools/voyage-13-art-prompts.json`. No third-party panels or characters were used. The jellyfish, fish, ripples, waterfront materials, figures and small harbour details in `voyage/harbour-art.js` are original native Canvas artwork. The existing artwork and code licence split applies.
+
+
+### Voyage 0.14 canal portraits
+
+`assets/portraits/jun-harbour.webp`, `hana-harbour.webp` and `mako-harbour.webp` are original images made with OpenAI's built-in image-generation tool from the game's own character portraits. Nao's artwork served only as a rendering and lighting reference. The original faces, ages, clothing and roles were retained; no third-party characters or panels were used. Exact prompts and references: `tools/voyage-14-art-prompts.json`. The existing artwork licence applies.

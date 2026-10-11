@@ -124,3 +124,10 @@ Quay clothing was checked against the actual portraits: Priya’s navy office ve
 Mio’s three expression portraits were refined with the built-in image-generation tool from their existing identity references and Nao’s original relaxed portrait as a rendering-quality reference. They retain Mio’s own face, chestnut ponytail, gold glasses, blue work coat, ivory scarf and observatory background. The new `assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp` exports are 1024 × 1024, WebP quality 86. Exact prompts: `tools/voyage-13-art-prompts.json`. Existing versions are retained. Other active portraits were visually reviewed and kept.
 
 The sailing map keeps native Canvas art. `voyage/harbour-art.js` adds translucent jellyfish, quiet fish shoals, softly curved ripples, reflected quay light, roof materials, dock planks, stone edges and small working-harbour details. Figures have layered clothing, less rounded silhouettes, finer hair and individual work accessories. Decorative movement honours reduced motion; no raster portrait is laid over the sailing view.
+
+
+## Voyage 0.14 · Closer canal portraits
+
+Jun, Hana and Mako's older portraits were inspected against Nao's finer illustration. Their wider scene framing gave the faces fewer source pixels than the newer portraits. Three individually generated replacements use their own portraits as identity references and Nao only as the rendering and lighting reference. Jun keeps his glasses, dark shirt and green tea-shop apron; Hana keeps her half-tied dark hair, dusty-rose overshirt and clipboard; Mako keeps their salt-and-pepper hair, mature face, rust scarf and weathered work jacket.
+
+The new `assets/portraits/{jun,hana,mako}-harbour.webp` files are 1024 × 1024, WebP quality 86, with closer chest-up framing. Built-in image generation supplied the drawn detail; Pillow only resized and exported the production files. Original portraits remain intact and Classic retains its original references. Full prompts, references and source paths are in `tools/voyage-14-art-prompts.json`.
