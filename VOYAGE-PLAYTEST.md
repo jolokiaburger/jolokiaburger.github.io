@@ -1,6 +1,31 @@
-# Neon Tides Voyage · Playtest 0.15
+# Neon Tides Voyage · Playtest 0.16
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+
+## People across the water · 0.16
+
+- **Passenger trips:** People, Pastimes, Journal or Menu. Priya boards at Landing 3 from 00:50 for Metro (18 cr); Lam at Metro from 01:40 for Kisaragi (22 cr); Rin at the yard from 00:30 for Kurage (20 cr). Boarding takes 3 min, destination disembarking 2 min. Optional thermos stops are free, 8 min. One new fare passenger alongside Nao/Yumi, no freight slot. Docking alone pays nothing; explicitly disembark to receive the fare. Close at a quay without payment. Fuel remains extra.
+- **Neighbour favours:** give Mei a kept fish; take Jun's tea to Matte; pack rice/tea for Mio's picnic; check Priya/Mako's twice-rung bell accounts and choose the checked record or labelled legend. The board and Journal track the actual steps and interpretation. No stock purchase or new location.
+- **Learned recipes:** ask Mei, Nao and Jun through their optional topics. Assemble broth, garnish and tea at Nao's market counter; fish bowls require an explicit kept catch. Drafts are free; serving takes 6 min, no credits, and consumes the catch once. Three learned pages and favourite customer trays persist between voyages. Variations have their own response.
+- **Optional conversations:** each neighbour has two inline topics with complete player reply choices. Facts & recipe notebook preserves speaker and first-heard time, with labels for working rules, history, rumours, recipes and science. Kenji/Mio's science notes have optional USGS/NASA source links. No topic observes an unseen scale; evidence-dependent replies require the account you actually heard.
+- **Docking practice:** switch on through Passenger trips. Near a quay, slow down and align until the guide turns green; Dock deliberately. Gentle arrivals earn records and a cosmetic keepsake at three distinct quays. No damage, penalty or time cost; assisted docking remains available.
+- **GUI/art:** fixed port/dialog Back controls, fixed Close, per-tab/person/quay scroll memory, cost/time shortcuts and explicit phone header placement. Three additional illustrated seats at Metro, the yard and Tsukimi; visible fare passenger luggage, subtle native blinking and steam, reduced motion. Five new keepsakes. The first page keeps its Code on GitHub link.
+
+Rules and save fields: [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md). Art provenance: `tools/voyage-16-art-prompts.json`. All activities open by choice; the existing orange six-second arrival notice is unchanged. Existing Voyage/Classic save keys and version remain intact.
+
+Verification: **775** new model/profile assertions and **401** total DOM checks pass; engine **71,627**, pastimes **677**, Classic **3,211** and mocked audio **134** remain required release checks. Native Canvas renders cover all three fare figures, nine decorations, the approach guide, two small camera views and existing photo captures. These do not test CSS layout or phone comfort.
+
+Browser/phone checklist for this release:
+
+1. Load a fresh and a 0.13/0.15 save; verify that no welcome, topic or new activity opens automatically. Complete Mei's original tea delivery and try Classic's saved shift.
+2. At 320/390 px portrait and a short landscape size, open all four port tabs, scroll, choose a person, return, and reopen a long notebook. Check fixed Back/Close, safe-area spacing, focus visibility, Escape, and that the exposed sea frames the ferry above/beside the port sheet.
+3. Board each new passenger; change direct/tea routes, take and skip a thermos stop, dock and explicitly disembark. Verify dialogue, luggage, no payout on docking, and the fare/letter after reload. Close one unfinished fare without a reward.
+4. Complete all four favours, including picnic packets in either order. Compare the bell with both accounts, choose each interpretation on different voyages, and check the resulting board/Journal wording. Gift a fish and confirm it cannot be sold or cooked.
+5. Learn all recipes; try a matching bowl, a variation, leaving a partial tray and selecting a real catch. Reload, start a fresh voyage, and verify learned pages, customer favourites and earned decorations without carrying over cash or jobs.
+6. Enable/disable docking practice, approach manually and by Set course, and compare a gentle arrival with a quicker arrival. Inspect the guide and three new illustrated seats with reduced motion on/off.
+7. Play through 06:00 and finish early on another voyage; check action boundaries, reports and one-time rewards. Listen and sail on a physical phone while menus, steam and native figures are visible.
+
+Real-browser CSS, focus behaviour, Safari/iOS, touch comfort and physical-device performance remain unverified. Browser access was declined earlier in this session; no browser screenshot or phone result is claimed.
 
 ## Harbour pastimes · 0.15
 

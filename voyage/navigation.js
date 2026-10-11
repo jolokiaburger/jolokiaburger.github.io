@@ -18,4 +18,5 @@ function step(ship,input,dt,boost){dt=Math.max(0,Math.min(dt,.05));const length=
  if(segment(ship,{x:ship.x+dx,y:ship.y+dy})){ship.x+=dx;ship.y+=dy;return Math.hypot(dx,dy);}
  ship.speed=0;return 0;
 }
-window.VoyageNavigation={water,segment,route,step};})();
+function approach(ship,port){const distance=Math.hypot(port.x-ship.x,port.y-ship.y),target=Math.atan2(port.y-ship.y,port.x-ship.x),turn=distance<5?0:Math.abs(((target-ship.angle+Math.PI*3)%(Math.PI*2))-Math.PI),gentle=ship.speed<=18&&turn<=.8;return {distance,turn,gentle,speed:ship.speed,canDock:distance<65,message:ship.speed>18?'Ease off the throttle':turn>.8?'Point the bow towards the mooring ring':distance<65?'Gentle approach · Dock when ready':'Follow the dotted approach to the berth'};}
+window.VoyageNavigation={water,segment,route,step,approach};})();

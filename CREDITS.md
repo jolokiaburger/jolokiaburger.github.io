@@ -98,3 +98,9 @@ Mio’s three refined portraits (`assets/portraits/mio-{relaxed,thoughtful,pleas
 ### Voyage 0.15 harbour life
 
 Six original Mei/Priya expression portraits and three dockside illustrations (Mei, Nao, Jun) were generated with the built-in image-generation tool, using their existing character art as identity references, and exported as local WebP assets. Exact prompts and provenance: `tools/voyage-15-art-prompts.json`. Original files and Classic remain intact. Native SVG dish/fish illustrations, Canvas photograph rendering, markers and ferry keepsakes are authored in `voyage/leisure-ui.js` and `voyage/voyage.js`. No image-generation service runs during play.
+
+### Voyage 0.16 neighbours and learning
+
+Three original dockside illustrations (`assets/scenes/{metro,yard,observatory}-dockside.webp`) were generated with OpenAI's built-in image-generation tool from the game's own character portraits and Nao's established dockside art. Exported as 1440 × 960 WebP; exact prompts, references and hashes: `tools/voyage-16-art-prompts.json`. Lam, Yumi, Rin and Mio retain their existing identities. No original asset was replaced.
+
+Passenger/favour/recipe stories, all 28 conversation topics and their reply branches are original writing in `voyage/neighbours.js` and `voyage/conversations.js`. The game-design brief cites Sunless Sea, Dredge, Deus Ex and food/adventure anime; their characters, dialogue and images are not included. The two science notes are original paraphrases with optional primary USGS/NASA links, listed in `VOYAGE-NEIGHBOURS.md`. No source text or scientific artwork is bundled. Native passenger/luggage/keepsake/approach art, SVG food and reduced-motion-aware character blinking retain the existing code licence; new images and fictional writing retain the existing artwork/story licence.

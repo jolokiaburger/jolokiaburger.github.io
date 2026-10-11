@@ -1,6 +1,6 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('../',import.meta.url)),c=vm.createContext({window:{},console});
-for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/travel-plan.js','voyage/camera.js','voyage/profile.js','voyage/leisure-profile.js','voyage/leisure-ui.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),c,{filename:file});
+for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/travel-plan.js','voyage/camera.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),c,{filename:file});
 const {VoyageWorld:W,VoyageNavigation:N,VoyageModel:M,VoyagePorts:P,NeonMarket:G}=c.window;let count=0;const check=(v,msg)=>{assert.ok(v,msg);count++;},equal=(a,b,msg)=>{assert.equal(a,b,msg);count++;};
 const shipAt=p=>({x:p.x,y:p.y,angle:0,speed:0});
 for(const a of W.ports)for(const b of W.ports){check(N.water(a.x,a.y),'port mooring in navigable water');const route=N.route(a,b);check(route.length>0,a.id+'→'+b.id+' has safe course');let prior=a;for(const p of route){check(N.segment(prior,p),'route stays clear of shore');prior=p;}

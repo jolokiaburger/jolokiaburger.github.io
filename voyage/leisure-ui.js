@@ -25,7 +25,7 @@
         reasonButton('Dockside fishing · Free · 4 min per catch', 'fish', fishing),
         reasonButton('Help Nao’s kitchen · Receive 4–6 cr · 6 min per tray', 'kitchen', kitchen),
         button('Catch basket · ' + l.fishing.catches.filter(c => c.outcome === 'kept').length + ' / 3', basket),
-        button('Photo errands & album', album), button('Ferry decorations', decorations),
+        button('Photo errands & album', album), button('Recipe notebook', () => api.neighbourUI().recipes()), button('Passenger trips', () => api.neighbourUI().routes()), button('Neighbour favours', () => api.neighbourUI().favours()), button('Ferry decorations', decorations),
         el('p', 'Fishing uses a separate three-fish basket, never your freight hold. Six catches per voyage; Nao offers 6 cr each. Kitchen ingredients belong to her stall. No purchase is required.', 'muted')]);
     }
     function fishing() {
@@ -60,7 +60,7 @@
       const s = state(), rows = s.leisure.kitchen, customer = L.customers[rows.length];
       if (!customer) { openPanel('A counter full of familiar faces', [portrait('nao'), el('p', 'All three trays have reached their customers. ' + rows.filter(r => r.matched).length + ' / 3 favourite orders remembered. Nao has saved a little tea-cup decoration for the Tern.'), button('Ferry decorations', decorations), button('Back to pastimes', hub)]); return; }
       const dish = {broth: 'miso', topping: 'tofu', tea: 'roasted'}, preview = el('div'); preview.append(dishArt(dish));
-      const nodes = [portrait('nao'), el('p', 'Tray ' + (rows.length + 1) + ' / 3 · Nao supplies ingredients · Receive 4 cr thanks, plus 2 cr for the favourite combination · 6 min.'), portrait(customer.id), el('p', customer.hint, 'speech'), preview];
+      const nodes = [portrait('nao'), ...(profile().neighbours?.preferences.includes(customer.id) ? [el('p', 'Remembered favourite: ' + Object.keys(L.dishes).map(k => L.dishes[k][customer.order[k]]).join(' · '), 'remembered-recipe')] : []), el('p', 'Tray ' + (rows.length + 1) + ' / 3 · Nao supplies ingredients · Receive 4 cr thanks, plus 2 cr for the favourite combination · 6 min.'), portrait(customer.id), el('p', customer.hint, 'speech'), preview];
       for (const kind of Object.keys(L.dishes)) {
         const group = el('div', undefined, 'recipe-options'); group.setAttribute('role', 'group'); group.setAttribute('aria-label', 'Choose ' + kind); group.append(el('h3', 'Choose ' + kind));
         const choices = [];
@@ -100,14 +100,24 @@
       nodes.push(button('Back to pastimes', hub)); openPanel('Ferry decorations', nodes);
     }
     function dockside() {
-      const s = state(), id = {bar: 'mei', market: 'nao', canal: 'jun'}[s.docked]; if (!id || (id === 'nao' && s.flags.naoAboard)) return;
-      const frame = el('div', undefined, 'dockside-scene'); frame.append(image('../assets/scenes/' + id + '-dockside.webp', {mei: 'Mei at her kitchen counter, with ceramic bowls and a warm broth pot.', nao: 'Nao at her lantern market counter, with a bowl, tea and the harbour behind her.', jun: 'Jun beside the canal tea table, a kettle and ceramic cups beneath warm lanterns.'}[id]), el('span', '', 'dockside-steam'));
-      const nodes = [frame, portrait(id), el('p', 'A closer seat by the counter. Looking is free and pauses the voyage clock.'), button('Chat with ' + P.characters[id].name.split(' ')[0], () => { api.closePanel(); api.showPerson(id); }), reasonButton('Dockside fishing · Free · 4 min', 'fish', fishing)];
-      if (id === 'nao') nodes.push(reasonButton('Help with the kitchen shift', 'kitchen', kitchen));
+      const views = {
+        bar: {who: 'mei', file: 'mei', title: 'Mei’s kitchen', alt: 'Mei at her warm kitchen counter with ceramic bowls and a broth pot.'},
+        market: {who: 'nao', file: 'nao', title: 'Nao’s lantern counter', alt: 'Nao serving a bowl beside tea and the lantern-lit harbour.'},
+        canal: {who: 'jun', file: 'jun', title: 'Jun’s canal tea table', alt: 'Jun beside the canal, with a kettle and ceramic cups beneath warm lanterns.'},
+        metro: {who: 'yumi', file: 'metro', title: 'A seat by Metro’s night platform', alt: 'Captain Lam and Yumi share tea beneath Metro Quay’s shelter, with a brass thermos and sketchbook.'},
+        yard: {who: 'rin', file: 'yard', title: 'Rin’s workshop supper table', alt: 'Rin beside a repaired pump, kettle and miso bowl in her warm harbour workshop.'},
+        observatory: {who: 'mio', file: 'observatory', title: 'Mio’s dockside chart table', alt: 'Mio points at a star chart between cocoa cups, with the observatory dome and harbour beyond.'}
+      };
+      const s = state(), view = views[s.docked]; if (!view || view.who === 'nao' && s.flags.naoAboard) return;
+      const id = view.who, frame = el('div', undefined, 'dockside-scene'); frame.append(image('../assets/scenes/' + view.file + '-dockside.webp', view.alt), el('span', '', 'dockside-steam'));
+      const nodes = [frame, portrait(id), el('p', 'An illustrated seat beside the quay. Looking is free and pauses the clock.'), button('Chat with ' + P.characters[id].name.split(' ')[0], () => { api.closePanel(); api.showPerson(id); }), reasonButton('Dockside fishing · Free · 4 min', 'fish', fishing), button('Neighbour favours', () => api.neighbourUI().favours())];
+      if (id === 'nao') nodes.push(reasonButton('Help with the kitchen shift', 'kitchen', kitchen), button('Nao’s recipe notebook', () => api.neighbourUI().recipes()));
+      if (s.docked === 'metro') nodes.push(button('Passenger trips', () => api.neighbourUI().routes()));
+      if (id === 'mio') nodes.push(button('Photo errands & postcard album', album));
       const meal = P.meals[s.docked]; if (meal) nodes.push(button(meal.name + ' · ' + meal.price + ' cr · ' + meal.minutes + ' min', () => { if (M.action(s, 'meal') && changed()) dockside(); }, !M.actionStatus(s, 'meal').ok));
-      nodes.push(button('Back to the quay', api.closePanel)); openPanel({mei: 'Mei’s kitchen', nao: 'Nao’s lantern counter', jun: 'Jun’s canal tea table'}[id], nodes);
+      nodes.push(button('Back to the quay', api.closePanel)); openPanel(view.title, nodes);
     }
-    return {dispose, hub, fishing, kitchen, basket, album, camera, decorations, dockside};
+    return {dispose, hub, fishing, kitchen, basket, album, camera, decorations, dockside, dishArt};
   }
   window.VoyageLeisureUI = {create};
 })();
