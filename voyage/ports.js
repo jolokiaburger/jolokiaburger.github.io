@@ -124,8 +124,8 @@ P.styles={hull:{sand:{name:'Harbour sand',color:'#c5b78f',cost:0},blue:{name:'De
 
 /* Local, optional story artwork. IDs are stable for saved captain histories. */
 (function(){'use strict';const P=window.VoyagePorts;
-for(const id of ['nao','rin','mio'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed.webp';
-P.portrait=function(id,mood='relaxed'){return ['nao','rin','mio'].includes(id)&&['relaxed','thoughtful','pleased'].includes(mood)?'../assets/portraits/'+id+'-'+mood+'.webp':P.characters[id].portrait;};
+for(const id of ['nao','rin','mio'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed'+(id==='mio'?'-harbour':'')+'.webp';
+P.portrait=function(id,mood='relaxed'){return ['nao','rin','mio'].includes(id)&&['relaxed','thoughtful','pleased'].includes(mood)?'../assets/portraits/'+id+'-'+mood+(id==='mio'?'-harbour':'')+'.webp':P.characters[id].portrait;};
 P.illustrations={
  supper:{title:'A supper drawn from stars',file:'constellation-supper',who:['nao','mio'],alt:'Nao and Mio share tea and ginger biscuits over a star chart beside the softly lit Tsukimi observatory.',caption:'Three cups, ginger biscuits and a map of the Swan. For a while, nobody needs to be anywhere else.'},
  breakfast:{title:'The first warm tray',file:'market-breakfast',who:['nao'],alt:'Nao offers steamed buns and tea at her lantern market counter as dawn reaches the harbour.',caption:'The lanterns are still warm when the first breakfast tray reaches the counter. A small homecoming before the day begins.'},

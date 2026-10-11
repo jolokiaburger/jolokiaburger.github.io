@@ -84,3 +84,7 @@ Skippable quay arrivals, animated mooring ropes, travelling workboats and Nao/Yu
 ### Voyage 0.11 festival and memories
 
 Kisaragi’s festival lanterns, table, supplies, visitors and route markers are original native Canvas drawings in `voyage/voyage.js`. Festival dialogue, cross-voyage memories and follow-up messages in `voyage/ports.js` are original fictional writing. No new third-party artwork or audio is bundled; the existing code/artwork/story licence split applies.
+
+### Voyage 0.13 artwork
+
+Mio’s three refined portraits (`assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp`) are original images made with OpenAI’s built-in image-generation tool, using the game’s own Mio designs and Nao artwork as references. Prompts and reference provenance: `tools/voyage-13-art-prompts.json`. No third-party panels or characters were used. The jellyfish, fish, ripples, waterfront materials, figures and small harbour details in `voyage/harbour-art.js` are original native Canvas artwork. The existing artwork and code licence split applies.

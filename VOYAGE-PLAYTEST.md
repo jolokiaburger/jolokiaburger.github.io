@@ -1,6 +1,17 @@
-# Neon Tides Voyage · Playtest 0.9
+# Neon Tides Voyage · Playtest 0.13
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+
+## Little life in the water · 0.13
+
+- **Easy docking:** the course-complete notice lasts one second, sits above the measured sailing/touch controls and disappears immediately on docking. Dock remains available while the notice is visible. Longer instructions and storage notices keep their usual reading time.
+- **Living water:** tiny translucent jellyfish, occasional fish shoals, curved surface ripples, rain rings and petals near the locks. Quay lanterns reflect across the shallows. These are decorative; they do not create objectives or obstruct sailing.
+- **Warmer waterfronts:** shaded tile and metal roofs, weathered dock planks, stone quay faces, moss, mooring hardware, kitchen ceramics, tea plants, a sleeping cat, a perched gull, a canal wind chime and an observatory compass tile. Named neighbours and anonymous visitors have refined clothing, hair, shadows and small work accessories.
+- **Mio’s portraits:** relaxed, thoughtful and pleased expressions now use the finer textured treatment of the existing Nao art. Mio keeps her chestnut ponytail, glasses, blue work coat, ivory scarf and observatory setting. New local exports are 1024 × 1024 WebP: `assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp`. Other portraits were inspected and retained.
+
+`voyage/harbour-art.js` owns the new native Canvas artwork; `voyage/voyage.js` uses it without changing navigation geometry or trading rules. Decorative motion freezes with reduced motion. Water objects are anchored in navigable water and the new water effects are culled outside the view. Existing saves and Classic remain compatible. Portrait provenance: `tools/voyage-13-art-prompts.json`.
+
+Verification: the engine suite passes 71,619 assertions; DOM integration passes 106 checks, including desktop/phone-width notice placement, one-second dismissal and immediate docking. Native Canvas renders cover all nine quays, dawn, reduced motion and Ghost Tide colours. These checks do not cover real-browser CSS layout or real-device performance; those still need playtesting.
 
 ## First route to try
 

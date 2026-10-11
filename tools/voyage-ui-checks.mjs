@@ -13,8 +13,9 @@ const equal=(actual,expected,message)=>{assert.equal(actual,expected,message);ch
 class Element {
   constructor(tag='div') {
     this.tagName=tag;this.children=[];this.dataset={};this.listeners={};
-    this.textContent='';this.open=false;this.hidden=false;
-    this.classList={add(){},remove(){},toggle(){}};
+    this.textContent='';this.open=false;this.hidden=false;this.style={};
+    const classes=new Set();
+    this.classList={add:(...names)=>names.forEach(name=>classes.add(name)),remove:(...names)=>names.forEach(name=>classes.delete(name)),contains:name=>classes.has(name),toggle:(name,on)=>{if(on??!classes.has(name))classes.add(name);else classes.delete(name);}};
   }
   append(...nodes){this.children.push(...nodes);}
   replaceChildren(...nodes){this.children=nodes;}
@@ -23,14 +24,15 @@ class Element {
   focus(){}
   showModal(){this.open=true;}
   close(){this.open=false;this.listeners.close?.();}
-  getBoundingClientRect(){return {left:0,top:0,right:1280,bottom:720,width:1280,height:720};}
-  getContext(){return {};}
+  getBoundingClientRect(){return this.rect||{left:0,top:0,right:1280,bottom:720,width:1280,height:720};}
+  getContext(){return new Proxy({measureText:text=>({width:String(text).length*6}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(target,key)=>key in target?target[key]:()=>{}});}
   querySelector(){return this.span||(this.span=new Element('span'));}
 }
 const walk=node=>[node,...node.children.flatMap(walk)];
 
 function boot(setup=()=>{},options={}) {
   const nodes=new Map(),groups={};
+  const timers=new Map();let timerID=0,elapsed=0,nextFrame;
   for(const [,id]of fs.readFileSync(root+'voyage/index.html','utf8').matchAll(/id="([^"]+)"/g))nodes.set(id,new Element());
   for(const [kind,values]of Object.entries({tab:['people','market','cargo','services'],steer:['up','left','down','right']})) {
     groups['[data-'+kind+']']=values.map(value=>{const node=new Element('button');node.dataset[kind]=value;return node;});
@@ -41,11 +43,11 @@ function boot(setup=()=>{},options={}) {
     window:{addEventListener(){}},console,devicePixelRatio:1,
     document:{getElementById:id=>nodes.get(id),createElement:tag=>new Element(tag),querySelectorAll:q=>groups[q]||[],addEventListener(){},body:new Element(),hidden:false},
     localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},
-    performance:{now:()=>1000},matchMedia:()=>({matches:false}),
-    requestAnimationFrame(){},setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){},
+    performance:{now:()=>1000+elapsed},matchMedia:()=>({matches:false}),
+    requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/profile.js','halloween-radio.js','voyage/sound.js','voyage/camera.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/profile.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
   const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P}=context.window;
@@ -59,7 +61,34 @@ function boot(setup=()=>{},options={}) {
   const click=node=>{check(!!node,'control exists');check(!node.disabled,'control is enabled');(node.listeners.click||node.onclick)();};
   const person=name=>click(walk(nodes.get('port-content')).find(n=>n.className==='person'&&n.children[1].children[0].textContent===name));
   const current=()=>context.window.NeonVoyage.getState();
-  return {nodes,groups,saved,find,click,person,current,confirmState};
+  const advance=ms=>{const end=elapsed+ms;for(;;){const due=[...timers].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!due)break;timers.delete(due[0]);elapsed=due[1].at;due[1].fn();}elapsed=end;};
+  return {nodes,groups,saved,find,click,person,current,confirmState,advance,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
+}
+
+// Assisted arrival: a brief notice leaves docking enabled and clears on mooring.
+for(const mobile of [false,true]) {
+  const r=boot(({state,moor})=>{moor('market');state.docked=null;state.ship.x-=24;});
+  const rect=(width,top,bottom)=>({left:0,right:width,width,top,bottom,height:bottom-top});
+  const width=mobile?390:1280;
+  r.nodes.get('sea').rect=rect(width,76,796);
+  r.nodes.get('sailing-top').rect=rect(width,90,230);
+  r.nodes.get('sailing-bottom').rect=rect(width,mobile?656:714,780);
+  r.nodes.get('touch-pad').rect=rect(width,688,776);
+  r.nodes.get('port').rect={left:820,top:96,right:1260,bottom:780,width:440,height:684};
+  r.course('market');
+  r.advance(1100);check(r.nodes.get('toast').classList.contains('show'),'longer sailing instructions remain readable');
+  let now=1000;
+  while(!r.nodes.get('toast').textContent.startsWith('Course complete')&&now<20000){now+=16;r.frame(now);}
+  check(r.nodes.get('toast').textContent.startsWith('Course complete'),'assisted course reaches the quay');
+  check(!r.nodes.get('dock-button').disabled,'Dock is enabled immediately on route completion');
+  equal(r.nodes.get('toast').style.bottom,mobile?'152px':'94px','notice sits above measured sailing and touch controls');
+  r.advance(999);check(r.nodes.get('toast').classList.contains('show'),'arrival is briefly visible');
+  r.advance(1);check(!r.nodes.get('toast').classList.contains('show'),'course notice disappears after one second');
+  r.course('market');r.frame(now+16);
+  check(r.nodes.get('toast').classList.contains('show'),'a new arrival can show fresh feedback');
+  r.click(r.nodes.get('dock-button'));
+  equal(r.current().docked,'market','the captain can dock immediately');
+  check(!r.nodes.get('toast').classList.contains('show'),'docking dismisses the notice');
 }
 
 // First launch provides one concrete next action, and help remains available later.
