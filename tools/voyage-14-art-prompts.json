@@ -1,0 +1,42 @@
+{
+  "version": "0.14",
+  "tool": "Built-in image_gen",
+  "export": {
+    "width": 1024,
+    "height": 1024,
+    "format": "WebP",
+    "quality": 86
+  },
+  "portraits": [
+    {
+      "id": "jun",
+      "output": "assets/portraits/jun-harbour.webp",
+      "references": [
+        "assets/portraits/jun-manga.webp",
+        "assets/portraits/nao-relaxed.webp"
+      ],
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-bfaa0d57-51f7-45d9-8fa8-8647989895da.png",
+      "prompt": "Use case: identity-preserve / style-transfer. Asset: one square 1024 × 1024 production dialogue portrait for the original browser JRPG Neon Tides. Image 1 is the existing character, the edit target and identity reference. Image 2 is Nao, used ONLY for rendering quality and warm harbour lighting, never for face or costume identity. Refine image 1 into a closer chest-up portrait: head fully inside frame, shoulders and upper chest visible, face significantly larger and readable at a small dialogue size. Preserve the same face, age, gender presentation, hair, clothing and recognisable character silhouette. Fine varied ink, softly painted facial planes, subtle crosshatching and fabric texture, natural adult proportions and restrained eyes; warm anime/JRPG slice-of-life harbour atmosphere. Increase real drawn detail rather than merely upscaling the old image. One character only. Warm amber practical light, gentle blue harbour fill. Soft place context without competing with the face. No Nao in the output, no extra people, no lettering, logo, watermark, photorealistic photograph, chibi, glamour pose or exaggerated eyes. Jun: an adult East Asian tea seller with short tousled dark hair flecked with grey, thin rectangular glasses, dark shirt and faded forest-green apron. Preserve his gentle, attentive expression and distinctive mature face. A modest friendly glance toward the captain; a ceramic teacup at the lower edge. His warm wooden tea shop, shelves of pots and a rainy canal bridge are suggested softly behind him. Keep the glasses, dark hair, green apron and identity from image 1."
+    },
+    {
+      "id": "hana",
+      "output": "assets/portraits/hana-harbour.webp",
+      "references": [
+        "assets/portraits/hana-manga.webp",
+        "assets/portraits/nao-relaxed.webp"
+      ],
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-f09a8195-89cd-4c5b-8621-054445050be9.png",
+      "prompt": "Use case: identity-preserve / style-transfer. Asset: one square 1024 × 1024 production dialogue portrait for the original browser JRPG Neon Tides. Image 1 is the existing character, the edit target and identity reference. Image 2 is Nao, used ONLY for rendering quality and warm harbour lighting, never for face or costume identity. Refine image 1 into a closer chest-up portrait: head fully inside frame, shoulders and upper chest visible, face significantly larger and readable at a small dialogue size. Preserve the same face, age, gender presentation, hair, clothing and recognisable character silhouette. Fine varied ink, softly painted facial planes, subtle crosshatching and fabric texture, natural adult proportions and restrained eyes; warm anime/JRPG slice-of-life harbour atmosphere. Increase real drawn detail rather than merely upscaling the old image. One character only. Warm amber practical light, gentle blue harbour fill. Soft place context without competing with the face. No Nao in the output, no extra people, no lettering, logo, watermark, photorealistic photograph, chibi, glamour pose or exaggerated eyes. Hana: an adult East Asian festival organiser with dark brown half-tied shoulder-length wavy hair, a loose dusty-rose overshirt over an ivory blouse, subtle pink cheeks and a kind composed smile. Preserve her own facial proportions, age and hair from image 1. A clipboard may be suggested at the lower edge without obscuring her chest-up face. Kisaragi's paper lanterns, warm wooden stall and cool canal reflections form a soft background. Keep Hana distinct from Nao; do not give her Nao's apron or face."
+    },
+    {
+      "id": "mako",
+      "output": "assets/portraits/mako-harbour.webp",
+      "references": [
+        "assets/portraits/mako-manga.webp",
+        "assets/portraits/nao-relaxed.webp"
+      ],
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-f03a55e9-5ce0-47da-8949-14230f5ae583.png",
+      "prompt": "Use case: identity-preserve / style-transfer. Asset: one square 1024 × 1024 production dialogue portrait for the original browser JRPG Neon Tides. Image 1 is the existing character, the edit target and identity reference. Image 2 is Nao, used ONLY for rendering quality and warm harbour lighting, never for face or costume identity. Refine image 1 into a closer chest-up portrait: head fully inside frame, shoulders and upper chest visible, face significantly larger and readable at a small dialogue size. Preserve the same face, age, gender presentation, hair, clothing and recognisable character silhouette. Fine varied ink, softly painted facial planes, subtle crosshatching and fabric texture, natural adult proportions and restrained eyes; warm anime/JRPG slice-of-life harbour atmosphere. Increase real drawn detail rather than merely upscaling the old image. One character only. Warm amber practical light, gentle blue harbour fill. Soft place context without competing with the face. No Nao in the output, no extra people, no lettering, logo, watermark, photorealistic photograph, chibi, glamour pose or exaggerated eyes. Mako: a middle-aged East Asian lockkeeper with short tousled salt-and-pepper hair, warm lined mature face, rust-orange scarf and weathered blue-grey work jacket over a dark shirt, work gloves tucked into the chest pocket. Preserve their recognisable face, age and gender presentation from image 1; do not make them younger or change their hairstyle. Quiet wry half-smile. Soft old lock gates and a warm workshop window behind, muted blue water with a trace of dusk gold. Keep the scarf and practical workwear from image 1."
+    }
+  ]
+}

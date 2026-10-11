@@ -65,3 +65,14 @@ These automated checks establish concrete behaviour, not fun, touch comfort or a
 Refine before adding another region. Observe a few new players completing Mei's delivery, making one gold decision and following two stories concurrently. Record where they lose the objective, whether they preserve fuel money, and how often they choose a cargo route expecting a profit. Tune prices and information pacing from those observations.
 
 The remaining structural debt is the large `voyage.js` renderer and its handwritten action conditions. Extract one area at a time behind the existing model and UI checks—conversation, then trading, then journal. There is no evidence here that a new engine or a wholesale rewrite is needed. More difficult routes, additional quests and richer character animation should wait until the core loop is understood and comfortable on a real phone.
+
+
+## Voyage 0.14 follow-up · Player feedback
+
+The next refinement responds to reported interface confusion: the first-voyage guide blocked the harbour, and the arrival overlay's “Skip arrival” button did not explain its purpose. Source review also found that the absolutely positioned arrival card occupied the phone port header's area.
+
+`voyage/voyage.js` no longer opens welcome help or an older release notice automatically. `voyage/index.html` exposes Menu in the header; help remains an explicit menu choice and Mei's tea case remains optional. The arrival message now belongs to the port panel below its tabs, uses orange styling, states **Docked at…**, counts down six seconds, and offers **Dismiss**. It clears on departure or opening a menu. Reduced motion removes animation without shortening reading time. Save recovery notices remain visible and available in Menu.
+
+Jun, Hana and Mako's 512 px scene portraits left comparatively little detail for their faces. New 1024 px portraits use closer framing while retaining their identities and clothes. Only Voyage references change; Classic and the older image files are preserved. Exact prompts: `tools/voyage-14-art-prompts.json`.
+
+Validation: **71,619** Voyage engine assertions, **168** DOM integration checks, **3,211** Classic checks and **134** mocked audio checks pass. The UI checks cover startup, legacy announcements, optional help, keyboard Menu, countdown boundaries, redocking, dismissal, reduced motion and recovery data retention. They do not render CSS. Live-browser layout and physical-phone testing remain outstanding; no browser screenshot or device result is claimed. The fuel-planner limitation described above remains unchanged in this release.

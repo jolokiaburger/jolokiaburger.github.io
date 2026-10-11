@@ -31,7 +31,7 @@ class Element {
 const walk=node=>[node,...node.children.flatMap(walk)];
 
 function boot(setup=()=>{},options={}) {
-  const nodes=new Map(),groups={};
+  const nodes=new Map(),groups={},documentEvents={};
   const timers=new Map();let timerID=0,elapsed=0,nextFrame;
   for(const [,id]of fs.readFileSync(root+'voyage/index.html','utf8').matchAll(/id="([^"]+)"/g))nodes.set(id,new Element());
   for(const [kind,values]of Object.entries({tab:['people','market','cargo','services'],steer:['up','left','down','right']})) {
@@ -41,9 +41,9 @@ function boot(setup=()=>{},options={}) {
   const confirmState={value:true};
   const context=vm.createContext({
     window:{addEventListener(){}},console,devicePixelRatio:1,
-    document:{getElementById:id=>nodes.get(id),createElement:tag=>new Element(tag),querySelectorAll:q=>groups[q]||[],addEventListener(){},body:new Element(),hidden:false},
+    document:{getElementById:id=>nodes.get(id),createElement:tag=>new Element(tag),querySelectorAll:q=>groups[q]||[],addEventListener:(name,fn)=>{documentEvents[name]=fn;},body:new Element(),hidden:false},
     localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},
-    performance:{now:()=>1000+elapsed},matchMedia:()=>({matches:false}),
+    performance:{now:()=>1000+elapsed},matchMedia:()=>({matches:options.reduced===true}),
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
@@ -62,7 +62,8 @@ function boot(setup=()=>{},options={}) {
   const person=name=>click(walk(nodes.get('port-content')).find(n=>n.className==='person'&&n.children[1].children[0].textContent===name));
   const current=()=>context.window.NeonVoyage.getState();
   const advance=ms=>{const end=elapsed+ms;for(;;){const due=[...timers].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!due)break;timers.delete(due[0]);elapsed=due[1].at;due[1].fn();}elapsed=end;};
-  return {nodes,groups,saved,find,click,person,current,confirmState,advance,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
+  const key=(key,editing=false)=>documentEvents.keydown({key,repeat:false,target:{closest:()=>editing},preventDefault(){}});
+  return {nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
 }
 
 // Assisted arrival: a brief notice leaves docking enabled and clears on mooring.
@@ -89,11 +90,29 @@ for(const mobile of [false,true]) {
   r.click(r.nodes.get('dock-button'));
   equal(r.current().docked,'market','the captain can dock immediately');
   check(!r.nodes.get('toast').classList.contains('show'),'docking dismisses the notice');
+  check(!r.nodes.get('panel').open,'arrival does not open a modal');
+  check(r.nodes.get('arrival-title').textContent.startsWith('Docked at '),'arrival explains that mooring is complete');
+  equal(r.nodes.get('arrival-countdown').textContent,'Closes in 6 s','arrival announces its auto-close time');
+  const arrivalClock=r.current().clock,arrivalPurse=r.current().credits;
+  r.advance(1000);
+  equal(r.nodes.get('arrival-countdown').textContent,'Closes in 5 s','arrival counts down each second');
+  r.groups['[data-tab]'][1].onclick();
+  check(r.find('port-content','You pay to buy'),'Market remains usable while arrival is visible');
+  r.advance(4999);check(!r.nodes.get('arrival-card').hidden,'arrival stays available for all six seconds');
+  r.advance(1);check(r.nodes.get('arrival-card').hidden,'arrival automatically closes after six seconds');
+  equal(r.current().clock,arrivalClock,'arrival countdown and tab changes spend no voyage time');
+  equal(r.current().credits,arrivalPurse,'arrival countdown spends no credits');
 }
 
-// First launch provides one concrete next action, and help remains available later.
+// First launch leaves the harbour usable; help is deliberately opened through Menu.
 const start=boot(()=>{},{welcome:true});
-check(start.nodes.get('panel').open,'first voyage opens help');
+check(!start.nodes.get('panel').open,'first voyage never forces a welcome modal');
+check(start.find('port-content','Mei has a small courier job'),'first crossing remains an optional dockside hint');
+start.key('m',true);
+check(!start.nodes.get('panel').open,'typing M in a text field does not open the menu');
+start.key('m');
+check(start.find('panel-content','Ferry tools'),'M deliberately opens the menu while docked');
+start.click(start.find('panel-content','How to play'));
 check(start.find('panel-content','A good first crossing'),'onboarding focuses on the first route');
 start.click(start.find('panel-content','Talk to Mei'));
 check(!start.nodes.get('panel').open,'Mei shortcut closes help');
@@ -110,6 +129,30 @@ start.nodes.get('tools-button').onclick();
 start.click(start.find('panel-content','How to play'));
 check(start.find('panel-content','Welcome aboard'),'help can be reopened');
 equal(start.saved.get('neon-tides:save:v1'),'classic-unchanged','startup preserves Classic save');
+
+const legacyIntro=boot(({state})=>{delete state.flags.continuitySeen;state.credits=127;state.fuel=2;});
+check(!legacyIntro.nodes.get('panel').open,'older saves do not force an old release announcement');
+equal(legacyIntro.current().credits,127,'removing old announcements preserves the purse');
+equal(legacyIntro.current().fuel,2,'removing old announcements preserves fuel');
+
+// Dismissal and departure cancel the timer; a new arrival receives its own full timer.
+for(const reduced of [false,true]) {
+  const r=boot(({state,moor})=>{moor('market');state.docked=null;},{reduced});
+  r.click(r.nodes.get('dock-button'));r.advance(2000);
+  equal(r.nodes.get('arrival-countdown').textContent,'Closes in 4 s','reduced motion keeps the full reading time too');
+  r.click(r.nodes.get('arrival-dismiss'));
+  check(r.nodes.get('arrival-card').hidden,'Dismiss closes the arrival immediately');
+  r.click(r.nodes.get('depart-button'));
+  check(r.nodes.get('arrival-card').hidden,'casting off leaves no arrival card');
+  r.click(r.nodes.get('dock-button'));
+  equal(r.nodes.get('arrival-countdown').textContent,'Closes in 6 s','redocking starts a fresh countdown');
+  r.advance(4000);
+  check(!r.nodes.get('arrival-card').hidden,'the previous arrival cannot close a later card');
+  r.click(r.nodes.get('tools-button'));
+  check(r.nodes.get('arrival-card').hidden,'opening a menu dismisses the arrival');
+  r.advance(2000);
+  check(r.nodes.get('panel').open,'arrival timer never dismisses the menu');
+}
 
 // Full hold explains the reason before a player tries to accept another case.
 const full=boot(({state})=>{state.flags.lampAccepted=true;state.cargo.bowls={cost:20,revenue:0,units:1};});
@@ -196,14 +239,17 @@ equal(JSON.stringify(bulk.current()),bulkBefore,'quantity selection is free and 
 
 // A corrupt save fails safely before any scene or history tries to render it.
 const corrupt=boot(({state})=>{state.finds={toString:'read'};});
-check(corrupt.find('panel-content','That voyage save could not be read'),'invalid save has a visible recovery notice');
+check(corrupt.nodes.get('toast').textContent.includes('That voyage save could not be read'),'invalid save has a visible recovery notice');
+check(!corrupt.nodes.get('panel').open,'save recovery does not force the welcome guide');
 equal(corrupt.current().clock,1420,'invalid save starts a usable voyage');
 check(JSON.parse(corrupt.saved.get(KEY+':unreadable')).finds.toString==='read','original corrupt save kept for possible recovery');
 equal(corrupt.saved.get('neon-tides:save:v1'),'classic-unchanged','corrupt Voyage save leaves Classic intact');
+corrupt.advance(8000);corrupt.nodes.get('tools-button').onclick();
+check(corrupt.find('panel-content','That voyage save could not be read'),'recovery information remains available in the menu');
 
 const corruptJson=boot(()=>{},{rawSave:'{unfinished-json'});
 equal(corruptJson.saved.get(KEY+':unreadable'),'{unfinished-json','unreadable JSON retained before replacement');
-check(corruptJson.find('panel-content','That voyage save could not be read'),'JSON failure gives a recovery notice');
+check(corruptJson.nodes.get('toast').textContent.includes('That voyage save could not be read'),'JSON failure gives a recovery notice');
 const corruptProfile=boot(({saved})=>saved.set(PROFILE,'{unfinished-history'));
 equal(corruptProfile.saved.get(PROFILE+':unreadable'),'{unfinished-history','unreadable history retained before reset');
 check(corruptProfile.nodes.get('toast').textContent.includes('unreadable captain history'),'history parse failure is visible to player');
