@@ -1,6 +1,20 @@
-# Neon Tides Voyage · Playtest 0.14
+# Neon Tides Voyage · Playtest 0.15
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+
+## Harbour pastimes · 0.15
+
+- **Fishing:** Menu/Journal → Harbour pastimes. Fish at any existing quay; a bite waits for you, or Relaxed mode reels automatically. Four game minutes per landed catch, six catches per voyage, a separate three-fish basket. Share with Nao for 6 cr each or release gently. The species notebook and earned paper-fish decoration persist.
+- **Nao's kitchen:** three authored customer orders with broth, topping and tea choices and illustrated trays. Nao provides ingredients; six minutes per served tray, 4 cr thanks plus 2 cr for the favourite combination. Completed shift unlocks a tea-cup decoration. No shift while she is aboard.
+- **Photo errands:** meet Yumi at Metro for market/canal views or Mio at Tsukimi for Hoshimi's light. Sail beside an accepted view, choose Frame a photo, select wide/close and capture for two minutes, free. Return to the requester for a pennant/star decoration. Three small actual Canvas photographs persist in the album across voyages; errands have no delivery deadline.
+- **Journey strip and budgets:** destination, sailing ETA, route fuel and nearest delivery deadline together. A low tank names a reachable pump and includes the refill in the ETA/budget, or explains why it cannot fit. Set course to the pump manually. Individual cargo budgets simulate collection, release waits, handovers, refilling, cash, shared capacity, deadline and return to Kurage. Net cash subtracts new fuel purchases, with starting-tank fuel explicitly excluded; combined two-order estimates remain distance-based.
+- **Closer views:** People → Take a closer dockside seat at Kurage, Lantern Market or Kisaragi. New illustrations of Mei, Nao and Jun include conversation and working activity/meal controls. Mei and Priya have 1024 px relaxed/thoughtful/pleased portraits. Original files and Classic references are preserved.
+
+Rules, costs, source files and save details: [VOYAGE-HARBOUR-LIFE.md](VOYAGE-HARBOUR-LIFE.md). Art provenance: `tools/voyage-15-art-prompts.json`. Save version and keys are unchanged; optional records start empty in older voyages and histories. No activity forces a panel on startup.
+
+Verification: 677 new rule/save/reward/fuel-budget checks and 285 total DOM integration checks pass, including pending-line reload, timer disposal, automatic reeling, recipe selection, photo framing, profile storage, close-view actions and the journey strip. Native Canvas inspected the three actual photo captures and all four ferry decorations. The full engine suite passes 71,627 assertions, Classic passes 3,211 checks and mocked audio passes 134. These do not verify browser CSS or phone comfort.
+
+Next browser/phone checks: fish using touch and Relaxed mode; close the activity during a bite and reopen a saved line; serve all three customers; photograph all views in both frames; return both errands; select decorations and reopen the game. Check small/landscape screens, portrait readability, photo preview and Close access, and performance while the journey strip estimates a fuel stop. Browser access was declined earlier in this session; Safari/iOS and physical-device results are not claimed.
 
 ## A clearer welcome and docking · 0.14
 
@@ -147,7 +161,7 @@ This is the expanded sailing stage of the intended new full game. Nine quays are
 - **Shared hold:** tea, lighthouse kit and stock cases share two slots. Kenji’s cargo racks at Lantern Market cost 65 cr and ten minutes, adding a third slot. Gold and Nao do not occupy case slots.
 - **Journal:** lists several active stories and completed outcomes, with a Track action for the objective line. The Basin chart marks visited quays and lets you set a course after casting off. Remembered gold boards include their observation time.
 
-Buildings now have roof tiles, skylights, warm windows, quay reflections, trees and cargo stacks. New landmarks include the yard crane and repair ferry, Metro platforms, Frostline chillers, Kisaragi’s canal bridge and lantern table, and Hoshimi’s sweeping lighthouse. Small workboats and restrained rain add movement. The map remains procedural Canvas artwork for playtesting; final painted environments, the broader chapters, Harbour Wire and additional radio stations remain future stages.
+Buildings now have roof tiles, skylights, warm windows, quay reflections, trees and cargo stacks. New landmarks include the yard crane and repair ferry, Metro platforms, Frostline chillers, Kisaragi’s canal bridge and lantern table, and Hoshimi’s sweeping lighthouse. Small workboats and restrained rain add movement. The map remains procedural Canvas artwork for playtesting; a fully painted sailing map, the broader chapters, Harbour Wire and additional radio stations remain future stages. Three optional illustrated dockside views are available in 0.15.
 
 Existing 0.1 Voyage saves retain their purse, stories, upgrades and discoveries. If you ended an early voyage before dawn, **Continue this voyage** on the report reopens it for the new destinations. Dawn-ended voyages need a fresh start. Classic saves remain separate.
 

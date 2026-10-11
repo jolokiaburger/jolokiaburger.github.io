@@ -11,7 +11,8 @@ const check=(value,message)=>{assert.ok(value,message);checks++;};
 const equal=(actual,expected,message)=>{assert.equal(actual,expected,message);checks++;};
 
 class Element {
-  constructor(tag='div') {
+  constructor(tag='div',canvasFactory=null) {
+    this.canvasFactory=canvasFactory;
     this.tagName=tag;this.children=[];this.dataset={};this.listeners={};
     this.textContent='';this.open=false;this.hidden=false;this.style={};
     const classes=new Set();
@@ -25,15 +26,18 @@ class Element {
   showModal(){this.open=true;}
   close(){this.open=false;this.listeners.close?.();}
   getBoundingClientRect(){return this.rect||{left:0,top:0,right:1280,bottom:720,width:1280,height:720};}
-  getContext(){return new Proxy({measureText:text=>({width:String(text).length*6}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(target,key)=>key in target?target[key]:()=>{}});}
+  get width(){return this._width||0;} set width(value){this._width=value;if(this.native)this.native.width=value;}
+  get height(){return this._height||0;} set height(value){this._height=value;if(this.native)this.native.height=value;}
+  toDataURL(...args){return this.native?this.native.toDataURL(...args):'data:image/webp;base64,AQIDBA==';}
+  getContext(){if(this.canvasFactory){if(!this.native)this.native=this.canvasFactory(this.width||1280,this.height||720);return this.native.getContext('2d');}return new Proxy({measureText:text=>({width:String(text).length*6}),createLinearGradient:()=>({addColorStop(){}}),createRadialGradient:()=>({addColorStop(){}})},{get:(target,key)=>key in target?target[key]:()=>{}});}
   querySelector(){return this.span||(this.span=new Element('span'));}
 }
 const walk=node=>[node,...node.children.flatMap(walk)];
 
-function boot(setup=()=>{},options={}) {
+export function boot(setup=()=>{},options={}) {
   const nodes=new Map(),groups={},documentEvents={};
   const timers=new Map();let timerID=0,elapsed=0,nextFrame;
-  for(const [,id]of fs.readFileSync(root+'voyage/index.html','utf8').matchAll(/id="([^"]+)"/g))nodes.set(id,new Element());
+  for(const [,id]of fs.readFileSync(root+'voyage/index.html','utf8').matchAll(/id="([^"]+)"/g))nodes.set(id,new Element(id==='sea'?'canvas':'div',id==='sea'?options.canvasFactory:null));
   for(const [kind,values]of Object.entries({tab:['people','market','cargo','services'],steer:['up','left','down','right']})) {
     groups['[data-'+kind+']']=values.map(value=>{const node=new Element('button');node.dataset[kind]=value;return node;});
   }
@@ -41,20 +45,20 @@ function boot(setup=()=>{},options={}) {
   const confirmState={value:true};
   const context=vm.createContext({
     window:{addEventListener(){}},console,devicePixelRatio:1,
-    document:{getElementById:id=>nodes.get(id),createElement:tag=>new Element(tag),querySelectorAll:q=>groups[q]||[],addEventListener:(name,fn)=>{documentEvents[name]=fn;},body:new Element(),hidden:false},
+    document:{getElementById:id=>nodes.get(id),createElement:tag=>new Element(tag,tag==='canvas'?options.canvasFactory:null),querySelectorAll:q=>groups[q]||[],addEventListener:(name,fn)=>{documentEvents[name]=fn;},body:new Element(),hidden:false},
     localStorage:{getItem:key=>saved.get(key)||null,setItem:(key,value)=>saved.set(key,value)},
     performance:{now:()=>1000+elapsed},matchMedia:()=>({matches:options.reduced===true}),
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/profile.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/leisure-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
-  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P}=context.window;
+  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L}=context.window;
   const state=M.create('ui-audit');
   if(!options.welcome)Object.assign(state.flags,{welcome:true,continuitySeen:true});
   const moor=id=>{const port=W.ports.find(p=>p.id===id);state.docked=id;state.ship={x:port.x,y:port.y,angle:0,speed:0};};
-  setup({state,M,P,Pr,saved,moor});
+  setup({state,M,P,Pr,L,saved,moor});
   saved.set(KEY,options.rawSave??JSON.stringify(state));
   vm.runInContext(fs.readFileSync(root+'voyage/voyage.js','utf8'),context,{filename:'voyage/voyage.js'});
   const find=(id,label)=>walk(nodes.get(id)).find(n=>n.textContent.startsWith(label));
@@ -63,7 +67,7 @@ function boot(setup=()=>{},options={}) {
   const current=()=>context.window.NeonVoyage.getState();
   const advance=ms=>{const end=elapsed+ms;for(;;){const due=[...timers].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!due)break;timers.delete(due[0]);elapsed=due[1].at;due[1].fn();}elapsed=end;};
   const key=(key,editing=false)=>documentEvents.keydown({key,repeat:false,target:{closest:()=>editing},preventDefault(){}});
-  return {nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
+  return {pastimes:context.window.NeonVoyage.pastimes,nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
 }
 
 // Assisted arrival: a brief notice leaves docking enabled and clears on mooring.
@@ -258,4 +262,75 @@ const invalidProfileValue=boot(({saved})=>saved.set(PROFILE,'false'));
 equal(invalidProfileValue.saved.get(PROFILE+':unreadable'),'false','invalid falsy history is retained too');
 check(invalidProfileValue.nodes.get('toast').textContent.includes('unreadable captain history'),'invalid falsy history gives a notice');
 
+// 0.15: deliberately opened activities use real model boundaries and save callbacks.
+const fishUI=boot();
+fishUI.click(fishUI.nodes.get('tools-button'));
+fishUI.click(fishUI.find('panel-content','Harbour pastimes'));
+fishUI.click(fishUI.find('panel-content','Dockside fishing'));
+fishUI.click(fishUI.find('panel-content','Cast the line'));
+equal(fishUI.current().clock,1420,'casting waits without spending game time');
+check(fishUI.find('panel-content','Waiting for a bite').disabled,'reel waits for float');
+fishUI.advance(2199);check(fishUI.find('panel-content','Waiting for a bite').disabled,'bite boundary is not early');
+fishUI.advance(1);fishUI.click(fishUI.find('panel-content','Reel in'));
+equal(fishUI.current().leisure.fishing.casts,1,'UI lands one catch');
+equal(fishUI.current().clock,1424,'UI charges advertised four minutes');
+fishUI.click(fishUI.find('panel-content','Another cast'));
+fishUI.click(fishUI.find('panel-content','Cast the line'));
+fishUI.click(fishUI.nodes.get('panel-close'));fishUI.click(fishUI.nodes.get('tools-button'));fishUI.advance(8000);
+equal(fishUI.current().leisure.fishing.casts,1,'closed activity has no late catch callback');
+equal(fishUI.nodes.get('panel-content').children[0].textContent,'Ferry tools','bite callback cannot replace Menu');
+const savedPending=JSON.parse(fishUI.saved.get(KEY));check(!!savedPending.leisure.fishing.pending,'pending line is saved');
+const resumedFish=boot(()=>{}, {rawSave:JSON.stringify(savedPending)});
+check(!resumedFish.nodes.get('panel').open,'pending line does not force a panel on reload');
+resumedFish.pastimes.fishing();resumedFish.advance(2200);resumedFish.click(resumedFish.find('panel-content','Reel in'));
+equal(resumedFish.current().leisure.fishing.casts,2,'saved cast resumes exactly once');
+const relaxedFish=boot(()=>{}, {reduced:true});relaxedFish.pastimes.fishing();
+relaxedFish.click(relaxedFish.find('panel-content','Relaxed mode'));
+relaxedFish.click(relaxedFish.find('panel-content','Cast the line'));relaxedFish.advance(2200);
+equal(relaxedFish.current().leisure.fishing.casts,1,'relaxed mode reels automatically without rapid tapping');
+equal(relaxedFish.current().leisure.fishing.relaxed,true,'relaxed setting saved');
+
+const kitchenUI=boot(({moor})=>moor('market'));kitchenUI.pastimes.kitchen();
+check(!kitchenUI.find('panel-content','Serve the tray').disabled,'first tray available');
+kitchenUI.click(kitchenUI.find('panel-content','Serve the tray'));
+equal(kitchenUI.current().leisure.kitchen.length,1,'first kitchen customer settled');
+equal(kitchenUI.current().credits,366,'default tray matches Priya and pays once');
+kitchenUI.click(kitchenUI.find('panel-content','Next customer'));
+for(const choice of ['Ginger broth','Roasted mushrooms','Black tea'])kitchenUI.click(kitchenUI.find('panel-content',choice));
+check(kitchenUI.find('panel-content','Black tea')['aria-pressed']==='true','selected tea visibly pressed');
+kitchenUI.click(kitchenUI.find('panel-content','Serve the tray'));kitchenUI.click(kitchenUI.find('panel-content','Next customer'));
+for(const choice of ['Spring greens','Jasmine tea'])kitchenUI.click(kitchenUI.find('panel-content',choice));
+kitchenUI.click(kitchenUI.find('panel-content','Serve the tray'));kitchenUI.click(kitchenUI.find('panel-content','Finish the shift'));
+equal(kitchenUI.current().credits,378,'all favourite trays produce advertised total');
+const kitchenProfile=JSON.parse(kitchenUI.saved.get(PROFILE));check(kitchenProfile.charms.includes('cup'),'earned kitchen decoration saved immediately');
+kitchenUI.click(kitchenUI.find('panel-content','Ferry decorations'));kitchenUI.click(kitchenUI.find('panel-content','Little tea cup'));
+equal(JSON.parse(kitchenUI.saved.get(PROFILE)).look.charm,'cup','earned charm can be equipped');
+
+const photoUI=boot(({state,moor,L})=>{moor('metro');L.acceptPhotos(state,'yumi');moor('market');state.docked=null;state.ship.x-=30;});
+check(!photoUI.nodes.get('photo-button').hidden,'camera action appears only beside accepted view');
+photoUI.click(photoUI.nodes.get('photo-button'));photoUI.click(photoUI.find('panel-content','Closer view'));photoUI.click(photoUI.find('panel-content','Take photograph'));
+equal(photoUI.current().leisure.photos.shots.length,1,'camera records one view');equal(photoUI.current().leisure.photos.shots[0].frame,'close','framing choice is retained');
+equal(photoUI.current().clock,1422,'camera charges two minutes');
+check(photoUI.nodes.get('photo-button').hidden,'completed view no longer advertises capture');
+equal(JSON.parse(photoUI.saved.get(PROFILE)).album.length,1,'actual thumbnail path reaches profile save');
+photoUI.click(photoUI.nodes.get('panel-close'));photoUI.frame(1200);
+const photoReload=boot(()=>{}, {rawSave:photoUI.saved.get(KEY)});check(photoReload.nodes.get('photo-button').hidden,'completed photo remains complete after reload');
+const requestUI=boot(({moor})=>moor('observatory'));requestUI.pastimes.album();
+const requestControls=walk(requestUI.nodes.get('panel-content')).filter(n=>n.tagName==='button'&&n.textContent.startsWith('Accept photo errand'));
+check(requestControls[0].disabled&&!requestControls[1].disabled,'requests explain their physical meeting place through availability');requestUI.click(requestControls[1]);
+equal(requestUI.current().leisure.photos.accepted[0],'mio','Mio request accepted through album');
+
+for(const quay of ['bar','market','canal']){
+ const view=boot(({moor})=>moor(quay));view.click(view.find('port-content','Take a closer dockside seat'));
+ const art=walk(view.nodes.get('panel-content')).find(n=>n.className==='dockside-art');
+ check(!!art?.src&&fs.existsSync(root+'voyage/'+art.src),'close view uses a shipped scene');
+ check(!!view.find('panel-content','Chat with'),'close view includes functional conversation');view.click(view.find('panel-content','Chat with'));
+ check(!view.nodes.get('panel').open,'conversation returns to the port');check(!!view.find('port-content','Keep chatting'),'close view opens the correct character controls');
+}
+const journeyUI=boot(({state,moor,M})=>{moor('bar');M.action(state,'accept-tea');state.docked=null;state.voyage={distance:0,from:'bar',to:'market',line:{speaker:'Captain',text:'Crossing'}};});
+const journeyText=walk(journeyUI.nodes.get('journey-strip')).map(n=>n.textContent).join(' ');
+check(journeyText.includes('Next')&&journeyText.includes('ETA')&&journeyText.includes('fuel')&&journeyText.includes('Handover by'),'journey strip brings route, fuel and deadline together');
+equal(journeyUI.saved.get('neon-tides:save:v1'),'classic-unchanged','new activity integration preserves Classic save');
+const fuelUI=boot(({state,moor,M})=>{M.action(state,'accept-tea');moor('landing');state.docked=null;state.fuel=.1;state.voyage={distance:0,from:'bar',to:'market',line:{speaker:'Captain',text:'Crossing'}};});
+fuelUI.click(fuelUI.find('journey-strip','Set course to Landing 3 fuel pump'));equal(fuelUI.current().voyage.to,'landing','fuel-strip shortcut sets a course to the reachable pump');
 console.log(`Passed ${checks} Voyage DOM integration checks (browser layout is not covered).`);

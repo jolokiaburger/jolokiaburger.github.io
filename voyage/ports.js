@@ -254,3 +254,9 @@ const casual=P.casual;P.casual=function(s,id,n){
  const pool=[base,...(pools[id]||[])].filter(Boolean);return pool[(Math.floor(n/2)+(s.visits[s.docked]||1)-1)%pool.length]||base;
 };
 })();
+
+/* 0.15: larger faces and restrained expressions; original assets remain for Classic. */
+(function(){const P=window.VoyagePorts,previous=P.portrait;
+for(const id of ['mei','priya'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed-harbour.webp';
+P.portrait=function(id,mood='relaxed'){return ['mei','priya'].includes(id)?'../assets/portraits/'+id+'-'+(['relaxed','thoughtful','pleased'].includes(mood)?mood:'relaxed')+'-harbour.webp':previous(id,mood);};
+})();
