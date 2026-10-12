@@ -1,6 +1,6 @@
 # Responsive interface and device QA
 
-**Applies to:** the launcher, Voyage 0.17 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
+**Applies to:** the launcher, Voyage 0.18 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
 
 ## Layout ownership
 

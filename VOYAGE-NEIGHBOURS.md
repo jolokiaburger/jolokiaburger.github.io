@@ -1,6 +1,6 @@
 # Voyage neighbours, knowledge and recipes
 
-**Scope:** passenger trips, favours, learned recipes, authored topics and optional docking practice in Voyage 0.17. These systems share the existing quays and profile while keeping fare passengers, recipe packets and fish separate from freight capacity.
+**Scope:** passenger trips, favours, learned recipes, authored topics and optional docking practice in Voyage 0.18. These systems share the existing quays and profile while keeping fare passengers, recipe packets and fish separate from freight capacity.
 
 ## Passenger fares
 

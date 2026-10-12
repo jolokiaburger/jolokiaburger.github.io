@@ -57,7 +57,7 @@ P.crossing=function(s,from,n){
 
 (function(){'use strict';const P=window.VoyagePorts;
 P.economy.market.local.observatory=5;P.economy.market.dealers.observatory={name:'Mio’s instrument exchange',spread:7,depth:8,stock:8,limit:12};
-P.characters.mio={name:'Mio Amami',role:'Tsukimi · Astronomer & patient tinkerer',portrait:'../assets/portraits/mio.svg',chats:[
+P.characters.mio={name:'Mio Amami',role:'Tsukimi · Astronomer & patient tinkerer',portrait:'../assets/portraits/mio-relaxed-observatory.webp',chats:[
  'Welcome to the wide part of the night. The kettle is closer than the stars, so we usually begin there.',
  'Gold contacts resist corrosion. In a salt-air observatory, a reliable little connection is worth more than a dramatic machine.',
  'Kenji has a sealed gold-contact kit at the market: fifty-four to buy, one hundred here before 04:50. Mind the return fuel.',
@@ -124,8 +124,8 @@ P.styles={hull:{sand:{name:'Harbour sand',color:'#c5b78f',cost:0},blue:{name:'De
 
 /* Local, optional story artwork. IDs are stable for saved captain histories. */
 (function(){'use strict';const P=window.VoyagePorts;
-for(const id of ['nao','rin','mio'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed'+(id==='mio'?'-harbour':'')+'.webp';
-P.portrait=function(id,mood='relaxed'){return ['nao','rin','mio'].includes(id)&&['relaxed','thoughtful','pleased'].includes(mood)?'../assets/portraits/'+id+'-'+mood+(id==='mio'?'-harbour':'')+'.webp':P.characters[id].portrait;};
+for(const id of ['nao','rin','mio'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed'+(id==='mio'?'-observatory':'')+'.webp';
+P.portrait=function(id,mood='relaxed'){return ['nao','rin','mio'].includes(id)&&['relaxed','thoughtful','pleased'].includes(mood)?'../assets/portraits/'+id+'-'+mood+(id==='mio'?'-observatory':'')+'.webp':P.characters[id].portrait;};
 P.illustrations={
  supper:{title:'A supper drawn from stars',file:'constellation-supper',who:['nao','mio'],alt:'Nao and Mio share tea and ginger biscuits over a star chart beside the softly lit Tsukimi observatory.',caption:'Three cups, ginger biscuits and a map of the Swan. For a while, nobody needs to be anywhere else.'},
  breakfast:{title:'The first warm tray',file:'market-breakfast',who:['nao'],alt:'Nao offers steamed buns and tea at her lantern market counter as dawn reaches the harbour.',caption:'The lanterns are still warm when the first breakfast tray reaches the counter. A small homecoming before the day begins.'},

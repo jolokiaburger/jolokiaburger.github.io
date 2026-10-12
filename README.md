@@ -8,12 +8,14 @@ Neon Tides is a browser game about a night ferry, small trades and the people wh
 
 | Mode | Entry point | Current version | Experience |
 | --- | --- | --- | --- |
-| Voyage | [voyage/index.html](voyage/index.html) | 0.17 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
+| Voyage | [voyage/index.html](voyage/index.html) | 0.18 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
 | Classic | [classic.html](classic.html) | 4.6.1 | Authored harbour scenes, three connected trading chapters and four investigation case files |
 
 [index.html](index.html) is the mode selector. Both modes use local browser saves with separate storage keys. The release version is independent of the save-format version. Existing saves remain supported by the current validators.
 
 Voyage's **Beyond the Breakwater** expedition starts at Nao's Night Market counter through **People → Beyond the Breakwater**. Preparation opens Aonami Tea Island and Shiosai Coastal Station; further conversations affect routes, recipes and the final supper. See [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md) for the complete subsystem specification.
+
+Voyage 0.18 adds an irregular dark sea-fog boundary in the sailing view, minimap and chart, plus detailed Mio expression portraits. The veil follows the current region unlock and preserves navigation limits. Visual specifications are in [ART-DIRECTION.md](ART-DIRECTION.md).
 
 ## Run locally
 

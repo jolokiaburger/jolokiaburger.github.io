@@ -1,6 +1,6 @@
 # Beyond the Breakwater: expedition specification
 
-**Scope:** Voyage 0.17's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
+**Scope:** Voyage 0.18's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
 
 ## Entry and chapter progression
 
