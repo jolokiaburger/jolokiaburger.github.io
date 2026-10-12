@@ -82,8 +82,7 @@
       "sha256": "afd04ba615d9bdd603db4ec2f281b6f7025978e629e773751cd0b3ffadb86947",
       "reference_status": "source-referenced",
       "references": [
-        "expansion.js",
-        "voyage/ports.js"
+        "expansion.js"
       ]
     },
     {
@@ -99,6 +98,54 @@
       "sha256": "afcffb2ac8dd5e61ce333ab385fbf036e1d121e4014daaedf4259faf4315dc80",
       "reference_status": "retained",
       "references": []
+    },
+    {
+      "path": "assets/portraits/aki-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 139200,
+      "sha256": "98b8887ded99919ff7e3cbe4e122f86fb3bc49b239d59bafcdd607cb5a2bdf04",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/aki-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 143244,
+      "sha256": "a5a9b38e82b7db0cc148dea8edd93ba19f8b73d325194fba9b72054610992d38",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/aki-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 144206,
+      "sha256": "cfa1eb8a0e386a9b6cfe82a2678e08dd304569f85d427297088005e443753b1d",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
     },
     {
       "path": "assets/portraits/dex-manga.webp",
@@ -226,7 +273,54 @@
       "reference_status": "source-referenced",
       "references": [
         "classic.html",
-        "night-market.js",
+        "night-market.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/kenji-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 131892,
+      "sha256": "8ffc00259cd2b671ddb5bd3947d97b1f0fdfe6445f82c531be6b9b4ea67ad1d0",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/kenji-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 136442,
+      "sha256": "8c97fa701e2d71f3dd34534b83e85826ce9d36f831ce2135d6aef983c374c5ed",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/kenji-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 134316,
+      "sha256": "567f78b0bf2a868b8293f4472394944d7c0a8282f423d89aee3e422578cd55a0",
+      "reference_status": "source-referenced",
+      "references": [
         "voyage/ports.js"
       ]
     },
@@ -243,7 +337,54 @@
       "sha256": "eab79d02e797162df1c0dbdb5fbf76063cf1a1d941c4b77bb0bd0f4b519858e4",
       "reference_status": "source-referenced",
       "references": [
-        "cases.js",
+        "cases.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/lam-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 134888,
+      "sha256": "ebe1f221436917f32dfac41dc0a9f6a3252751c039d0a353d3c21c820ba5dab7",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/lam-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 140840,
+      "sha256": "349ea62454b212409221a1b94d349fd5718b3803ae09dc95c1130621ee311504",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/lam-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 138888,
+      "sha256": "fbf4adc7c2892ec3969fe75f431f28198e060570b18ef1d7ad4dcd91647b52fb",
+      "reference_status": "source-referenced",
+      "references": [
         "voyage/ports.js"
       ]
     },
@@ -307,8 +448,7 @@
       "sha256": "c832069a4adb6236470659be228b10b9b9a7fad0ceba761a9fcda656ffc24a5b",
       "reference_status": "source-referenced",
       "references": [
-        "cases.js",
-        "voyage/ports.js"
+        "cases.js"
       ]
     },
     {
@@ -324,6 +464,54 @@
       "sha256": "68f99695c1a547f491bcc955883396d58d7a9dabf05433110d2a5ad476610277",
       "reference_status": "retained",
       "references": []
+    },
+    {
+      "path": "assets/portraits/matte-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 139692,
+      "sha256": "1b75f3c017296b0aa8009385b64d930277abb953e79cff5d6676a74f7ca4bc9c",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/matte-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 141292,
+      "sha256": "8dd88305542e4e5885e2d657f06bae9fd3a389b26c97045221931e9eec2e675b",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/matte-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 141534,
+      "sha256": "09c16faecdf9a9429ec8aaef36adba4ccf81db1c8f7ae2937edcde54c7d5a4c2",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
     },
     {
       "path": "assets/portraits/matte.svg",
@@ -599,6 +787,22 @@
       ]
     },
     {
+      "path": "assets/portraits/nao-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 138070,
+      "sha256": "b0f1d0ce5f2b541932db728169f456b25604fc833cdca25c028b9c3f593f2a83",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
       "path": "assets/portraits/nao-pleased.webp",
       "category": "portrait",
       "format": "webp",
@@ -609,6 +813,20 @@
       },
       "bytes": 54230,
       "sha256": "de5f431a7a9155249c8d2881cc3307787e2397ab5a2e952cd35728b23a187c4e",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/nao-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 138086,
+      "sha256": "bf12c654f6fb9f805086120c9ddbdb7323386e71228be21f2b501a26bee957f0",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -625,6 +843,20 @@
       },
       "bytes": 53478,
       "sha256": "3891ae3ec03aef1cf0ce9254bd3f69c1ea8549fc67148958bb8c489e9e0670c9",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/nao-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 140160,
+      "sha256": "e20dd4fffb1ced0d5fca6f51f14294569c67fda7f77db0c9afce6dfc4f44e430",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -641,10 +873,8 @@
       },
       "bytes": 57530,
       "sha256": "ec7ca820248a3da7d241082392684b759e10c0a6c7822822638f4f12452b96cd",
-      "reference_status": "source-referenced",
-      "references": [
-        "voyage/ports.js"
-      ]
+      "reference_status": "retained",
+      "references": []
     },
     {
       "path": "assets/portraits/oduya-manga.webp",
@@ -819,6 +1049,22 @@
       ]
     },
     {
+      "path": "assets/portraits/rin-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 129330,
+      "sha256": "838558619ff062d9047627f7d1a998c1854516ee6a07fec98e8675cfda8b2ed7",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
       "path": "assets/portraits/rin-pleased.webp",
       "category": "portrait",
       "format": "webp",
@@ -829,6 +1075,20 @@
       },
       "bytes": 33510,
       "sha256": "0a33f58ac71573e34fe5900b65d1385c12444126ccf197f5609da0e41ed00376",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/rin-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 133958,
+      "sha256": "a3de40cb8ce5ac36b323a778c7991ffab6dd7cf10d83007674c37413fb90123b",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -845,6 +1105,20 @@
       },
       "bytes": 34878,
       "sha256": "1a54c3601667a88b37007b3952ace029b7252f575d05d514a61f46cdaa0cb092",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/rin-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 130506,
+      "sha256": "d45ebac8e7b54f34476d05c6a81238db0b2e033e08e2aeb2e64ee4a045f6a764",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -861,10 +1135,8 @@
       },
       "bytes": 33094,
       "sha256": "575196d54a01e0817c8044e0fa83c44ca3cf657b2f182e7b223fb60718a57169",
-      "reference_status": "source-referenced",
-      "references": [
-        "voyage/ports.js"
-      ]
+      "reference_status": "retained",
+      "references": []
     },
     {
       "path": "assets/portraits/sora-harbour.webp",
@@ -880,8 +1152,7 @@
       "reference_status": "source-referenced",
       "references": [
         "classic.html",
-        "expansion.js",
-        "voyage/ports.js"
+        "expansion.js"
       ]
     },
     {
@@ -895,6 +1166,54 @@
       },
       "bytes": 24652,
       "sha256": "724e3872726eaeb0461d5f689923606f3042ad164aa865fb870135d8779e73bb",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/sora-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 132096,
+      "sha256": "476452e5be05a9fc2b28da369ffec25a57b8f3a1cd830448501e9176ea063a95",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/sora-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 136798,
+      "sha256": "a6ec7ac7bc58b5ce19c4f100edff880ffc42258941a8494076fb3505fac56976",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/sora-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 137630,
+      "sha256": "61747fdb9e6807dfe0a79a2d6a47dc75527da48f3e250401062e08c7ee6d748f",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -927,8 +1246,7 @@
       "sha256": "02454804fde0f079d12c5af811f169b54b0cb3f7ea13eea50d677ed675da131b",
       "reference_status": "source-referenced",
       "references": [
-        "cases.js",
-        "voyage/ports.js"
+        "cases.js"
       ]
     },
     {
@@ -944,6 +1262,54 @@
       "sha256": "2e8880f2642e27b88807c89beabd6f3e4ced3c6b6e8c69afab5a509339971e09",
       "reference_status": "retained",
       "references": []
+    },
+    {
+      "path": "assets/portraits/yumi-pleased-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 102088,
+      "sha256": "842543094f6b8e3aa18d81247c1f2465fc096641ce24a8ee9ebccfc4261bc5b8",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/yumi-relaxed-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 105168,
+      "sha256": "d539bff7b6c3d0304d7178a6f942509c6d6facef2e3809bee92fa06a4944bcd7",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/yumi-thoughtful-evening.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 724,
+        "height": 724,
+        "unit": "px"
+      },
+      "bytes": 104370,
+      "sha256": "5e18ef4921c12556901c2b62f726e5d5840d0c25551ca9194150b779bea9c876",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
     },
     {
       "path": "assets/portraits/yumi.svg",

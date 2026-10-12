@@ -8,14 +8,14 @@ Neon Tides is a browser game about a night ferry, small trades and the people wh
 
 | Mode | Entry point | Current version | Experience |
 | --- | --- | --- | --- |
-| Voyage | [voyage/index.html](voyage/index.html) | 0.18 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
+| Voyage | [voyage/index.html](voyage/index.html) | 0.19 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
 | Classic | [classic.html](classic.html) | 4.6.1 | Authored harbour scenes, three connected trading chapters and four investigation case files |
 
 [index.html](index.html) is the mode selector. Both modes use local browser saves with separate storage keys. The release version is independent of the save-format version. Existing saves remain supported by the current validators.
 
 Voyage's **Beyond the Breakwater** expedition starts at Nao's Night Market counter through **People → Beyond the Breakwater**. Preparation opens Aonami Tea Island and Shiosai Coastal Station; further conversations affect routes, recipes and the final supper. See [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md) for the complete subsystem specification.
 
-Voyage 0.18 adds an irregular dark sea-fog boundary in the sailing view, minimap and chart, plus detailed Mio expression portraits. The veil follows the current region unlock and preserves navigation limits. Visual specifications are in [ART-DIRECTION.md](ART-DIRECTION.md).
+Voyage 0.19 makes the existing harbour more playable through travelling/hosted supper evenings, three optional lantern sailing courses, **The Wrong Supper Crate**, a unified route board and refined shoreline, coast and character art. Completed expeditions can continue into further harbour nights. Rules and integration contracts are in [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md); visual specifications are in [ART-DIRECTION.md](ART-DIRECTION.md).
 
 ## Run locally
 
@@ -67,6 +67,7 @@ Voyage help is available through **Menu → How to play**. Story and activity pa
 | [VOYAGE-AUDIT.md](VOYAGE-AUDIT.md) | Current engineering safeguards, compatibility requirements and known limitations |
 | [VOYAGE-HARBOUR-LIFE.md](VOYAGE-HARBOUR-LIFE.md) | Fishing, kitchen shifts, photographs and travel budgets |
 | [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md) | Passenger fares, favours, recipes, conversations and docking practice |
+| [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md) | Supper evenings, sailing courses, dispatch investigation and unified itineraries |
 | [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md) | Expedition chapters, coast navigation and overnight continuation |
 | [ADVENTURE.md](ADVENTURE.md) | Classic dialogue, case files and lighthouse exploration |
 | [NIGHT-MARKET.md](NIGHT-MARKET.md), [NAO-STORY.md](NAO-STORY.md) | Classic market dispatch and breakfast story |

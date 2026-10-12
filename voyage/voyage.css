@@ -162,3 +162,13 @@ dialog .panel-controls #panel-close{margin:0;flex:1;min-width:0}
 @media(max-width:750px) and (max-height:550px){.topbar{grid-template-columns:minmax(0,1fr) repeat(5,auto)}#chart-button{grid-column:5;grid-row:1}#radio-button{grid-column:6;grid-row:1}}
 
 .chart-scroll{overflow:auto;max-height:55dvh;overscroll-behavior:contain;border-radius:9px}.region-chart.chart-detail{width:1020px;max-width:none}.chart-scroll .region-chart{margin:0}
+
+/* Evening controls stay inside the scroll region and retain fixed panel navigation. */
+.evening-summary,.route-budget{padding:14px 16px;border:1px solid #a68f66;border-radius:9px;background:#263d3c;color:#ead7b0}
+.route-budget strong{font:20px Georgia,serif}.route-budget p{margin:9px 0}.served-receipt{padding:9px 12px;border-left:3px solid #8da999;background:#203c3d;font-size:13px}
+.itinerary-stop{padding:14px;border:1px solid #647e78;border-radius:9px;margin:12px 0;background:#20373e}.itinerary-stop h3{font:19px Georgia,serif;margin:0 0 8px}.itinerary-stop p{margin:7px 0}
+.itinerary-controls{display:flex;flex-wrap:wrap;gap:7px}.itinerary-controls button{min-height:44px;font-size:12px;flex:1;min-width:90px}
+.route-add{display:grid;grid-template-columns:minmax(0,1fr) minmax(100px,.6fr);gap:8px}.route-add button{grid-column:1/-1}.route-add select,#panel-content>label select{font:inherit;color:var(--ink);background:#203b45;border:1px solid #6b807a;border-radius:7px;padding:10px;min-height:44px;width:100%;max-width:100%}
+#panel-content>label{display:block;margin:12px 0}.route-add select:focus-visible,#panel-content>label select:focus-visible{outline:3px solid var(--amber);outline-offset:3px}.pump-stop{padding:7px 9px;background:#22383d;border-left:3px solid #cbb989}
+.recipe-options>button[aria-pressed=true]{border-color:#efcf91;background:#38524a;color:#fff0cf}
+@media(max-width:420px){.route-add{grid-template-columns:1fr}.route-add button{grid-column:1}.itinerary-controls button{font-size:11px;min-width:70px}.itinerary-stop,.route-budget{padding:12px}.recipe-options>button{width:100%}}

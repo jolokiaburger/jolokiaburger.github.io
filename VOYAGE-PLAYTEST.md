@@ -1,6 +1,6 @@
 # Voyage QA and release test plan
 
-**Baseline:** Voyage 0.18, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
+**Baseline:** Voyage 0.19, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
 ## Test environment
 
@@ -16,6 +16,7 @@ node tools/voyage-neighbours-checks.mjs
 node tools/voyage-breakwater-checks.mjs
 node tools/voyage-ui-checks.mjs
 node tools/voyage-boundary-checks.mjs
+node tools/voyage-evenings-checks.mjs
 node tools/adventure-checks.mjs
 node tools/sound-checks.mjs
 ```
@@ -29,6 +30,7 @@ node tools/sound-checks.mjs
 | [tools/voyage-breakwater-checks.mjs](tools/voyage-breakwater-checks.mjs) | Chapters, menus/endings, real coast routes, continuation, contracts and malformed state |
 | [tools/voyage-ui-checks.mjs](tools/voyage-ui-checks.mjs) | Production callbacks in a mock DOM, optional help, arrivals, panel return, tutorial and activity integration |
 | [tools/voyage-boundary-checks.mjs](tools/voyage-boundary-checks.mjs) | Boundary coverage, contours, unlock transitions, drawing state and portrait selection; native pixel checks when the optional Canvas dependency is installed |
+| [tools/voyage-evenings-checks.mjs](tools/voyage-evenings-checks.mjs) | Supper menus/contributions, six actual sailing runs, evidence/capacity, complete itineraries, saves, continuation and production callbacks |
 | [tools/adventure-checks.mjs](tools/adventure-checks.mjs) | Classic cases, dialogue, chapters, cargo, board and compatibility |
 | [tools/sound-checks.mjs](tools/sound-checks.mjs) | Mocked Web Audio controls, gating, scheduling and cleanup |
 
@@ -60,6 +62,11 @@ Inspect its photographs, decorations, passengers, camera views, coastal scenery 
 | V12 · Continuation | Continue an unfinished chapter, carried paid case/courier, moored finish and at-sea finish | Real resources/basis retained, windows renew explicitly, prior receipts are excluded from new income, tug terms match, no unpaid passenger homecoming |
 | V13 · Dawn boundaries | Attempt activities with insufficient time, then actions finishing exactly at 06:00 | Insufficient actions charge nothing; exact-dawn commits settle once and retain the report |
 | V14 · Saves/recovery | Load older valid Voyage saves and a current expedition; test invalid voyage/profile separately and unavailable storage | Valid progress retained; recovery notice is visible; raw unreadable data retained where possible; Classic unchanged |
+| V16 · Supper evenings | Complete a two/three-table route and a hosted station evening; try variations, insufficient resources, close and another night | Ingredients paid once, table order enforced, 12/15-cr contributions only on serving, no duplicate report income, full duration before dawn, outcomes persist |
+| V17 · Lantern runs | Complete all three courses in relaxed/timed modes using manual and assisted steering; pause, close and resume a saved run | Ordered gates, real fuel/game time, clear current gate, no cash/damage, completion notice is non-blocking, bounded best records and pennant |
+| V18 · Dispatch investigation | Check records in different orders, fill the hold, recover the case and complete both resolutions in separate runs | Specific replies require evidence, full hold blocks recovery, platform supper requires consent, case slot releases and no fee appears |
+| V19 · Route board | Add/reorder twelve stops; compare two orders; execute supper/case routes and an early refill; import an older cargo route | Whole refills and actual cash dependencies, no future quote, clear next action, correct stop reconciliation and explicit handovers |
+| V20 · Continuing evenings | Continue a completed expedition with an unfinished case; start another supper and revisit courses | Chapter three stays complete, resources/case retained, older checks labelled retained, nightly supper/courses reset, no free fuel or repeated old payment |
 | V15 · Classic | Resume a saved shift, inspect Captain's guide, complete a trade and case route, continue through three chapters | Original progression, evidence, controls and save origin remain consistent; no Voyage data is used |
 
 For V11, the preparation uses Nao's menu, Mei's 8-cr/six-minute pack and Rin's free ten-minute fitting. Chapter two uses boarding, Aonami tasting, the waterproof case and station cooker; chapter three concludes at Nao's counter. Detailed terms and spoilers are in [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md).

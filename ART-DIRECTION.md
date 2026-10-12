@@ -6,7 +6,7 @@ Neon Tides presents a warm working harbour at night: amber interiors, cool water
 
 | Layer | Implementation | Requirements |
 | --- | --- | --- |
-| Voyage sailing world | [voyage/voyage.js](voyage/voyage.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js) | Native Canvas geography, waterfronts, crew, keepsakes and weather |
+| Voyage sailing world | [voyage/voyage.js](voyage/voyage.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js), [voyage/shoreline-art.js](voyage/shoreline-art.js) | Native Canvas geography, waterfronts, crew, keepsakes and weather |
 | Voyage region chart | [voyage/breakwater-ui.js](voyage/breakwater-ui.js) | Draw from actual world geometry; keep named destination controls beside the chart |
 | Classic scenes | [classic.html](classic.html), [styles.css](styles.css) | Inline SVG landmarks, state overlays and semantic targets; local scene plates where present |
 | Character portraits | [assets/portraits/](assets/portraits/) | Local WebP/SVG with consistent identity and readable face framing |
@@ -40,7 +40,8 @@ The shipped inventory is [tools/asset-manifest.json](tools/asset-manifest.json).
 
 | Asset type | Current convention |
 | --- | --- |
-| Base portraits | 512 × 512 WebP |
+| Retained original portraits | 512 × 512 WebP; existing Classic references remain available |
+| Refined Nao/Rin/Sora/Aki/Yumi/Matte/Kenji/Lam expressions | 724 × 724 WebP; relaxed, thoughtful and pleased, with consistent face framing |
 | Refined Mei/Priya expressions and Jun/Hana/Mako portraits | 1024 × 1024 WebP |
 | Active Mio observatory expressions | 1254 × 1254 WebP; relaxed, thoughtful and pleased |
 | Classic scene plates | 1440 × 800 WebP |
@@ -67,6 +68,14 @@ Use native motion for steam, water, crew details and landmarks. Honour reduced m
 The sailing view and minimap use the dark sea palette; the parchment chart uses muted charcoal. Ferry, course and quay indicators draw above the veil. All shapes are deterministic and static, require no blur filter or downloaded texture, and cull work outside the camera. Keep the veil separate from collision, price and save rules.
 
 Mio’s active expression paths select the observatory portraits through [voyage/ports.js](voyage/ports.js). Earlier variants are retained. Her native map figure carries matching scarf, glasses, coat details and constellation pin in [voyage/harbour-art.js](voyage/harbour-art.js).
+
+## Working coast and evening scenes
+
+[voyage/shoreline-art.js](voyage/shoreline-art.js) replaces natural-island surface edges with deterministic contours, shallow-water colour and rocks. Solid contour deviations stay within six world units of the existing bounds, inside navigation clearance. Built waterfronts retain readable constructed edges. Collision rectangles, quay coordinates and save positions remain authoritative.
+
+[voyage/coast-art.js](voyage/coast-art.js) adds hillside paths, tea baskets, working figures, masonry, a credited station rota and guest tables. Window light and kitchen steam follow restoration state; hosted servings leave bowls and guests visible. Completed dispatch resolutions and dockside supper tables appear through native drawing. Decorative steam remains static under reduced motion.
+
+The evening portrait set refines eight previously 512-pixel characters and adds expressions for characters that had a single active portrait. Earlier assets remain for Classic. Each 724-pixel square is exported from its expression sheet without enlargement; active selectors are verified against the asset manifest. Portraits load in explicit conversation/activity panels and introduce no raster layer into sailing.
 
 ## Asset review
 
