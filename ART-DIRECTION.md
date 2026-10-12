@@ -85,6 +85,12 @@ Each species has one complete living-fish illustration in [assets/fish/](assets/
 
 Keep native 1536 × 1024 dimensions; use contain scaling and reserved aspect ratios. Inspect each WebP after encoding and verify inventory dimensions, bytes, hashes and runtime-selected references. The eight cards total approximately 2.5 MB and are loaded only through fishing/basket/notebook panels.
 
+## Harbour craft presentation
+
+[voyage/harbour-craft-ui.js](voyage/harbour-craft-ui.js) draws scalable tea trays and recovered objects as local SVG data images. The kettle uses sage ceramic, the tray warm wood, and each tea a distinct infusion colour. Recipe instructions and readings remain HTML text outside the image. Recovery illustrations distinguish brass, painted tin and glass; their stories identify the owner.
+
+[voyage/tides.js](voyage/tides.js) places mint directional trails only on navigable water. Amber diamond markers identify recoveries. [voyage/voyage.js](voyage/voyage.js) adds widening wake rings; reduced motion leaves current arrows static and removes wake animation. These additions introduce no raster downloads or collision changes.
+
 ## Asset review
 
 After adding or refining assets, run `node tools/documentation-checks.mjs --update-assets` and review the inventory diff. Run `node tools/documentation-checks.mjs` without that option to verify shipped files, dimensions, hashes and references without modifying metadata. Optional `node tools/voyage-render-checks.mjs <output-directory>` renders implemented Canvas scenes with `@napi-rs/canvas` for inspection.

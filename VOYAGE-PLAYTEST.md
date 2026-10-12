@@ -1,6 +1,6 @@
 # Voyage QA and release test plan
 
-**Baseline:** Voyage 0.20, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
+**Baseline:** Voyage 0.21, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
 ## Test environment
 
@@ -18,6 +18,7 @@ node tools/voyage-ui-checks.mjs
 node tools/voyage-boundary-checks.mjs
 node tools/voyage-evenings-checks.mjs
 node tools/voyage-fishing-checks.mjs
+node tools/voyage-craft-checks.mjs
 node tools/adventure-checks.mjs
 node tools/sound-checks.mjs
 ```
@@ -33,6 +34,7 @@ node tools/sound-checks.mjs
 | [tools/voyage-boundary-checks.mjs](tools/voyage-boundary-checks.mjs) | Boundary coverage, contours, unlock transitions, drawing state and portrait selection; native pixel checks when the optional Canvas dependency is installed |
 | [tools/voyage-evenings-checks.mjs](tools/voyage-evenings-checks.mjs) | Supper menus/contributions, six actual sailing runs, evidence/capacity, complete itineraries, saves, continuation and production callbacks |
 | [tools/voyage-fishing-checks.mjs](tools/voyage-fishing-checks.mjs) | All tackle/quay combinations, shared coastal fights, measurements, bounded records, legacy catches, malformed saves, exact dawn and timer disposal |
+| [tools/voyage-craft-checks.mjs](tools/voyage-craft-checks.mjs) | Tea quality/replays, finite recoveries, request evidence, current bounds, old saves, exact dawn, persistent records and production controls |
 | [tools/adventure-checks.mjs](tools/adventure-checks.mjs) | Classic cases, dialogue, chapters, cargo, board and compatibility |
 | [tools/sound-checks.mjs](tools/sound-checks.mjs) | Mocked Web Audio controls, gating, scheduling and cleanup |
 
@@ -79,6 +81,15 @@ For V11, the preparation uses Nao's menu, Mei's 8-cr/six-minute pack and Rin's f
 Approach all four outer edges, the locked east coast and a corner in close/wide views. The rectangle walls must be replaced by a feathered navy-black veil, with the Tern and active navigation indicators readable above it. Check the minimap and enlarged chart before and after chapter-two unlock. The gate must remain enforced while locked; opening the coast must restore its normal geography and destinations. Verify night/dawn, portrait/landscape and reduced motion.
 
 At Tsukimi, read Mio’s ordinary chat, knowledge topics, sky-watch reactions, photo errand and illustrated seat. Relaxed, thoughtful and pleased portraits must all use the detailed observatory set. Confirm fallback behaviour and local loading.
+
+## Harbour craft acceptance
+
+- At Kisaragi, brew all three blends, compare a balanced and over-extracted cup, resume a saved partial pour, share six cups and verify the daily limit. Close/reopen at every phase. Serve at 05:54 and reject a new serving at 05:55.
+- Find all three recovery sites. Try a wrong gap, high tension, packing, moving away, save/reopen, duplicate retrieval and duplicate handover. Verify four-minute retrieval and return, separate storage, object illustrations and attributed histories.
+- Complete selected request goals before and after reading the board. Verify actual progress, location requirements, one-time thank-yous, no inventory consumption and no purse change.
+- Continue an expedition. Verify fresh nightly progress, forwarded unreturned objects, retained best tea scores and retained learned histories.
+- Sail with, across and against currents through a cycle. Check sheltered approaches, stopped boats, conservative normal-speed estimates, current arrows, Gentle helm and actual lantern-run results.
+- At 320/390 px and short landscape sizes, inspect target bands, phase labels, wrapped controls, recovery lanes, notebooks and crowded sailing actions. Check keyboard focus after each repeated action and screen-reader meter values. Repeat with reduced motion.
 
 ## Browser and device acceptance
 

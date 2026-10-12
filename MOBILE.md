@@ -1,6 +1,6 @@
 # Responsive interface and device QA
 
-**Applies to:** the launcher, Voyage 0.20 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
+**Applies to:** the launcher, Voyage 0.21 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
 
 ## Layout ownership
 
@@ -75,3 +75,9 @@ A device pass must demonstrate a complete first delivery, gold transaction, acti
 ## Harbour-evening controls
 
 The route board uses stacked stop cards with labelled reorder/remove controls and native service selectors. At 320–420 px, selectors and recipe choices stack vertically; actions retain 44-pixel targets. Fixed dialog Back/Close remain outside the scrollable content. Test twelve-stop plans, long disabled reasons, the three course boards and all supper/evidence panels in portrait and short landscape. Observe full-itinerary budget latency and the numbered lantern rings during touch steering.
+
+## Tea and recovery controls
+
+[voyage/harbour-craft-ui.js](voyage/harbour-craft-ui.js) uses explicit action buttons without reaction deadlines. Tea phase labels and controls become two-column groups below 550 px. Controls use 48-pixel targets; meters expose numeric values and target guidance. Recovery gaps are numbered and labelled alongside the illustration. Repeated actions restore focus to the same available control.
+
+Verify long notebooks, native SVG images, 320 px recovery lanes, the Read water chip and contextual recovery button in portrait and short landscape. The Gentle helm toggle affects manual steering only. Touch direction controls retain pointer-up, cancellation and lost-capture cleanup. Native dialog focus, actual CSS fit and touch comfort still require device testing.

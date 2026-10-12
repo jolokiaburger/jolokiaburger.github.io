@@ -11,9 +11,9 @@ function route(start,end){if(!water(end.x,end.y))return [];
  if(!prev.has(finish.key))return [];const path=[end];let key=finish.key;while(key!==null){path.unshift(cells.get(key));key=prev.get(key);}let out=[],anchor=start;
  while(path.length){let far=0;for(let i=0;i<path.length;i++)if(segment(anchor,path[i],42))far=i;const next=path[far];out.push(next);anchor=next;path.splice(0,far+1);}return out;
 }
-function step(ship,input,dt,boost){dt=Math.max(0,Math.min(dt,.05));const length=Math.hypot(input.x,input.y);let target=length?Math.atan2(input.y,input.x):ship.angle;
+function step(ship,input,dt,boost,current=1){dt=Math.max(0,Math.min(dt,.05));const length=Math.hypot(input.x,input.y);let target=length?Math.atan2(input.y,input.x):ship.angle;
  let turn=((target-ship.angle+Math.PI*3)%(Math.PI*2))-Math.PI;ship.angle+=Math.max(-3.8*dt,Math.min(3.8*dt,turn));
- const wanted=length?86*(boost?1.15:1):0;ship.speed+=(wanted-ship.speed)*Math.min(1,dt*4.5);if(ship.speed<.6)ship.speed=0;
+ const wanted=length?86*(boost?1.15:1)*Math.max(1,Math.min(1.18,current))*(input.gentle?.55:1):0;ship.speed+=(wanted-ship.speed)*Math.min(1,dt*4.5);if(ship.speed<.6)ship.speed=0;
  const dx=Math.cos(ship.angle)*ship.speed*dt,dy=Math.sin(ship.angle)*ship.speed*dt;
  if(segment(ship,{x:ship.x+dx,y:ship.y+dy})){ship.x+=dx;ship.y+=dy;return Math.hypot(dx,dy);}
  ship.speed=0;return 0;
