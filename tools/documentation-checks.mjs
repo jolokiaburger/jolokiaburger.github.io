@@ -39,6 +39,12 @@ for (const [, file] of sources.get('voyage/leisure-ui.js').matchAll(/file:\s*'([
 for (const [, file] of sources.get('voyage/breakwater-ui.js').matchAll(/'([a-z-]+-dockside)'/g)) {
   selected('assets/scenes/' + file + '.webp', 'voyage/breakwater-ui.js');
 }
+for (const file of ['voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/fishing.js']) {
+  vm.runInContext(read(file), context, {filename: file});
+}
+for (const fish of Object.values(context.window.VoyageFishing.species)) {
+  selected(path.posix.normalize(path.posix.join('voyage', fish.art)), 'voyage/fishing.js');
+}
 
 function dimensions(buffer, format) {
   if (format === 'svg') {
@@ -78,7 +84,7 @@ const inventory = list('assets').map(file => {
   ])].sort();
   return {
     path: file,
-    category: file.startsWith('assets/portraits/') ? 'portrait' : file.startsWith('assets/scenes/') ? 'scene' : file.startsWith('assets/sprites/') ? 'sprite' : 'icon',
+    category: file.startsWith('assets/portraits/') ? 'portrait' : file.startsWith('assets/scenes/') ? 'scene' : file.startsWith('assets/sprites/') ? 'sprite' : file.startsWith('assets/fish/') ? 'fish-illustration' : 'icon',
     format,
     dimensions: dimensions(buffer, format),
     bytes: buffer.length,

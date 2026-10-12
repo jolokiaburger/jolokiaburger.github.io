@@ -1,16 +1,14 @@
 # Voyage harbour pastimes and travel budgets
 
-**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.19. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
+**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.20. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
 
 ## Fishing rules
 
-Fishing is available while moored at every unlocked quay, including the coast. A cast settles for 2.2 real seconds; after the bite, Reel in remains available without a reaction deadline. Relaxed mode reels automatically after the same settling time. Casting, waiting, viewing the basket and packing away are free of game time.
+Harbour fishing is available while moored at every unlocked quay. [VOYAGE-FISHING.md](VOYAGE-FISHING.md) defines the lure/depth selection, persistent bite, patient tension minigame, Relaxed mode, illustrated species notebook and measurement records. Harbour and outer-coast fishing share this presentation while retaining separate inventory rules.
 
-Each landed catch uses four game minutes, which must fit before dawn. A voyage allows six landed catches and a separate three-fish kept basket. Fish do not occupy freight slots. Releasing a kept fish frees space. Nao's market counter pays 6 cr for each shared kept catch, once, without additional game time. Gifting and learned recipes use their own explicit consumption rules.
+Each landed harbour catch requires four full game minutes before dawn. Six catches per night and three kept slots remain separate from freight. Releasing frees a slot; Nao pays 6 cr once for a kept catch at her market counter without additional handover time. Existing gifts and learned recipes consume the actual selected fish. The first shared harbour catch still unlocks the paper-fish decoration.
 
-Six species vary deterministically with quay, weather and seed: silver sprat, lantern bream, canal carp, blue mackerel, reef rockfish and moonfin. Recasting does not reroll a pending result. Species knowledge persists in the profile.
-
-A pending line is saved without forcing its panel open. Departure packs it away. Closing or replacing the panel disposes its timer; no catch may commit behind another activity. The first shared catch unlocks the paper-fish decoration.
+Pending lines and decisions are saved without forcing an activity window open. Closing/replacing a panel cancels its timer. Departure and actual movement pack the rod. Older catches retain their outcomes and observations without fabricated sizes.
 
 ## Nao's kitchen shift
 
@@ -56,13 +54,14 @@ The active two-order comparison and route board use the same pump-aware simulati
 
 ## Presentation and implementation
 
-Portrait selection uses [voyage/ports.js](voyage/ports.js). Optional seats at Kurage, the Market and Kisaragi use local scenes and explicit return controls. Food/fish shapes are native SVG; photographs, markers and keepsakes are native Canvas. Asset specifications are in [ART-DIRECTION.md](ART-DIRECTION.md) and [tools/asset-manifest.json](tools/asset-manifest.json).
+Portrait selection uses [voyage/ports.js](voyage/ports.js). Optional seats at Kurage, the Market and Kisaragi use local scenes and explicit return controls. Food trays use native SVG; eight fish illustrations use local WebP cards. Photographs, markers and keepsakes are native Canvas. Asset specifications are in [ART-DIRECTION.md](ART-DIRECTION.md) and [tools/asset-manifest.json](tools/asset-manifest.json).
 
 | Source | Responsibility |
 | --- | --- |
 | [voyage/leisure.js](voyage/leisure.js) | Activity costs, eligibility, rewards and optional-state validation |
 | [voyage/leisure-profile.js](voyage/leisure-profile.js) | Bounded species notebook, album and cosmetics |
-| [voyage/leisure-ui.js](voyage/leisure-ui.js) | Activity panels, tray controls, fishing timer lifecycle and illustrated seats |
+| [voyage/leisure-ui.js](voyage/leisure-ui.js) | Activity entry points, tray controls and illustrated seats |
+| [voyage/fishing.js](voyage/fishing.js), [voyage/fishing-ui.js](voyage/fishing-ui.js), [voyage/fishing-profile.js](voyage/fishing-profile.js) | Shared angling rules, panels, timer lifecycle, notebook and records |
 | [voyage/travel-plan.js](voyage/travel-plan.js) | Pump-aware budget simulation and bounded route cache |
 | [voyage/voyage.js](voyage/voyage.js), [voyage/voyage.css](voyage/voyage.css) | Journey strip, photo drawing, keepsakes and responsive integration |
 

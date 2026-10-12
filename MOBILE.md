@@ -1,6 +1,6 @@
 # Responsive interface and device QA
 
-**Applies to:** the launcher, Voyage 0.19 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
+**Applies to:** the launcher, Voyage 0.20 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
 
 ## Layout ownership
 
@@ -26,6 +26,7 @@ Use dynamic viewport units for a supported fixed shell and stable sizing for scr
 - Escape closes the active panel or cancels the sailing course according to context. Keyboard shortcuts must not fire while typing in a text field.
 - Restoring focus after a render must keep the target reachable and visibly focused. Native dialog focus behaviour requires browser checks.
 - Close or replacement of a fishing/photo activity must dispose its pending UI work. Timers cannot commit an action behind another panel.
+- Fishing uses individual button presses with no reaction deadline. Show movement text and numeric tension/progress as well as colour. At narrow widths the three rod actions stack with at least 50 px height; tackle choices wrap and the species notebook becomes one column. Validate the catch reveal, field-guide scroll and dawn-report return on phones.
 
 ## Touch and readability
 

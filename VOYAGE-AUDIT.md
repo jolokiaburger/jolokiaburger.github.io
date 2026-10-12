@@ -1,6 +1,6 @@
 # Voyage engineering quality register
 
-**Baseline:** Voyage 0.19. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
+**Baseline:** Voyage 0.20. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
 
 ## Implemented safeguards
 
@@ -22,11 +22,11 @@
 | Q14 | Coastal access is gated, geometry remains authoritative and route knowledge changes actual waypoints. Original quay coordinates are retained. | [voyage/regions.js](voyage/regions.js), navigation; engine/expedition suites |
 | Q15 | Classic remains a separate mode with its own saves and content progression. Shared changes require Classic regression coverage. | [game.js](game.js), Classic engine/audio suites |
 | Q16 | The uncharted-water veil follows current region access, hides perimeter artwork and keeps navigation indicators visible without changing collision or save rules. | [voyage/sea-boundary.js](voyage/sea-boundary.js); boundary/UI/engine suites |
-
 | Q17 | Supper ingredients are bought once per agreed evening; only explicit six-minute servings award 12/15 cr. The result counts contributions once and ingredient costs separately. | [voyage/supper-routes.js](voyage/supper-routes.js); evening suite |
 | Q18 | Lantern runs advance ordered gates through actual sailing, retain real fuel/time spending and award only cosmetics. | [voyage/sailing-challenges.js](voyage/sailing-challenges.js); real-sailing and UI coverage |
 | Q19 | Dispatch recovery requires three physical records and shared freight capacity. Platform supper additionally requires Nao’s consent; neither resolution pays a fee. | [voyage/harbour-mystery.js](voyage/harbour-mystery.js); evening/neighbour suites |
 | Q20 | The active route board and two-order comparison simulate whole refills, purchase funding, capacity, waits and handovers; next-stop advice follows early refills required by the full itinerary. | [voyage/route-board.js](voyage/route-board.js), [voyage/travel-plan.js](voyage/travel-plan.js); evening suite |
+| Q21 | Angling decisions and records are bounded; only landing spends four minutes, both baskets retain their earlier limits/payments, and close/replacement cancels auto-land callbacks. Old catches are observed without fabricated measurements. | [voyage/fishing.js](voyage/fishing.js), [voyage/fishing-profile.js](voyage/fishing-profile.js), [tools/voyage-fishing-checks.mjs](tools/voyage-fishing-checks.mjs) |
 
 ## Accounting and planning contracts
 
@@ -44,7 +44,7 @@ Story-critical information belongs to explicit actions or properly gated dialogu
 
 ## Save compatibility
 
-Voyage state and profiles retain version 1. Optional `leisure`, `neighbours`, `breakwater`, supper, lantern-run, dispatch-investigation and route-board records accept valid older saves before hydration. Persistent IDs and legacy price terms must remain stable. Profile reconciliation may restore recorded learning, but cannot create money, completed jobs or chapter progress.
+Voyage state and profiles retain version 1. Optional `leisure`, `neighbours`, `breakwater`, supper, lantern-run, dispatch-investigation, route-board and angling records accept valid older saves before hydration. Fish measurements and the eight-page profile notebook are optional; validation replays known actions and verifies deterministic size/mass and grades. Persistent IDs and legacy price terms must remain stable. Profile reconciliation may restore recorded learning, but cannot create money, completed jobs or chapter progress.
 
 Reject duplicate records, invalid choices, inherited identifiers, future timestamps, unsafe thumbnails and orphan inventory consumption. Preserve bounded histories and immutable completed accounting. Test recovery independently for voyage and profile corruption; neither path may read or overwrite Classic storage.
 

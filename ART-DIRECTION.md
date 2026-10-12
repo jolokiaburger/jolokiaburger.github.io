@@ -12,7 +12,8 @@ Neon Tides presents a warm working harbour at night: amber interiors, cool water
 | Character portraits | [assets/portraits/](assets/portraits/) | Local WebP/SVG with consistent identity and readable face framing |
 | Illustrated scenes | [assets/scenes/](assets/scenes/) | Harbour-specific composition, warm light and descriptive alternative text |
 | Market sprites | [assets/sprites/](assets/sprites/) | Matching Sora, Nao and Kenji identities with preserved transparency |
-| Food and activity illustration | [voyage/leisure-ui.js](voyage/leisure-ui.js), [voyage/neighbours-ui.js](voyage/neighbours-ui.js) | Native SVG dishes and fish, with clear selectable ingredients |
+| Food and activity illustration | [voyage/leisure-ui.js](voyage/leisure-ui.js), [voyage/neighbours-ui.js](voyage/neighbours-ui.js) | Native SVG dishes and ingredients, with clear selectable controls |
+| Fish illustration | [assets/fish/](assets/fish/), [voyage/fishing-ui.js](voyage/fishing-ui.js) | Eight detailed local species cards with painted scales, complete fin silhouettes and teal water |
 
 Decorative world details must not change collision geometry or conceal quay rings, route indicators and readable controls. Voyage's chart is a navigation view of the implemented map, not a separate geographic approximation.
 
@@ -48,6 +49,7 @@ The shipped inventory is [tools/asset-manifest.json](tools/asset-manifest.json).
 | Voyage story illustrations | 960 × 640 WebP |
 | Dockside seats | 1440 × 960 WebP |
 | Launcher title | 2048 × 688 WebP with a 1024 px responsive variant |
+| Fish species cards | 1536 × 1024 WebP, full native dimensions; eight individual illustrations |
 | Player postcard | Actual Canvas capture at 480 × 320, bounded in local profile storage |
 | Icons | SVG favicon and local PNG application/touch icons |
 
@@ -76,6 +78,12 @@ Mio’s active expression paths select the observatory portraits through [voyage
 [voyage/coast-art.js](voyage/coast-art.js) adds hillside paths, tea baskets, working figures, masonry, a credited station rota and guest tables. Window light and kitchen steam follow restoration state; hosted servings leave bowls and guests visible. Completed dispatch resolutions and dockside supper tables appear through native drawing. Decorative steam remains static under reduced motion.
 
 The evening portrait set refines eight previously 512-pixel characters and adds expressions for characters that had a single active portrait. Earlier assets remain for Classic. Each 724-pixel square is exported from its expression sheet without enlargement; active selectors are verified against the asset manifest. Portraits load in explicit conversation/activity panels and introduce no raster layer into sailing.
+
+## Fish field-guide cards
+
+Each species has one complete living-fish illustration in [assets/fish/](assets/fish/), with a consistent left-facing composition, teal water and warm lantern highlights. Scale/fin detail and species silhouettes stay distinct at both notebook and full reveal sizes. [voyage/fishing-ui.js](voyage/fishing-ui.js) supplies editable names, measurements, notes and accessible alternative text. Images contain no embedded interface text. Notebook cards load lazily; the just-landed reveal loads eagerly. No fish raster is added to the sailing renderer.
+
+Keep native 1536 × 1024 dimensions; use contain scaling and reserved aspect ratios. Inspect each WebP after encoding and verify inventory dimensions, bytes, hashes and runtime-selected references. The eight cards total approximately 2.5 MB and are loaded only through fishing/basket/notebook panels.
 
 ## Asset review
 

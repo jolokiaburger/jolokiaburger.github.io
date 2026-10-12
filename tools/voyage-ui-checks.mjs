@@ -51,7 +51,7 @@ export function boot(setup=()=>{},options={}) {
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','voyage/breakwater-ui.js','voyage/evenings-ui.js','voyage/route-board-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/sea-boundary.js','voyage/harbour-art.js','voyage/coast-art.js','voyage/shoreline-art.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/fishing.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js','voyage/fishing-profile.js','voyage/fishing-ui.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','voyage/breakwater-ui.js','voyage/evenings-ui.js','voyage/route-board-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/sea-boundary.js','voyage/harbour-art.js','voyage/coast-art.js','voyage/shoreline-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
   const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N,VoyageBreakwater:B,VoyageRegions:R,VoyageSuppers:S,VoyageLanternRuns:Lantern,VoyageCrateMystery:Q,VoyageRouteBoard:D}=context.window;
@@ -262,7 +262,13 @@ const invalidProfileValue=boot(({saved})=>saved.set(PROFILE,'false'));
 equal(invalidProfileValue.saved.get(PROFILE+':unreadable'),'false','invalid falsy history is retained too');
 check(invalidProfileValue.nodes.get('toast').textContent.includes('unreadable captain history'),'invalid falsy history gives a notice');
 
-// 0.15: deliberately opened activities use real model boundaries and save callbacks.
+// Deliberately opened activities use real model boundaries and save callbacks.
+function finishFishing(r){
+  const F=r.context.window.VoyageFishing;
+  r.click(r.find('panel-content','Set the hook'));
+  for(let i=0;i<24&&!F.metrics(r.current().angling.pending).done;i++){const p=r.current().angling.pending;r.click(r.find('panel-content',F.actions[F.coach(p)].name));}
+  r.click(r.find('panel-content','Lift into the landing net'));
+}
 const fishUI=boot();
 fishUI.click(fishUI.nodes.get('tools-button'));
 fishUI.click(fishUI.find('panel-content','Harbour pastimes'));
@@ -271,7 +277,7 @@ fishUI.click(fishUI.find('panel-content','Cast the line'));
 equal(fishUI.current().clock,1420,'casting waits without spending game time');
 check(fishUI.find('panel-content','Waiting for a bite').disabled,'reel waits for float');
 fishUI.advance(2199);check(fishUI.find('panel-content','Waiting for a bite').disabled,'bite boundary is not early');
-fishUI.advance(1);fishUI.click(fishUI.find('panel-content','Reel in'));
+fishUI.advance(1);finishFishing(fishUI);
 equal(fishUI.current().leisure.fishing.casts,1,'UI lands one catch');
 equal(fishUI.current().clock,1424,'UI charges advertised four minutes');
 fishUI.click(fishUI.find('panel-content','Another cast'));
@@ -282,7 +288,7 @@ equal(fishUI.nodes.get('panel-content').children[0].textContent,'Ferry tools','b
 const savedPending=JSON.parse(fishUI.saved.get(KEY));check(!!savedPending.leisure.fishing.pending,'pending line is saved');
 const resumedFish=boot(()=>{}, {rawSave:JSON.stringify(savedPending)});
 check(!resumedFish.nodes.get('panel').open,'pending line does not force a panel on reload');
-resumedFish.pastimes.fishing();resumedFish.advance(2200);resumedFish.click(resumedFish.find('panel-content','Reel in'));
+resumedFish.pastimes.fishing();resumedFish.advance(2200);finishFishing(resumedFish);
 equal(resumedFish.current().leisure.fishing.casts,2,'saved cast resumes exactly once');
 const relaxedFish=boot(()=>{}, {reduced:true});relaxedFish.pastimes.fishing();
 relaxedFish.click(relaxedFish.find('panel-content','Relaxed mode'));
@@ -462,7 +468,7 @@ routeUI.expedition.routes();routeUI.click(routeUI.find('panel-content','Pilotsâ€
 equal(routeUI.current().breakwater.route,'inlet','knowledge unlocks actual route selection');
 const coastFishUI=boot(({state,B})=>{state.breakwater={...B.fresh(),chapter:2,menu:'herbs',steps:['packed','trim'],crew:true};state.docked=null;state.ship={x:3500,y:800,angle:0,speed:0};});
 check(!coastFishUI.nodes.get('coast-fish-button').hidden,'coastal action appears only in unlocked water');
-coastFishUI.click(coastFishUI.nodes.get('coast-fish-button'));coastFishUI.click(coastFishUI.find('panel-content','Fish the coastal water'));
+coastFishUI.click(coastFishUI.nodes.get('coast-fish-button'));coastFishUI.click(coastFishUI.find('panel-content','Fish the coastal water'));coastFishUI.advance(2200);finishFishing(coastFishUI);
 equal(coastFishUI.current().breakwater.catches.length,1,'actual coastal fish callback works');
 equal(coastFishUI.current().clock,1424,'coastal fishing charges full time');
 

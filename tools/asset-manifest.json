@@ -38,6 +38,134 @@
       ]
     },
     {
+      "path": "assets/fish/bream.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 353138,
+      "sha256": "eff0915ee88d44cf8cda10332c23fd37993bf35880b30ade126257216359bd03",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/carp.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 322928,
+      "sha256": "20e61f97c5d6f0ad3ab0d52e3bfd8977bd256901c6bda9cb13bd614f60f9af01",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/mackerel.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 248600,
+      "sha256": "5221380d2110ed98051dfdd5ea8dd44ecca7b8cd62fc4365c933f0f33fc74151",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/moon-mullet.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 363334,
+      "sha256": "901d8ac4d7e80f65047a0deaeb9392e06f71ab69a78815c4677e7899f71c195e",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/moonfish.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 271544,
+      "sha256": "d53eb115c423326e1aa2898e63fbb79b570d2ca7bb4214bdd3f8e5e444076f93",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/ribbon-mackerel.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 301226,
+      "sha256": "9102357cf8e43367c49d991b7960803263af6e71f12d1173c0d09dac203ca639",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/rockfish.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 383206,
+      "sha256": "d6c674172fcfa16970408b7f361fb7256ff958895e2356431367eb68e24a8d93",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
+      "path": "assets/fish/silver.webp",
+      "category": "fish-illustration",
+      "format": "webp",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 220592,
+      "sha256": "9aa57ed30f7ebd83b66ad409397cd277a3acfbdf0397c905eb850ce3bed195b2",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/fishing.js"
+      ]
+    },
+    {
       "path": "assets/icon-192.png",
       "category": "icon",
       "format": "png",
