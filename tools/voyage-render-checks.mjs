@@ -1,6 +1,6 @@
 /* Optional native Canvas art inspection; this renders no CSS and launches no browser. */
 import {createRequire} from 'node:module';
-const {createCanvas} = createRequire(import.meta.url)('@napi-rs/canvas');
+const {createCanvas,loadImage} = createRequire(import.meta.url)('@napi-rs/canvas');
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {boot} from './voyage-ui-checks.mjs';
@@ -60,3 +60,19 @@ for(const ending of ['counter','platform']){
 const supper=boot(({state,moor,B,S})=>{state.breakwater={...B.fresh(),chapter:3,menu:'herbs',tasting:'brew',steps:['packed','trim','sample','pages','station','home','supper'],notes:['journal'],ending:'kitchen',crew:false};moor('market');S.start(state,['rice','broth'],'station',[]);for(const id of S.required(state.supper.menu)){moor(S.ingredients[id].quay);S.buy(state,id);}moor('coast-station');S.serve(state,'rice');S.serve(state,'broth');},{canvasFactory:createCanvas,reduced:true});layout(supper);supper.frame(1000);fs.writeFileSync(out+'/station-hosted-supper.png',supper.nodes.get('sea').native.toBuffer('image/png'));
 const board=boot(({state,moor,B,S,D})=>{state.breakwater={...B.fresh(),chapter:3,menu:'herbs',tasting:'brew',steps:['packed','trim','sample','pages','station','home','supper'],notes:[],ending:'book',crew:false};moor('market');S.start(state,['rice','broth'],'route',['metro','yard']);D.save(state,[...D.supperTasks(state),{kind:'visit',id:'bar'}]);},{canvasFactory:createCanvas,reduced:true});board.expedition.chart();const routeChart=board.nodes.get('panel-content').children.flatMap(n=>[n,...n.children]).find(n=>n.className==='region-chart');assert.ok(routeChart.native);fs.writeFileSync(out+'/evening-itinerary-chart.png',routeChart.native.toBuffer('image/png'));
 console.log('Native Canvas photographs, decorations, courses and evening scenery rendered; browser layout remains untested.');
+
+// Decode illustrations from the production craft UI, without emulating browser layout.
+const walkCraft=n=>[n,...n.children.flatMap(walkCraft)];
+const craft=boot(({moor})=>moor('canal'));craft.context.window.NeonVoyage.craft.tea();craft.click(craft.find('panel-content','Choose Aonami green'));
+let image=walkCraft(craft.nodes.get('panel-content')).find(n=>n.className==='craft-art');
+const nativeTea=await loadImage(Buffer.from(decodeURIComponent(image.src.split(',')[1])));assert.equal(nativeTea.width,640);
+const sheet=createCanvas(1280,620),paint=sheet.getContext('2d');paint.fillStyle='#102c34';paint.fillRect(0,0,1280,620);paint.drawImage(nativeTea,0,0,640,300);
+const recover=boot(({state})=>{state.docked=null;state.ship={x:590,y:880,angle:0,speed:0};});
+const SM=recover.context.window.VoyageRecoveries;
+// Illustrated collection cards are rendered through the same public UI using valid receipts.
+const recoveryMoves=id=>{let p={id,moves:[]};for(const target of SM.sites[id].lanes){while(SM.simulate(p).lane!==target)p.moves.push(SM.simulate(p).lane<target?'right':'left');p.moves.push('lower');}while(!SM.simulate(p).done)p.moves.push(SM.simulate(p).tension+24>85?'ease':'lift');return p.moves;};
+const collection=boot(({state,moor})=>{moor('market');state.clock=1432;state.recoveries={pending:null,finds:Object.keys(SM.sites).map((id,i)=>({id,moves:recoveryMoves(id),at:1424+i*4,returnedAt:null}))};});collection.context.window.NeonVoyage.craft.salvage();
+const objects=walkCraft(collection.nodes.get('panel-content')).filter(n=>n.className==='craft-art');assert.equal(objects.length,3);
+for(let i=0;i<objects.length;i++){const native=await loadImage(Buffer.from(decodeURIComponent(objects[i].src.split(',')[1])));assert.equal(native.width,640);paint.drawImage(native,(i+1)%2*640,Math.floor((i+1)/2)*310,640,280);}
+fs.writeFileSync(out+'/harbour-craft-illustrations.png',sheet.toBuffer('image/png'));
+console.log('Tea tray and three recovery illustrations decoded from production SVG output.');

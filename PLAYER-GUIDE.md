@@ -1,6 +1,6 @@
 # Player guide
 
-**Applies to:** Voyage 0.20 and Classic 4.6.1.
+**Applies to:** Voyage 0.21 and Classic 4.6.1.
 
 Neon Tides begins at Kurage 33 aboard the ferry *Tern*. Choose a mode on the first page, then explore the harbour through deliveries, trading and conversations. Food and tea offer places to pause between crossings.
 
@@ -88,6 +88,16 @@ After **Beyond the Breakwater**, Nao's supper invitation lets you choose two dis
 The **Route board** joins these activities with cargo, destinations, meals and fuel. Add, reorder or remove up to twelve actions. Its budget includes whole refills, release waits and handover durations. Follow any early refill advised for the full route, even when the next crossing alone fits the tank. A later payment cannot fund an earlier purchase. Estimates still need allowance for manual turns and detours.
 
 Planning, previewing and setting course commit no purchase or payout. At each stop, confirm the visit, refill, collection or handover yourself. Supper stops open the dish choice. The board's two-order comparison uses the same fuel calculation and includes the return to Kurage. Earlier saved cargo routes can be imported. See [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md) for full activity terms and story details.
+
+## Tea, recoveries and nightly requests
+
+Visit **Kisaragi → Jun → Brew tea**, or open **Menu → Jun’s tea-brewing table**. Choose a blend, warm the kettle, pour approximately 180 ml and steep until the extraction meter reaches its pale target band. Temperature and water quantity affect how quickly the leaves open. Decant to lock the result. Preparation waits for your actions; sharing costs six game minutes and no credits. You can practise freely, share six cups each night and retain your best scores across voyages.
+
+**Menu → Small salvage adventures** shows three objects in existing waterways. Set course to a site, then use **Recover** when close. Align the hook with each labelled gap, lower it, and alternate careful lifting with easing the line. Bringing an object aboard takes four minutes. Returning it to the named neighbour takes four more and reveals its history. The recovery box uses no freight space.
+
+**Menu → Tonight’s harbour requests** offers three optional goals involving tea, fish, kitchen trays or recovered objects. Progress counts even before you open the board. Visit the named neighbour for a personal thank-you; no items are consumed and no cash is awarded.
+
+Mint water arrows show a helpful current. Follow it for up to 18% extra sailing speed. Quay approaches are sheltered, and stopped boats hold position. **Read water** explains the cycle and symbols. **Helm → Gentle** slows manual steering for precise approaches; normal course estimates do not include this slower pace. Assisted courses retain normal speed. Amber diamonds mark recovery sites; the contextual Recover button identifies the nearby object.
 
 ## Classic
 

@@ -1,6 +1,6 @@
 # Voyage engineering quality register
 
-**Baseline:** Voyage 0.20. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
+**Baseline:** Voyage 0.21. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
 
 ## Implemented safeguards
 
@@ -42,9 +42,18 @@ Character text is authored in finite pools. It will repeat after eligible materi
 
 Story-critical information belongs to explicit actions or properly gated dialogue. No essential progression should depend on repeatedly buying a meal or guessing a hidden casual line. Topics pause sailing and reveal no remote live quote. Science entries retain their source links; fictional accounts remain labelled as fiction or local lore.
 
+## Harbour craft contracts
+
+- Tea and recovery preparation store bounded action IDs; quality, extraction, tension and completion are replayed. Only explicit serving/retrieval/return commits game time. No craft or request action changes credits or freight.
+- Optional records accept old saves. Duplicate terminal receipts, unknown inputs, impossible return times and requests without evidence are rejected. Finishing a voyage clears uncommitted preparations before saving.
+- Profile reconciliation stores at most three tea bests and three learned histories, with no duplicate rewards. New nights reset finite activities while retaining those profile pages.
+- Current assistance is bounded to 18%, disabled near quays and applied in both movement implementations. Geometry and fuel-per-distance contracts are unchanged. Normal-speed route estimates exclude assistance; Gentle helm is explicitly slower than those estimates.
+
+Source and verification contracts are in [VOYAGE-HARBOUR-CRAFT.md](VOYAGE-HARBOUR-CRAFT.md) and [tools/voyage-craft-checks.mjs](tools/voyage-craft-checks.mjs).
+
 ## Save compatibility
 
-Voyage state and profiles retain version 1. Optional `leisure`, `neighbours`, `breakwater`, supper, lantern-run, dispatch-investigation, route-board and angling records accept valid older saves before hydration. Fish measurements and the eight-page profile notebook are optional; validation replays known actions and verifies deterministic size/mass and grades. Persistent IDs and legacy price terms must remain stable. Profile reconciliation may restore recorded learning, but cannot create money, completed jobs or chapter progress.
+Voyage state and profiles retain version 1. Optional `leisure`, `neighbours`, `breakwater`, supper, lantern-run, dispatch-investigation, route-board, angling, tea, recovery and request records accept valid older saves before hydration. Fish measurements and the eight-page profile notebook are optional; validation replays known actions and verifies deterministic size/mass and grades. Persistent IDs and legacy price terms must remain stable. Profile reconciliation may restore recorded learning, but cannot create money, completed jobs or chapter progress.
 
 Reject duplicate records, invalid choices, inherited identifiers, future timestamps, unsafe thumbnails and orphan inventory consumption. Preserve bounded histories and immutable completed accounting. Test recovery independently for voyage and profile corruption; neither path may read or overwrite Classic storage.
 

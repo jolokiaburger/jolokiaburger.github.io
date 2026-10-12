@@ -1,6 +1,6 @@
 # Voyage angling system
 
-**Baseline:** Voyage 0.20. **Scope:** optional harbour and coastal fishing, catch presentation, field-guide content, personal records and save compatibility. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+**Baseline:** Voyage 0.21. **Scope:** optional harbour and coastal fishing, catch presentation, field-guide content, personal records and save compatibility. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
 
 ## Design and entry points
 

@@ -1,6 +1,6 @@
 # Developer tutorial
 
-**Baseline:** Voyage 0.20 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+**Baseline:** Voyage 0.21 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
 
 ## 1. Set up the project
 
@@ -40,6 +40,8 @@ Voyage loads shared economics, world/regions, navigation, ports and the base mod
 | Base rules | [voyage/model.js](voyage/model.js) | State, time, fuel, actions, cargo, ledger and validation |
 | Activity rules | [voyage/leisure.js](voyage/leisure.js), [voyage/neighbours.js](voyage/neighbours.js), [voyage/breakwater.js](voyage/breakwater.js) | Pastimes, fares, favours, recipes and expedition state |
 | Angling | [voyage/fishing.js](voyage/fishing.js), [voyage/fishing-ui.js](voyage/fishing-ui.js), [voyage/fishing-profile.js](voyage/fishing-profile.js) | Shared encounter/fight rules, illustrated species pages and personal records |
+| Harbour craft | [voyage/tea-brewing.js](voyage/tea-brewing.js), [voyage/salvage-adventures.js](voyage/salvage-adventures.js), [voyage/harbour-requests.js](voyage/harbour-requests.js), [voyage/tides.js](voyage/tides.js) | Replayed preparation, committed receipts, optional goals and following-stream assistance |
+| Craft UI/profile | [voyage/harbour-craft-ui.js](voyage/harbour-craft-ui.js), [voyage/craft-profile.js](voyage/craft-profile.js) | Native illustrated controls, best tea scores and remembered histories |
 | Evening rules | [voyage/supper-routes.js](voyage/supper-routes.js), [voyage/sailing-challenges.js](voyage/sailing-challenges.js), [voyage/harbour-mystery.js](voyage/harbour-mystery.js) | Finite suppers, actual sailing records and dispatch evidence |
 | Planning | [voyage/travel-plan.js](voyage/travel-plan.js), [voyage/route-board.js](voyage/route-board.js) | Shared pump-aware budgets, ordered action IDs and dependencies |
 | Profiles | [voyage/profile.js](voyage/profile.js) and the leisure, neighbour, breakwater, [evenings](voyage/evenings-profile.js) and [fishing](voyage/fishing-profile.js) profile extensions | Bounded cross-voyage history, learning and cosmetics |
@@ -48,6 +50,8 @@ Voyage loads shared economics, world/regions, navigation, ports and the base mod
 | Rendering/input | [voyage/voyage.js](voyage/voyage.js), [voyage/camera.js](voyage/camera.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js), [voyage/shoreline-art.js](voyage/shoreline-art.js) | Controller, shared camera transform, native drawing and input |
 
 The fishing model loads after the leisure/neighbour/expedition rules, and its profile after the earlier profile extensions. The shared fishing UI loads before the leisure UI. Fight actions are bounded IDs; tension and progress are replayed rather than trusted saved metrics. Keep harbour and coastal basket ownership in their existing modules. See [VOYAGE-FISHING.md](VOYAGE-FISHING.md).
+
+The craft rule modules load after fishing; requests depend on tea and recovery receipts. The craft profile loads after the fishing profile, and its UI before the controller. Current assistance is passed through both base and coastal movement functions into navigation; estimates remain based on unassisted normal speed. [VOYAGE-HARBOUR-CRAFT.md](VOYAGE-HARBOUR-CRAFT.md) defines replay limits, resource commitments and persistence.
 
 Subsystem extensions wrap selected model functions. Inspect the final exported function after all scripts load when tracing validation, costs or story integration. A change to the base model can affect every extension.
 

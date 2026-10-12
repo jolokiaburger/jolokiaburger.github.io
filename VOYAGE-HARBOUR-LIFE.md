@@ -1,6 +1,6 @@
 # Voyage harbour pastimes and travel budgets
 
-**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.20. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
+**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.21. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
 
 ## Fishing rules
 

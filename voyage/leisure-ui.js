@@ -18,6 +18,7 @@
     function hub() {
       const s = state(), l = s.leisure;
       openPanel('Harbour pastimes', [el('p', 'A quiet cast, a warm tray, or a view worth bringing home. Every activity is optional.'),
+        button('Jun’s tea-brewing table',()=>window.NeonVoyage.craft.tea()),button('Tonight’s harbour requests',()=>window.NeonVoyage.craft.requests()),
         reasonButton('Dockside fishing · Free · 4 min per catch', 'fish', fishing),
         reasonButton('Help Nao’s kitchen · Receive 4–6 cr · 6 min per tray', 'kitchen', kitchen),
         button('Catch basket · ' + l.fishing.catches.filter(c => c.outcome === 'kept').length + ' / 3', basket),
@@ -81,7 +82,8 @@
       };
       const s = state(), view = views[s.docked]; if (!view || view.who === 'nao' && s.flags.naoAboard) return;
       const id = view.who, frame = el('div', undefined, 'dockside-scene'); frame.append(image('../assets/scenes/' + view.file + '-dockside.webp', view.alt), el('span', '', 'dockside-steam'));
-      const nodes = [frame, portrait(id), el('p', 'An illustrated seat beside the quay. Looking is free and pauses the clock.'), button('Chat with ' + P.characters[id].name.split(' ')[0], () => { api.closePanel(); api.showPerson(id); }), reasonButton('Dockside fishing · Free · 4 min', 'fish', fishing), button('Neighbour favours', () => api.neighbourUI().favours())];
+      const nodes = [frame, portrait(id), el('p', 'An illustrated seat beside the quay. Looking is free and pauses the clock.'), button('Chat with ' + P.characters[id].name.split(' ')[0], () => { api.closePanel(); api.showPerson(id); }), button('Jun’s tea-brewing table',()=>window.NeonVoyage.craft.tea()),button('Tonight’s harbour requests',()=>window.NeonVoyage.craft.requests()),
+        reasonButton('Dockside fishing · Free · 4 min', 'fish', fishing), button('Neighbour favours', () => api.neighbourUI().favours())];
       if (id === 'nao') nodes.push(reasonButton('Help with the kitchen shift', 'kitchen', kitchen), button('Nao’s recipe notebook', () => api.neighbourUI().recipes()));
       if (s.docked === 'metro') nodes.push(button('Passenger trips', () => api.neighbourUI().routes()));
       if (id === 'mio') nodes.push(button('Photo errands & postcard album', album));

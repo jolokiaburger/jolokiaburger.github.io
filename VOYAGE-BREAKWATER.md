@@ -1,6 +1,6 @@
 # Beyond the Breakwater: expedition specification
 
-**Scope:** Voyage 0.20's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
+**Scope:** Voyage 0.21's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
 
 ## Entry and chapter progression
 
@@ -30,6 +30,8 @@ Companions occupy no cargo slots. Their deck observations, figures and luggage f
 | Ledger and report | Open at carried cash/stock; subtract earlier receipts from new-night settlement results |
 
 Story details remain expedition-wide and labelled accordingly. Profile learning and cosmetics keep their normal persistent behaviour. Continuation does not convert an unfinished story into a completion.
+
+Tea servings, recovery sites and nightly requests restart with the next night; unreturned recovery objects are forwarded ashore. Best tea scores and learned recovery histories remain in the captain profile. See [VOYAGE-HARBOUR-CRAFT.md](VOYAGE-HARBOUR-CRAFT.md).
 
 A moored night resumes at the same quay. Finishing at sea uses an explicit overnight tug to Landing 3, charging up to 20 cr bounded by the purse and leaving at least three fuel under the existing recovery allowance. Its fee is reflected in the next opening purse/log. Ordinary fresh-voyage reset is a separate confirmed action and does not transfer expedition resources.
 
