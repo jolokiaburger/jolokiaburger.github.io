@@ -2,7 +2,7 @@
 
 **Reviewed:** Voyage 0.11. **Fix release:** 0.12, 11 October 2026.
 
-**Latest follow-up:** Voyage 0.16, 11 October 2026; scope and validation are recorded at the end of this audit.
+**Latest follow-up:** Voyage 0.17, 12 October 2026; scope and validation are recorded at the end of this audit.
 
 This is a critical review by the coding assistant, using a game-development and QA lens. It is not an independent human review or a substitute for observing players. Voyage is the current game; Classic received regression checks for the shared repository and assets.
 
@@ -107,3 +107,16 @@ Port/dialog return controls stay outside scrolling content, and port scroll is r
 Validation: **775** new model/profile assertions, **401** total DOM integration checks, **71,627** engine assertions, **677** pastimes checks, **3,211** Classic checks and **134** mocked audio checks. Native Canvas inspection covers photo scenery, all nine charms, three passengers, docking marks and portrait/landscape camera framing. Counts describe assertions, including simulated navigation frames, not independent play sessions. The checks do not render browser CSS or establish whether the additions are fun.
 
 Browser access was declined earlier in this session. Real-browser CSS/focus, touch comfort, Safari/iOS, physical-phone performance and listening remain outstanding; the 0.16 manual checklist is in `VOYAGE-PLAYTEST.md`. The combined cargo planner's conditional fuel estimate and large renderer remain known limitations. The next evaluation should observe the existing loop on phones before expanding the Basin further.
+
+
+## Beyond the Breakwater · Voyage 0.17
+
+The authorised expansion adds a continuing three-chapter Nao/Rin adventure and two outer-coast quays. Preparation, exploration and homecoming are distinct stages; the player explicitly starts and continues the story. Unfinished chapters can continue on another night. Original quay coordinates remain fixed, the coast is gated before chapter two, and Classic is untouched. `VOYAGE-BREAKWATER.md` documents full terms and limitations.
+
+Continuation preserves real purse, gold purchase basis, tank, engine/racks and trim, owned sealed stock and finite contract receipts. Renewed next-night delivery windows are stated before continuation. Prior delivery/discovery/courier receipts are subtracted from current-night illustrated results, while the cash ledger starts at the carried purse. A moored continuation grants no fuel. Finishing at sea explicitly uses an overnight tug, charging at most the current 20-cr fee and recovering to Landing 3 with at least three fuel. It does not claim a passenger homecoming or pay an unfinished fare. Coastal catches are shared with the overnight crew as stated in the continuation terms.
+
+Knowledge changes available actions: Priya’s survey unlocks a genuinely shorter route, Jun’s introduction unlocks a second tasting, and Rin’s recovered notebook unlocks the station-kitchen ending. Both final outcomes produce their own letters. Routes use the actual navigation function and previews share their geometry. Rin’s fitting reduces actual fuel per distance by 10% while keeping steering and game-time rules. The two new pumps use the existing 30-cr/10-min/full-tank terms. New cargo uses the shared hold, fixed costs/payments and one-time receipts. All consuming activities require their full advertised duration before dawn.
+
+Optional bounded expedition and profile records retain version-one compatibility and reject unknown choices, routes, chapter numbers, duplicated steps and malformed carryover fields. The chart is generated from navigation data, with native landmark illustrations, visible pins, accessible named controls and a larger pannable view. New native map art and two original dockside scenes retain the cast and warm harbour direction. The expanded world adds more pathfinding work; a real phone performance assessment remains needed.
+
+Validation covers 10,169 focused expedition checks and 458 DOM checks, plus the expanded engine, pastimes, neighbour, Classic and mocked-audio suites. Native Canvas inspections cover both new quays, the illustrated chart and small camera framing. Counts include per-frame navigation assertions. Browser CSS/focus, touch comfort, Safari/iOS, listening and physical-device performance remain outstanding; browser access was declined earlier. Automated coverage establishes specific behaviour and compatibility, not fun or an independent human review.

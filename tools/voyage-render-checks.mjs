@@ -46,4 +46,9 @@ for(const [name,width,height]of [['portrait',390,640],['landscape',740,330]]) {
 const guide=boot(({state,moor})=>{moor('market');state.docked=null;state.ship.x-=20;state.neighbours.practice=true;},{canvasFactory:createCanvas,reduced:true});
 layout(guide);guide.frame(1000);assert.equal(guide.nodes.get('dock-guide').hidden,false);
 fs.writeFileSync(out+'/gentle-docking-guide.png',guide.nodes.get('sea').native.toBuffer('image/png'));
+for(const port of ['tea-island','coast-station']){
+ const r=boot(({state,moor,B})=>{state.breakwater={...B.fresh(),chapter:2,menu:'herbs',steps:['packed','trim'],crew:true};moor(port);},{canvasFactory:createCanvas,reduced:true});layout(r);r.frame(1000);fs.writeFileSync(out+'/'+port+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+ r.expedition.chart();const chart=r.nodes.get('panel-content').children.flatMap(n=>[n,...n.children]).find(n=>n.className==='region-chart');assert.ok(chart.native);fs.writeFileSync(out+'/region-chart-'+port+'.png',chart.native.toBuffer('image/png'));
+ layout(r,390,640);r.frame(1000);fs.writeFileSync(out+'/phone-'+port+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+}
 console.log('Native Canvas photograph and decoration renders complete; browser layout remains untested.');

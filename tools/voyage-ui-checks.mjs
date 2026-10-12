@@ -51,14 +51,14 @@ export function boot(setup=()=>{},options={}) {
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','voyage/breakwater-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/harbour-art.js','voyage/coast-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
-  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N}=context.window;
+  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N,VoyageBreakwater:B,VoyageRegions:R}=context.window;
   const state=M.create('ui-audit');
   if(!options.welcome)Object.assign(state.flags,{welcome:true,continuitySeen:true});
   const moor=id=>{const port=W.ports.find(p=>p.id===id);state.docked=id;state.ship={x:port.x,y:port.y,angle:0,speed:0};};
-  setup({state,M,P,Pr,L,H,C,N,saved,moor});
+  setup({state,M,P,Pr,L,H,C,N,B,R,saved,moor});
   saved.set(KEY,options.rawSave??JSON.stringify(state));
   vm.runInContext(fs.readFileSync(root+'voyage/voyage.js','utf8'),context,{filename:'voyage/voyage.js'});
   const find=(id,label)=>walk(nodes.get(id)).find(n=>n.textContent.startsWith(label));
@@ -67,7 +67,7 @@ export function boot(setup=()=>{},options={}) {
   const current=()=>context.window.NeonVoyage.getState();
   const advance=ms=>{const end=elapsed+ms;for(;;){const due=[...timers].filter(([,t])=>t.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!due)break;timers.delete(due[0]);elapsed=due[1].at;due[1].fn();}elapsed=end;};
   const key=(key,editing=false)=>documentEvents.keydown({key,repeat:false,target:{closest:()=>editing},preventDefault(){}});
-  return {context,neighbours:context.window.NeonVoyage.neighbours,pastimes:context.window.NeonVoyage.pastimes,nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
+  return {context,expedition:context.window.NeonVoyage.expedition,neighbours:context.window.NeonVoyage.neighbours,pastimes:context.window.NeonVoyage.pastimes,nodes,groups,saved,find,click,person,current,confirmState,advance,key,frame:now=>nextFrame(now),course:context.window.NeonVoyage.course};
 }
 
 // Assisted arrival: a brief notice leaves docking enabled and clears on mooring.
@@ -426,4 +426,44 @@ for(const [port,file,title]of [['metro','metro','A seat by Metro'],['yard','yard
 }
 const readUI=boot(({state,moor,C})=>{moor('observatory');C.read(state,'mio','mio-depth');});
 readUI.neighbours.notebook();check(walk(readUI.nodes.get('panel-content')).some(n=>n.href?.startsWith('https://science.nasa.gov/')&&n.rel==='noopener noreferrer'),'science note links directly to its primary source');
+// 0.17: the new story is optional; actual chapter and chart controls reach the model.
+const inviteUI=boot(({moor})=>moor('market'));
+check(!inviteUI.nodes.get('panel').open,'new expansion does not force an intro');
+inviteUI.expedition.notebook();inviteUI.click(inviteUI.find('panel-content','Read Nao’s invitation'));
+equal(inviteUI.current().breakwater.chapter,1,'invitation creates chapter one');
+inviteUI.click(inviteUI.find('panel-content','Choose the expedition menu with Nao'));
+inviteUI.click(inviteUI.find('panel-content','“Let’s bring a gentle bowl'));
+equal(inviteUI.current().breakwater.menu,'herbs','full menu reply commits choice');
+check(inviteUI.find('panel-content','“Then the broth'),'choice-specific Nao reply visible');
+check(!inviteUI.nodes.get('panel-back').hidden,'new conversation has fixed Back');
+inviteUI.click(inviteUI.nodes.get('panel-back'));inviteUI.click(inviteUI.find('panel-content','Illustrated region chart'));
+check(walk(inviteUI.nodes.get('panel-content')).some(n=>n.className==='region-chart'&&n['aria-label']),'chart has accessible description');
+check(inviteUI.find('panel-content','Prepare chapter one'),'locked quays explain how they open');
+check(!!inviteUI.saved.get('neon-tides:voyage:v1'),'new story saves under existing Voyage key');
+equal(inviteUI.saved.get('neon-tides:save:v1'),'classic-unchanged','expansion leaves Classic untouched');
+const chapterUI=boot(({state,moor,B})=>{moor('market');B.start(state);B.talk(state,'menu','smoked');moor('bar');B.action(state,'pack');moor('yard');B.action(state,'trim');});
+chapterUI.expedition.notebook();chapterUI.click(chapterUI.find('panel-content','Finish this night & review continuation'));
+check(chapterUI.find('panel-content','Continue the expedition · Next chapter'),'report offers real chapter continuation');
+const carryPurse=chapterUI.current().credits,carryFuel=chapterUI.current().fuel;
+chapterUI.click(chapterUI.find('panel-content','Continue the expedition · Next chapter'));
+equal(chapterUI.current().breakwater.chapter,2,'actual report advances chapter');equal(chapterUI.current().credits,carryPurse,'report retains purse');equal(chapterUI.current().fuel,carryFuel,'report retains tank');
+check(!chapterUI.nodes.get('panel').open,'continuation returns to the quay');
+const outerUI=boot(({state,moor,B})=>{state.breakwater={...B.fresh(),chapter:2,menu:'herbs',steps:['packed','trim'],crew:true};moor('tea-island');});
+outerUI.click(outerUI.find('port-content','Take a closer coastal seat'));
+check(walk(outerUI.nodes.get('panel-content')).some(n=>n.src==='../assets/scenes/aonami-dockside.webp'&&n.alt),'tea island has its own arrival illustration');
+outerUI.click(outerUI.nodes.get('panel-back'));outerUI.person('Nao Mizuno');
+check(outerUI.find('port-content','Beyond the Breakwater'),'travelling Nao has expedition control');
+outerUI.click(outerUI.nodes.get('chart-button'));check(outerUI.find('panel-content','Preview Aonami'),'chart exposes named quay controls');
+outerUI.click(outerUI.find('panel-content','Pin this route'));check(outerUI.current().breakwater.pin,'chart pin persisted');
+const routeUI=boot(({state,moor,B})=>{state.breakwater={...B.fresh(),chapter:2,menu:'herbs',steps:['packed','trim']};moor('landing');});
+routeUI.expedition.routes();check(routeUI.find('panel-content','Pilots’ short inlet').disabled,'unheard route remains disabled');
+routeUI.click(routeUI.find('panel-content','Ask Priya'));routeUI.click(routeUI.find('panel-content','“Please mark the surveyed inlet'));
+routeUI.expedition.routes();routeUI.click(routeUI.find('panel-content','Pilots’ short inlet'));
+equal(routeUI.current().breakwater.route,'inlet','knowledge unlocks actual route selection');
+const coastFishUI=boot(({state,B})=>{state.breakwater={...B.fresh(),chapter:2,menu:'herbs',steps:['packed','trim'],crew:true};state.docked=null;state.ship={x:3500,y:800,angle:0,speed:0};});
+check(!coastFishUI.nodes.get('coast-fish-button').hidden,'coastal action appears only in unlocked water');
+coastFishUI.click(coastFishUI.nodes.get('coast-fish-button'));coastFishUI.click(coastFishUI.find('panel-content','Fish the coastal water'));
+equal(coastFishUI.current().breakwater.catches.length,1,'actual coastal fish callback works');
+equal(coastFishUI.current().clock,1424,'coastal fishing charges full time');
+
 console.log(`Passed ${checks} Voyage DOM integration checks (browser layout is not covered).`);
