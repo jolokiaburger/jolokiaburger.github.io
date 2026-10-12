@@ -1,6 +1,6 @@
 # Voyage QA and release test plan
 
-**Baseline:** Voyage 0.19, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
+**Baseline:** Voyage 0.20, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
 ## Test environment
 
@@ -17,6 +17,7 @@ node tools/voyage-breakwater-checks.mjs
 node tools/voyage-ui-checks.mjs
 node tools/voyage-boundary-checks.mjs
 node tools/voyage-evenings-checks.mjs
+node tools/voyage-fishing-checks.mjs
 node tools/adventure-checks.mjs
 node tools/sound-checks.mjs
 ```
@@ -31,6 +32,7 @@ node tools/sound-checks.mjs
 | [tools/voyage-ui-checks.mjs](tools/voyage-ui-checks.mjs) | Production callbacks in a mock DOM, optional help, arrivals, panel return, tutorial and activity integration |
 | [tools/voyage-boundary-checks.mjs](tools/voyage-boundary-checks.mjs) | Boundary coverage, contours, unlock transitions, drawing state and portrait selection; native pixel checks when the optional Canvas dependency is installed |
 | [tools/voyage-evenings-checks.mjs](tools/voyage-evenings-checks.mjs) | Supper menus/contributions, six actual sailing runs, evidence/capacity, complete itineraries, saves, continuation and production callbacks |
+| [tools/voyage-fishing-checks.mjs](tools/voyage-fishing-checks.mjs) | All tackle/quay combinations, shared coastal fights, measurements, bounded records, legacy catches, malformed saves, exact dawn and timer disposal |
 | [tools/adventure-checks.mjs](tools/adventure-checks.mjs) | Classic cases, dialogue, chapters, cargo, board and compatibility |
 | [tools/sound-checks.mjs](tools/sound-checks.mjs) | Mocked Web Audio controls, gating, scheduling and cleanup |
 
@@ -67,6 +69,7 @@ Inspect its photographs, decorations, passengers, camera views, coastal scenery 
 | V18 · Dispatch investigation | Check records in different orders, fill the hold, recover the case and complete both resolutions in separate runs | Specific replies require evidence, full hold blocks recovery, platform supper requires consent, case slot releases and no fee appears |
 | V19 · Route board | Add/reorder twelve stops; compare two orders; execute supper/case routes and an early refill; import an older cargo route | Whole refills and actual cash dependencies, no future quote, clear next action, correct stop reconciliation and explicit handovers |
 | V20 · Continuing evenings | Continue a completed expedition with an unfinished case; start another supper and revisit courses | Chapter three stays complete, resources/case retained, older checks labelled retained, nightly supper/courses reset, no free fuel or repeated old payment |
+| V21 · Advanced angling | Try all lures/depths, read each movement, misread/recover, reach the practice limit, reload a fight, use Relaxed mode in both waters and inspect all eight pages | Four-minute landing only, no reaction deadline or hidden catch, preserved basket/payment rules, readable artwork and numeric meters, bounded largest-catch records, old catch sizes unrecorded |
 | V15 · Classic | Resume a saved shift, inspect Captain's guide, complete a trade and case route, continue through three chapters | Original progression, evidence, controls and save origin remain consistent; no Voyage data is used |
 
 For V11, the preparation uses Nao's menu, Mei's 8-cr/six-minute pack and Rin's free ten-minute fitting. Chapter two uses boarding, Aonami tasting, the waterproof case and station cooker; chapter three concludes at Nao's counter. Detailed terms and spoilers are in [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md).
@@ -82,6 +85,8 @@ At Tsukimi, read Mio’s ordinary chat, knowledge topics, sky-watch reactions, p
 Follow [MOBILE.md](MOBILE.md)'s device matrix. At 320/390 px portrait and short landscape sizes, inspect all tabs, long notebooks, recipe trays, illustrated seats and the enlarged chart. Confirm fixed Back/Close, focus visibility, safe-area spacing, keyboard Escape, panel scroll restoration and usable sea framing.
 
 Listen with music/effects independently enabled, retune repeatedly, hide/lock/return and reopen. Check full and reduced motion. Observe fuel-planner latency, sustained sailing performance and chart panning on physical phones.
+
+Fishing additionally requires manual focus/scroll, 320/390 px catch-card and notebook review, local image loading, relaxed callback disposal after Close/Escape/backgrounding, and the exact-dawn reveal’s report return.
 
 Current real-browser CSS/focus, Safari/iOS, touch comfort, listening and physical-device performance remain outstanding. Record these as separate manual results; mock DOM and native renders do not complete this coverage.
 

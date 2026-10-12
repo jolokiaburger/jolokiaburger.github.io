@@ -1,6 +1,6 @@
 # Harbour evenings specification
 
-**Baseline:** Voyage 0.19. **Scope:** supper evenings, lantern sailing courses, the dispatch investigation, unified itineraries and persistent keepsakes. Existing activities are specified in [VOYAGE-HARBOUR-LIFE.md](VOYAGE-HARBOUR-LIFE.md) and [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md).
+**Baseline:** Voyage 0.20. **Scope:** supper evenings, lantern sailing courses, the dispatch investigation, unified itineraries and persistent keepsakes. Existing activities are specified in [VOYAGE-HARBOUR-LIFE.md](VOYAGE-HARBOUR-LIFE.md) and [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md).
 
 ## Access and interaction
 

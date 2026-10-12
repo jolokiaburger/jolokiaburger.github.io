@@ -5,15 +5,11 @@
   function create(api) {
     const {el, button, openPanel, changed, toast} = api;
     const state = () => api.getState(), profile = () => api.getProfile();
-    let timer = 0, generation = 0;
-    function dispose() { clearTimeout(timer); timer = 0; generation++; }
+    const angling = window.VoyageFishingUI.create({...api, hub: () => hub()});
+    function dispose() { angling.dispose(); }
     function image(src, alt, cls = 'dockside-art') { const img = el('img'); img.src = src; img.alt = alt; img.className = cls; img.onerror = () => { img.hidden = true; }; return img; }
     function reasonButton(label, kind, fn) { const reason = L.status(state(), kind); return button(label + (reason ? ' · ' + reason : ''), fn, !!reason); }
     function portrait(id, mood = 'thoughtful') { const head = el('div', undefined, 'activity-host'); head.append(image(P.portrait(id, mood), P.characters[id].name, 'activity-portrait'), el('strong', P.characters[id].name)); return head; }
-    function fishArt(id) {
-      const f = L.fish[id], svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160"><rect width="300" height="160" rx="20" fill="#173a44"/><path d="M30 116Q150 100 270 116M45 135Q145 122 260 135" fill="none" stroke="#527b7e" stroke-width="2"/><path d="M215 78L268 43V115Z" fill="' + f.colour + '" stroke="#edd7ab" stroke-width="2"/><ellipse cx="136" cy="78" rx="90" ry="40" fill="' + f.colour + '" stroke="#edd7ab" stroke-width="2"/><path d="M115 40L145 18L177 45M122 112L150 132L177 111" fill="' + f.colour + '" stroke="#edd7ab"/><circle cx="74" cy="70" r="5" fill="#21323a"/><path d="M95 52Q108 78 95 101" fill="none" stroke="#607479" stroke-width="2"/></svg>';
-      return image('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg), f.name + ', drawn in harbour colours.', 'dish-art');
-    }
     function dishArt(dish) {
       const topping = dish.topping === 'greens' ? '#799465' : dish.topping === 'mushroom' ? '#a28467' : '#eee0bc';
       const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220"><rect width="400" height="220" rx="20" fill="#283e42"/><ellipse cx="190" cy="177" rx="125" ry="16" fill="#122c3480"/><path d="M65 92Q80 187 187 187Q290 183 308 92Z" fill="#c8b899" stroke="#ebd7ae" stroke-width="3"/><ellipse cx="187" cy="93" rx="122" ry="44" fill="' + (dish.broth === 'ginger' ? '#c3985e' : '#aa8161') + '" stroke="#ebd7ae" stroke-width="6"/><path d="M100 88Q151 54 224 99M100 100Q170 62 264 97M113 114Q173 80 240 117" fill="none" stroke="#e4ce9c" stroke-width="6"/><g fill="' + topping + '"><ellipse cx="139" cy="84" rx="20" ry="10"/><ellipse cx="204" cy="104" rx="22" ry="11"/><ellipse cx="246" cy="82" rx="19" ry="10"/></g><path d="M324 132H367V181Q346 195 324 181Z" fill="#83a2a0"/><ellipse cx="345" cy="132" rx="22" ry="7" fill="#a57b4e"/><path d="M360 143Q389 143 368 170" fill="none" stroke="#83a2a0" stroke-width="7"/></svg>';
@@ -25,37 +21,12 @@
         reasonButton('Dockside fishing · Free · 4 min per catch', 'fish', fishing),
         reasonButton('Help Nao’s kitchen · Receive 4–6 cr · 6 min per tray', 'kitchen', kitchen),
         button('Catch basket · ' + l.fishing.catches.filter(c => c.outcome === 'kept').length + ' / 3', basket),
+        button('Captain’s fish notebook · Eight illustrated species', angling.notebook),
         button('Photo errands & album', album), button('Recipe notebook', () => api.neighbourUI().recipes()), button('Passenger trips', () => api.neighbourUI().routes()), button('Neighbour favours', () => api.neighbourUI().favours()), button('Ferry decorations', decorations),
         el('p', 'Fishing uses a separate three-fish basket, never your freight hold. Six catches per voyage; Nao offers 6 cr each. Kitchen ingredients belong to her stall. No purchase is required.', 'muted')]);
     }
-    function fishing() {
-      const s = state(), f = s.leisure.fishing, reason = L.status(s, 'fish');
-      const water = el('div', undefined, 'fishing-water'), float = el('span', '◉', 'fishing-float'); float.setAttribute('aria-hidden','true'); water.append(float);
-      const message = el('p', f.pending ? 'The float is settling. A bite will stay available until you reel in.' : 'Cast beside the quay. There is no short reaction window and no lost bait.', 'fishing-message'); message.setAttribute('role', 'status');
-      const reelButton = button('Waiting for a bite…', () => catchFish(), true, true);
-      const nodes = [el('p', 'Free · 4 game minutes when the catch lands · ' + f.casts + ' / 6 catches this voyage'), water, message];
-      if (f.pending) {
-        nodes.push(reelButton, button('Pack away the line · Free', () => { L.pack(s); changed(); fishing(); }));
-      } else nodes.push(reasonButton('Cast the line', 'fish', () => { if (L.cast(s)) { changed(); fishing(); } }));
-      nodes.push(button('Relaxed mode · ' + (f.relaxed ? 'On · Reel automatically' : 'Off · Tap to reel'), () => { f.relaxed = !f.relaxed; changed(); fishing(); }), button('Catch basket', basket), button('Back to pastimes', hub));
-      if (reason) nodes.push(el('p', reason, 'activity-notice'));
-      openPanel('Dockside fishing', nodes);
-      function catchFish() { const c = L.reel(s); if (!c) { toast(L.status(s, 'fish') || 'Cast first.'); return; } if (!changed()) return; openPanel('A little silver in the basket', [fishArt(c.id), el('h3', L.fish[c.id].name), el('p', 'Kept in your catch basket. Four minutes have passed; no credits or freight space were used.'), button('Release gently', () => { L.releaseFish(s, f.catches.length - 1); changed(); fishing(); }), reasonButton('Another cast', 'fish', fishing), button('Catch basket', basket)]); }
-      if (f.pending && !reason) {
-        const ownGeneration = generation, voyageID = s.uid, pending = f.pending;
-        timer = setTimeout(() => {
-          if (generation !== ownGeneration || state().uid !== voyageID || f.pending !== pending || s.docked !== pending.port || s.ended) return;
-          water.classList.add('bite'); message.textContent = 'A bite! Tap Reel in whenever you are ready.'; reelButton.textContent = 'Reel in · Free · 4 min'; reelButton.disabled = false;
-          if (f.relaxed) catchFish();
-        }, 2200);
-      }
-    }
-    function basket() {
-      const s = state(), f = s.leisure.fishing, nodes = [el('p', 'Your separate catch basket holds three fish. Releasing or sharing is free and uses no game time.')];
-      f.catches.forEach((c, i) => { const card = el('article', undefined, 'pastime-card'); card.append(fishArt(c.id), el('h3', L.fish[c.id].name), el('p', c.outcome + ' · ' + M.time(c.at))); if (c.outcome === 'kept') card.append(button('Release gently', () => { L.releaseFish(s, i); changed(); basket(); }, s.ended), reasonButton('Share with Nao · Receive 6 cr', 'share', () => { if (L.share(s, i)) { changed(); basket(); } })); nodes.push(card); });
-      if (!f.catches.length) nodes.push(el('p', 'No catches yet. Borrow the harbour rod through Dockside fishing.'));
-      nodes.push(el('h3', 'Captain’s fish notebook'), el('p', Object.keys(L.fish).map(id => (profile().fishSeen.includes(id) ? '✓ ' : '○ ') + L.fish[id].name).join(' · ')), button('Back to pastimes', hub)); openPanel('Catch basket & fish notebook', nodes);
-    }
+    function fishing() { angling.fishing('harbour'); }
+    function basket() { angling.basket('harbour'); }
     function kitchen() {
       const s = state(), rows = s.leisure.kitchen, customer = L.customers[rows.length];
       if (!customer) { openPanel('A counter full of familiar faces', [portrait('nao'), el('p', 'All three trays have reached their customers. ' + rows.filter(r => r.matched).length + ' / 3 favourite orders remembered. Nao has saved a little tea-cup decoration for the Tern.'), button('Ferry decorations', decorations), button('Back to pastimes', hub)]); return; }
@@ -117,7 +88,7 @@
       const meal = P.meals[s.docked]; if (meal) nodes.push(button(meal.name + ' · ' + meal.price + ' cr · ' + meal.minutes + ' min', () => { if (M.action(s, 'meal') && changed()) dockside(); }, !M.actionStatus(s, 'meal').ok));
       nodes.push(button('Back to the quay', api.closePanel)); openPanel(view.title, nodes);
     }
-    return {dispose, hub, fishing, kitchen, basket, album, camera, decorations, dockside, dishArt};
+    return {dispose, hub, fishing, coastalFishing: () => angling.fishing('coast'), coastalBasket: () => angling.basket('coast'), fishNotebook: angling.notebook, kitchen, basket, album, camera, decorations, dockside, dishArt};
   }
   window.VoyageLeisureUI = {create};
 })();

@@ -9,6 +9,7 @@ Neon Tides is maintained by [Neon Tides contributors](https://github.com/jolokia
 | Voyage world, navigation and scenery | [voyage/](voyage/), including native Canvas waterfronts, crew and region chart |
 | Classic scenes and interface | [classic.html](classic.html), [styles.css](styles.css), [game.js](game.js) |
 | Cast, dialogue and chapters | Root content scripts, [voyage/ports.js](voyage/ports.js), [voyage/conversations.js](voyage/conversations.js) and Voyage subsystem modules |
+| Fish field-guide illustrations and fictional species notes | [assets/fish/](assets/fish/), [voyage/fishing.js](voyage/fishing.js); eight original Basin species cards |
 | Portraits, scene plates, market sprites and icons | [assets/](assets/); complete inventory in [tools/asset-manifest.json](tools/asset-manifest.json) |
 | Economic definitions and gold accounting | [trade.js](trade.js), [market.js](market.js) |
 | Music and sound effects | [game.js](game.js), [halloween-radio.js](halloween-radio.js), [voyage/sound.js](voyage/sound.js) |

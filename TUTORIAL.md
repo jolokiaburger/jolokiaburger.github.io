@@ -1,6 +1,6 @@
 # Developer tutorial
 
-**Baseline:** Voyage 0.19 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+**Baseline:** Voyage 0.20 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
 
 ## 1. Set up the project
 
@@ -39,12 +39,15 @@ Voyage loads shared economics, world/regions, navigation, ports and the base mod
 | Content | [voyage/ports.js](voyage/ports.js), [voyage/conversations.js](voyage/conversations.js) | Cast, contracts, meals, stories, topics and reply branches |
 | Base rules | [voyage/model.js](voyage/model.js) | State, time, fuel, actions, cargo, ledger and validation |
 | Activity rules | [voyage/leisure.js](voyage/leisure.js), [voyage/neighbours.js](voyage/neighbours.js), [voyage/breakwater.js](voyage/breakwater.js) | Pastimes, fares, favours, recipes and expedition state |
+| Angling | [voyage/fishing.js](voyage/fishing.js), [voyage/fishing-ui.js](voyage/fishing-ui.js), [voyage/fishing-profile.js](voyage/fishing-profile.js) | Shared encounter/fight rules, illustrated species pages and personal records |
 | Evening rules | [voyage/supper-routes.js](voyage/supper-routes.js), [voyage/sailing-challenges.js](voyage/sailing-challenges.js), [voyage/harbour-mystery.js](voyage/harbour-mystery.js) | Finite suppers, actual sailing records and dispatch evidence |
 | Planning | [voyage/travel-plan.js](voyage/travel-plan.js), [voyage/route-board.js](voyage/route-board.js) | Shared pump-aware budgets, ordered action IDs and dependencies |
-| Profiles | [voyage/profile.js](voyage/profile.js) and the leisure, neighbour, breakwater and [evenings](voyage/evenings-profile.js) profile extensions | Bounded cross-voyage history, learning and cosmetics |
+| Profiles | [voyage/profile.js](voyage/profile.js) and the leisure, neighbour, breakwater, [evenings](voyage/evenings-profile.js) and [fishing](voyage/fishing-profile.js) profile extensions | Bounded cross-voyage history, learning and cosmetics |
 | Evening UI | [voyage/evenings-ui.js](voyage/evenings-ui.js), [voyage/route-board-ui.js](voyage/route-board-ui.js) | Explicit evening choices and a consolidated route editor |
 | Activity UI | [voyage/leisure-ui.js](voyage/leisure-ui.js), [voyage/neighbours-ui.js](voyage/neighbours-ui.js), [voyage/breakwater-ui.js](voyage/breakwater-ui.js) | Explicit panels, callbacks, notebooks and chart |
 | Rendering/input | [voyage/voyage.js](voyage/voyage.js), [voyage/camera.js](voyage/camera.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js), [voyage/shoreline-art.js](voyage/shoreline-art.js) | Controller, shared camera transform, native drawing and input |
+
+The fishing model loads after the leisure/neighbour/expedition rules, and its profile after the earlier profile extensions. The shared fishing UI loads before the leisure UI. Fight actions are bounded IDs; tension and progress are replayed rather than trusted saved metrics. Keep harbour and coastal basket ownership in their existing modules. See [VOYAGE-FISHING.md](VOYAGE-FISHING.md).
 
 Subsystem extensions wrap selected model functions. Inspect the final exported function after all scripts load when tracing validation, costs or story integration. A change to the base model can affect every extension.
 

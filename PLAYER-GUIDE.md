@@ -1,6 +1,6 @@
 # Player guide
 
-**Applies to:** Voyage 0.19 and Classic 4.6.1.
+**Applies to:** Voyage 0.20 and Classic 4.6.1.
 
 Neon Tides begins at Kurage 33 aboard the ferry *Tern*. Choose a mode on the first page, then explore the harbour through deliveries, trading and conversations. Food and tea offer places to pause between crossings.
 
@@ -38,7 +38,9 @@ The normal freight hold has two slots. Kenji's cargo racks add a third. Gold, pa
 | --- | --- | --- |
 | Passenger trips | People, Menu or Journal | Read a fare, board deliberately and disembark at the named destination; tea detours are optional |
 | Neighbour favours | Harbour board, Menu or Journal | Small deliveries and an investigation with tracked steps |
-| Harbour fishing | Menu → Harbour pastimes while moored | Four game minutes per landed catch; the bite waits for you, or Relaxed mode reels automatically |
+| Harbour fishing | Menu → Harbour pastimes while moored | Choose lure/depth, set the hook, then manage the line; four game minutes per landed catch, with optional Relaxed mode |
+| Fish notebook | Harbour pastimes or either catch basket | Eight illustrated species, habitat/tackle hints, food notes and your largest measured catches |
+| Coastal fishing | Sailing controls in unlocked outer water | Same minigame with a separate three-catch expedition basket |
 | Nao's kitchen shift | Night Market while Nao is working | Choose broth, topping and tea for three customers; only serving commits a tray |
 | Recipes | Character topics, then Nao's recipe notebook | Learned recipes persist; fish bowls require an actual kept catch |
 | Photo errands | Yumi at Metro or Mio at Tsukimi | Accept a request, sail near its view, capture it and return to the requester |
@@ -50,6 +52,22 @@ The normal freight hold has two slots. Kenji's cargo racks add a third. Gold, pa
 All costs and durations appear before a committed activity. Leaving an ingredient tray spends nothing. The Journal keeps active stories, postcards and earned ferry decorations. Decorations change appearance only.
 
 Character topics present complete player replies and attribute notebook entries to their speaker. Working rules, history, rumours, recipes and science have distinct labels. The twice-rung bell story can be checked against both Priya's and Mako's accounts.
+
+## A patient fishing minigame
+
+While moored, open **Menu → Harbour pastimes → Dockside fishing**. Choose a borrowed lure and depth, then cast. The local fish list and notebook explain where each species prefers to feed. Tackle is free and changes the chance of a bite from each eligible species.
+
+After the float settles, **Set the hook** whenever you are ready. Read the next movement before choosing:
+
+- **Swimming evenly:** Reel steadily.
+- **Pulling away:** Give line.
+- **Turning towards you:** Lift the rod to take up slack.
+
+Keep line tension between 20% and 80%. A mistaken pull gives the fish room, but you can recover. When landing progress reaches 100%, choose **Lift into the landing net**. This spends four game minutes and shows the species illustration, length, weight and technique. Waiting and each decision pause the game clock; there is no reaction deadline. **Relaxed mode** automatically lands a new cast after the same wait.
+
+The harbour basket holds three kept fish, with six landed catches per night. Release one to make room, share it with Nao for 6 cr, or use a learned recipe or Mei's supper favour. Outer-coast catches use their own three-catch basket and can be shared with the coastal cooks or Nao in four minutes without payment. The **Captain's fish notebook** keeps observations and your largest measured catch for each of eight species; older catches stay known without invented measurements. Field-guide food notes describe the fictional Basin and do not unlock a recipe.
+
+Closing the panel saves your line and decisions. Reopen the same fishing water to resume; sailing away packs the rod. See [VOYAGE-FISHING.md](VOYAGE-FISHING.md) for the detailed rules.
 
 ## Beyond the Breakwater
 

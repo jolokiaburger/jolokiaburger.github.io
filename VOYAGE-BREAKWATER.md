@@ -1,6 +1,6 @@
 # Beyond the Breakwater: expedition specification
 
-**Scope:** Voyage 0.19's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
+**Scope:** Voyage 0.20's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
 
 ## Entry and chapter progression
 
@@ -73,7 +73,7 @@ The travelling supper book and station kitchen complete the expedition without c
 
 Coastal stops require the chapter-two expedition crew. Leaving is free and keeps an unsettled stop available. Settled stops remain marked and cannot duplicate rewards or steps. None opens a window automatically.
 
-Coastal fishing appears underway in unlocked outer water. Each catch stops the ferry and takes four game minutes; three catches are available per night. Fictional moon mullet and ribbon mackerel use a separate expedition basket. Share a kept catch at Aonami or Nao's Market counter for four minutes/free, once. There is no fish sale, automatic payment or freight-slot penalty. Normal harbour fishing is also available at both new quays under its separate six-catch/three-kept rules.
+Coastal fishing appears underway in unlocked outer water. Lure/depth selection and the patient line-control minigame are specified in [VOYAGE-FISHING.md](VOYAGE-FISHING.md). Each landed catch stops the ferry and takes four game minutes; three catches are available per night. Fictional moon mullet and ribbon mackerel use a separate expedition basket. Share a kept catch at Aonami or Nao's Market counter for four minutes/free, once. There is no fish sale, automatic payment or freight-slot penalty. Normal harbour fishing is also available at both new quays under its separate six-catch/three-kept rules.
 
 ## Chart and presentation
 

@@ -76,7 +76,7 @@
     M.log(n,'Expedition night '+b.night+' · Chapter '+b.chapter+'. Purse, owned gold, tank, fitting and sealed contracts carried forward.'+(fee?' Overnight tug: '+fee+' cr, included in this night’s opening purse.':''));M.observe(n);return n;
   }
   function catchStatus(s) { if(!R.unlocked(s)||s.ship.x<3400||s.docked||s.ended)return 'Sail into the outer coast';if(s.breakwater.catches.length>=3)return 'Three expedition catches already landed';if(s.clock+4>1800)return 'Needs 4 min before 06:00';return ''; }
-  function catchFish(s) { if(catchStatus(s))return false;const b=s.breakwater;b.catches.push({id:b.catches.length%2?'ribbon-mackerel':'moon-mullet',outcome:'kept',at:s.clock+4});s.ship.speed=0;M.advance(s,4);M.log(s,'Landed a coastal catch · 4 min, kept in the expedition basket.');return true; }
+  function catchFish(s,id) { if(catchStatus(s)||id!==undefined&&!['moon-mullet','ribbon-mackerel'].includes(id))return false;const b=s.breakwater;b.catches.push({id:id|| (b.catches.length%2?'ribbon-mackerel':'moon-mullet'),outcome:'kept',at:s.clock+4});s.ship.speed=0;M.advance(s,4);M.log(s,'Landed a coastal catch · 4 min, kept in the expedition basket.');return true; }
   function shareFish(s,index) { const b=s.breakwater,c=b?.catches[index];if(s.ended||s.docked!=='tea-island'&&s.docked!=='market'||!c||c.outcome!=='kept'||s.clock+4>1800)return false;c.outcome='shared';M.advance(s,4);M.log(s,'Shared the coastal catch with the cooks · 4 min, free.');return true; }
   function pin(s,id) { if(!s.breakwater||id!==null&&!W.ports.some(p=>p.id===id)||id&&!R.available(s,id))return false;s.breakwater.pin=id;return true; }
   Object.assign(P.economy.market.local,{'tea-island':1.5,'coast-station':-1});

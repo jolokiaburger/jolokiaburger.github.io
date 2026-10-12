@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const context = vm.createContext({window: {}, console});
-for (const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js']) vm.runInContext(fs.readFileSync(root + file, 'utf8'), context, {filename: file});
+for (const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/fishing.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js','voyage/fishing-profile.js']) vm.runInContext(fs.readFileSync(root + file, 'utf8'), context, {filename: file});
 const {VoyageModel: M, VoyageNeighbours: H, VoyageConversations: C, VoyageLeisure: L, VoyageProfile: P, VoyagePorts: Ports, VoyageWorld: W, VoyageNavigation: N} = context.window;
 let checks = 0;
 const check = (v, message) => { assert.ok(v, message); checks++; };
