@@ -1,6 +1,6 @@
 # Developer tutorial
 
-**Baseline:** Voyage 0.21 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+**Baseline:** Voyage 0.22 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
 
 ## 1. Set up the project
 
@@ -119,3 +119,7 @@ Voyage preserves unreadable raw data under the relevant key plus `:unreadable` w
 Use [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md) to select automated suites and manual scenarios. [MOBILE.md](MOBILE.md) defines viewport, focus and animation constraints. [ART-DIRECTION.md](ART-DIRECTION.md) and [tools/asset-manifest.json](tools/asset-manifest.json) document shipped visuals. [SOUND.md](SOUND.md) describes audio lifecycle and listening checks.
 
 Before publication, run documentation/asset checks and relevant regression suites, review the complete diff, verify script/asset paths and retain save compatibility. GitHub Pages serves the root directly. Confirm the deployed commit after merging. Record actual device observations separately from automated results.
+
+## Optional visual themes
+
+[voyage/halloween-theme.js](voyage/halloween-theme.js) loads before the final controller and exposes decorative rendering plus isolated preference helpers. The controller provides a native checkbox in Ferry tools and applies the theme without changing the model. Keep visual selection independent of audio startup and preserve navigation overlays above atmospheric water layers. See [VOYAGE-HALLOWEEN.md](VOYAGE-HALLOWEEN.md) for layering, persistence and QA.

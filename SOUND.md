@@ -23,7 +23,7 @@ Volume controls use 30%, 60% and 100%. Radio Off leaves separately enabled effec
 | Basin Lo-Fi | Classic | 104 BPM sequencer, filtered bass/pads, percussion noise and echo |
 | Ghost Tide FM | Classic and Voyage | 72 BPM pulse, minor chords, sea/wind noise and slow modulation |
 
-Ghost Tide FM also selects a pumpkin-orange visual theme. Theme selection changes no economic, quest, clock or collision rules.
+In Classic, Ghost Tide FM also selects its existing pumpkin-orange accents. In Voyage, the separate **Menu → Halloween mode** checkbox controls the full visual theme independently of radio and effects. Theme selection never starts audio and changes no economic, quest, clock or collision rules. See [VOYAGE-HALLOWEEN.md](VOYAGE-HALLOWEEN.md).
 
 ## Interaction mix
 

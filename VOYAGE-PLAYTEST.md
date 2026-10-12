@@ -1,6 +1,6 @@
 # Voyage QA and release test plan
 
-**Baseline:** Voyage 0.21, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
+**Baseline:** Voyage 0.22, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
 ## Test environment
 
@@ -19,6 +19,7 @@ node tools/voyage-boundary-checks.mjs
 node tools/voyage-evenings-checks.mjs
 node tools/voyage-fishing-checks.mjs
 node tools/voyage-craft-checks.mjs
+node tools/voyage-halloween-checks.mjs
 node tools/adventure-checks.mjs
 node tools/sound-checks.mjs
 ```
@@ -112,3 +113,7 @@ Record test ID, game version, commit, device/OS/browser, orientation, seed, chap
 3. Execute the applicable manual scenarios and record any remaining coverage explicitly.
 4. Publish the tested revision, verify GitHub Pages completion and confirm the deployment commit.
 5. Smoke-test the deployed entry page and both modes, including save/resume on the intended browser origin.
+
+## Halloween mode acceptance
+
+Check and uncheck Menu → Halloween mode using mouse, keyboard and touch. Reload with the box enabled and disabled. Toggle the radio independently, test unavailable storage, and verify game/profile/Classic saves remain untouched. Inspect water, ferry decorations and all eleven quays in close/wide views at night and dawn. Confirm course, current, docking and recovery markers stay readable; compare reduced motion. At 320/390 px, verify the checkbox label, illustration, scrolling and fixed panel controls. Native rendering coverage is available through [tools/voyage-halloween-checks.mjs](tools/voyage-halloween-checks.mjs); browser and phone results must be recorded separately.

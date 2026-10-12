@@ -96,3 +96,7 @@ Keep native 1536 × 1024 dimensions; use contain scaling and reserved aspect rat
 After adding or refining assets, run `node tools/documentation-checks.mjs --update-assets` and review the inventory diff. Run `node tools/documentation-checks.mjs` without that option to verify shipped files, dimensions, hashes and references without modifying metadata. Optional `node tools/voyage-render-checks.mjs <output-directory>` renders implemented Canvas scenes with `@napi-rs/canvas` for inspection.
 
 Review portraits at their actual display size, scenes at desktop and phone widths, alpha edges against dark water, and the chart against navigable geometry. Verify local loading, alternative text, motion settings and state-dependent character presence. Native renders establish artwork output; browser CSS and phone readability require manual QA. See [CREDITS.md](CREDITS.md) and [LICENSE](LICENSE) for reuse terms.
+
+## Halloween harbour festival
+
+[voyage/halloween-theme.js](voyage/halloween-theme.js) uses scalable Canvas paths for ribbed, glowing pumpkins and friendly spirits with large eyes and soft cheek colour. Violet mist and amber reflections complement the harbour palette. Decorations cover home and coastal quays and the Tern, while navigation indicators and the ferry remain above the water effects. Reduced motion freezes decorative movement. The dedicated menu illustration renders at 1280 × 440; no low-resolution sprites are enlarged. Rendering and preference contracts are in [VOYAGE-HALLOWEEN.md](VOYAGE-HALLOWEEN.md).

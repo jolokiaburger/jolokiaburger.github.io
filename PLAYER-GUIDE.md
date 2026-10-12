@@ -1,6 +1,6 @@
 # Player guide
 
-**Applies to:** Voyage 0.21 and Classic 4.6.1.
+**Applies to:** Voyage 0.22 and Classic 4.6.1.
 
 Neon Tides begins at Kurage 33 aboard the ferry *Tern*. Choose a mode on the first page, then explore the harbour through deliveries, trading and conversations. Food and tea offer places to pause between crossings.
 
@@ -124,3 +124,7 @@ Talking and reading are free. Some food conversations reveal trading leads. The 
 Sound begins muted. Tune the radio and enable harbour sounds separately; volume and sound preferences are remembered. Reopening may require a tap before sound starts. Motion settings and system reduced-motion preferences control decorative movement.
 
 Progress saves in the current browser. Voyage and Classic use separate saves; each mode's new-game action affects its own progression. A fresh Voyage keeps profile learning and owned cosmetics, while an expedition continuation carries its current resources. Storage restrictions allow session play but may prevent persistence; follow the displayed notice. Clearing site data removes local saves and preferences. Local development and the public site have separate save origins.
+
+## Halloween harbour
+
+Check **Menu → Halloween mode** for pumpkin lanterns, friendly spirits, lavender fog and a decorated ferry. Uncheck it to restore the normal harbour. The choice is remembered separately from your voyage. Music remains optional; Ghost Tide FM and harbour sounds keep their own controls. The theme changes no sailing rules, weather, quests or resources. Reduced motion keeps the decorations still.
