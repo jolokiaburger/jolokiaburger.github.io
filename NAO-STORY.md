@@ -1,50 +1,47 @@
-# The Last Bowl Before Sunrise
+# Classic breakfast story: The Last Bowl Before Sunrise
 
-Nao Mizuno wants to revive her retired father Haruto's breakfast counter, with her own name on the menu. This is an optional, complete one-night subplot. It adds a personal conversation, two ways to help the serving trays, invitations, a small optional supply trade, an opening and a later follow-up. It does not yet create a persistent business or a multi-night character arc.
+**Scope:** Classic Night One. Nao Mizuno prepares a breakfast counter under her own name, carrying forward her father Haruto's recipes. The personal story is free to complete; food purchases and extra stock are optional.
 
-## Start without spoilers
+## Entry and progress
 
-At the Night Market, choose Nao's food counter and **Nao's folded recipe · Ask about breakfast**. Starting and hearing her story are free. Her pantry covers the first bowls; buying food or stock is not required to finish the story.
+At the Night Market food counter, choose Nao's folded recipe. The separate food-pane/Journal card tracks preparation, invitations and extra stock. From 05:00 it points back to the opening. An explicit wait shows its full clock cost and allows the market to continue advancing.
 
-The food pane and journal have a separate Nao progress card. It tracks preparation, neighbours and any extra stock. Other market and lighthouse leads remain available. From 05:00 the objective points back to her counter. Choose the explicit wait if you want to stay; its full clock cost is shown, and the rest of the harbour continues moving.
+## Actions and timing — story spoilers
 
-## Choices and timings — spoilers
-
-| Choice | Place | Cost | Availability |
+| Action | Location | Cost | Window |
 | --- | --- | --- | --- |
-| Hear Nao's recipe story | Night Market, food | Free | After accepting, before finishing |
-| Help Kenji mend the warmer | Night Market, repairs | 10 min, no credits | Start before 03:20 |
-| Help Nao heat insulated trays | Night Market, food | 15 min, no credits | From 03:30; start before 04:45; alternate to repair |
-| Invite Mei | Noodle bar | Free conversation; crossing costs apply | Before 05:00 |
-| Invite Priya | Landing 3 | Free conversation; crossing costs apply | Before 05:00 |
-| Invite Captain Lam | Metro Quay | Free conversation; crossing costs apply | Before 05:00 |
-| Buy an optional market batch | Night Market, food | 24 cr, 5 min | Start before 04:50 |
-| Read the co-op offer, then buy its batch | Landing 3 | Offer free; stock 18 cr, 10 min | Start collection before 04:30 |
-| Hand over the extra batch | Night Market, food | 5 min | Start before 05:40; once |
-| Join the opening | Night Market, food | Free | 05:00–05:44 |
-| Catch the last bowl | Night Market, food | Free | 05:45–05:59 |
-| Buy a sunrise bowl with tea | Night Market, food | 7 cr, 10 min | After finishing |
+| Hear the recipe story | Nao | Free | Before completion |
+| Mend the warmer | Kenji | Ten minutes/free | Start before 03:20 |
+| Heat insulated trays | Nao | Fifteen minutes/free | From 03:30; start before 04:45; alternative to repair |
+| Invite Mei, Priya or Lam | Their home quays | Free conversation; normal crossings | Before 05:00 |
+| Buy local extra batch | Nao | 24 cr/five minutes | Start before 04:50 |
+| Read co-op offer and collect batch | Landing 3 | Offer free; 18 cr/ten minutes | Start collection before 04:30 |
+| Hand over extra batch | Nao | Five minutes | Start before 05:40 |
+| Join opening | Nao | Free | 05:00–05:44 |
+| Catch last bowl | Nao | Free | 05:45–05:59 |
+| Sunrise bowl and tea | Nao | 7 cr/ten minutes | After story completion |
 
-A free explicit wait from 03:20–03:29 bridges the repair cutoff and the insulated-tray preparation, so buying tea is never necessary to advance that step. Neither preparation nor invitations gate the ending. Without warmer help, Nao serves smaller rounds. The late return remains warm and personal, with notes from invited neighbours. Starting after five has its own introduction. Turning in before attending leaves the story unfinished; the morning wire acknowledges Nao's trial instead of granting an automatic completion or payment.
+A free wait bridges 03:20–03:29 to the tray fallback. Preparation/invitations influence the scene without gating completion. Late arrival and starting after five have distinct text. Turning in before attending leaves the story unfinished; the wire acknowledges Nao's trial without automatic completion or stock revenue.
 
-## Optional supply trading
+## Optional batch account
 
-You can buy **one twelve-portion extra batch**, from either supplier. Purchasing one removes the other offer. It is distinct from Nao's pantry and from paying for a meal. Crossing, fuel and delivery time must be considered when comparing the 18 cr co-op price with the 24 cr market price.
+Choose one twelve-portion batch from either supplier; purchasing one removes the other offer. Nao's pantry remains separate. Sales return 4 cr per served portion only after handover and an attended opening. A batch left aboard or an unattended opening earns zero sales. The opening button previews exact portions/proceeds before commitment.
 
-At the opening, sold portions return 4 cr each; unsold portions go to the morning crew. No purchase has guaranteed demand or an automatic payout. You must hand the batch over, then attend an opening before dawn. A batch left aboard or an opening you do not attend earns zero sales. At an available opening, the button previews the exact sales and proceeds before you choose it.
+| Demand component | Portions |
+| --- | --- |
+| `frost-order` base | 5 |
+| `vault-light` base | 3 |
+| `two-tides` base | 4 |
+| Each invited neighbour | +2 |
+| Prepared warmer or trays | +2 |
+| Late opening | −3 |
 
-The deterministic demand is 5 portions for `frost-order`, 3 for `vault-light`, and 4 for `two-tides`. Each of the three invitations adds two; a prepared warmer/tray adds two. A late opening subtracts three from demand. Sold portions are bounded between zero and twelve. With all help and invitations, an early opening sells twelve portions on `frost-order`/`two-tides` and eleven on `vault-light`. A quiet unprepared batch can lose money even when you arrive on time.
+Sold portions are bounded to 0–12. Unsold stock goes to the morning crew without payment. Gross stock result is sales minus batch purchase; fuel/time remain extra and a quiet batch can lose money.
 
-`game.js` records optional `breakfastCost`, `breakfastRevenue` and `breakfastSold` fields. Purchasing is part of cash spent, but the morning card separates stock cost from food, tea and fuel. It reports breakfast sales minus stock cost **before fuel and time**. Gold-trading performance excludes both the supply cost and its revenue; food sales are not counted as quest gifts. Every batch, delivery and settlement is guarded against repeat payment.
+[game.js](game.js) records optional validated `breakfastCost`, `breakfastRevenue` and `breakfastSold`. Purchase is an actual cash expense. The morning report separates breakfast stock from food/fuel and gold-trading performance. Purchase, handover and settlement each have repeat guards.
 
-## Presentation and saves
+## Presentation, memory and validation
 
-`night-market.js` contains the personal story, offers, source notes, invitation replies, contextual casual talk, opening variants and morning reactions. `game.js` renders the progress card in the food pane and journal, calculates the supply settlement and updates market status. Existing saves remain compatible; new counters are optional and validated.
+[night-market.js](night-market.js) owns the story and replies. [game.js](game.js) owns progress, settlement and saves. [classic.html](classic.html) and [styles.css](styles.css) render menus, trays, stock and guests. Later chapter dialogue remembers preparation, invitations and opening/late outcomes without replaying rewards.
 
-`index.html` and `styles.css` add native SVG counter props: the planned menu, a signed sunrise menu, covered trays, an extra-stock crate, the breakfast pot and background guests. Nao and the invited characters speak through their existing manga portraits. These changes reuse the shipped artwork and add no bitmap downloads. The fixed phone shell is unchanged; progress lives in the scrolling content panel.
-
-## Validation
-
-Run `node tools/adventure-checks.mjs`. Checks cover both suppliers across all three seeds, real invitation routes and refuelling, cost/proceeds accounting, quiet losses, the zero-credit ending, warmer fallback, late and undelivered outcomes, deadline boundaries, reloads and repeat-payment prevention. The original market, lighthouse and case-file checks remain included.
-
-The opening scene was rendered and inspected. Interactive browser and real-phone layout remain unverified in this environment. The next human play-test should check whether the free story is easy to find, whether the co-op journey feels worthwhile, and whether the risk of extra stock is clear before purchase.
+Run `node tools/adventure-checks.mjs` for both suppliers, all seeds, real invitation routes, quiet losses, zero-credit completion, repair fallback, late/undelivered stock, deadline boundaries and reload. Manual checks must confirm the optional purchase risk is visible and the free personal ending remains discoverable. Chapter continuity is specified in [NIGHT-TWO.md](NIGHT-TWO.md) and [SEASON-UPDATE.md](SEASON-UPDATE.md).

@@ -1,251 +1,83 @@
-# Neon Tides Voyage · Playtest 0.17
+# Voyage QA and release test plan
 
-Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+**Baseline:** Voyage 0.17, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
-## Beyond the Breakwater · 0.17
+## Test environment
 
-Choose **People → Beyond the Breakwater** at Nao’s Night Market counter. The optional three-chapter adventure prepares the Tern, opens Aonami Tea Island and Shiosai Coastal Station, then brings Nao/Rin home for a chosen supper future. The original nine quay IDs/coordinates and all Classic assets/save keys remain unchanged.
+Run checks from the repository root with Node 22 or later. Serve the game over local HTTP using the command in [README.md](README.md). Use a dedicated test origin/profile, preserve compatibility fixtures and record the tested commit. Keep production saves intact.
 
-- Chapter one: choose Nao’s travelling menu, pack Mei’s rice (8 cr/6 min), and fit Rin’s weatherproof trim (free/10 min, 10% less fuel per distance). Finish the night and deliberately Continue the expedition.
-- Chapter two: invite Nao/Rin at the Market (free/5 min), taste with the Aonami growers (free/6 min), recover the waterproof recipe case (free/6 min) and restore the station cooker (free/8 min). Jun’s introduction opens a leaf-steamed tasting. Rin’s recovered last page opens the kitchen ending. Priya’s survey opens a shorter coast route. Signals/skiff tea and coastal fishing are optional stops.
-- Chapter three: companions remain aboard for the homeward crossing. Tie up at Nao’s counter, choose the kitchen or travelling book and share the supper (free/12 min). Follow-up letters remember the actual outcome.
-- Continue an unfinished chapter on another night if dawn arrives first. Purse, gold basis, tank, engine/racks/trim, named memories and sealed contracts persist. Contract windows renew; settled contracts never pay twice. Current-night reports exclude earlier receipts. Fare passengers take an overnight connection without payment; the coastal basket is shared with the overnight crew. Finishing at sea offers an explicit continuation with a tug fee of up to 20 cr and recovery to Landing 3 with at least 3 fuel.
-- Chart opens through its header button, People or Journal. Pin and preview named quays, choose surveyed/sheltered routes, or enlarge and pan the picture for detail. Three coastal stops have direct course controls. Outer quays open in chapter two; the locked coast explains its prerequisite. Both new quays have fuel, meals and gold scales; two sealed cargo requests lead home.
+## Automated suites
 
-Full terms, source files and save rules: [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md). Art prompts/refs/hashes: `tools/voyage-17-art-prompts.json`.
+```sh
+node tools/documentation-checks.mjs
+node tools/voyage-checks.mjs
+node tools/voyage-leisure-checks.mjs
+node tools/voyage-neighbours-checks.mjs
+node tools/voyage-breakwater-checks.mjs
+node tools/voyage-ui-checks.mjs
+node tools/adventure-checks.mjs
+node tools/sound-checks.mjs
+```
 
-Verification: **10,169** expedition assertions cover menus/endings, chapters, carryover, inventory, receipts, actual navigation on both routes, choice unlocks, fuel fitting, new contracts, malformed saves and action time limits. **458** total DOM integration checks exercise the invitation, full replies, chapter continuation, pins, locked regions, route selection, coastal images and fishing. Native Canvas inspection covers both quays, the region chart and a small camera view. These counts include individual navigation frames and do not represent independent play sessions.
+| Suite | Coverage |
+| --- | --- |
+| [tools/documentation-checks.mjs](tools/documentation-checks.mjs) | Local documentation links/anchors, source references and shipped asset metadata |
+| [tools/voyage-checks.mjs](tools/voyage-checks.mjs) | Actual navigation steps for port routes, base stories, trading, cargo, ledger, recovery and saves |
+| [tools/voyage-leisure-checks.mjs](tools/voyage-leisure-checks.mjs) | Fishing, kitchen, photographs, bounded profiles and individual-trip budgets |
+| [tools/voyage-neighbours-checks.mjs](tools/voyage-neighbours-checks.mjs) | Fares, favours, recipes, evidence, consumed catches, practice and learning |
+| [tools/voyage-breakwater-checks.mjs](tools/voyage-breakwater-checks.mjs) | Chapters, menus/endings, real coast routes, continuation, contracts and malformed state |
+| [tools/voyage-ui-checks.mjs](tools/voyage-ui-checks.mjs) | Production callbacks in a mock DOM, optional help, arrivals, panel return, tutorial and activity integration |
+| [tools/adventure-checks.mjs](tools/adventure-checks.mjs) | Classic cases, dialogue, chapters, cargo, board and compatibility |
+| [tools/sound-checks.mjs](tools/sound-checks.mjs) | Mocked Web Audio controls, gating, scheduling and cleanup |
 
-Manual browser/phone checks: play all three chapters with both menus/endings; continue an unfinished chapter after dawn; try carrying a paid case and an unfinished courier; compare the actual sheltered/inlet crossings and previewed fuel; inspect enlarged chart panning at 320/390 px and short landscape; visit both illustrated seats; catch/share coastal fish; reopen a mid-expedition save; finish at sea and check the explicit tug terms; check full-duration actions at dawn, focus/Back/Close and performance while planning fuel stops. Real-browser CSS, touch, Safari/iOS, listening and physical-device performance remain unverified. Browser access was declined earlier in this session.
+All required suites must exit successfully for a release that changes their area. Run both modes for shared economic, asset or storage changes. Assertion totals include individual simulated frames and do not represent independent player sessions.
 
-## People across the water · 0.16
+The optional native-art check requires separately installed `@napi-rs/canvas`:
 
-- **Passenger trips:** People, Pastimes, Journal or Menu. Priya boards at Landing 3 from 00:50 for Metro (18 cr); Lam at Metro from 01:40 for Kisaragi (22 cr); Rin at the yard from 00:30 for Kurage (20 cr). Boarding takes 3 min, destination disembarking 2 min. Optional thermos stops are free, 8 min. One new fare passenger alongside Nao/Yumi, no freight slot. Docking alone pays nothing; explicitly disembark to receive the fare. Close at a quay without payment. Fuel remains extra.
-- **Neighbour favours:** give Mei a kept fish; take Jun's tea to Matte; pack rice/tea for Mio's picnic; check Priya/Mako's twice-rung bell accounts and choose the checked record or labelled legend. The board and Journal track the actual steps and interpretation. No stock purchase or new location.
-- **Learned recipes:** ask Mei, Nao and Jun through their optional topics. Assemble broth, garnish and tea at Nao's market counter; fish bowls require an explicit kept catch. Drafts are free; serving takes 6 min, no credits, and consumes the catch once. Three learned pages and favourite customer trays persist between voyages. Variations have their own response.
-- **Optional conversations:** each neighbour has two inline topics with complete player reply choices. Facts & recipe notebook preserves speaker and first-heard time, with labels for working rules, history, rumours, recipes and science. Kenji/Mio's science notes have optional USGS/NASA source links. No topic observes an unseen scale; evidence-dependent replies require the account you actually heard.
-- **Docking practice:** switch on through Passenger trips. Near a quay, slow down and align until the guide turns green; Dock deliberately. Gentle arrivals earn records and a cosmetic keepsake at three distinct quays. No damage, penalty or time cost; assisted docking remains available.
-- **GUI/art:** fixed port/dialog Back controls, fixed Close, per-tab/person/quay scroll memory, cost/time shortcuts and explicit phone header placement. Three additional illustrated seats at Metro, the yard and Tsukimi; visible fare passenger luggage, subtle native blinking and steam, reduced motion. Five new keepsakes. The first page keeps its Code on GitHub link.
+```sh
+node tools/voyage-render-checks.mjs /tmp/neon-tides-renders
+```
 
-Rules and save fields: [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md). Art provenance: `tools/voyage-16-art-prompts.json`. All activities open by choice; the existing orange six-second arrival notice is unchanged. Existing Voyage/Classic save keys and version remain intact.
+Inspect its photographs, decorations, passengers, camera views, coastal scenery and chart. Native Canvas output does not render browser CSS or establish touch comfort.
 
-Verification: **775** new model/profile assertions and **401** total DOM checks pass; engine **71,627**, pastimes **677**, Classic **3,211** and mocked audio **134** remain required release checks. Native Canvas renders cover all three fare figures, nine decorations, the approach guide, two small camera views and existing photo captures. These do not test CSS layout or phone comfort.
+## Manual scenario matrix
 
-Browser/phone checklist for this release:
+| ID | Procedure | Acceptance criteria |
+| --- | --- | --- |
+| V01 · First crossing | Start fresh, inspect Menu → How to play, collect Mei's optional tea and deliver to Nao | No forced help window; route/dock/handovers are clear; exactly one 24-cr payment |
+| V02 · Arrival and controls | Dock, switch every port tab during the six-second notice, dismiss it, depart and redock | Message identifies the quay, never blocks controls and changes no clock/cash; new arrival receives a complete countdown |
+| V03 · Sailing and recovery | Use manual/touch steering, water targeting and Set course; stop/cancel; exhaust fuel and call the tug | Routes avoid land, Dock remains explicit, recovery terms and result match, background tabs do not advance play |
+| V04 · Gold and ledger | Buy/sell one and three grams, revisit a remembered scale, compare ledger with purse and lots | Quotes show buy/sell and age; limits apply; cash reconciles; sale revenue and realised profit remain distinct |
+| V05 · Cargo and budgets | Compare and complete a stock job, a courier and a route requiring a pump; try full capacity and expiry | Costs/windows are visible, pump advice is actionable, handover pays once, expiry unloads without refund, hold frees correctly |
+| V06 · Fishing and kitchen | Cast, close/reopen a pending line, use Relaxed mode, keep/release/share/gift/cook catches and serve all three kitchen customers | No hidden timer action, six catches/three kept slots respected, committed fish cannot be reused, drafts are free |
+| V07 · Photos and keepsakes | Accept both photo jobs, capture each view/framing, return them, apply owned decorations and reopen | Actual harbour captures appear, rewards occur once, album is bounded and cosmetics have no rule effect |
+| V08 · Passengers | Complete each fare directly and with its tea stop; change route, close one fare and reload another | Boarding/disembarking durations apply; docking alone grants no fare; closure is honest; luggage and dialogue match |
+| V09 · Favours and knowledge | Complete all favours, both picnic pickup orders and each bell interpretation in separate runs; read topics and replies | Evidence gate holds, speaker/time/category persist, recipes teach correctly and no topic observes a remote price |
+| V10 · Docking practice | Enable/disable practice; approach slowly/aligned and quickly; compare manual/assisted arrival | Optional guidance and cosmetic record only; no damage/fee or altered docking eligibility |
+| V11 · Expedition | Complete preparation, coast and homecoming using both menus, tasting routes and endings across saves | Coast opens at chapter two; required case/cooker steps track correctly; crew and final letters match choices |
+| V12 · Continuation | Continue an unfinished chapter, carried paid case/courier, moored finish and at-sea finish | Real resources/basis retained, windows renew explicitly, prior receipts are excluded from new income, tug terms match, no unpaid passenger homecoming |
+| V13 · Dawn boundaries | Attempt activities with insufficient time, then actions finishing exactly at 06:00 | Insufficient actions charge nothing; exact-dawn commits settle once and retain the report |
+| V14 · Saves/recovery | Load older valid Voyage saves and a current expedition; test invalid voyage/profile separately and unavailable storage | Valid progress retained; recovery notice is visible; raw unreadable data retained where possible; Classic unchanged |
+| V15 · Classic | Resume a saved shift, inspect Captain's guide, complete a trade and case route, continue through three chapters | Original progression, evidence, controls and save origin remain consistent; no Voyage data is used |
 
-1. Load a fresh and a 0.13/0.15 save; verify that no welcome, topic or new activity opens automatically. Complete Mei's original tea delivery and try Classic's saved shift.
-2. At 320/390 px portrait and a short landscape size, open all four port tabs, scroll, choose a person, return, and reopen a long notebook. Check fixed Back/Close, safe-area spacing, focus visibility, Escape, and that the exposed sea frames the ferry above/beside the port sheet.
-3. Board each new passenger; change direct/tea routes, take and skip a thermos stop, dock and explicitly disembark. Verify dialogue, luggage, no payout on docking, and the fare/letter after reload. Close one unfinished fare without a reward.
-4. Complete all four favours, including picnic packets in either order. Compare the bell with both accounts, choose each interpretation on different voyages, and check the resulting board/Journal wording. Gift a fish and confirm it cannot be sold or cooked.
-5. Learn all recipes; try a matching bowl, a variation, leaving a partial tray and selecting a real catch. Reload, start a fresh voyage, and verify learned pages, customer favourites and earned decorations without carrying over cash or jobs.
-6. Enable/disable docking practice, approach manually and by Set course, and compare a gentle arrival with a quicker arrival. Inspect the guide and three new illustrated seats with reduced motion on/off.
-7. Play through 06:00 and finish early on another voyage; check action boundaries, reports and one-time rewards. Listen and sail on a physical phone while menus, steam and native figures are visible.
+For V11, the preparation uses Nao's menu, Mei's 8-cr/six-minute pack and Rin's free ten-minute fitting. Chapter two uses boarding, Aonami tasting, the waterproof case and station cooker; chapter three concludes at Nao's counter. Detailed terms and spoilers are in [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md).
 
-Real-browser CSS, focus behaviour, Safari/iOS, touch comfort and physical-device performance remain unverified. Browser access was declined earlier in this session; no browser screenshot or phone result is claimed.
+## Browser and device acceptance
 
-## Harbour pastimes · 0.15
+Follow [MOBILE.md](MOBILE.md)'s device matrix. At 320/390 px portrait and short landscape sizes, inspect all tabs, long notebooks, recipe trays, illustrated seats and the enlarged chart. Confirm fixed Back/Close, focus visibility, safe-area spacing, keyboard Escape, panel scroll restoration and usable sea framing.
 
-- **Fishing:** Menu/Journal → Harbour pastimes. Fish at any existing quay; a bite waits for you, or Relaxed mode reels automatically. Four game minutes per landed catch, six catches per voyage, a separate three-fish basket. Share with Nao for 6 cr each or release gently. The species notebook and earned paper-fish decoration persist.
-- **Nao's kitchen:** three authored customer orders with broth, topping and tea choices and illustrated trays. Nao provides ingredients; six minutes per served tray, 4 cr thanks plus 2 cr for the favourite combination. Completed shift unlocks a tea-cup decoration. No shift while she is aboard.
-- **Photo errands:** meet Yumi at Metro for market/canal views or Mio at Tsukimi for Hoshimi's light. Sail beside an accepted view, choose Frame a photo, select wide/close and capture for two minutes, free. Return to the requester for a pennant/star decoration. Three small actual Canvas photographs persist in the album across voyages; errands have no delivery deadline.
-- **Journey strip and budgets:** destination, sailing ETA, route fuel and nearest delivery deadline together. A low tank names a reachable pump and includes the refill in the ETA/budget, or explains why it cannot fit. Set course to the pump manually. Individual cargo budgets simulate collection, release waits, handovers, refilling, cash, shared capacity, deadline and return to Kurage. Net cash subtracts new fuel purchases, with starting-tank fuel explicitly excluded; combined two-order estimates remain distance-based.
-- **Closer views:** People → Take a closer dockside seat at Kurage, Lantern Market or Kisaragi. New illustrations of Mei, Nao and Jun include conversation and working activity/meal controls. Mei and Priya have 1024 px relaxed/thoughtful/pleased portraits. Original files and Classic references are preserved.
+Listen with music/effects independently enabled, retune repeatedly, hide/lock/return and reopen. Check full and reduced motion. Observe fuel-planner latency, sustained sailing performance and chart panning on physical phones.
 
-Rules, costs, source files and save details: [VOYAGE-HARBOUR-LIFE.md](VOYAGE-HARBOUR-LIFE.md). Art provenance: `tools/voyage-15-art-prompts.json`. Save version and keys are unchanged; optional records start empty in older voyages and histories. No activity forces a panel on startup.
+Current real-browser CSS/focus, Safari/iOS, touch comfort, listening and physical-device performance remain outstanding. Record these as separate manual results; mock DOM and native renders do not complete this coverage.
 
-Verification: 677 new rule/save/reward/fuel-budget checks and 285 total DOM integration checks pass, including pending-line reload, timer disposal, automatic reeling, recipe selection, photo framing, profile storage, close-view actions and the journey strip. Native Canvas inspected the three actual photo captures and all four ferry decorations. The full engine suite passes 71,627 assertions, Classic passes 3,211 checks and mocked audio passes 134. These do not verify browser CSS or phone comfort.
+## Defect report format
 
-Next browser/phone checks: fish using touch and Relaxed mode; close the activity during a bite and reopen a saved line; serve all three customers; photograph all views in both frames; return both errands; select decorations and reopen the game. Check small/landscape screens, portrait readability, photo preview and Close access, and performance while the journey strip estimates a fuel stop. Browser access was declined earlier in this session; Safari/iOS and physical-device results are not claimed.
+Record test ID, game version, commit, device/OS/browser, orientation, seed, chapter, starting clock/quay and relevant inventory. Give minimal reproduction steps, expected result and actual result. Include the affected source file where known, console errors and a screenshot or recording for visual defects. Preserve an anonymised local save fixture when the issue is state-dependent; do not overwrite the original fixture.
 
-## A clearer welcome and docking · 0.14
+## Release gate
 
-- **Help when you want it:** new and existing voyages open directly at the harbour. The automatic welcome guide and older release announcement are removed. Mei's optional tea job stays in People and the objective hint. Choose **Menu → How to play** for the full guide and its Talk to Mei shortcut. Menu is in the header at sea and alongside; M opens it on a keyboard.
-- **Clear arrivals:** an orange **Docked at…** message sits inside the port panel, below its tabs. It cannot cover Cast off or the tabs. **Closes in 6 s** counts down to automatic dismissal; **Dismiss** closes it immediately. Opening a menu or casting off also clears it. Countdown time is real time and never advances the voyage clock or charges credits. Reduced motion keeps the same six-second reading time without an entrance animation. The countdown does not announce every second to screen readers.
-- **Header layout:** the phone header groups Menu, Journal and Pause above Radio and the purse. The map fills the remaining height instead of assuming a fixed phone header height.
-- **Closer canal portraits:** Jun, Hana and Mako have newly drawn 1024 × 1024 portraits with larger faces, finer ink and warm place context. Their own faces, ages, clothing and roles remain recognisable. Original exports stay available, and Classic's references are unchanged. Prompts and source references: `tools/voyage-14-art-prompts.json`.
-
-`voyage/voyage.js`, `voyage/index.html` and `voyage/voyage.css` own the interface changes; `voyage/ports.js` selects the new portraits. Gameplay rules, Classic code and save version 1 are unchanged. Save recovery notices still appear and can be reread in Menu.
-
-Verification: `node tools/voyage-ui-checks.mjs` passes **168 DOM integration checks**, covering optional help, legacy startup, docking countdowns, dismissal, redocking, reduced motion, usable port tabs and save recovery. The engine suite passes **71,619 assertions**; Classic passes **3,211**; mocked audio passes **134**. These are automated results, not browser CSS or physical-phone testing.
-
-Next browser/phone checks: open a fresh voyage and an older save without dismissing a guide; use Menu while docked and sailing; dock, use every port tab during the countdown, and cast off before it ends. Check 320/390 px widths and a short landscape view for readable controls and scrollable content. Inspect Jun, Hana and Mako in both People and conversation. Safari/iOS, touch comfort, sound quality and device performance remain unverified.
-
-## Little life in the water · 0.13
-
-- **Easy docking:** the course-complete notice lasts one second, sits above the measured sailing/touch controls and disappears immediately on docking. Dock remains available while the notice is visible. Longer instructions and storage notices keep their usual reading time.
-- **Living water:** tiny translucent jellyfish, occasional fish shoals, curved surface ripples, rain rings and petals near the locks. Quay lanterns reflect across the shallows. These are decorative; they do not create objectives or obstruct sailing.
-- **Warmer waterfronts:** shaded tile and metal roofs, weathered dock planks, stone quay faces, moss, mooring hardware, kitchen ceramics, tea plants, a sleeping cat, a perched gull, a canal wind chime and an observatory compass tile. Named neighbours and anonymous visitors have refined clothing, hair, shadows and small work accessories.
-- **Mio’s portraits:** relaxed, thoughtful and pleased expressions now use the finer textured treatment of the existing Nao art. Mio keeps her chestnut ponytail, glasses, blue work coat, ivory scarf and observatory setting. New local exports are 1024 × 1024 WebP: `assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp`. Other portraits were inspected and retained.
-
-`voyage/harbour-art.js` owns the new native Canvas artwork; `voyage/voyage.js` uses it without changing navigation geometry or trading rules. Decorative motion freezes with reduced motion. Water objects are anchored in navigable water and the new water effects are culled outside the view. Existing saves and Classic remain compatible. Portrait provenance: `tools/voyage-13-art-prompts.json`.
-
-Verification: the engine suite passes 71,619 assertions; DOM integration passes 106 checks, including desktop/phone-width notice placement, one-second dismissal and immediate docking. Native Canvas renders cover all nine quays, dawn, reduced motion and Ghost Tide colours. These checks do not cover real-browser CSS layout or real-device performance; those still need playtesting.
-
-## First route to try
-
-1. At Kurage 33, select Mei under People and collect her free tea case (5 minutes). Menu → How to play is available if you want guidance.
-2. Cast off. Steer with WASD or arrow keys, use the touch direction buttons, or choose **Night Market** in Set course. Manual steering cancels assistance. The boat turns toward your chosen direction and slows when you release it; Stop holds position immediately.
-3. Enter the quay's dotted ring and press **Dock** or E. The assisted route stops near the port; it does not dock without your choice.
-4. Speak to Nao and deliver the tea: 24 cr, 5-minute handover, start by 03:40. Have a bun, or chat again for different replies.
-5. Sail to Landing 3. Read the gold board, compare it with your remembered quotes in the Journal, and refuel if needed. The co-op releases recycled gold at 00:20; market crews create demand after 00:55. Observe the actual price before committing.
-6. Explore the lantern in the western reeds. Close enough, an Investigate button appears. Recover the signal-light kit once for 36 cr and 12 minutes.
-7. Finish under Services at any port, or continue until 06:00. The report separates realised gold profit, courier payment and salvage.
-
-## Another reason to cross · 0.9
-
-- **Portrait review:** Aki, Yumi and Matte’s faces and costumes stay recognisable, with warmer places behind them. Sora’s new portrait brings her brass scale and lantern counter into view. Nao’s fine ink, painted colour, adult expression and harbour warmth were the quality reference. The four refined portraits are also used by Classic. Other portraits were reviewed and retained. Exact prompts: `tools/voyage-09-art-prompts.json`; all four are local 512 × 512 WebP files generated with the built-in image-generation tool.
-- **Dockside listening:** opt-in Harbour sounds now include soft kettle simmer near Kurage, the market, Kisaragi and Tsukimi; filtered workshop sounds near the yard; low refrigeration machinery near Frostline. They fade over 360 map units, independently of the radio. Turning effects off mutes the whole effects bus. No audio starts without an explicit interaction.
-- **Trading overview:** open from Market or the Journal. It shows the live local quote, remembered prices and their age, unread boards, and sailing time/fuel to each quay. Aboard cargo combines paid cost, promised payment, time remaining, sailing time, handover time and fuel. Fuel cost estimates use 5 cr/unit; refills still cost 30 cr for a full tank. Estimates exclude return travel, turns, detours and waits. Viewing never reads unseen quotes or advances time.
-- **Letters:** meaningful completed voyages can offer one optional job on a later voyage. Acceptance is free; it does not buy cargo or transfer money from another night. One request per voyage, including closed/completed requests. Older letters without a request field gain an appropriate offer where available. Read the letter and choose Accept; collection and delivery happen through the named People controls. The Journal tracks every phase. Moor at any quay to close a request without payment or refund.
-- **Mio’s lens parts:** collect from Rin at the yard for 24 cr and five minutes, one cargo slot. Deliver to Mio at Tsukimi by 05:00 for 58 cr and five minutes. This is a separate seal-parts job, not an automatic completion of the original gold-contact kit.
-- **Rin’s inspection:** collect a free checklist at the yard in five minutes, no cargo slot. Sail to the retired weather station east of Frostline and choose Inspect for Rin (free, ten minutes). Inspection must finish by 05:10; start the five-minute report to Rin by 05:10 for 24 cr. The station remains available for this inspection even if its public tide sketch was already read.
-- **Nao’s citrus:** collect Jun’s sealed case at Kisaragi for 12 cr and five minutes, one cargo slot. Deliver to Nao by 05:20 for 32 cr and five minutes. Fuel is extra for every job; quoted margins do not guarantee a profitable route.
-- **Three small discoveries:** a sheltered tea pontoon north of the market (3 cr/six-minute tea or a free wave), a retired floating weather station east of Frostline (a free tide sketch or leave undisturbed), and a flower skiff west of the locks (4 cr/four-minute cabin posy or free conversation). Choices settle once per voyage. These are small stops in navigable water, not new full ports. The Journal’s Basin chart previews them and sets a safe assisted course. Approach within their ring and use Explore. The station and pontoon stay visible after a visit.
-- **Ferry details:** cargo is secured with crossed straps, a small captain silhouette sits behind the glass, Nao appears aboard while travelling, and a purchased posy rests by the cabin window. A fading wake follows movement. Decorative changes honour reduced motion and do not alter the hull’s navigation geometry.
-- **Nao & Sora’s evening:** after Mei’s tea delivery, speak to either at Lantern Market and plan the evening free. Collect Mei’s sesame supplies at Kurage for 8 cr/five minutes/one slot; deliver at the market free in five minutes. With Sora, choose a five-credit simple menu for more night workers or a seven-credit fuller tray; this is a free narrative decision and credits no shop sales to the captain. Bring Nao back to her counter if she is aboard, then share the evening tea for 4 cr/twelve minutes. The ending, casual reactions, board and Nao’s follow-up letter reflect the price. The full story costs 12 cr plus fuel and has no special deadline beyond dawn.
-
-Save version remains 1. `letterJob` is optional and holds `{id,source,stage,paid,revenue}`; request stages are accepted, collected, inspected (survey only), done or abandoned. Letter cargo and evening supplies share the existing two/three-slot hold. Boolean evening flags use the existing save schema. Profile letters can optionally carry a request ID. Older saves are accepted without adding rewards or completing quests. No network is used while playing. The letters panel’s invalid history-variable reference was corrected.
-
-Engine checks cover full request and evening flows, duplicate rewards, funds, deadlines, capacity, legacy letters, unknown request IDs, discovery costs and free alternatives, and quote visibility. Mock-DOM/Canvas smoke checks cover accepting letters, collection dialogue, menu choice, evening tea, free trading overview and reduced motion. Web Audio checks cover distance mixes, mute and graph cleanup. Timbre, touch comfort, real-device layout and performance still need playtesting.
-
-## Familiar faces, warmer quays · 0.8
-
-- Nao, Rin and Mio have relaxed, thoughtful and pleased portrait variants. Plans use thoughtful faces; successful handovers, repairs and supper use pleased faces. Casual replies retain their normal or completed-story mood. No extra dialogue click is required.
-- All fourteen quay figures have distinct hair, clothing and accessories matching the cast. Nao leaves her market figure while aboard and appears at the canal or observatory when moored there for her story.
-- Small kettle steam, slow telescope adjustment, slack rope movement and a softly breathing work lamp add activity. System reduced motion freezes their movement. Shallow shoreline bands, submerged quay walls, shadows and small lantern reflections add depth without changing safe water or collision geometry.
-- Three optional illustrations unlock after constellation supper, Nao’s market breakfast and Second Helping’s repair. **View moment** appears in relevant conversations and the Journal. Completed voyages retain those buttons in the captain’s history. Viewing is free, pauses sailing and never auto-opens over the map. Images have descriptive alternative text and a readable fallback if an image fails to load.
-- Existing saves and histories remain valid. Older histories have no image record; existing supper/repair flags unlock their images in the current journal. A market breakfast played before 0.8 needs another breakfast visit to create its new memory flag.
-
-All twelve new images are original, generated with the built-in image-generation tool from this game’s own character references. The exact prompts are in `tools/voyage-art-prompts.json`. Portraits are 512 × 512 WebP; optional scenes are 960 × 640 WebP. No image service runs during play.
-
-## Familiar water, another night · 0.7
-
-- **Captain’s history:** the Journal and Services show the latest twelve completed voyages, seeds, realised gold results, cargo result before fuel, discoveries, fuel purchases and shared moments. Finishing again or continuing and re-finishing updates the same entry. Active voyages are not archived. Finishing early counts as a completed voyage; reaching dawn is not required.
-- **Different nights:** fresh voyages keep the five existing cargo requests and add one seeded request: Mei’s rice parcels (Kurage → Metro, 16/34 cr, release 00:20, deadline 04:20), Rin’s filters (yard → Landing, 22/46 cr, release 00:00, deadline 04:30), or Mio’s star charts (observatory → Kisaragi, 14/44 cr, release 00:40, deadline 05:20). The same seed selects the same request and demand pattern. Co-op supply and crew/instrument demand magnitudes vary, with unchanged event times. The board’s Tonight’s working harbour notice signals relative demand without promising profit. Older voyages without `demandVersion` preserve their original requests and market terms; start a fresh voyage for the new patterns.
-- **Reservation:** reserve one uncollected request through the board. No credits or hold slot are taken. The Journal tracks the collection quay, release, cost and deadline; Cargo and board show collected/delivered status. Cancel before collecting for free. Collection uses the usual purchase and five-minute rules and clears the reservation. Other cargo remains available. Reserving does not extend a deadline, waive a purchase or promise spare hold space. Collected cases follow the existing delivery/expired-unload rules.
-- **Ferry choices:** Services at Lantern Market or Starling Yard offers previews of three hull colours and three cabin lamps. Blue paint costs 12 cr, plum paint 14 cr, mint or rose lamps 8 cr; original choices are owned and free. A nameplate costs 5 cr once, then can be changed freely (up to twelve letters, numbers, spaces, apostrophes or hyphens). Previewing is free; buying/applying is explicit and takes no clock time. Owned styles carry between voyages, but money and gameplay upgrades do not. Cosmetics change no fuel, speed, capacity or dialogue identity.
-- **Letters:** meaningful completed stories can produce letters from Nao, Mio, Rin, Aki or Jun. Read them in the Journal or captain’s history and mark them read. They survive starting a fresh voyage and do not unlock or complete quests. Reopening a report does not duplicate letters; a changed outcome updates the letter and marks it new. Letters belong to the latest twelve recorded voyages, with a maximum of forty-eight.
-
-History, letters and cosmetics use `neon-tides:voyage:profile:v1`, separately from `neon-tides:voyage:v1`. A corrupt profile resets only that profile, with a notice; the active voyage remains intact. Storage-blocked sessions retain these features in memory but cannot persist them. `voyage/profile.js` owns profile validation, deduplicated records and cosmetic transactions. The optional `uid`, `reservation` and `demandVersion` fields keep older voyage saves compatible.
-
-## A night worth bringing home · 0.6
-
-- **Destination previews:** choose Plan your next destination in People, select a quay in the Journal chart, or use Set course while sailing. A preview shows local neighbours, fuel availability, cargo requests, unlocked jobs, active story steps and route estimates. Reading costs nothing and does not fetch unseen gold quotes. Cast off & set course is explicit; closing the preview commits nothing.
-- **Encounter visitors:** each of the three existing discoveries has its original encounter and two seeded variants. Meet a fisherman or breakfast skipper, salvage released tea boxes or a survey chest, and read day-crew thanks or a folded star map. Labels, fuel/time costs and rewards remain explicit. The same seed has the same visitors. Resolved variants are saved, pay once and retain their specific journal outcome; older completed discoveries retain their original wording.
-- **Trading feedback:** successful sales show revenue, purchase basis and realised result before fuel in the log and Market; the short toast shows revenue and result. Local harbour notices explain only events that have already occurred: recycled gold at 00:20, market crews at 00:55 and instruments at 02:00. No hidden future price is exposed. Fuel purchases and tug fees have separate report totals. Older saves begin a partial expense ledger at migration time; the report explicitly marks unavailable earlier expenses. Older sales without a purchase basis are excluded from realised results and labelled.
-- **Nao aboard:** her existing portrait appears beside Crossing moment and in its reading panel. Four fresh post-supper lines reflect her recipe, the star map and the homeward crossing. The portrait uses the existing action area, with no new floating panel covering the sea.
-- **Morning:** from 05:00 to 06:00 the water gradually brightens, with a gentle warm daylight tint and breakfast signage. Mei and Nao offer breakfast (4 cr, eight minutes) through People from 05:00. At dawn the closing harbour wire shares messages reflecting tea, Nao’s whereabouts, sky watching, supper and repairs. Finishing earlier uses evening wording. Messages grant no rewards and do not teleport the ferry or falsely return Nao home.
-
-The optional `encounters` and `expenses` save fields retain version 1 compatibility. Tests cover preview side effects, all encounter visitors, duplicate rewards, expense migration, sale basis, breakfast timing and contextual endings. Native Canvas/mock-DOM checks exercise the new controls; real-browser phone layout still needs playtesting.
-
-## Camera fix · 0.5.1
-
-The camera centres the ferry and nearby quay/discovery in the area between the measured route controls, action buttons and touch pad. It can pan beyond world boundaries, so upper-edge water is reachable below the menu. A safety bound keeps the ferry clear immediately after zooming or resizing. Empty space beside the course selector passes clicks to the sea. `voyage/camera.js` contains the pure framing rules; rendering and hit-testing share the same camera transform in `voyage/voyage.js`.
-
-## Stories across the water · 0.5
-
-- **Harbour board:** read it through People at any quay, or the Journal. Neighbours post requests, casual remarks and notices reflecting deliveries, repairs and the new supper. Reading is free and pauses sailing. Cargo notices show fixed costs, payments, release times and destinations.
-- **Trading talk:** the board and character conversations add trading notes to the Journal. Each note shows author, posting time, first hearing time and elapsed minutes. Re-reading preserves the first hearing time. Outlooks describe existing co-op supply, crew demand and instrument demand; they promise no profit. Fixed cargo contracts are labelled separately. Market has a Local trading talk button.
-- **Constellation supper:** after sharing the sky watch with Nao, talk to her to plan supper. Collect Jun’s roasted tea at Kisaragi (6 cr, 5 minutes) and Mei’s ginger biscuits at Kurage 33 (4 cr, 5 minutes), in either order. The small recipe basket uses no freight slot. Bring Nao aboard, sail to Tsukimi and share the supper with Mio (free, 12 minutes). The Journal tracks each next step; the board, character reactions and observatory table reflect completion. Bring Nao home when ready. There is no additional deadline, but dawn still ends the voyage.
-- **Navigation:** selecting a quay displays estimated arrival, sailing minutes, route fuel and a low-fuel warning. Estimates use safe assisted routing and reflect engine upgrades; turns, detours and stops need extra allowance. Manual steering, Stop and Escape clear the destination. View switches between close and wide; keyboard, touch and water-click targeting use the same camera transform.
-- **Waterfronts:** a kitchen chimney, harbour clock tower, yard gantry and workers, canal banners and observatory supper table give quays distinct shapes. Market counters move into morning preparation after 03:30; Metro’s last train gives way to a departure notice after 01:40; Frostline’s unloading crew arrives after 02:00. Details stay decorative and do not change collisions. Reduced motion keeps ambient drawing still.
-
-Existing saves preserve all earlier stories and gain an empty trading notebook; the save version remains 1. The new supper depends on the shared Nao sky-watch outcome, not a fresh voyage.
-
-## The wider night · 0.4
-
-- **Harbour sounds:** open Radio and turn Harbour sounds on independently of music. Quiet engine and wake follow sailing; wind and rain follow weather; departures have a low soft horn and mooring a gentle bell. Effects start Off, with separate 30%, 60% and 100% volume. Remembered settings require a tap after reopening. Panels, pauses and hidden tabs silence sailing ambience.
-- **Discoveries:** look for a drifting survey chest, a resting delivery boat and a lantern message. Approach their dotted ring and choose Explore. Costs appear before committing; each outcome can be claimed once. Recovering the chest takes eight minutes and earns 18 cr. Helping the boat uses 0.6 fuel and ten minutes for 20 cr; arranging help by radio uses five minutes without fuel or payment. Reading the letter uses five minutes. Leaving a discovery also records its outcome.
-- **Cargo planner:** the Journal lists paid cost, promised payment, destination, remaining delivery time and estimated route fuel for cargo aboard. Compare two available orders, including collection, release waits, return fuel and handover deadlines. Estimates exclude manoeuvres, refuelling time and detours; handover takes another five minutes. Fuel credit estimates use the full-tank rate and are not a guarantee of net profit.
-- **Nao aboard:** crossing moments vary with destination, weather, visits and shared memories. After completing her festival return, invite her on another outing at Lantern Market. The original festival outcome stays completed; bring her back to finish the new outing.
-- **Weather:** seeded clear water, rain and mist blend through the night. Weather is cosmetic: it does not change speed, fuel or prices. Quay markers remain above the haze; reduced motion removes animated rain.
-- **Tsukimi Observatory:** ask Kenji at Lantern Market about Mio’s gold-contact kit. It opens at 00:40, costs 54 cr and pays 100 cr at Tsukimi if handover starts by 04:50. The outer-bay quay has a fuel pump, cocoa and astronomer Mio Amami. Delivering the kit unlocks a twelve-minute sky watch. Nao can join it, or share a six-minute return watch if you went alone first. The calibrated dome and telescope reflect delivery progress.
-
-Older Voyage saves gain optional discovery records without a save-format change. Radio preferences use `neon-tides:voyage:radio:v1`; ferry effects use `neon-tides:voyage:sound:v1`. Neither changes Classic settings.
-
-## Ghost Tide FM · 0.3.2
-
-Open **Radio** (or `R`) and explicitly tune Ghost Tide FM for a mellow Halloween station: slow 72 BPM electronic pulses, minor chords, waves and wind. Volume cycles through 30%, 60% and 100%. Music preferences live separately from the game save; reopening asks you to tap to listen. Pumpkin accents, warm sea haze and small quay pumpkins follow the station and clear when it is Off. The sound and theme do not alter gameplay.
-
-## Boat and waterfront detail · 0.3.1
-
-The Tern now has deck rails, wheelhouse glazing, its nameplate, aerial, life ring, rope coil, navigation lights, visible case cargo and a softer curved wake. Moored and passing boats have fishing, tug, passenger-ferry and cargo-barge silhouettes. Waterfronts add ladders, fenders, cleats, mooring lines, rescue rings, rope coils, dock carts, nets and local freight equipment. These are visual details; sailing routes and save rules are unchanged. Reduced motion keeps wakes off and ambient details still.
-
-## Refinement update · 0.3
-
-- **Crossing moment:** after sailing 120 map units, an optional button opens one short passenger, radio or observation card. Opening the card pauses sailing. It never opens automatically, costs no clock time and can be ignored. New departures rotate the lines; Nao speaks when aboard. The selected line survives a save/reload.
-- **Timed buyer requests:** Metro releases one gold-contact regulator case at 00:50: buy 48 cr, Kenji pays 78 at Lantern Market by 03:20. Frostline releases chilled jasmine starter at 02:00: buy 28 cr, Hana pays 50 at Kisaragi by 05:30. Cargo offers include labelled waits; these advance the clock to release time.
-- **Route preview:** cargo cards show estimated sailing minutes and fuel for the safe outbound route, reflecting an engine upgrade. Fuel credits use the full-tank rate (30/6 = 5 cr per fuel). These are distance-based estimates; collection, turns, detours, the five-minute handover and return costs need separate allowance.
-- **Expired cases:** unload at any quay after the delivery deadline. This frees a hold slot without payment or refund, keeps the purchase loss in the report, and cannot be used to buy the same contract again.
-- **Working waterfronts:** striped kitchen awning and stools, market counters, train carriages, numbered cold bays, pipework, repair rails, crane hook, shop signs, small neighbours, moored skiffs, reeds and faint offshore mist. Decorative figures, vessels, reeds and mist do not create collision hazards. Buoys, quay rings and routes remain clear. After the pump repair, Second Helping leaves its dry slip and appears beside the yard; Nao’s table appears after the preview supper. Cargo buyers and sellers acknowledge settled deliveries.
-
-## Controls and rules
-
-- WASD/arrows or held touch buttons: direct steering. J: Journal. M: Menu and optional help. P: pause. E: dock. Escape: cancel course/stop, or dismiss an open panel.
-- Click open water for an assisted course. The Set course selector work with keyboard and touch too. Assisted routes avoid land; manual steering remains available.
-- Time advances only during movement and explicitly labelled activities. Conversations, trading, journal reading and panels pause it. Background tabs do not advance time.
-- Start: 360 cr, 2 g gold, full tank. Gold lots use the existing deterministic `market.js` pricing, spreads, dealer impact and stock caps.
-- Small tea courier contract: no stock purchase, one payment, deadline checked at handover start. Fuel is the captain's cost.
-- Landing 3, Starling Yard, Kisaragi or Tsukimi refuel: 30 cr, 10 min, tank filled to 6. Market engine tuning: 80 cr, 15 min, 15% more speed and 20% less fuel per distance. Upgrade once.
-- Out of fuel: the tug recovers you to Landing 3 in 20 min for up to 20 cr, including free recovery if penniless. No combat, hull damage or permanent death in this stage.
-- Closing/reopening resumes the Voyage save. Corrupt or incompatible Voyage saves start fresh without altering Classic. Storage-blocked browsers still play for the session.
-
-## Scope
-
-This is the expanded sailing stage of the intended new full game. Nine quays are navigable: Kurage 33, Landing 3, Lantern Market, Metro Quay, Starling Yard, Frostline, Kisaragi, Hoshimi and Tsukimi. Fourteen characters have fresh casual replies, with contextual reactions after story progress. Classic remains the complete previous game.
-
-## New routes and stories
-
-- **Rin → Aki:** collect the free lighthouse kit at Starling Yard and take it to Hoshimi. Start the handover by 05:00 for 40 cr. The lighthouse brightens after delivery. Help Rin repair Second Helping for a separate ten-minute story outcome.
-- **Nao → Kisaragi → home:** after delivering Mei’s tea, invite Nao aboard at Lantern Market. Speak to Hana or Nao in Kisaragi for the preview supper, then bring Nao home to her counter. Nao appears in the People list while travelling with you. This is a social story without a fee or special delivery deadline; the voyage still ends at dawn.
-- **Stock cargo:** Jun sells a sealed bowl case in Kisaragi for 20 cr; Mei pays 36 cr at Kurage 33 by 05:10. Rin sells pump seals at the yard for 18 cr; Frostline pays 32 cr by 04:50. These are one-time purchases and payments. Buying and handing over take five minutes each. The difference is gross margin: fuel and other expenses are extra.
-- **Shared hold:** tea, lighthouse kit and stock cases share two slots. Kenji’s cargo racks at Lantern Market cost 65 cr and ten minutes, adding a third slot. Gold and Nao do not occupy case slots.
-- **Journal:** lists several active stories and completed outcomes, with a Track action for the objective line. The Basin chart marks visited quays and lets you set a course after casting off. Remembered gold boards include their observation time.
-
-Buildings now have roof tiles, skylights, warm windows, quay reflections, trees and cargo stacks. New landmarks include the yard crane and repair ferry, Metro platforms, Frostline chillers, Kisaragi’s canal bridge and lantern table, and Hoshimi’s sweeping lighthouse. Small workboats and restrained rain add movement. The map remains procedural Canvas artwork for playtesting; a fully painted sailing map, the broader chapters, Harbour Wire and additional radio stations remain future stages. Three optional illustrated dockside views are available in 0.15.
-
-Existing 0.1 Voyage saves retain their purse, stories, upgrades and discoveries. If you ended an early voyage before dawn, **Continue this voyage** on the report reopens it for the new destinations. Dawn-ended voyages need a fresh start. Classic saves remain separate.
-
-## Files and validation
-
-`world-map.js`: navigable land, ports, landmarks. `navigation.js`: steering, collisions and safe assisted routing. `ports.js`: adapted character text, cargo contracts and market events. `model.js`: time, cargo, fuel, gold, upgrades, recovery and save validation. `voyage.js`: Canvas map, HUD, People/Market/Cargo/Services panels, input, dialogs and autosave. `voyage.css`: desktop/mobile views. `sound.js`: optional ferry and weather synthesis; `../halloween-radio.js`: shared procedural radio. `../assets/portraits/mio-{relaxed,thoughtful,pleased}.webp`: observatory portraits; `mio.svg` remains as the original design reference. No build or dependencies needed to play.
-
-Run `node tools/voyage-checks.mjs`, `node tools/adventure-checks.mjs`, and `node tools/sound-checks.mjs`. Sailing checks simulate every port-to-port route through the actual steering function, not just path existence. A local canvas/DOM smoke pass also exercises startup, tabs, portraits, assisted sailing, docking and the journal. Actual browser layout, touch comfort and device performance still need player testing.
-
-Most useful feedback: Does the ferry turn comfortably? Are the quay rings easy to find? Do the four port tabs feel clear? Does the gold/cargo presentation make sense? Is the map too empty, too zoomed out, or difficult to read on your device?
-
-## Voyage 0.10 · A little more life between quays
-
-- `voyage/voyage.js` and `voyage/voyage.css`: brief skippable arrivals, gently drawn mooring ropes, safe camera easing, and small animated Nao/Yumi deck figures. Reduced motion uses a static reveal. Arrival presentation consumes no game time.
-- `voyage/ports.js` and `voyage/model.js`: three optional waterway encounters west of the central channel and along its eastern approach. Sora sells one gram for 46 cr (4 min); released yard fittings pay 8 cr (6 min); Yumi boards for free (3 min) and pays 12 cr once on mooring at Metro. Each offers a free alternative, settles once, and persists in existing saves. Nao can remain aboard with Yumi.
-- `voyage/ports.js`: fourteen characters gain rotating everyday conversations after their introductory lines. Delivery and quest reactions retain priority. Deck conversations vary with distance sailed, nearby quays, weather, cargo and story progress; reading pauses sailing.
-- `voyage/model.js` and `voyage/voyage.js`: Trading overview compares one-gram gold routes using only the live local purchase price and known remembered bids. Cargo comparisons include collection/delivery fuel, return fuel to Kurage, purchase cost, promised payment, quote age and deadline feasibility. These remain estimates; no unseen price is revealed.
-- `voyage/profile.js`: each completed voyage now keeps an illustrated entry, encounters and a relevant character’s closing message. The result includes realised gold, cargo, couriers, letter jobs, discoveries and salvage minus recorded fuel/recovery. Food, upgrades, cosmetics and unrealised gold are explicitly excluded. Old histories and Voyage saves remain compatible.
-
-Validation: `node tools/voyage-checks.mjs` covers encounter location, costs, one-time rewards, passenger coexistence, malformed/old saves, changing conversations, estimate accounting and saved logbook entries. Native Canvas smoke scenarios inspect sailing and mooring; real-device Safari/iOS testing remains outstanding.
-
-## Voyage 0.11 · Routes, memories and a little festival
-
-- `voyage/index.html` / `voyage/voyage.css`: essentials remain visible; the objective expands on request, Stop appears while underway, and Ferry tools groups recovery, ledger and planning. Touch controls and the camera’s safe viewport remain separate.
-- `voyage/voyage.js`: nearby, tracked and selected quays have strong labels. Distant quays retain small markers and mooring lights; wide-view secondary signs are quieter. Selected destinations and assisted courses use stronger outlines.
-- `voyage/model.js`: the two-order planner evaluates precedence-valid collection/delivery sequences against hold occupancy, release times, deadlines and simulated cash (including payments before later pickups). It includes both handovers, purchase basis for cargo already aboard and a return to Kurage. A saved route tracks its next stop after handovers. Estimates exclude steering delays, detours and refuelling stops; a low-fuel route explicitly needs a refill and its additional 30 cr / 10 min.
-- `voyage/ports.js` / `voyage/model.js`: after Nao’s Kisaragi preview, Hana offers the festival. Collect Mei’s rice (8 cr) and Jun’s citrus (4 cr) into one cargo basket, give it to Hana, help Mako hang lanterns, bring Nao and choose sesame rice or citrus soup. Opening is free; tea is 2 cr, a bun 3 cr and the celebration 4 cr. No menu sales or delivery payment are credited. Supplies and celebration settle once; food stalls remain optional purchases. Nao stays aboard until you bring her home.
-- `voyage/profile.js`: completed voyages preserve known visits, shared meals and meaningful stories. Memories produce fresh contextual greetings without fees or artificial relationship meters. Existing histories recover recognisable story memories where available; old histories still load.
-- `voyage/model.js` / `voyage/profile.js`: the ledger records all actual purse movements in categories, retaining totals and the latest 200 transactions. Meals, upgrades, paint, gifts and festival spending are included. Cash change is separate from realised gold profit and cash-plus-stock at purchase cost. Gold basis is grams × per-gram cost; deliverable held cargo retains purchase cost, expired cargo is written down, and upgrades/gifts have zero stock value. This is a cost-based book value, not a guaranteed resale valuation. Older saves start an explicitly partial ledger from their current purse and inventory. Completed history accounting is an immutable snapshot.
-
-Checks: `node tools/voyage-checks.mjs` covers both festival branches, exact costs, blocked/repeated actions, combined precedence and capacity, funding pickups, expired inventory, gold basis, immutable accounting and profile migration. DOM/Canvas smoke scenarios cover the festival controls, ledger, route saving and the compact interface, including a phone-sized viewport and reduced motion. Real-device Safari/iOS remains unverified.
-
-## Voyage 0.12 · Gameplay and dialogue audit
-
-A critical review of 0.11 is recorded in `VOYAGE-AUDIT.md`, with reproducible findings, fixes and remaining play-test questions.
-
-- Expired tea/lighthouse cases can be unloaded at any quay through Cargo or Journal. Closed requests release their cargo slot without payment and remain visible as outcomes.
-- Optional activities require their full advertised time before 06:00. Exact-dawn completion is allowed. The tug remains available in the final minutes and shows its actual duration.
-- First-voyage guidance leads directly to Mei's tea crossing; Ferry tools reopens help. Active stories come first in the Journal, with next-quay previews; outcomes and detailed planning are folded. Buttons explain common time, purse and capacity limits. Close stays visible while long panels scroll.
-- Festival destination markers follow their written next steps. Unloading a case refreshes the combined route. Routes needing refuelling explicitly remain conditional on its extra budget and time.
-- The logbook and new history rows separate held inventory from settled cargo results. Expired purchases are written down once; older summaries keep their numbers and show their earlier basis.
-- Gold route comparisons support one or three grams. New voyages price Sora's travelling gram at 86 cr; existing voyages preserve the older 46-cr offer. No unseen quote is supplied.
-- Delivery and festival reactions have distinct voices, repeat dialogue notices the night's progress, and late Metro crossings acknowledge the last train. Current reactions take precedence over old memories without losing trading news.
-- Invalid saves/history fail safely, with a notice and the unreadable original retained locally where storage permits. Valid earlier saves continue.
-
-Checks: run `node tools/voyage-checks.mjs`, `node tools/voyage-ui-checks.mjs`, `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. The new UI script has no dependencies and checks DOM behaviour; it does not verify CSS, touch comfort or real-browser rendering.
+1. Review the diff and update affected specifications, player guidance and asset inventory.
+2. Run required automated suites and JavaScript syntax/whitespace checks; confirm local script and asset paths.
+3. Execute the applicable manual scenarios and record any remaining coverage explicitly.
+4. Publish the tested revision, verify GitHub Pages completion and confirm the deployment commit.
+5. Smoke-test the deployed entry page and both modes, including save/resume on the intended browser origin.

@@ -1647,7 +1647,7 @@
   // the moon). "wide" (Menu → Camera, or index.html?camera=wide) is the picture as it was before 3.2:
   // the whole harbour all the time. The viewBox cannot be transitioned in CSS, so it is tweened by
   // hand; during the 0.9 s glide the picture repaints every frame, which is the price of doing it this
-  // way (a still picture repaints nothing: MOBILE.md §12).
+  // way (a still picture repaints nothing: MOBILE.md: Animation budget).
   const CAMERA_MODES = ["wide", "close"];
   const CAMERA_MS = 900;
   const FULL_VIEW = { x: 0, y: 0, w: 1440, h: 800 };
@@ -3866,23 +3866,22 @@
   function openTradeHelp() {
     const touch = touchFirst();
     const items = [
-      "Gold is money in the Basin, kept when the banks fail, and it is also what the wet machines run on: contacts, sensors, radios, drones. Every scale chalks two numbers a gram: what you pay to buy, and what you get when you sell.",
-      "Your goal is to grow the value of your purse and gold before you finish the night. Prices respond to boats, buyers and news. Compare leads, check the quays, and choose your moment.",
-      "Chat with people for free; repeated visits reveal different casual lines. Food and tea still unlock the important meal conversations. Casual chat never spends time or buys trust.",
-      "Use Next to read a conversation at your pace, or Read full exchange to see it all. Reading never moves the clock.",
-      "Food and tea cost a few credits and some time. Sitting down is how you hear things; leaving at once saves both, and you may miss something.",
-      "What you hear goes into the notebook" + (touch ? "" : " (N)") + " as it was said, with who said it, where and when. Whether it's true is up to you. Going to look for yourself costs fuel and time, and the news may be old by the time you get there.",
-      "Scales are at Kurage 33 and Landing 3. Trading takes no time. " + (touch ? "Tap" : "Click") + " a ringed thing in the picture to do what the matching choice does.",
-      "Crossings cost fuel and minutes; refuel at Landing 3. Out of fuel elsewhere, radio the harbour tug.",
-      "From " + TRADE.meta.turnInFrom + " you can turn in aboard the Tern. The morning wire says what really happened, and Mei's scale says what your night was worth.",
-      "Every night is a seed; the same seed is the same night. Four mystery adventures await under Case files on the title screen.",
-      "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it."
+      "Each gold scale shows two prices per gram: Buy is what you pay; Sell is what you receive. Quotes change with local supply, demand and the night’s events. Dealers have finite stock and buying allowances.",
+      "Compare the price you paid with the destination’s actual bid. A remembered quote may have changed; fuel, food and other expenses also affect your result.",
+      "Talking and casual chats are free. Food and tea show their price and time before you order, and some meals introduce trading leads. Next, Previous and Read full exchange let you read at your own pace without advancing the clock.",
+      "The notebook" + (touch ? "" : " (N)") + " keeps each rumour’s wording, speaker, place and time. Check accounts at other quays before deciding what to trade.",
+      (touch ? "Tap" : "Click") + " a ringed scene target or its matching action button. Use the destination strip or Ferry choices to travel. Each crossing shows its fuel and time cost.",
+      "Fuel is available at Landing 3 and other unlocked pumps. The harbour tug provides recovery when you are stranded. Keep fuel money available before committing to a delivery.",
+      "Cargo offers show purchase cost, payment, destination and handover window. Gross margin excludes travel and fuel. Deliver explicitly to settle a case; arrival and dawn do not pay it automatically.",
+      "The trading season has three chapters. Continue through the shift reports to keep actual credits, gold purchase history, fuel and story memories. Continuing grants no free refill.",
+      "From " + TRADE.meta.turnInFrom + " you can turn in aboard the Tern. The morning report records the night’s events and accounts. Four separate investigations are available under Case files on the title screen.",
+      "Radio and Harbour sounds have separate controls in Menu. Sound starts from a tap or key press. Menu → Motion selects full, reduced or system-following decorative movement."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
     openModal({
       title: "Captain’s guide",
       body: [
-        el("p", { text: "You run the night ferry Tern, with a little gold, a few hundred credits and most of a tank. The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross." }),
+        el("p", { text: "Trade and explore aboard the night ferry Tern. The scene shows your current quay and pulls back during a crossing. Your purse, gold, fuel and clock remain visible in the dashboard." }),
         el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
       ],
       actions: [{ label: "Back" }]
@@ -3893,24 +3892,23 @@
     if (isTrade() && transient.mode === "play") { openTradeHelp(); return; }
     const touch = touchFirst();
     const items = [
-      "Talking and casual chats are free. Repeated chats offer different lines. Searching and crossing cost minutes; reading with Next or Read full exchange never does.",
-      "Clues go into the notebook" + (touch ? "" : " (N)") + " with their exact wording.",
-      "Somebody tonight is lying. When you can prove it, go back to them and put up to three pieces of evidence down: first the proofs that break the story, then the reason, and the one clue that supports it.",
-      "Things you can act on are marked in the picture with a dashed ring and a label: " + (touch ? "tap" : "click") + " one and it does what the matching choice under the story does, for the same cost. \"Show … something from the notebook\" lets you hold a clue up to a witness and hear what they make of it.",
-      "The notebook's timeline asks who was where, and when. Fill it in from what you have read: the liar tests it against the paper you put down, and the ending card counts the lines you got right.",
-      "The notebook marks the threads your evidence settles and the lines you can fill in. Menu → Hints turns those marks off for a harder night; the liar's rebuttals at the counter stay.",
-      DATA.world.drink.name + ": one can, one use. Drink it and your next crossing takes no time. The vending machine at the Metro Quay has more.",
-      "Out of fuel? Refuel at Landing 3, or radio the harbour tug if you are stuck elsewhere.",
-      "The radio " + (touch ? "on the dashboard" : "under the picture") + " tunes between Off, Rain only, Lantern FM and Basin Lo-Fi. The music is generated on the spot; nothing is downloaded. Menu → Harbour sounds enables soft ferry, trading and market effects independently of the radio. Effects volume has three levels.",
-      "Every case is a seed, and the same seed always opens the same night. Case files on the title screen lists the mysteries and endings you have found.",
-      "Nothing moving? Your system may be asking for reduced motion. Open the Menu and set Motion to \"full\" to override it, or \"reduced\" to keep the picture still."
+      "Talking and reading are free. Searches and crossings show their time and fuel costs before you choose. Conversation paging never advances the clock.",
+      "Clues enter the notebook" + (touch ? "" : " (N)") + " with their original wording, discovery time and location. Compare the records with each witness’s account.",
+      "Complete the notebook’s timeline from the evidence. To challenge an account, return to its speaker and submit up to three held clues that prove the contradiction, then choose an explanation and its supporting clue.",
+      (touch ? "Tap" : "Click") + " a ringed scene target or its matching action button. Show something from the notebook presents a held clue to a witness without a time cost.",
+      "Menu → Hints controls the notebook’s progress marks. Witness rebuttals remain available with hints disabled.",
+      DATA.world.drink.name + " has one use per can: drink it to remove the next crossing’s game-time cost. Its normal fuel cost still applies. More cans are available at the Metro vending machine.",
+      "Refuel at Landing 3. If stranded elsewhere, use the harbour tug. Read each travel cost before leaving the quay.",
+      "The radio offers Rain only, Lantern FM, Basin Lo-Fi and Ghost Tide FM. Menu → Harbour sounds controls ferry and interaction effects separately. Sound begins through a player gesture; volume has three levels.",
+      "A seed selects a repeatable case. Case files lists the four investigations and discovered endings. Loading a saved case retains its selected story.",
+      "Menu → Motion selects full, reduced or system-following decorative movement. The setting does not change evidence or story outcomes."
     ];
     if (!touch) items.push("Keys: 1–9 choose actions, N notebook, M menu, R radio, Esc closes panels.");
     openModal({
       title: "Captain’s guide",
       body: [
         el("p", { text: touch
-          ? "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Tap one of the four buttons under it to cross the Basin. What you can do where you are is listed under the story; every crossing and search shows its cost before you commit."
+          ? "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Choose a destination below it to cross the Basin. Actions at the current quay appear under the story; every crossing and search shows its cost before you commit."
           : "The picture shows the quay you are moored at; it pulls back to the whole harbour while you cross. Cast off with the Ferry buttons under the story, or click a neighbouring quay where it shows at the edge of the picture. Every crossing shows its fuel and clock cost before you commit." }),
         el("ul", {}, items.map(function (text) { return el("li", { text: text }); }))
       ],
