@@ -1,46 +1,46 @@
-# Harbour sounds — a quiet adventure mix
+# Audio system
 
-The sound update uses a warm, understated JRPG mood: low wooden scale contacts and quay water when gold changes hands, dry paper receipts, short soft ceramics, filtered grill and kettle textures, felted repair taps, and a short rising pentatonic phrase for Nao's opening. These are original procedural cues, not samples from any game or anime. No audio files or network requests are needed.
+Neon Tides uses procedural Web Audio for music, weather, ferry movement and interaction cues. No recorded music, samples or soundfonts are shipped. Music and harbour effects have separate controls and begin muted for new players.
 
-## Listen
+## Ownership and controls
 
-Open Menu (`M`) and turn **Harbour sounds** on. **Effects volume** cycles through 30%, 60% and 100%, with 60% as the initial setting. Music stays on the separate radio (`R`): try **Lantern FM** for plucked-string ambience or **Basin Lo-Fi** for the existing 104 bpm groove. Turning radio Off leaves enabled effects available. Turning Harbour sounds off silences the effects bus, including a ferry cue already playing.
+| Component | Source | Behaviour |
+| --- | --- | --- |
+| Classic radio and effects | [game.js](game.js) | Radio dial, independent Harbour sounds toggle and effects volume |
+| Classic stall palette | [night-market.js](night-market.js) | Action-to-cue mappings and market ambience |
+| Ghost Tide FM | [halloween-radio.js](halloween-radio.js) | Shared procedural station and disposable audio graph |
+| Voyage ferry/weather effects | [voyage/sound.js](voyage/sound.js) | Engine, wake, wind, rain, departure horn and mooring bell |
+| Voyage controls/preferences | [voyage/voyage.js](voyage/voyage.js) | Separate radio/effects state, user-gesture activation and persistence |
 
-New players start silent. Existing settings with a tuned radio migrate with effects enabled to preserve the earlier ferry sounds. Browser autoplay rules may require the first click or key press after reopening. Settings persist locally; no game-save format changes.
+Volume controls use 30%, 60% and 100%. Radio Off leaves separately enabled effects available. Disabling harbour effects silences their bus, including an active ferry cue. Existing Classic settings migrate through [game.js](game.js); Voyage preferences use their own radio and sound storage keys.
 
-## What plays
+## Stations
 
-- Successful gold purchases and sales: a low wooden scale contact, gentle quay water and paper rustle. The former rising electronic beeps are removed. Kenji's gold order uses the sale cue. Rejected transactions are silent.
-- Meals and drinks: Mei's ramen and milk tea, Rei's shared tea, Priya's flask and the metro's warm soy milk also use the bowl/pour cues. Nao's food: grilled skewers, tea pours and bowl placement have distinct small cues.
-- Warmer repair and tray preparation: two low bench taps or kettle textures, without a pitched beep sequence.
-- Tea: a soft kettle exhale and water pour, followed by a quiet cup touching its saucer. Bowls use a low placement sound and brief ceramic contact. Grill cues use softened sizzling, without a notification tone. All these noise textures roll off above 1.8 kHz.
-- Nao's early or late opening: a roughly two-second original pentatonic phrase, once through the successful story action. Reloading or reading the exchange does not replay it.
-- Market ambience: a sparse cue every sixteen seconds, chosen from the stall's palette. After 03:30 the grill and repair sounds become tea ambience. No simulated speech, voices or typing ticks.
-- Ferry departures and arrivals: the existing horn, engine, hull and bell now follow Harbour sounds independently of the radio.
+| Station | Mode | Synthesis |
+| --- | --- | --- |
+| Rain only | Classic | Filtered noise ambience |
+| Lantern FM | Classic | Karplus–Strong plucked strings, pentatonic phrases, drone and sparse partial-based bowls |
+| Basin Lo-Fi | Classic | 104 BPM sequencer, filtered bass/pads, percussion noise and echo |
+| Ghost Tide FM | Classic and Voyage | 72 BPM pulse, minor chords, sea/wind noise and slow modulation |
 
-Ambient cues only play during an active gold night at the market. They pause during crossings, on title/end screens, with the notebook/menu open, and in hidden tabs. Ambience never wakes a suspended audio context. A short shared cooldown prevents rapid transaction clicks from piling up; ambience also waits eight seconds after an action cue. Finite new sources stop and disconnect themselves.
+Ghost Tide FM also selects a pumpkin-orange visual theme. Theme selection changes no economic, quest, clock or collision rules.
 
-## Files and validation
+## Interaction mix
 
-`night-market.js` holds the stall palettes and action-to-cue mapping. `game.js` contains synthesis, the independent effects bus, controls, settings migration, scheduling and gameplay hooks. Menu controls remain in the existing scrolling modal; the fixed phone shell has no layout changes.
+Classic successful trades use wooden scale contact, quay water and paper rustle. Meals use brief ceramic, grill and kettle textures; repairs use low bench taps. Nao's breakfast opening plays its short pentatonic phrase only through the successful story action. Failed transactions and rereading an exchange do not replay rewards or cues.
 
-Run `node tools/adventure-checks.mjs` for gameplay regression checks and `node tools/sound-checks.mjs` for the mock Web Audio contract checks. The latter covers successful/failed trades, opening replay prevention, bounded sources and full node cleanup, softened interaction frequencies and levels, cooldowns, location/visibility gating, independent mute, old settings and missing audio support.
+Market ambience is sparse, uses the stall palette and follows the late-watch closures. It pauses on crossings, title/end screens, open panels and hidden pages. Shared cooldowns limit rapid action overlap. Interaction noise is filtered to keep the mix soft.
 
-These checks do not establish how the mix sounds on speakers or actual browser autoplay behavior. Listening on desktop headphones, a phone speaker and Safari/iOS remains to be done. Start at 30% for a first listening pass; tune the per-cue synthesis levels in `game.js` after that play-test.
+Voyage engine and wake levels follow movement; wind and rain follow cosmetic weather. Pausing sailing, opening panels or hiding the page silences its sailing ambience. Effects and radio have separate buses with shared browser-context/limiting integration.
 
-## Ghost Tide FM · Halloween special
+## Lifecycle requirements
 
-Classic’s radio now includes **Ghost Tide FM** after Basin Lo-Fi. Voyage’s new **Radio** button (also `R`) offers Ghost Tide FM and Off, with volume at 30%, 60% or 100%. Starts only when you explicitly tune; a remembered Voyage station asks you to tap to listen after reopening.
+Start or resume audio only through the supported user-gesture flow. A remembered preference must not bypass browser autoplay rules. Ambience must not wake a suspended context.
 
-The shared `halloween-radio.js` station generates two filtered sea/wind noise beds, slow wave and gust modulation, a muted sine bass pulse and distant minor chords at 72 BPM. It has no samples or network requests. Retuning fades the private audio graph, stops its sources and clears its scheduler. Classic sound effects remain independently controlled.
+Station shutdown clears its scheduler, fades output and stops/disconnects owned sources. Finite cues stop and disconnect after their envelope. Page visibility and mode changes gate scheduling; test repeated tuning and reopening for leaked sources or unwanted playback. Unsupported audio must leave gameplay usable.
 
-While selected, Ghost Tide FM adds pumpkin-orange interface accents. Voyage also warms the sea haze and quay rings and places small jack-o’-lanterns beside the quays. Changing the station to Off restores the usual palette. Theme selection changes no prices, clocks, quests or collision rules; reduced motion remains honoured. Automated graph and cleanup checks run with `node tools/sound-checks.mjs`; the final mix still needs listening on real headphones and phone speakers.
+## Validation
 
+Run `node tools/sound-checks.mjs` for mocked Web Audio contracts and `node tools/adventure-checks.mjs` for Classic gameplay integration. The audio suite covers control independence, missing support, gating, levels, cooldowns and graph cleanup. These checks do not evaluate the final mix or browser autoplay.
 
-## Voyage 0.4 · Independent ferry and weather sounds
-
-Voyage’s Radio panel has a separate Harbour sounds switch and volume control. It starts Off; enabling it requires a user gesture, and reopening asks for another tap. Preferences use `neon-tides:voyage:sound:v1`, independently of the radio and Classic.
-
-`voyage/sound.js` generates a quiet low engine, filtered wake, wind and rain, a soft departure horn and a gentle mooring bell. Speed controls the engine and wake; cosmetic weather controls wind and rain. Paused sailing, open panels and hidden tabs silence sailing ambience. Effects and radio share the browser context and limiter but have separate buses; turning music Off leaves enabled effects available. No samples or downloads are used.
-
-Mock Web Audio checks cover default mute, bounded levels, independent controls, context gating and cleanup. Real-device listening, touch interaction and browser autoplay behaviour remain player-test tasks.
+Before release, listen on desktop headphones, phone speakers and Safari/iOS. Start at 30%, compare effect/music balance, perform repeated trades, repair and opening actions, then hide, lock, return, retune and reopen. Record clipping, harsh frequencies, overlapping cues, latency and failures to resume. Adjust synthesis in the owning source file and rerun its regression suite.

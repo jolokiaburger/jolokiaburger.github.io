@@ -1,0 +1,1223 @@
+{
+  "schema_version": 1,
+  "artwork_license": "CC-BY-4.0",
+  "assets": [
+    {
+      "path": "assets/apple-touch-icon.png",
+      "category": "icon",
+      "format": "png",
+      "dimensions": {
+        "width": 180,
+        "height": 180,
+        "unit": "px"
+      },
+      "bytes": 7392,
+      "sha256": "d04434d288fe42249799175f53e9fe7be95d94ba4df33b8e37ca264e8afbb62b",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/favicon.svg",
+      "category": "icon",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 591,
+      "sha256": "b0a62f3615b469c2fee07ab833539206ce6ce4b88f8e67343ea1b149de6ea363",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "index.html",
+        "manifest.webmanifest",
+        "voyage/index.html"
+      ]
+    },
+    {
+      "path": "assets/icon-192.png",
+      "category": "icon",
+      "format": "png",
+      "dimensions": {
+        "width": 192,
+        "height": 192,
+        "unit": "px"
+      },
+      "bytes": 7904,
+      "sha256": "ab5f598c0870bface259684039fe847230a9ba7a9659aea5fd026bb278567923",
+      "reference_status": "source-referenced",
+      "references": [
+        "manifest.webmanifest"
+      ]
+    },
+    {
+      "path": "assets/icon-512.png",
+      "category": "icon",
+      "format": "png",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 21133,
+      "sha256": "2dcab3eb67e871c9ea20dcf88f7fbc1d84b4c30982531f12638659abe220748f",
+      "reference_status": "source-referenced",
+      "references": [
+        "manifest.webmanifest"
+      ]
+    },
+    {
+      "path": "assets/portraits/aki-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 59158,
+      "sha256": "afd04ba615d9bdd603db4ec2f281b6f7025978e629e773751cd0b3ffadb86947",
+      "reference_status": "source-referenced",
+      "references": [
+        "expansion.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/aki-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 28102,
+      "sha256": "afcffb2ac8dd5e61ce333ab385fbf036e1d121e4014daaedf4259faf4315dc80",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/dex-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 27004,
+      "sha256": "a76c5f32c4fc579cf829f5dacb215d26b61bffd14f53af0ccbd7a398826b7a8a",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/dex.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 769,
+      "sha256": "a2100b9827d973ae0537ae429c989083d553e08c9b7991683944842779f445a9",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/hana-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 191772,
+      "sha256": "588579eab83841cc4e26fbcfd99e8f760ee661169918676e64c13ca8a98c4d02",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/hana-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 46414,
+      "sha256": "7eb5a9ae1310db89ce4327a3cf79745116ce06832824f110854ea53885a70ff9",
+      "reference_status": "source-referenced",
+      "references": [
+        "canal-town.js",
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/portraits/hollis-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 28890,
+      "sha256": "791e2dd6325a6b85d5d2dbe69539d0d367ad8a442411a7b03b9e879a5d3255b6",
+      "reference_status": "source-referenced",
+      "references": [
+        "trade.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/jun-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 175180,
+      "sha256": "5cc5e53c01a514395cc765b7cfa1897324579dc3bc59e07aceb990a71cc5ee9c",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/jun-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 45114,
+      "sha256": "e7e08c1accbd26ad4d4589d699b4468e7c2d3b24d8e9be1d3c59bbbe4a29899c",
+      "reference_status": "source-referenced",
+      "references": [
+        "canal-town.js",
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/portraits/kenji-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 41086,
+      "sha256": "6ef7f5947bf0b1e44d654debfa9b17927f154197191ba4f8fe20ec52582b2a10",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "night-market.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/lam-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 35132,
+      "sha256": "eab79d02e797162df1c0dbdb5fbf76063cf1a1d941c4b77bb0bd0f4b519858e4",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/lam.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 804,
+      "sha256": "c2c393716fd69e2e6231b26a221201948994f8298ed3e52fe535191418c08d77",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mako-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 251474,
+      "sha256": "72e7f7c95dfd3c92e5c437caafc92fcc6c7ad14b82aedb31807dac1e5b8d1db2",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mako-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 56196,
+      "sha256": "fa133967345837454cab7e31c7222426a988c67fb103d7f51695eef3a7b82ea7",
+      "reference_status": "source-referenced",
+      "references": [
+        "canal-town.js",
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/portraits/matte-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 52088,
+      "sha256": "c832069a4adb6236470659be228b10b9b9a7fad0ceba761a9fcda656ffc24a5b",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/matte-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 27758,
+      "sha256": "68f99695c1a547f491bcc955883396d58d7a9dabf05433110d2a5ad476610277",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/matte.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 688,
+      "sha256": "5c2465490b4bd71b3c296ccc084052281ea31997e5310313319ab4d209bca007",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mei-anime.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 320,
+        "height": 320,
+        "unit": "viewBox"
+      },
+      "bytes": 5279,
+      "sha256": "d9db8d3bbc18fe2e209619a99ef540ac223fa8047ee14506256671f130aee61d",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mei-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 28488,
+      "sha256": "27867f332c3ebd0cd1431f5541fbaedf9d7a2ccf980fb2a170bfa5aa44811cdc",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js",
+        "classic.html",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mei-pleased-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 186506,
+      "sha256": "e16eaed103f0f88c0babcc238d6f1d5556e848447757341fccdcb806c7f55d8f",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mei-relaxed-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 174622,
+      "sha256": "6bd2a7291b774e81c0cea3dc16d70e0ac0e76967ac4e059078478f66b9166d64",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mei-thoughtful-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 206924,
+      "sha256": "7dd0d814c82006d989c94464ffc996f41451c9a3d5776228ee66322010d9c848",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mei.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 873,
+      "sha256": "3c0f6cce424f305c48f3cc6a8bd47ce3b70ebdf1285d95aeeb9134bda06b9d0f",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-pleased-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 167622,
+      "sha256": "981507571134fb6689bd2b6d136555f05a33bc0ff8eee8afef766c4ed7247509",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mio-pleased.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 39992,
+      "sha256": "db51fe4f11148aac08956d47b2e86539437d3ddfadd8a9fdb3137c2a112da789",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-relaxed-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 157000,
+      "sha256": "c405546d7473ac54c02f0bc76a0b5013487cec947b201e084a9b1c6a2f05c62b",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mio-relaxed.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 32806,
+      "sha256": "3c0d762f9f695f5b8de418ce499a791347bf9796258dabbdf065856a4b1d15f1",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-thoughtful-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 159832,
+      "sha256": "a7edd4c485af6783ab307cd6d4a0c00d0d8bf58a5882bc275548fd2a380d3fcf",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/mio-thoughtful.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 31814,
+      "sha256": "f5277ea80bd52f47a04c2b8152b21217872d4dd3edadc5a335ab6c777918738f",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 400,
+        "height": 400,
+        "unit": "viewBox"
+      },
+      "bytes": 4296,
+      "sha256": "e6aa85c98a36c8940a001497aad62cae015240f0f188614db324f8c2e6a2eff6",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/nao-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 45510,
+      "sha256": "cb199536eb24ab9b3e558069f290e597570e9dc846913e83048e9aa8af46a0f6",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "night-market.js",
+        "voyage/index.html",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/nao-pleased.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 54230,
+      "sha256": "de5f431a7a9155249c8d2881cc3307787e2397ab5a2e952cd35728b23a187c4e",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/nao-relaxed.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 53478,
+      "sha256": "3891ae3ec03aef1cf0ce9254bd3f69c1ea8549fc67148958bb8c489e9e0670c9",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/nao-thoughtful.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 57530,
+      "sha256": "ec7ca820248a3da7d241082392684b759e10c0a6c7822822638f4f12452b96cd",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/oduya-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 27144,
+      "sha256": "b054f5c312f9334d6f1bdaf3b7df520d4cfc6d047fec44969037741f02bd350d",
+      "reference_status": "source-referenced",
+      "references": [
+        "trade.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/priya-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 25714,
+      "sha256": "8c17d4f246cd9b720e52eeeeaf3abf21d7fcc4aebc495e84d0cf14451077162b",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/priya-pleased-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 188698,
+      "sha256": "0948c07976bb9a66caf9db3f84ca2803f90d3ab2371843cc1476d11f1e5983ec",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/priya-relaxed-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 173866,
+      "sha256": "120063d215122d6942f3ab7e5491897a64cd82dad7035b214b8451bce87017c5",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/priya-thoughtful-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 1024,
+        "unit": "px"
+      },
+      "bytes": 162392,
+      "sha256": "aea4c6e0f00615fce2b2c6634d2c22d7ba7b80da89890b0e6de62d03a6554547",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/priya.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 745,
+      "sha256": "e5e60b5c1f343d4fb31688c8ed5d8c545ea59446485e4a5283d36b484d38e73f",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/radio-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 25754,
+      "sha256": "e7ed5f3df7cf3bc93c29f2771d9ceae52bd979319f64ac32fb8cfc8a7adfa96c",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/radio.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 680,
+      "sha256": "fc54c04d23a66093a00b05e61b57f4cc84d01bdd0e8f3796be478d109a629e75",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/rei-anime.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 320,
+        "height": 320,
+        "unit": "viewBox"
+      },
+      "bytes": 4946,
+      "sha256": "38a116bceb00dda0745c9db7331c10a8ba0acf352a107d0f12d54c316e883df6",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/rei-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 23196,
+      "sha256": "3d288ec76d99547e260f9b5eb86ca7ef475a6e33202e7dd33ae0e7c1cc18fd27",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/rin-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 26234,
+      "sha256": "0cb3e435637dd0fc1212caffc37fba7aa5cee6a078ab164305adfa2833d5f6db",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "expansion.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/rin-pleased.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 33510,
+      "sha256": "0a33f58ac71573e34fe5900b65d1385c12444126ccf197f5609da0e41ed00376",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/rin-relaxed.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 34878,
+      "sha256": "1a54c3601667a88b37007b3952ace029b7252f575d05d514a61f46cdaa0cb092",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/rin-thoughtful.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 33094,
+      "sha256": "575196d54a01e0817c8044e0fa83c44ca3cf657b2f182e7b223fb60718a57169",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/sora-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 53564,
+      "sha256": "ba93ff5135e5b604099d90741f7710120f841928fa18fc040301013249f4a71e",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "expansion.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/sora-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 24652,
+      "sha256": "724e3872726eaeb0461d5f689923606f3042ad164aa865fb870135d8779e73bb",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/teo.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 814,
+      "sha256": "2316ac3eb97557a095b5b9eca5d8c4589eba97aa7ea82b365f268801ee58f7d6",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/yumi-harbour.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 41358,
+      "sha256": "02454804fde0f079d12c5af811f169b54b0cb3f7ea13eea50d677ed675da131b",
+      "reference_status": "source-referenced",
+      "references": [
+        "cases.js",
+        "voyage/ports.js"
+      ]
+    },
+    {
+      "path": "assets/portraits/yumi-manga.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 512,
+        "height": 512,
+        "unit": "px"
+      },
+      "bytes": 20376,
+      "sha256": "2e8880f2642e27b88807c89beabd6f3e4ced3c6b6e8c69afab5a509339971e09",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/yumi.svg",
+      "category": "portrait",
+      "format": "svg",
+      "dimensions": {
+        "width": 64,
+        "height": 64,
+        "unit": "viewBox"
+      },
+      "bytes": 776,
+      "sha256": "6c35da142995c42cfa29c7c74a86bf5a9d77c18585641b99ab6b5bec01600d49",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/scenes/aonami-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 356146,
+      "sha256": "7baf30fa0d6464d7c3aac96b2e0ef6e0e25d2a10b421f478c37bab5cd69b1d4f",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/breakwater-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/constellation-supper.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 960,
+        "height": 640,
+        "unit": "px"
+      },
+      "bytes": 130444,
+      "sha256": "e36c25c7442c7f2ee2288b58d7be2c3b67003ca9ae4257f6d5b43e808f4585f0",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/scenes/jun-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 281436,
+      "sha256": "11265078e84093ffa370113f17335b4b5938dbce89cf76a7dc4bac370cbf9cd9",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/kisaragi-canal.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 800,
+        "unit": "px"
+      },
+      "bytes": 350574,
+      "sha256": "6f7969020b08d1c97a41e0c9587139df3a6b83442363876492ef9b20d60dd7bd",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/scenes/lantern-market.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 800,
+        "unit": "px"
+      },
+      "bytes": 290262,
+      "sha256": "5f7fc4fc3dcaa101bbfb572630405860a3fdd6716faf9bb916823e4c3a10cfe1",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html",
+        "index.html"
+      ]
+    },
+    {
+      "path": "assets/scenes/market-breakfast.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 960,
+        "height": 640,
+        "unit": "px"
+      },
+      "bytes": 153216,
+      "sha256": "045473858724e0f0539321856fa9ad989ecd34f220e1805ee0280d0aa08d4d6d",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/scenes/mei-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 260768,
+      "sha256": "fcf9a121c1a7b131c9847958c9e62323d2c9c46550c4abc763805a5859fdead9",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/metro-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 318710,
+      "sha256": "479ee4db13fda0a4c162097358703b22c195dca8a4571d6660745464a8a16678",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/nao-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 291212,
+      "sha256": "6d8c24b866a719b7017731a5ed74613e46ac280b0f4ea29bc99b403601585c50",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/observatory-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 302418,
+      "sha256": "c5edd4f14f67495fbbd87882f0c69a589123e497aa85535ed26dcfdfc80f27f1",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/second-helping.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 960,
+        "height": 640,
+        "unit": "px"
+      },
+      "bytes": 137426,
+      "sha256": "5fa879242145164d365d3786f66140b0b4963a48be9059a4f27071d4da750865",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/scenes/shiosai-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 343778,
+      "sha256": "bb6be8c822986c7391b194f2d607faf27fc732b3c19cba2a25c9d5f0564f8b2c",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/breakwater-ui.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/starling-yard-manga.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 800,
+        "unit": "px"
+      },
+      "bytes": 327172,
+      "sha256": "131cfe00fc80f60e59c23101fa070dfe51d18c8de4b2bac5523a9a22f13acd33",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/scenes/voyage-title-1024.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1024,
+        "height": 344,
+        "unit": "px"
+      },
+      "bytes": 134782,
+      "sha256": "7e0d7ca3e3a97745665c5ef1d3743d77b0037d8d223b11da5876f955d824286b",
+      "reference_status": "source-referenced",
+      "references": [
+        "index.html",
+        "voyage/voyage.js"
+      ]
+    },
+    {
+      "path": "assets/scenes/voyage-title.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 2048,
+        "height": 688,
+        "unit": "px"
+      },
+      "bytes": 455838,
+      "sha256": "fb3c96dfd875a81b9cf333e6f1b80f1eb646a61a9879ad20c75184d4752823fa",
+      "reference_status": "source-referenced",
+      "references": [
+        "index.html"
+      ]
+    },
+    {
+      "path": "assets/scenes/yard-dockside.webp",
+      "category": "scene",
+      "format": "webp",
+      "dimensions": {
+        "width": 1440,
+        "height": 960,
+        "unit": "px"
+      },
+      "bytes": 336340,
+      "sha256": "ff65435c146c2387cb2fc9ae9db99e41430165f6dc1f347ed4043210da35d426",
+      "reference_status": "source-referenced",
+      "references": [
+        "voyage/leisure-ui.js"
+      ]
+    },
+    {
+      "path": "assets/sprites/kenji-market.webp",
+      "category": "sprite",
+      "format": "webp",
+      "dimensions": {
+        "width": 240,
+        "height": 360,
+        "unit": "px"
+      },
+      "bytes": 11886,
+      "sha256": "9ffe2cf4b391f55dba81336cc5ace20b36e91104a7f80015cc3c3446a505a869",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/sprites/nao-market.webp",
+      "category": "sprite",
+      "format": "webp",
+      "dimensions": {
+        "width": 240,
+        "height": 360,
+        "unit": "px"
+      },
+      "bytes": 10580,
+      "sha256": "d69bc9b23fcff2ee5e4fe58eddca86140b089679f4edc17b3a0d588e1b93368c",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    },
+    {
+      "path": "assets/sprites/sora-market.webp",
+      "category": "sprite",
+      "format": "webp",
+      "dimensions": {
+        "width": 240,
+        "height": 360,
+        "unit": "px"
+      },
+      "bytes": 14590,
+      "sha256": "7ab29d0529ac2ee4bed0b4681b76dad9baed2f51ffa31ea64b750d8028f0572e",
+      "reference_status": "source-referenced",
+      "references": [
+        "classic.html"
+      ]
+    }
+  ]
+}

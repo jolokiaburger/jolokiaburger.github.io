@@ -1,111 +1,40 @@
 # Credits and licences
 
-Everything in this folder was made for Neon Tides. Nothing was copied from another game, stock library, font foundry or sound pack. Two reference images were shown during development as mood references only (a synthwave sunset over a grid, and a neon noodle-shop logo); neither was traced, reproduced or reused — the moon, the tube lettering, the neon jellyfish and the grid here are original drawings in the same spirit.
+Neon Tides is maintained by [Neon Tides contributors](https://github.com/jolokiaburger/jolokiaburger.github.io/graphs/contributors). The repository contains the game's code, fictional writing, local illustrations and procedural audio.
 
-## Origins
+## Project content
 
-| Asset | Where it lives | Origin |
-| --- | --- | --- |
-| Harbour illustration (sky, banded moon, skyline, Line 9 viaduct and train, water grid and waves, four destinations, the KURAGE 33 tube sign with its neon jellyfish, ferry, jellyfish, rain, the case-specific pieces: the Grey Kittiwake's masts, the wild green jelly, the stacked tank lids, and Mei's gold board for the gold night) | inline SVG in `classic.html` | Drawn by hand as SVG shapes, gradients and patterns for this project |
-| Current character portraits (all 15 speakers) | `assets/portraits/*-manga.webp` | Original images generated with OpenAI's built-in image-generation tool, exported as compact 512 px WebP. Direction and complete prompts: `ART-DIRECTION.md`. No existing manga characters or panels were used as assets. |
-| Earlier character portraits | `assets/portraits/*.svg` | Original native SVG illustrations, retained as earlier versions |
-| Updated harbour figures, salvage yard and lighthouse | inline SVG in `classic.html` | Original native SVG, with clothing and hair coordinated with the current portraits |
-| Night Market scene and three character sprites | `assets/scenes/lantern-market.webp`, `assets/sprites/*-market.webp` | Original illustrations generated with OpenAI's built-in image-generation tool. Sprite identities reference the game's own portraits. Native SVG signage, map targets and state overlays are authored in `classic.html`. Prompts: `tools/night-market-art-prompts.json`. |
-| Favicon (jellyfish) and the home-screen icons rendered from it | `assets/favicon.svg`, `assets/*.png` | Original SVG; the PNGs are rendered from it by `tools/icons.mjs` |
-| Story, characters, dialogue, place names, brands (Kurage 33, Tiger Volt, OX-9, Frostline, Meridian Private Aquaria, Haldane Marine Credit, the Grey Kittiwake, tug Vidar, Bellwater Basin, Bell Reef, Line 9; for the gold night, Hollis, Oduya, the salvage boat Long Patience, Harbour Savings, the Heron) | `cases.js`, `trade.js`, `dialogue.js`, `expansion.js`, `night-market.js` | Written for this project. All people, companies, brands, vessels and places are fictional |
-| The gold market's numbers and model (base price, district offsets, event envelopes, seeded noise) | `trade.js`, `market.js` | Invented for the game; not modelled on any real market's data |
-| Interface text and layout | `index.html`, `styles.css`, `game.js` | Original |
-| Boat radio: rain ambience, *Lantern FM*, *Basin Lo-Fi*, the ferry's horn, engine, hull bump and bell, gold-scale/receipt cues, market ceramics/grill/repair ambience, and Nao's pentatonic opening phrase | generated at runtime in `game.js` (the *BOAT RADIO* section) | Filtered noise, a Karplus-Strong plucked-string model and oscillator synthesis through the Web Audio API. Both stations and all effects are original procedural sounds; no recorded audio, samples or sound fonts are bundled |
+| Content | Source |
+| --- | --- |
+| Voyage world, navigation and scenery | [voyage/](voyage/), including native Canvas waterfronts, crew and region chart |
+| Classic scenes and interface | [classic.html](classic.html), [styles.css](styles.css), [game.js](game.js) |
+| Cast, dialogue and chapters | Root content scripts, [voyage/ports.js](voyage/ports.js), [voyage/conversations.js](voyage/conversations.js) and Voyage subsystem modules |
+| Portraits, scene plates, market sprites and icons | [assets/](assets/); complete inventory in [tools/asset-manifest.json](tools/asset-manifest.json) |
+| Economic definitions and gold accounting | [trade.js](trade.js), [market.js](market.js) |
+| Music and sound effects | [game.js](game.js), [halloween-radio.js](halloween-radio.js), [voyage/sound.js](voyage/sound.js) |
 
-## Kisaragi expansion
+Characters, vessels, companies, places and the Basin's economic model are fictional. The illustrations and writing are project content; third-party game characters, dialogue, screenshots and recorded music are not bundled.
 
-`assets/scenes/kisaragi-canal.webp` and the Hana, Jun and Mako portraits in `assets/portraits/` are original illustrations created with OpenAI's built-in image-generation tool for this game. They use adult manga-inspired fine ink, crosshatching and muted amber/teal colour. The town, characters, festival invitation and parcel dialogue in `canal-town.js` are original fictional content. Scene labels and interaction targets in `classic.html` are native SVG. Artwork and story follow the project's CC BY 4.0 split; code follows MIT.
+## Fonts and dependencies
 
-## Fonts
+The interface uses system font stacks. No font files or runtime libraries are bundled or downloaded. The browser supplies DOM, CSS, SVG, Canvas, local storage and Web Audio.
 
-No font files are bundled and none are downloaded. The stylesheet asks for fonts that already exist on the player's device and falls back gracefully:
+Most validation scripts use Node's built-in modules. The optional [tools/voyage-render-checks.mjs](tools/voyage-render-checks.mjs) uses `@napi-rs/canvas` as a separately installed development dependency. It is not included in the deployed game; its own distribution retains its licence terms.
 
-- Interface: Bahnschrift → Trebuchet MS → Segoe UI → sans-serif-condensed (Android's Roboto Condensed) → system sans-serif
-- Story text: Trebuchet MS → Segoe UI → system-ui → sans-serif
-- Clue text: Cascadia Mono → Consolas → SF Mono → Menlo → monospace
-- Signage in the picture: Impact → Arial Black → Bahnschrift → Arial Narrow → sans-serif-condensed → sans-serif (the KURAGE 33 sign is pinned to its width with `textLength`, so any fallback fits)
+## Factual references
 
-## Third-party code
+Two optional character notebook entries paraphrase public scientific background and provide source links:
 
-None. The game uses only what browsers provide (DOM, CSS, SVG, `localStorage`, Web Audio). The optional test tooling in `tools/` (Node scripts that drive a headless Chromium browser over the DevTools Protocol) uses only Node's built-in modules and is not needed to play.
+- Kenji's electrical-contact note: [USGS, Gold Fact Sheet, 2002](https://pubs.usgs.gov/of/2002/of02-303/OFR_02-303.pdf).
+- Mio's constellation note: [NASA, Discovering the Universe Through the Constellation Orion](https://science.nasa.gov/universe/stories/quick-reads/discovering-the-universe-through-the-constellation-orion/).
 
-## Licence
+These references support the individual facts in [voyage/conversations.js](voyage/conversations.js). No source illustrations or extended source passages are included. They do not describe the fictional harbour economy or establish a character's rumour as fact.
 
-See the `LICENSE` file. In short:
+## Reuse terms
 
-- Code (`game.js`, `market.js`, `styles.css`, the markup of `index.html`, `tools/*.mjs`, the data structures of `cases.js`, `trade.js`, `dialogue.js`, `expansion.js` and `night-market.js`): MIT.
-- Artwork and story text (the SVG illustration, portraits, dialogue, clue wording, scene descriptions, endings, documentation prose): Creative Commons Attribution 4.0 (CC BY 4.0).
+[LICENSE](LICENSE) defines the split:
 
-If you reuse the artwork or text elsewhere, credit it as "Artwork and story from *Neon Tides*, CC BY 4.0". The copyright line in `LICENSE` names "Neon Tides contributors"; replace it with your own name if you publish under yours.
+- **MIT:** executable code, HTML structure, styles, tools and data structures.
+- **CC BY 4.0:** artwork, dialogue, story descriptions, endings and documentation prose, including that content embedded in source files.
 
-
-## Character visual refinement
-
-Updated Sora, Priya and Mei portraits and Sora’s matching market sprite were created with OpenAI’s built-in image-generation tool. Sora uses blonde hair and navy workwear; Priya is an original Japanese office worker with a warm slice-of-life cashier influence; Mei is an original older cyberpunk cook inspired by Motoko Kusanagi. The illustrations use original faces and clothing rather than copies of existing characters. Native harbour figures in `classic.html` were updated to match. Prompts: `tools/character-redesign-prompts.json`.
-
-## Starling Yard and the three-chapter season
-
-`assets/scenes/starling-yard-manga.webp` is an original harbour-workshop illustration generated with the built-in image-generation tool, using the project's original Kisaragi artwork as a mood reference. It contains no copied characters or franchise assets. The final prompt and mode are recorded in `tools/yard-art-prompts.json`. The interactive portrait pins, work signs, memory overlays and morning tint are native SVG/CSS in `classic.html` and `styles.css`. New stories and dialogue in `harbour-life.js` and `morning-after.js` are original writing for Neon Tides; the existing code/art/story licence split applies.
-
-
-## Voyage and Tsukimi Observatory
-
-The top-down harbour, ferry, quay details, discoveries, weather and observatory are original Canvas drawings in `voyage/voyage.js`, with navigable geography in `voyage/world-map.js`. Mio Amami’s portrait (`assets/portraits/mio.svg`) is an original native SVG illustration. Her character, gold-contact kit, sky watch and expanded Nao dialogue are original fictional writing in `voyage/ports.js` and `voyage/model.js`.
-
-Voyage ferry and weather effects (`voyage/sound.js`) and Ghost Tide FM (`halloween-radio.js`) are original procedural Web Audio synthesis. They use no recorded samples. Artwork and story are CC BY 4.0; code is MIT, following the existing licence split.
-
-The Voyage 0.5 harbour-board posts, trading notes, constellation-supper story and completion reactions in `voyage/ports.js` and `voyage/model.js` are original writing. Additional clock tower, market shutters, train, yard gantry, banners and supper table in `voyage/voyage.js` are original native Canvas artwork. The existing licence split applies.
-
-Voyage 0.6 encounter visitors, Nao’s post-supper crossing dialogue, breakfast exchanges and closing harbour-wire messages in `voyage/ports.js` are original fictional writing. The dawn palette and breakfast signage in `voyage/voyage.js` are original Canvas/CSS work. Nao’s passenger portrait reuses the existing original game artwork.
-
-Voyage 0.7’s rice-parcel, filter and star-chart contracts, working-harbour notices and follow-up letters in `voyage/ports.js` are original fictional content. Ferry palette choices and the CSS preview are original project artwork. The captain-profile code in `voyage/profile.js` follows the existing MIT code licence; writing and artwork follow CC BY 4.0.
-
-### Voyage 0.8 artwork
-
-Original Nao, Rin and Mio expression portraits and three optional story illustrations were generated with the built-in image-generation tool using this project’s own character designs as references. Prompt provenance: `tools/voyage-art-prompts.json`. Exports: `assets/portraits/{nao,rin,mio}-{relaxed,thoughtful,pleased}.webp` and `assets/scenes/{constellation-supper,market-breakfast,second-helping}.webp`. No external manga panels, branded characters or downloaded artwork were used. These assets follow the artwork licence in `LICENSE`.
-
-### Voyage 0.9 character refinements
-
-Four original portrait refinements (`assets/portraits/{aki,yumi,matte,sora}-harbour.webp`) use the game’s existing designs as identity references and its own Nao artwork as a treatment reference. Generated with the built-in image-generation tool; prompt set: `tools/voyage-09-art-prompts.json`. They follow the artwork licence in `LICENSE`. Sea discoveries and ferry detail are original native Canvas code; dockside ambience is procedural Web Audio synthesis.
-
-### Voyage start-page illustration
-
-`assets/scenes/voyage-title.webp` (2048 × 688) and its 1024 px responsive export are original illustrations generated with OpenAI’s built-in image-generation tool, using the game’s own Nao portrait as an identity reference. The Tern, lantern-lit harbour, water and fog follow the project’s art direction. Prompt: `tools/voyage-title-art-prompts.json`. These assets follow the artwork licence in `LICENSE`.
-
-### Voyage 0.10 harbour life
-
-Skippable quay arrivals, animated mooring ropes, travelling workboats and Nao/Yumi deck figures in `voyage/voyage.js` are original native Canvas artwork. New everyday exchanges, waterway encounters and logbook messages in `voyage/ports.js` are original fictional writing. Illustrated logbook entries reuse the original Voyage start-page illustration and existing portraits; no additional downloads or external assets are required. Existing artwork/story and code licences apply.
-
-### Voyage 0.11 festival and memories
-
-Kisaragi’s festival lanterns, table, supplies, visitors and route markers are original native Canvas drawings in `voyage/voyage.js`. Festival dialogue, cross-voyage memories and follow-up messages in `voyage/ports.js` are original fictional writing. No new third-party artwork or audio is bundled; the existing code/artwork/story licence split applies.
-
-### Voyage 0.13 artwork
-
-Mio’s three refined portraits (`assets/portraits/mio-{relaxed,thoughtful,pleased}-harbour.webp`) are original images made with OpenAI’s built-in image-generation tool, using the game’s own Mio designs and Nao artwork as references. Prompts and reference provenance: `tools/voyage-13-art-prompts.json`. No third-party panels or characters were used. The jellyfish, fish, ripples, waterfront materials, figures and small harbour details in `voyage/harbour-art.js` are original native Canvas artwork. The existing artwork and code licence split applies.
-
-
-### Voyage 0.14 canal portraits
-
-`assets/portraits/jun-harbour.webp`, `hana-harbour.webp` and `mako-harbour.webp` are original images made with OpenAI's built-in image-generation tool from the game's own character portraits. Nao's artwork served only as a rendering and lighting reference. The original faces, ages, clothing and roles were retained; no third-party characters or panels were used. Exact prompts and references: `tools/voyage-14-art-prompts.json`. The existing artwork licence applies.
-
-
-### Voyage 0.15 harbour life
-
-Six original Mei/Priya expression portraits and three dockside illustrations (Mei, Nao, Jun) were generated with the built-in image-generation tool, using their existing character art as identity references, and exported as local WebP assets. Exact prompts and provenance: `tools/voyage-15-art-prompts.json`. Original files and Classic remain intact. Native SVG dish/fish illustrations, Canvas photograph rendering, markers and ferry keepsakes are authored in `voyage/leisure-ui.js` and `voyage/voyage.js`. No image-generation service runs during play.
-
-### Voyage 0.16 neighbours and learning
-
-Three original dockside illustrations (`assets/scenes/{metro,yard,observatory}-dockside.webp`) were generated with OpenAI's built-in image-generation tool from the game's own character portraits and Nao's established dockside art. Exported as 1440 × 960 WebP; exact prompts, references and hashes: `tools/voyage-16-art-prompts.json`. Lam, Yumi, Rin and Mio retain their existing identities. No original asset was replaced.
-
-Passenger/favour/recipe stories, all 28 conversation topics and their reply branches are original writing in `voyage/neighbours.js` and `voyage/conversations.js`. The game-design brief cites Sunless Sea, Dredge, Deus Ex and food/adventure anime; their characters, dialogue and images are not included. The two science notes are original paraphrases with optional primary USGS/NASA links, listed in `VOYAGE-NEIGHBOURS.md`. No source text or scientific artwork is bundled. Native passenger/luggage/keepsake/approach art, SVG food and reduced-motion-aware character blinking retain the existing code licence; new images and fictional writing retain the existing artwork/story licence.
-
-
-### Voyage 0.17 · Beyond the Breakwater
-
-`assets/scenes/aonami-dockside.webp` and `shiosai-dockside.webp` are original images made with OpenAI’s built-in image-generation tool using the game’s own Nao/Rin portraits and dockside art. Exact prompts, references and export hashes: `tools/voyage-17-art-prompts.json`. Native coastal scenery and the illustrated navigation chart are authored in `voyage/coast-art.js` and `voyage/breakwater-ui.js`. Etsuko’s notebook, tea-grower invitation, chapter dialogue and endings are original fictional writing in `voyage/breakwater.js`. Existing code/artwork/story licences apply; no external game, anime art or dialogue is bundled.
+Retain the MIT copyright and licence notice when redistributing code. For artwork or text, provide appropriate attribution, a link to CC BY 4.0 and an indication of changes. Suggested attribution: “Artwork and story from Neon Tides, CC BY 4.0.” The copyright holder is Neon Tides contributors. Preserve the existing notices when adding your own contribution credit.

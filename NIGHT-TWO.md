@@ -1,55 +1,50 @@
-# Night Two · A Lantern for Tomorrow
+# Classic Chapter Two: A Lantern for Tomorrow
 
-This is the current two-night direction, independent of historical planning documents. It adds a complete second evening with a closing morning report, not a persistent restaurant simulator or an unlimited season.
+**Scope:** the second trading chapter in Classic 4.6.1. Complete Night One and select Continue to Night Two on its morning report. Chapter Three follows the second report; see [SEASON-UPDATE.md](SEASON-UPDATE.md).
 
-## Start and continuity
+## Chapter continuity
 
-Finish any gold Night One (including an existing saved first night), then choose **Continue to Night Two · Keep earnings & choices** on the morning card or under the story. Continue an active save from the title as usual. Night Two starts at Kurage 33 at 23:40; turn-in is available from 01:30 and dawn ends play at 06:00. After its report, **Start fresh Night One** begins a new, independent chapter.
+Night Two starts at Kurage 33 at 23:40. Turn-in is available from 01:30; dawn ends the chapter at 06:00. Carryover retains actual credits, gold lots/purchase basis, fuel, relationships, casual-chat memory and unlocked routes. It grants no overnight refill.
 
-Carry-over is the actual credits, gold lots and purchase basis, fuel, relationship values, prior chat memory and previously unlocked reef chart. There is no free overnight refill. Prior story memory records Nao's opening/late arrival, warmer help, invitations, and the lighthouse delivery. Nao and Sora acknowledge those choices in authored dialogue. A missed opening gets an honest new introduction; no old quest is automatically marked complete.
+The market has fresh allowances, event history, action counters and benchmarks. Its seed derives from Night One with `:night-2`. Save version remains 2; a valid older save without a chapter field is Night One. Loading chooses chapter data from the save, independently of the title or current chapter.
 
-Each evening has fresh dealer stock/allowances, rumours, event history, action-use counters and financial benchmarks. Night Two's seed is the first night's seed plus `:night-2`; the same starting seed and choices reproduce the chapter. Saves remain version 2; old saves with no chapter field are Night One. Read validation selects the chapter from the save itself, even when loading from the title or while another chapter is active.
+## Recipe trial
 
-## Nao's festival recipe
+Ask Nao about A lantern for tomorrow and choose smoky mushroom rice or plum-and-sesame rice. The menu choice is exclusive and narrative; it does not secretly change the fixed rice payment. Optional seasoning takes ten minutes and closes at 04:50.
 
-Ask Nao about **A lantern for tomorrow**. Choose one recipe: smoky mushroom rice or plum-and-sesame rice. The choice is exclusive and appears in the ending. Optional seasoning help takes ten minutes and closes at 04:50 so it finishes by five. Tasting is free and does not require food purchases, gold, invitations or cargo:
+| Result | Window / cost |
+| --- | --- |
+| First spoonful | 05:00–05:44; free |
+| Saved spoonful | 05:45–05:59; free |
+| Explicit wait | Advances to 05:00; market continues |
+| Full bowl/tea after trial | 7 cr/ten minutes |
 
-- First spoonful ending: 05:00–05:44.
-- Saved spoonful ending: 05:45–05:59.
-- Explicit wait action advances to 05:00; the market continues to move while waiting.
-- After completing the trial, a full bowl and tea cost 7 cr and ten minutes. A further conversation covers Nao's festival plans and time off.
-- Turning in early does not complete the story. Nao finishes with the morning crew in the wire; the player has missed that experience.
+No gold, food purchase, invitation or cargo is required for tasting. Early turn-in leaves the trial unfinished. Nao's dialogue remembers actual Night One preparation and opening outcomes.
 
-The menu choice is a personal narrative choice, not a hidden profitability bonus. The ingredient deal uses a disclosed fixed price. Food, tea, casual rotating dialogue and independent harbour sounds remain available.
+## Sealed-rice contracts
 
-## Sealed-rice trade
+Two ingredient slots are available. Choose one purchase or courier route per night:
 
-The Tern reserves two ingredient slots. Choose one purchase or courier route per night:
-
-| Route | Purchase | Collection | Settlement |
+| Route | Purchase | Pickup | Destination settlement |
 | --- | --- | --- | --- |
-| Landing 3, owned | 18 cr/crate, one or two | 10 min; start before 04:00 | Nao pays 30 cr/crate |
-| Market, owned | 26 cr/crate, one or two | 5 min; start before 04:20 | Nao pays 30 cr/crate |
-| Co-op courier | No purchase; one co-op crate | 10 min; start before 04:00 | 12 cr delivery fee, once |
+| Landing 3 owned rice | 18 cr/crate; one or two | Ten minutes; start before 04:00 | Nao pays 30 cr/crate |
+| Market owned rice | 26 cr/crate; one or two | Five minutes; start before 04:20 | Nao pays 30 cr/crate |
+| Co-op courier | No purchase; one crate | Ten minutes; start before 04:00 | 12 cr fee once |
 
-Delivery must finish by 04:30: last start 04:25, five-minute handover. Owned unopened crates can instead return to Landing 3 for 16 cr/crate, finishing by 05:45: last start 05:40, five-minute handover. Co-op cargo returns without a payment; it cannot be sold as owned cargo. Action labels show the actual carried quantity and payout. Successful handover consumes the cargo; reloads/repeated clicks cannot pay twice.
+Delivery's five-minute handover must finish by 04:30; last start is 04:25. Owned unopened crates may instead return to Landing 3 for 16 cr each, finishing by 05:45; last start is 05:40. Co-op returns pay nothing and cannot be sold as owned rice.
 
-A two-crate wholesale load yields 24 cr before fuel and time; a market load yields 8 cr. A new 30 cr refuel solely for that trade can erase the margin. Owned returns make a loss explicit. Unserved crates go to the morning co-op with zero payout; cargo cost remains incurred. The report and folded cargo log distinguish commodity return, courier reward, food/fuel spending and gold performance. Rice is not valued as cash or gold at the ending.
+The two-crate Landing margin is 24 cr before fuel/time; market margin is 8 cr. A dedicated 30-cr refill may erase either margin. Unserved crates earn zero automatic payout and are not valued as cash/gold at the report. Accounts distinguish stock return, courier rewards, food/fuel and gold performance. Successful handover consumes cargo and cannot repeat after reload.
 
-An empty-tank player can still call the existing tug. At Landing 3, a player with less than 30 cr and less than one fuel can claim a one-time co-op emergency voucher for two fuel, taking five minutes. This keeps the free personal story reachable even after an exhausted first night. It is a bounded courtesy, not a loan or repeatable earnings mechanic.
+A one-time Landing emergency voucher supplies two fuel/five minutes when cash is below 30 cr and fuel below one. It supports story recovery without a loan or repeatable profit; the ordinary tug remains available.
 
-## Festival gold night
+## Festival economy and exploration
 
-Night Two uses a separate market definition. Co-op recycled gold arrives at 01:00; the pier instrument desk is provisionally due at 02:00. Rei reports the provisional order, Priya confirms the supply, and Matte gives the actual desk status. Clear weather confirms demand; fog postpones the desk; extra festival crews create both supply and demand. The morning wire reflects the actual hidden outcome. Dealer impact, spreads, finite gold stock and buying caps still apply.
+Co-op recycled gold arrives at 01:00. The pier instrument desk is provisionally due at 02:00. Rei gives the provisional order, Priya confirms supply and Matte explains actual desk status. Seeded weather/crew situations produce different demand outcomes, reflected in the wire. Spreads, impact, stock and buying caps remain active.
 
-Yesterday's salvage rumours, first breakfast quest, shipment investigation and lighthouse delivery cannot be repeated for rewards in this chapter. The shared island route can be unlocked through Rin even if the earlier delivery was skipped; tonight a visit is simply a visit.
+Night One breakfast stock, dispatch and lighthouse rewards cannot be repeated. Rin can still provide the shared island route for a visit. Nao's festival invitation and town tasting use [CANAL-TOWN.md](CANAL-TOWN.md).
 
-## Source files and checks
+## Implementation and validation
 
-- `night-two.js`: isolated cloned chapter data, new story, trade terms, market events, scene conditions and casual dialogue.
-- `game.js`: guarded transition, chapter-aware data selection and save validation, cargo accounting, journal/controls and morning report.
-- `index.html`, `styles.css`: festival banner and delivered-rice props; existing illustration and fixed phone shell retained. No additional downloads or character portraits.
-- `tools/adventure-checks.mjs`: actual engine tests for carry-over, real crossings, all three market outcomes, both recipes, both purchase sources, one/two crates, courier fee, return/loss/unsold paths, deadlines, old saves, chapter reloads, repeat guards, memory and zero-purse recovery.
-- `tools/sound-checks.mjs`: mock Web Audio regression checks; shared sounds remain independent of the chapter.
+[night-two.js](night-two.js) builds isolated chapter data. [game.js](game.js) guards transitions, validates chapter-aware saves and records rice accounting. [classic.html](classic.html)/[styles.css](styles.css) supply banners and delivered-rice props.
 
-Run both scripts with Node 22+. Engine and mock sound checks do not prove browser layout, actual audio quality, real-phone behavior or economic enjoyment. A full human play-through of both nights remains the next validation step.
+Run `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. Required regressions include real carryover/crossings, all truths/recipes, both suppliers, one/two crates, courier/returns, deadlines, reload, old saves, repeated payment and zero-purse recovery. Manual QA must cover both nights and the subsequent morning, using actual phone layout and audio.

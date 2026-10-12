@@ -1,39 +1,41 @@
-# Kisaragi Canal Town
+# Classic Kisaragi Canal Town specification
 
-Kisaragi is an inland destination in both trading nights. Ask Priya at Landing 3 for the canal pilot sheet. The route costs **2 fuel and 40 minutes each way** from harbour quays, or **4 fuel and 55 minutes** from Hoshimi. The unlock carries into Night Two. Investigations keep their original four destinations.
+**Scope:** the Classic trading season. Kisaragi contains Hana Tsukino's festival work, Jun Arai's tea shop and Mako Senda's lock records. Case-file investigations retain their original destinations.
 
-The town has three residents with rotating free conversation: **Hana Tsukino**, festival organiser; **Jun Arai**, tea merchant; **Mako Senda**, lockkeeper. Explore the ceramics arcade and bridge notice, eat dumplings, drink tea, trade capped quantities of gold, or refuel for 30 cr and 10 minutes. If stranded, radio the existing tug for a tow to Landing 3.
+## Access and facilities
 
-## A bounded tea trade
+Priya's canal pilot sheet unlocks the route. Crossings cost two fuel/forty minutes from harbour quays or four fuel/55 minutes from Hoshimi. Unlocks carry across chapters. Morning access follows Chapter Three's lock state, described in [SEASON-UPDATE.md](SEASON-UPDATE.md).
 
-Jun sells **one sealed case for 24 cr**, with five minutes to load. Sora pays **38 cr** at Lantern Market, with five minutes to hand over. This is a 14 cr gross margin, before fuel and time. Purchases close at 05:10 to leave room for a return crossing; the last handover starts at 05:55. There is no replenishment or automatic payout. An unsold case is set aside for the morning crew and does not carry into the next night.
+Facilities include bounded gold trading, 30-cr/ten-minute refuelling, tea, dumplings, ceramics/bridge reading and free authored character exchanges. The existing tug recovers to Landing 3 when required.
 
-`game.js` stores the case in the optional `canalTrade` save field and reports its cost and revenue separately. Tea sales and the parcel fee are excluded from the gold-versus-holding statistic. Old saves without this field remain valid. Rice retains its own two-slot account.
+## Sealed tea trade
 
-## Mako's unfinished address
+Jun offers one case for 24 cr/five minutes. Sora pays 38 cr at the Night Market with a five-minute handover. The 14-cr gross margin excludes travel and fuel. Collection closes at 05:10; last night handover starts at 05:55. There is no replenishment or automatic dawn payout. Unsettled commercial cases are set aside at shift end rather than carried to a fresh market.
 
-Accept Mako's parcel, read the festival notice and ask Jun about the fourth table. Deliver to Hana for **12 cr**, once. No purchases are required. Reading, talking and the parcel handover are free; checking the notice costs five minutes.
+[game.js](game.js) stores the optional `canalTrade` account and separates its stock cost/revenue from gold performance. Parcel rewards use a distinct account; rice retains its own ingredient rack. Older valid saves without the tea field remain supported.
 
-## Nao's invitation (Night Two)
+## Unfinished address
 
-1. Start Nao's new recipe and choose smoky mushroom or plum-and-sesame rice.
-2. Read Hana's invitation at Nao's food counter. It also supplies the canal pilot sheet.
-3. Help Nao prepare a sample (10 minutes, free), meet Hana in Kisaragi, and ask Jun about the tea pairing (free, no stock purchase).
-4. Return to Nao and choose either a small festival table or sending her signed recipe while keeping her afternoon with Haruto.
-5. Return to Kisaragi. Attending the preview supper takes ten minutes; from 05:50 there is a free quiet-table ending until dawn. Delivering the signed card is free. Neither branch grants money or gold.
+Accept Mako's parcel, check the festival notice for five minutes and ask Jun about the fourth table. Hand it to Hana for 12 cr, once. Reading/talking and the final parcel handover are free; ordinary crossing costs apply. Purchases are not required.
 
-When Nao travels with you, her original free recipe tasting can also be completed in Kisaragi after 05:00. The public festival happens tomorrow; tonight is the crew's preview supper. The chapter still ends at dawn. Turning in early records an unfinished invitation without automatically resolving it. Completion changes subsequent conversation and the morning wire.
+## Nao's Chapter Two invitation — story spoilers
 
-The sample, contacts, selected branch, parcel and trade progress appear in a folded **Kisaragi · Routes, tea & festival log**, both beneath the story and in the notebook.
+1. Choose Nao's recipe and read Hana's invitation; it also supplies the pilot sheet.
+2. Prepare a free sample for ten minutes, meet Hana in town and ask Jun about tea without purchasing stock.
+3. Return to Nao and choose a small festival table or a signed recipe that preserves her afternoon with Haruto.
+4. Return to Kisaragi for the preview supper or card delivery. Supper takes ten minutes; from 05:50 a free quiet-table ending remains until dawn. Card delivery is free.
 
-## Source and checks
+Nao's original recipe tasting can occur in town after 05:00 when she travels with the captain. These branches award no gold or cash. Early turn-in records unfinished progress rather than completing it automatically. Follow-up dialogue, scene props and the wire use the selected outcome.
 
-- `canal-town.js`: world registration, actions, dialogue, commerce definitions and the chapter builder extension.
-- `game.js`: tea accounting, save validation, route carry-over, progress log and full-scene camera.
-- `index.html`, `styles.css`: illustrated canal, three portrait interaction targets and title-screen introduction; the fixed phone shell is retained.
-- `assets/scenes/kisaragi-canal.webp`, `assets/portraits/{hana,jun,mako}-manga.webp`: original generated illustrations, optimized for static delivery.
-- `tools/adventure-checks.mjs`: actual engine tests for travel, resource costs, parcel prerequisites, repeated reward prevention, save consistency, both invitation branches across all three market truths, original recipe completion in town, late arrival and tug recovery.
+The folded Kisaragi log gathers route, tea, parcel, sample and invitation progress in both story and notebook. Chapter Three's afternoon vignette is specified in [HARBOUR-REFINEMENTS.md](HARBOUR-REFINEMENTS.md).
 
-Run `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. Automated engine tests do not replace real-device playtesting or listening.
+## Source and validation
 
-Validation for this change: **2,701 engine/data checks** and **56 mocked sound checks** passed. The canal SVG composition was rendered and inspected separately. Full browser and real-phone checks remain pending because Chromium was unavailable and its download failed in this environment.
+| Source | Responsibility |
+| --- | --- |
+| [canal-town.js](canal-town.js) | Route registration, residents, actions, invitation and chapter extensions |
+| [game.js](game.js) | Tea account, validation, route memory, folded log and camera |
+| [classic.html](classic.html), [styles.css](styles.css) | Canal plate, portrait targets, labels and scene state |
+| [assets/scenes/kisaragi-canal.webp](assets/scenes/kisaragi-canal.webp) | Local scene plate; portraits listed in the asset manifest |
+
+Run `node tools/adventure-checks.mjs` for route/resource costs, parcel gates, rewards, saves, both invitation branches across truths, town tasting, late arrival and recovery. Run audio regressions for shared changes. Manual phone checks cover three person targets, log readability, canal departure and companion return.

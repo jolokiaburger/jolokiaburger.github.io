@@ -211,7 +211,7 @@ body[data-mode="title"] .hs-tag { opacity: 0; }
 .thing-hit { fill: transparent; }
 .thing-ring { fill: none; stroke: var(--amber); stroke-width: 2; stroke-dasharray: 6 5; opacity: .7; animation: thing-breathe 2.6s ease-in-out infinite; }
 .thing.kind-confront .thing-ring { stroke: var(--coral); }
-@keyframes thing-breathe { 0%, 100% { opacity: .45; } 50% { opacity: .95; } }   /* opacity only: never a paint property (MOBILE.md §12) */
+@keyframes thing-breathe { 0%, 100% { opacity: .45; } 50% { opacity: .95; } }   /* opacity only: never a paint property (MOBILE.md: Animation budget) */
 .thing:focus-visible .thing-ring { opacity: 1; animation: none; stroke: var(--amber-bright); stroke-dasharray: none; }
 @media (hover: hover) { .thing:hover .thing-ring { opacity: 1; animation: none; stroke: var(--amber-bright); } }
 .thing-tag-bg { fill: rgba(7, 5, 26, .88); stroke: var(--amber); stroke-width: 1.2; }
@@ -578,7 +578,7 @@ body.travelling .thing, body[data-mode="title"] .thing { display: none; }
   .harbour-frame { aspect-ratio: 18 / 10; height: auto; }
   /* Never aspect-ratio together with a height: with width auto the ratio then computes the WIDTH
      from the height (1084px wide on a 390px phone, and the browser zoomed out to fit it). The title
-     frame gets a fixed pixel height here; vh would be the large viewport and jitter (MOBILE.md §3). */
+     frame gets a fixed pixel height here; vh would be the large viewport and jitter (MOBILE.md: Viewport and scrolling). */
   body[data-mode="title"] .harbour-frame { aspect-ratio: auto; height: 600px; }
   .harbour { width: 100%; height: 100%; }
   .hs-tag { display: none; }              /* labels move to the chips below */
@@ -629,7 +629,7 @@ body.travelling .thing, body[data-mode="title"] .thing { display: none; }
    The phone obeys the desktop's contract: the document never scrolls. The picture, the chips and a
    slim dashboard stay put; the story and its choices scroll in one sheet below them. Because the page
    never scrolls, Android never retracts its URL bar, so nothing on screen can jump — and inside the
-   shell dvh is exactly the visible height, which svh would undershoot (MOBILE.md §8). The travel
+   shell dvh is exactly the visible height, which svh would undershoot (MOBILE.md: Viewport and scrolling). The travel
    buttons are hidden here: the chips above the sheet already are the travel buttons. */
 @supports (height: 100dvh) {
   @media (max-width: 899px) {
@@ -870,7 +870,7 @@ body.reduce-motion .toast { transition: none; }
 /* 14b · THE PHONE ANIMATION BUDGET ----------------------------------------
    On a phone the picture is about 200px tall: glints, window twinkles, wave lines, mast lights and
    the water's shimmer shrink below a pixel or two, yet every one of them still costs a frame
-   (102 concurrent animations measured 38 fps idle at 6x CPU throttle; MOBILE.md §5). They rest on
+   (see MOBILE.md: Animation budget). They rest on
    phones. The jellies, rain, train, neon, lanterns, fog and the ferry — what you can actually see —
    keep moving. This block must stay AFTER the base animation rules, or it is overridden and inert. */
 @media (max-width: 899px) {
@@ -881,7 +881,7 @@ body.reduce-motion .toast { transition: none; }
 
 
 /* 15 · LANTERN ADVENTURE — presentation only; retain the measured phone shell.
-   Never animate paint properties inside #harbour (see MOBILE.md §12). */
+   Never animate paint properties inside #harbour (see MOBILE.md: Animation budget). */
 .encounter { background: linear-gradient(160deg, #192b47 0%, #101b32 70%); }
 .topbar { background: #101c32; }
 .loc-title { color: var(--amber-bright); font-size: clamp(21px, 2vw, 27px); line-height: 1.2; }

@@ -1,33 +1,49 @@
-# Neon Tides · A small season of familiar lights
+# Classic season and world continuity
 
-The game now connects Night One, **A Lantern for Tomorrow**, and **Morning After the Lanterns**. Finish a shift and use its report to continue. Earnings, gold purchase history, fuel and relationships carry forward; the next shift has fresh gold allowances and cargo orders. Existing saves still load.
+**Scope:** Classic 4.6.1's three connected trading chapters. Reports provide explicit continuation controls; a fresh season remains a separate action.
 
-## Places that remember
+## Chapter schedule
 
-`harbour-life.js` adds reactions to earlier choices and deliveries. Reef kits appear by Sora's stall, Nao's menu stays visible, Hana's spoons and signed recipe appear in Kisaragi, and Jun's delivered tea waits at the market. A repaired pump remains repaired across chapters. An unfinished brass-star reunion can continue in the next chapter.
+| Chapter | Time | Main thread |
+| --- | --- | --- |
+| Night One | 23:40–06:00; turn-in from 01:30 | Gold rumours, market dispatch and Nao's first breakfast |
+| A Lantern for Tomorrow | 23:40–06:00; turn-in from 01:30 | Recipe trial, sealed rice and Kisaragi invitation |
+| Morning After the Lanterns | 06:40–11:00; rest from 08:00 | Revised lock route, stranded festival kit and late breakfast |
 
-## A proper visit to Starling Yard
+Continue through each shift report. Credits, gold purchase basis, fuel, relationships and eligible memories carry forward. New markets have fresh stock/allowances and orders; there is no free refill or repeated quest payout. Unfinished commercial stock is handled at settlement rather than silently becoming a new purchase.
 
-`index.html` uses the new illustrated workshop in `assets/scenes/starling-yard-manga.webp`. Rin and visiting Kenji have portrait targets; the work board, rescued ferry and kettle have their own targets. Talking to the people is free. The yard offers a bilge-pump repair, a salvage ledger, a brass keepsake to return to Captain Lam, a bracket check, a repair celebration and workshop miso soup. Gold trading and refuelling remain available.
+## Persistent harbour state
 
-## Small cargo and quiet company
+[harbour-life.js](harbour-life.js) provides current/earlier delivery reactions and props: reef kits, Nao's menu, Hana's spoons, signed recipe, Jun's tea, repaired pump and returned keepsake. An unfinished brass-star reunion can continue across chapters. Scene memory uses existing flags and counters and preserves older valid saves.
 
-`harbour-life.js` offers one ceramic-bowl case for Mei, one pump-seal case for Mako and one lantern-cloth case for Sora per shift. Two small-cargo slots are separate from the rice ingredient rack. Written prices and deadlines are displayed before buying. There is no automatic delivery payout, and fuel can erase a gross margin. Unfinished commercial cases are set aside at shift end rather than carried into a fresh market.
+Starling Yard offers pump repair, salvage records, Lam's brass keepsake, bracket checks, workshop food and character encounters alongside gold/refuelling. [classic.html](classic.html) uses its local workshop plate with native portrait/work targets.
 
-Nao can join a quiet ferry break after her recipe/breakfast story, or after breakfast in Chapter Three. Visit the lighthouse or canal bench together. Her counter closes while she is aboard; bring her back using the market's return action. These moments require no purchases and change later dialogue.
+## Small cargo and company
 
-## Plan before casting off
+Ceramic bowls for Mei, pump seals for Mako and lantern cloth for Sora use a two-slot small-freight hold separate from rice. Offers show written costs/windows and settle once after delivery. Fuel may consume a gross margin.
 
-`game.js` adds a folded **Plan a crossing** card alongside the Ferry controls. Selecting a destination spends nothing. It shows arrival time, fuel, return fuel/time, refill cost and affordability, and held delivery payments/deadlines. Existing direct destination buttons remain available. Recorded quotes show their observation time and age.
+Nao can join a quiet ferry break after appropriate recipe/breakfast progress. Lighthouse and canal-bench visits are free apart from ordinary crossings. Her counter closes while she is aboard; the Market return action restores her work presence. Follow-up dialogue reflects completed visits.
 
-## Morning After the Lanterns
+## Crossing planner
 
-`morning-after.js` runs from **06:40 to 11:00**, with rest available from 08:00. Talk to Mei, share Nao's free breakfast, collect Hana's stranded table kit at the yard, and consult Priya's revised route. Three seeded situations have different lock conditions: clear canal, low water with a market handover, or locks reopening at 08:00. Deliver by 10:20, allowing five minutes for handover, then join the crew's late breakfast. The fee is 18 cr, accounted as a courier reward. Repairs and gold trading are optional. A bounded emergency fuel voucher keeps the main delivery finishable with an empty purse.
+[game.js](game.js) provides Plan a crossing. Selecting a destination spends nothing. The card reports arrival, fuel, return cost, refill affordability and held delivery deadlines/payments. Recorded quotes retain their observation time and age. Direct destination controls remain available. Estimates require practical allowance for route-specific actions.
 
-Morning seed examples are `morning-clear`, `morning-low` and `morning-late` in the chapter definition. Normal progression derives the chapter's seed from your earlier shift, so replaying a whole season repeats its market situations.
+## Chapter Three delivery — story spoilers
 
-## Verification and play-test checklist
+After Mei's introduction and Nao's free breakfast, collect Hana's stranded table kit at the yard and consult Priya's revised route. The five-minute handover must start by **10:15**, finishing by 10:20, for an 18-cr courier reward.
 
-Run `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. Checks exercise real engine actions for each morning route, contract costs and payments, deadlines, save/reload, chapter transitions, memories, companion visits, free routes and no repeated rewards. The audio checks use mocked Web Audio; they do not assess sound quality.
+| Seeded situation | Destination/access |
+| --- | --- |
+| Clear canal | Deliver to Hana in Kisaragi |
+| Low water | Canal closed to the Tern; Hana receives at Night Market |
+| Late lock release | Locks reopen at 08:00; obtain the signed route and deliver in Kisaragi |
 
-Static SVG previews were rendered for visual inspection. A browser executable and a physical phone were not available for this update. Before calling the mobile layout verified, play through on Android and iOS: open the planner and change destinations, tap both yard characters and the ferry, return Nao to her counter, inspect the notebook with several active stories, resume each chapter after closing the browser, and check focus/scrolling with the planner open. Also listen to the repair and meal cues on actual speakers.
+Normal progression derives morning conditions from the earlier seed. `morning-clear`, `morning-low` and `morning-late` are development examples. Gold trading and repairs are optional. A bounded emergency voucher keeps the main free delivery recoverable with an empty purse.
+
+The late breakfast closes the morning thread. An optional prepared family picnic appears as a settled post-shift scene, not a fourth trading chapter; see [HARBOUR-REFINEMENTS.md](HARBOUR-REFINEMENTS.md).
+
+## Sources and validation
+
+[night-two.js](night-two.js) and [morning-after.js](morning-after.js) build chapter data; [harbour-life.js](harbour-life.js) owns continuity; [game.js](game.js) owns transitions, validation, accounts and planner presentation. [classic.html](classic.html)/[styles.css](styles.css) render scene memories.
+
+Run `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. Required cases include all morning routes, real resources, boundary handovers, chapter reload/continuation, memories, companion visits, zero-purse recovery and repeated-payment guards. Manual QA must verify the complete three-chapter season, planner scrolling and persistence on desktop/phones.

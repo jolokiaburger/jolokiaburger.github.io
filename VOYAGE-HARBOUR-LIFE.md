@@ -1,66 +1,73 @@
-# Voyage 0.15 · Harbour pastimes
+# Voyage harbour pastimes and travel budgets
 
-This release adds optional activities and closer views within the existing nine-quay Basin. Classic, the Voyage save key and save version 1 remain unchanged. Nothing opens automatically on a fresh or resumed voyage.
+**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.17. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
 
-## Where to start
+## Fishing rules
 
-Choose **Menu → Harbour pastimes**, the matching Journal shortcut, or the button under People/Services. Fishing works while moored at every quay. Nao's kitchen is at Lantern Market while she is at her counter. Photo errands begin with Yumi at Metro and Mio at Tsukimi. People at Kurage, Lantern Market and Kisaragi also offers **Take a closer dockside seat**.
+Fishing is available while moored at every unlocked quay, including the coast. A cast settles for 2.2 real seconds; after the bite, Reel in remains available without a reaction deadline. Relaxed mode reels automatically after the same settling time. Casting, waiting, viewing the basket and packing away are free of game time.
 
-## Fishing
+Each landed catch uses four game minutes, which must fit before dawn. A voyage allows six landed catches and a separate three-fish kept basket. Fish do not occupy freight slots. Releasing a kept fish frees space. Nao's market counter pays 6 cr for each shared kept catch, once, without additional game time. Gifting and learned recipes use their own explicit consumption rules.
 
-- Borrowing the harbour rod and casting are free. The float settles for 2.2 real seconds; after the bite, **Reel in** stays available. There is no reaction deadline, lost bait or failure penalty. **Relaxed mode** reels automatically after that same settling time, including with reduced motion.
-- Landing a catch uses four game minutes. Casting, waiting, packing away the line and viewing the basket do not advance the clock. The full four minutes must fit before dawn; a catch may land exactly at 06:00.
-- There are six catches per voyage and a separate three-fish basket. This never uses freight slots. Releasing a kept fish frees basket space. Nao at her market counter pays 6 cr for each kept catch; sharing uses no additional game time and can settle only once. A first shared catch unlocks the paper-fish decoration.
-- Six species vary with quay, weather and the voyage seed: silver sprat, lantern bream, canal carp, blue mackerel, reef rockfish and moonfin. A cast is deterministic; packing and recasting cannot reroll it. The captain's fish notebook persists between voyages.
-- A pending line is saved. Reopening the activity resumes it; departing packs it away. Closing or replacing its panel cancels its UI timer. It never catches fish behind a different menu.
+Six species vary deterministically with quay, weather and seed: silver sprat, lantern bream, canal carp, blue mackerel, reef rockfish and moonfin. Recasting does not reroll a pending result. Species knowledge persists in the profile.
+
+A pending line is saved without forcing its panel open. Departure packs it away. Closing or replacing the panel disposes its timer; no catch may commit behind another activity. The first shared catch unlocks the paper-fish decoration.
 
 ## Nao's kitchen shift
 
-Nao supplies the ingredients; there is no stock purchase. Prepare one bowl and tea for each of Priya, Kenji and Mei, in that order. Choose a broth, topping and tea from the illustrated tray. Their requests describe their preferences.
+Nao supplies ingredients at her Night Market counter. The three customers arrive in a fixed order:
 
-| Customer | Favourite tray |
+| Customer | Favourite broth | Topping | Tea |
+| --- | --- | --- | --- |
+| Priya | Gentle miso | Silken tofu | Roasted |
+| Kenji | Ginger | Roasted mushrooms | Black |
+| Mei | Gentle miso | Spring greens | Jasmine |
+
+Serving takes six game minutes and pays 4 cr, plus 2 cr for the favourite combination. An alternate tray receives its own response and the normal payment. A complete shift takes eighteen minutes and pays 12–18 cr. Each customer settles once per voyage; the final tray unlocks the tea-cup decoration.
+
+Ingredient selection is a free draft until serving. Rejected or abandoned trays spend nothing. The shift is unavailable while Nao is aboard. Learned fish recipes are a separate activity; see [VOYAGE-NEIGHBOURS.md](VOYAGE-NEIGHBOURS.md).
+
+## Photographs and album
+
+| Requester | Required views | Reward |
+| --- | --- | --- |
+| Yumi at Metro | Market lanterns and Kisaragi bridge | Pennant decoration |
+| Mio at Tsukimi | Hoshimi's light | Brass-star decoration |
+
+Accept at the requester's home quay, approach the marked view and choose Frame a photo. Opening the camera stops the ferry. Wide/close selection is free; capture takes two game minutes and no credits. Each view can be captured once per voyage. Return explicitly to settle the request; there is no delivery deadline or automatic reward.
+
+Photographs draw the actual Canvas harbour at 480 × 320. The persistent album stores the latest capture of each of the three views with framing, weather and time. Thumbnail values have bounded size and accept only local PNG/WebP data. If image storage fails, recorded errand progress remains and the UI displays the limitation. No device camera permission or upload is required.
+
+Owned decorations are selected in the ferry studio and appear on the Tern's rail. They change appearance, not navigation, fuel, prices or cargo capacity.
+
+## Individual-route budget contract
+
+The journey strip combines destination, estimated arrival, route fuel and the nearest cargo deadline. If the tank cannot cover a leg, [voyage/travel-plan.js](voyage/travel-plan.js) searches reachable pumps. A workable result names the next pump and includes its 30-cr/ten-minute full refill. The player must set course to it; advice does not silently replace an assisted route.
+
+Cargo trip budgets simulate collection, release waits, shared hold occupancy, purchase funding, five-minute handovers, deadlines, useful pump stops and return to Kurage. They report fuel used, ending tank, cash on return and failure reasons.
+
+| Term | Meaning |
 | --- | --- |
-| Priya | Gentle miso, silken tofu, roasted tea |
-| Kenji | Ginger broth, roasted mushrooms, black tea |
-| Mei | Gentle miso, spring greens, jasmine tea |
+| Gross margin | Promised cargo payment minus purchase price |
+| Estimated net cash | Gross margin less new fuel purchases on the simulated trip |
+| Starting fuel | Already aboard; its earlier purchase is excluded from estimated net cash |
+| Arrival estimate | Route estimate with modelled waits/actions; manual turns and detours need allowance |
 
-Serving takes six game minutes and pays 4 cr thanks, plus 2 cr for the favourite combination. An alternate tray receives a kind reply and the normal payment. Only serving commits the choice; leaving a draft tray is free. A full shift uses eighteen minutes and pays 12–18 cr, once per customer per voyage. The final tray unlocks a tea-cup decoration. All costs, durations and payments are checked before mutation; exact-dawn completion is valid. The shift is unavailable while Nao is aboard the ferry.
+The two-order planner in [voyage/model.js](voyage/model.js) retains its distance estimate and conditional refuelling limitation. Route previews never guarantee a future gold quote.
 
-## Photo errands and album
+## Presentation and implementation
 
-Yumi wants the market lanterns and canal bridge for her sketchbook. Mio wants Hoshimi's light. Accept at the requester's home quay, sail near the marked view and choose **Frame a photo**. The ferry stops while the camera is open. Choose wide or closer framing, then take the photograph for two game minutes and no credits. A view can be captured once per voyage. Neither request has a delivery deadline.
+Portrait selection uses [voyage/ports.js](voyage/ports.js). Optional seats at Kurage, the Market and Kisaragi use local scenes and explicit return controls. Food/fish shapes are native SVG; photographs, markers and keepsakes are native Canvas. Asset specifications are in [ART-DIRECTION.md](ART-DIRECTION.md) and [tools/asset-manifest.json](tools/asset-manifest.json).
 
-Return both views to Yumi at Metro for her pennant, or the lighthouse view to Mio at Tsukimi for a brass-star decoration. No cash reward or freight slot is involved. Captured views and completed handovers survive reloads; handovers cannot grant duplicate rewards.
+| Source | Responsibility |
+| --- | --- |
+| [voyage/leisure.js](voyage/leisure.js) | Activity costs, eligibility, rewards and optional-state validation |
+| [voyage/leisure-profile.js](voyage/leisure-profile.js) | Bounded species notebook, album and cosmetics |
+| [voyage/leisure-ui.js](voyage/leisure-ui.js) | Activity panels, tray controls, fishing timer lifecycle and illustrated seats |
+| [voyage/travel-plan.js](voyage/travel-plan.js) | Pump-aware budget simulation and bounded route cache |
+| [voyage/voyage.js](voyage/voyage.js), [voyage/voyage.css](voyage/voyage.css) | Journey strip, photo drawing, keepsakes and responsive integration |
 
-Photographs render the actual native Canvas harbour artwork at 480 × 320, centred on the landmark. The three-slot album keeps the latest capture of each view across voyages, with framing, weather and capture time. Thumbnail strings are bounded and restricted to local PNG/WebP data. If a thumbnail cannot be stored, the errand's recorded progress is still retained and the UI explains the limitation. No camera permission, image service or network upload is used.
+The optional `leisure` records preserve version-1 save compatibility. Validators check known IDs, unique records, timing, rewards, thumbnail constraints and consumed-catch consistency. Pending UI timers are transient; pending line data is persistent. All committed activities obey the full-duration dawn contract.
 
-Decorations are selected through **Harbour pastimes → Ferry decorations**. They appear on the Tern's cabin rail and do not affect navigation, prices, fuel or hold capacity.
+## Validation
 
-## Journey information and trip budgets
-
-The sailing strip puts the selected/tracked destination, estimated arrival, route fuel and nearest cargo deadline together. If the tank cannot cover the leg, it simulates reachable fuel pumps. A workable estimate names the next pump, includes each 30-cr/10-minute refill and tells the captain to set course to that pump first. It never automatically changes an assisted course. An impossible fuel budget shows its reason.
-
-Individual cargo offers and Trading overview include a **Trip budget** through collection, release waits, five-minute handovers and return to Kurage. The simulation checks the tank at each leg, available money, cargo space, deadlines and dawn. It considers early refuelling where useful, and full-tank purchases rather than simply charging a distance rate. Routes are estimates: turns and detours still need allowance.
-
-**Gross margin** is promised payment minus the case's purchase price. **Estimated net cash** subtracts fuel purchases on this simulated trip; starting fuel is already aboard and its earlier purchase is excluded. The card separately shows fuel used, remaining tank, refuelling stops and purse on return. These are not guaranteed profit or guaranteed arrival. The older two-order combined planner retains its distance-based estimate and explicit refuelling limitation.
-
-## Artwork and accessibility
-
-Mei and Priya gain 1024 × 1024 relaxed, thoughtful and pleased portraits. Their faces, ages, hair and work clothes use their own existing identity references. The three 1440 × 960 dockside scenes show Mei's kitchen, Nao's counter and Jun's canal tea table. Original portraits and Classic's references remain available. The other portraits were reviewed; this is a focused art pass rather than a promise that every asset was redrawn.
-
-Dish and fish illustrations use local SVG code; ferry decorations and photo markers use native Canvas. Generated portrait/scene prompts, identity references, export dimensions, byte counts and hashes are in `tools/voyage-15-art-prompts.json`. The image-generation service is used during development only.
-
-All activities open by choice and keep the dialog's persistent Close control. Large recipe buttons expose their selected state. The bite is announced once; decorative bobbing and steam freeze with reduced motion. Photographs, portraits and dishes have descriptive alternative text. Phone layout uses the existing measured camera viewport; real device comfort still needs playtesting.
-
-## Implementation and validation
-
-- `voyage/leisure.js`: activity rules, optional save validation, story steps and fixed rewards.
-- `voyage/leisure-profile.js`: bounded album, fish notebook and cosmetic continuity.
-- `voyage/leisure-ui.js`: explicit activity panels, recipe choices, fishing timer disposal and close views.
-- `voyage/travel-plan.js`: reachable refuelling simulation and a bounded route cache.
-- `voyage/voyage.js`, `voyage/index.html`, `voyage/voyage.css`: integration, journey strip, photograph rendering and cabin decorations.
-- `voyage/ports.js`: Voyage-only portrait selection.
-
-Required checks: `node tools/voyage-checks.mjs`, `node tools/voyage-leisure-checks.mjs`, `node tools/voyage-ui-checks.mjs`, `node tools/adventure-checks.mjs` and `node tools/sound-checks.mjs`. They cover old saves, malformed optional fields, exact-dawn actions, duplicate payments, both photo jobs, every quay, reward persistence and actual UI callbacks. Optional `tools/voyage-render-checks.mjs` uses `@napi-rs/canvas` to inspect photographs and decorations; the game has no added runtime dependency.
-
-Browser CSS, Safari/iOS, actual touch comfort and real-phone performance remain unverified. Native Canvas art inspection and mock-DOM checks are not browser/phone playtests.
+Run the leisure, neighbour, base-engine and UI suites in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md). Inspect native photographs and keepsakes through the optional render suite. Manual QA must cover touch fishing, relaxed controls, closing during a bite, tray drafts, all photo views, storage failure and phone return controls. Browser layout and real-device performance require separate results.
