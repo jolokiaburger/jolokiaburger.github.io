@@ -1,6 +1,6 @@
 # Voyage engineering quality register
 
-**Baseline:** Voyage 0.17. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
+**Baseline:** Voyage 0.18. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
 
 ## Implemented safeguards
 
@@ -21,6 +21,8 @@
 | Q13 | Expedition continuation retains real resources and owned stock, renews delivery windows explicitly and prevents duplicate completion receipts. | [voyage/breakwater.js](voyage/breakwater.js); expedition suite |
 | Q14 | Coastal access is gated, geometry remains authoritative and route knowledge changes actual waypoints. Original quay coordinates are retained. | [voyage/regions.js](voyage/regions.js), navigation; engine/expedition suites |
 | Q15 | Classic remains a separate mode with its own saves and content progression. Shared changes require Classic regression coverage. | [game.js](game.js), Classic engine/audio suites |
+
+| Q16 | The uncharted-water veil follows current region access, hides perimeter artwork and keeps navigation indicators visible without changing collision or save rules. | [voyage/sea-boundary.js](voyage/sea-boundary.js); boundary/UI/engine suites |
 
 ## Accounting and planning contracts
 

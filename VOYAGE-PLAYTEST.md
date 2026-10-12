@@ -1,6 +1,6 @@
 # Voyage QA and release test plan
 
-**Baseline:** Voyage 0.17, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
+**Baseline:** Voyage 0.18, with Classic 4.6.1 regression coverage. **Scope:** simulation, content, saves, interface, assets and release verification.
 
 ## Test environment
 
@@ -15,6 +15,7 @@ node tools/voyage-leisure-checks.mjs
 node tools/voyage-neighbours-checks.mjs
 node tools/voyage-breakwater-checks.mjs
 node tools/voyage-ui-checks.mjs
+node tools/voyage-boundary-checks.mjs
 node tools/adventure-checks.mjs
 node tools/sound-checks.mjs
 ```
@@ -27,6 +28,7 @@ node tools/sound-checks.mjs
 | [tools/voyage-neighbours-checks.mjs](tools/voyage-neighbours-checks.mjs) | Fares, favours, recipes, evidence, consumed catches, practice and learning |
 | [tools/voyage-breakwater-checks.mjs](tools/voyage-breakwater-checks.mjs) | Chapters, menus/endings, real coast routes, continuation, contracts and malformed state |
 | [tools/voyage-ui-checks.mjs](tools/voyage-ui-checks.mjs) | Production callbacks in a mock DOM, optional help, arrivals, panel return, tutorial and activity integration |
+| [tools/voyage-boundary-checks.mjs](tools/voyage-boundary-checks.mjs) | Boundary coverage, contours, unlock transitions, drawing state and portrait selection; native pixel checks when the optional Canvas dependency is installed |
 | [tools/adventure-checks.mjs](tools/adventure-checks.mjs) | Classic cases, dialogue, chapters, cargo, board and compatibility |
 | [tools/sound-checks.mjs](tools/sound-checks.mjs) | Mocked Web Audio controls, gating, scheduling and cleanup |
 
@@ -61,6 +63,12 @@ Inspect its photographs, decorations, passengers, camera views, coastal scenery 
 | V15 · Classic | Resume a saved shift, inspect Captain's guide, complete a trade and case route, continue through three chapters | Original progression, evidence, controls and save origin remain consistent; no Voyage data is used |
 
 For V11, the preparation uses Nao's menu, Mei's 8-cr/six-minute pack and Rin's free ten-minute fitting. Chapter two uses boarding, Aonami tasting, the waterproof case and station cooker; chapter three concludes at Nao's counter. Detailed terms and spoilers are in [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md).
+
+## Boundary and portrait review
+
+Approach all four outer edges, the locked east coast and a corner in close/wide views. The rectangle walls must be replaced by a feathered navy-black veil, with the Tern and active navigation indicators readable above it. Check the minimap and enlarged chart before and after chapter-two unlock. The gate must remain enforced while locked; opening the coast must restore its normal geography and destinations. Verify night/dawn, portrait/landscape and reduced motion.
+
+At Tsukimi, read Mio’s ordinary chat, knowledge topics, sky-watch reactions, photo errand and illustrated seat. Relaxed, thoughtful and pleased portraits must all use the detailed observatory set. Confirm fallback behaviour and local loading.
 
 ## Browser and device acceptance
 

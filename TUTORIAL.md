@@ -1,6 +1,6 @@
 # Developer tutorial
 
-**Baseline:** Voyage 0.17 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
+**Baseline:** Voyage 0.18 and Classic 4.6.1. This guide covers the current source layout, simulation boundaries and the workflow for integrating content. Player instructions are in [PLAYER-GUIDE.md](PLAYER-GUIDE.md).
 
 ## 1. Set up the project
 
@@ -42,7 +42,7 @@ Voyage loads shared economics, world/regions, navigation, ports and the base mod
 | Planning | [voyage/travel-plan.js](voyage/travel-plan.js) | Individual-trip fuel, time, cash and pump simulation |
 | Profiles | [voyage/profile.js](voyage/profile.js) and the leisure, neighbour and breakwater profile extensions | Bounded cross-voyage history, learning and cosmetics |
 | Activity UI | [voyage/leisure-ui.js](voyage/leisure-ui.js), [voyage/neighbours-ui.js](voyage/neighbours-ui.js), [voyage/breakwater-ui.js](voyage/breakwater-ui.js) | Explicit panels, callbacks, notebooks and chart |
-| Rendering/input | [voyage/voyage.js](voyage/voyage.js), [voyage/camera.js](voyage/camera.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js) | Controller, shared camera transform, native drawing and input |
+| Rendering/input | [voyage/voyage.js](voyage/voyage.js), [voyage/camera.js](voyage/camera.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js) | Controller, shared camera transform, native drawing and input |
 
 Subsystem extensions wrap selected model functions. Inspect the final exported function after all scripts load when tracing validation, costs or story integration. A change to the base model can affect every extension.
 

@@ -1,6 +1,6 @@
 # Player guide
 
-**Applies to:** Voyage 0.17 and Classic 4.6.1.
+**Applies to:** Voyage 0.18 and Classic 4.6.1.
 
 Neon Tides begins at Kurage 33 aboard the ferry *Tern*. Choose a mode on the first page, then explore the harbour through deliveries, trading and conversations. Food and tea offer places to pause between crossings.
 

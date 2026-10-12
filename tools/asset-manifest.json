@@ -444,6 +444,20 @@
       },
       "bytes": 167622,
       "sha256": "981507571134fb6689bd2b6d136555f05a33bc0ff8eee8afef766c4ed7247509",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-pleased-observatory.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1254,
+        "height": 1254,
+        "unit": "px"
+      },
+      "bytes": 373138,
+      "sha256": "450ca31797539cc2d6f450f3830ca21d23216b8e13bbc2a533a4d98e00a2a796",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -474,6 +488,20 @@
       },
       "bytes": 157000,
       "sha256": "c405546d7473ac54c02f0bc76a0b5013487cec947b201e084a9b1c6a2f05c62b",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-relaxed-observatory.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1254,
+        "height": 1254,
+        "unit": "px"
+      },
+      "bytes": 347778,
+      "sha256": "a43de800f7916b8b0bc0764aa0bfbaf7c53e47948fb50d9d82f4f2112369adc8",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -504,6 +532,20 @@
       },
       "bytes": 159832,
       "sha256": "a7edd4c485af6783ab307cd6d4a0c00d0d8bf58a5882bc275548fd2a380d3fcf",
+      "reference_status": "retained",
+      "references": []
+    },
+    {
+      "path": "assets/portraits/mio-thoughtful-observatory.webp",
+      "category": "portrait",
+      "format": "webp",
+      "dimensions": {
+        "width": 1254,
+        "height": 1254,
+        "unit": "px"
+      },
+      "bytes": 332316,
+      "sha256": "1aa6a5c8862dd0951099f409734c8ba3fb88e7ac06e63ed8531d3dc63d2b99ba",
       "reference_status": "source-referenced",
       "references": [
         "voyage/ports.js"
@@ -534,10 +576,8 @@
       },
       "bytes": 4296,
       "sha256": "e6aa85c98a36c8940a001497aad62cae015240f0f188614db324f8c2e6a2eff6",
-      "reference_status": "source-referenced",
-      "references": [
-        "voyage/ports.js"
-      ]
+      "reference_status": "retained",
+      "references": []
     },
     {
       "path": "assets/portraits/nao-manga.webp",

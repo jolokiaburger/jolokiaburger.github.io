@@ -6,7 +6,7 @@ Neon Tides presents a warm working harbour at night: amber interiors, cool water
 
 | Layer | Implementation | Requirements |
 | --- | --- | --- |
-| Voyage sailing world | [voyage/voyage.js](voyage/voyage.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js) | Native Canvas geography, waterfronts, crew, keepsakes and weather |
+| Voyage sailing world | [voyage/voyage.js](voyage/voyage.js), [voyage/harbour-art.js](voyage/harbour-art.js), [voyage/coast-art.js](voyage/coast-art.js), [voyage/sea-boundary.js](voyage/sea-boundary.js) | Native Canvas geography, waterfronts, crew, keepsakes and weather |
 | Voyage region chart | [voyage/breakwater-ui.js](voyage/breakwater-ui.js) | Draw from actual world geometry; keep named destination controls beside the chart |
 | Classic scenes | [classic.html](classic.html), [styles.css](styles.css) | Inline SVG landmarks, state overlays and semantic targets; local scene plates where present |
 | Character portraits | [assets/portraits/](assets/portraits/) | Local WebP/SVG with consistent identity and readable face framing |
@@ -41,7 +41,8 @@ The shipped inventory is [tools/asset-manifest.json](tools/asset-manifest.json).
 | Asset type | Current convention |
 | --- | --- |
 | Base portraits | 512 × 512 WebP |
-| Refined Mei/Priya/Mio expressions and Jun/Hana/Mako portraits | 1024 × 1024 WebP |
+| Refined Mei/Priya expressions and Jun/Hana/Mako portraits | 1024 × 1024 WebP |
+| Active Mio observatory expressions | 1254 × 1254 WebP; relaxed, thoughtful and pleased |
 | Classic scene plates | 1440 × 800 WebP |
 | Voyage story illustrations | 960 × 640 WebP |
 | Dockside seats | 1440 × 960 WebP |
@@ -58,6 +59,14 @@ Faces should be large enough for the displayed portrait, with natural adult prop
 Use amber/cream for welcome and food, muted blue/teal for water and workwear, and restrained cyan/magenta for harbour signs. Orange distinguishes the short arrival summary from dialogue. Knowledge categories and disabled actions need labels as well as colour.
 
 Use native motion for steam, water, crew details and landmarks. Honour reduced motion, cull offscreen detail and follow [MOBILE.md](MOBILE.md)'s animation budget. Portraits and larger optional seats should not increase the sailing view's mandatory raster layers.
+
+## Uncharted-water boundary
+
+[voyage/sea-boundary.js](voyage/sea-boundary.js) draws opaque navy-black outside the current allowed area and layers feathered, unequal cloud lobes and curved contours along its inner edge. The outer collision strips are omitted from decorative land drawing; the model geometry remains unchanged. Before chapter two, the same veil covers the locked coast. It opens immediately when expedition access unlocks.
+
+The sailing view and minimap use the dark sea palette; the parchment chart uses muted charcoal. Ferry, course and quay indicators draw above the veil. All shapes are deterministic and static, require no blur filter or downloaded texture, and cull work outside the camera. Keep the veil separate from collision, price and save rules.
+
+Mio’s active expression paths select the observatory portraits through [voyage/ports.js](voyage/ports.js). Earlier variants are retained. Her native map figure carries matching scarf, glasses, coat details and constellation pin in [voyage/harbour-art.js](voyage/harbour-art.js).
 
 ## Asset review
 

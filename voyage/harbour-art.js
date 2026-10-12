@@ -199,6 +199,12 @@
     if(['rin','kenji'].includes(id)){stroke(ctx,7,5,10,11,'#abb5a8',1.2);stroke(ctx,6,4,8,3,'#bfc5ac',.9);}
     if(id==='yumi'){stroke(ctx,-5,0,5,10,'#b8aa8c',.8);box(ctx,3,8,6,6,1,'#bfb195','#ded1a8');}
     if(['hana','mio'].includes(id)){box(ctx,4,4,6,6,.5,id==='mio'?'#d5cfad':'#d9bdba');stroke(ctx,5,5,8,5,'#7b9580',.55);}
+    if(id==='mio'){
+      stroke(ctx,-5,2,-3,7,'#a5b5c06b',.6);stroke(ctx,3,2,5,7,'#a5b5c06b',.6);
+      box(ctx,-4,6,3,3,.4,'#355875','#819eac');ellipse(ctx,3.5,2.3,1.2,1.2,'#d4bc7e');
+      for(const [px,py]of [[3,1.7],[4,2],[3.8,3],[2.9,2.7]])ellipse(ctx,px,py,.24,.24,'#fff0b8');
+      stroke(ctx,5,6,8,6,'#527088',.45);stroke(ctx,5,7.4,8.8,7.4,'#527088',.45);
+    }
     ctx.restore();
   }
   function shade(colour, amount) {
