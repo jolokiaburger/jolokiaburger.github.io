@@ -1,6 +1,6 @@
 # Player guide
 
-**Applies to:** Voyage 0.18 and Classic 4.6.1.
+**Applies to:** Voyage 0.19 and Classic 4.6.1.
 
 Neon Tides begins at Kurage 33 aboard the ferry *Tern*. Choose a mode on the first page, then explore the harbour through deliveries, trading and conversations. Food and tea offer places to pause between crossings.
 
@@ -43,6 +43,8 @@ The normal freight hold has two slots. Kenji's cargo racks add a third. Gold, pa
 | Recipes | Character topics, then Nao's recipe notebook | Learned recipes persist; fish bowls require an actual kept catch |
 | Photo errands | Yumi at Metro or Mio at Tsukimi | Accept a request, sail near its view, capture it and return to the requester |
 | Docking practice | Passenger trips → Docking practice | Optional approach guidance and cosmetic records, without a damage or fee penalty |
+| Harbour evenings | People, Menu or Journal | Lantern courses, a dispatch investigation and supper routes after the expedition |
+| Route board | People, Menu, Journal, Chart or sailing strip | Order destinations and actions; inspect whole-refill, cash, capacity and time estimates |
 | Closer dockside seats | People at supported quays | Illustrated views with conversation, food and activity controls |
 
 All costs and durations appear before a committed activity. Leaving an ingredient tray spends nothing. The Journal keeps active stories, postcards and earned ferry decorations. Decorations change appearance only.
@@ -56,6 +58,18 @@ At Nao's Night Market counter, choose **People → Beyond the Breakwater → Rea
 The expedition opens Aonami Tea Island and Shiosai Coastal Station in its second chapter. Invite Nao and Rin aboard, follow the recipe case and station notebook, then bring them home for a final supper. Conversations can reveal a surveyed inlet, another tasting and a different ending. **Chart** provides named destination controls, route previews, pins and an enlarged view.
 
 Continuation keeps your actual purse, gold purchase basis, fuel, fittings and owned sealed cargo. An unfinished chapter can use another night. Delivery windows renew as stated in the continuation terms; completed contracts do not pay again. Finite daily activities reset. If the night ends at sea, read the explicit overnight tug terms before continuing. See [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md) for detailed rules and story spoilers.
+
+## Harbour evenings and the route board
+
+Open **Menu → Harbour evenings** for three new activities. **Lantern sailing runs** offer six numbered gates on each of three familiar waterways. Start at the named quay, cast off and cross their rings in order. Relaxed practice records an efficient route; timed runs compare your finish with the displayed target. Normal sailing fuel and game time apply. Reading and pauses stop the clock; refuelling spends its labelled time. Completion earns a pennant, with no entry fee, cash payout or damage penalty.
+
+**The Wrong Supper Crate** begins with Nao at the Market. Check the counter label, Priya's dispatch manifest and Mei's packing card. After all three records agree, recover the intact case at Metro using one freight slot. Bring it back to Nao, or obtain her permission and share supper with the platform crew. Both resolutions are free and earn a checked-dispatch keepsake. The notebook retains your physical evidence and unlocks specific character replies.
+
+After **Beyond the Breakwater**, Nao's supper invitation lets you choose two dishes and two or three dockside tables. Buy each listed ingredient once for the whole evening, then serve the tables in your agreed order. Each six-minute serving receives 12 cr, or 15 cr for the host's preferred dish. Ingredients and fuel remain your expenses. The station-kitchen ending also permits three hosted tables at Shiosai while the coast is unlocked. Choose **Continue harbour evenings → Another night** on a completed expedition report to revisit it without losing resources or restarting the story.
+
+The **Route board** joins these activities with cargo, destinations, meals and fuel. Add, reorder or remove up to twelve actions. Its budget includes whole refills, release waits and handover durations. Follow any early refill advised for the full route, even when the next crossing alone fits the tank. A later payment cannot fund an earlier purchase. Estimates still need allowance for manual turns and detours.
+
+Planning, previewing and setting course commit no purchase or payout. At each stop, confirm the visit, refill, collection or handover yourself. Supper stops open the dish choice. The board's two-order comparison uses the same fuel calculation and includes the return to Kurage. Earlier saved cargo routes can be imported. See [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md) for full activity terms and story details.
 
 ## Classic
 

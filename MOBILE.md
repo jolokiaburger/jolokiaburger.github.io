@@ -1,6 +1,6 @@
 # Responsive interface and device QA
 
-**Applies to:** the launcher, Voyage 0.18 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
+**Applies to:** the launcher, Voyage 0.19 and Classic 4.6.1. This document specifies current layout constraints and the device validation required for release.
 
 ## Layout ownership
 
@@ -70,3 +70,7 @@ Use 320 px and 390 px widths and a short landscape viewport for preliminary layo
 Run the automated suites in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md). Native Canvas renders and mock DOM checks are development evidence; current real-browser CSS, touch comfort, Safari/iOS, listening and physical-phone performance remain to be validated.
 
 A device pass must demonstrate a complete first delivery, gold transaction, activity, departure/docking, long-panel return, save/reopen and expedition continuation. Check for clipped controls, unintended document scroll, obscured objectives and sustained stalls. Attach reproduction steps and the affected source files to any defect report.
+
+## Harbour-evening controls
+
+The route board uses stacked stop cards with labelled reorder/remove controls and native service selectors. At 320–420 px, selectors and recipe choices stack vertically; actions retain 44-pixel targets. Fixed dialog Back/Close remain outside the scrollable content. Test twelve-stop plans, long disabled reasons, the three course boards and all supper/evidence panels in portrait and short landscape. Observe full-itinerary budget latency and the numbered lantern rings during touch steering.

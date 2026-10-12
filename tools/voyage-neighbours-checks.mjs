@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const context = vm.createContext({window: {}, console});
-for (const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js']) vm.runInContext(fs.readFileSync(root + file, 'utf8'), context, {filename: file});
+for (const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js']) vm.runInContext(fs.readFileSync(root + file, 'utf8'), context, {filename: file});
 const {VoyageModel: M, VoyageNeighbours: H, VoyageConversations: C, VoyageLeisure: L, VoyageProfile: P, VoyagePorts: Ports, VoyageWorld: W, VoyageNavigation: N} = context.window;
 let checks = 0;
 const check = (v, message) => { assert.ok(v, message); checks++; };
@@ -18,10 +18,10 @@ equal(s.credits, cash, 'migration transfers no money'); equal(s.neighbours.learn
 delete p.neighbours; delete p.album; delete p.fishSeen; delete p.charms; delete p.look.charm; check(P.valid(p), 'old profile accepted'); P.hydrate(p); check(P.valid(clone(p)), 'profile defaults valid'); equal(p.neighbours.facts.length, 0, 'profile migration creates no facts');
 
 // Every neighbour has original topics, meaningful replies, and a named note source.
-equal(Object.keys(C.topics).length, 28, 'two authored topics per fourteen neighbours');
+equal(Object.keys(C.topics).length, 31, 'twenty-eight neighbour topics plus three dispatch investigation topics');
 for (const port of W.ports) for (const who of port.people) {
   s = M.create('topics-' + who); moor(s, port.id); const beforeCash = s.credits, beforeFuel = s.fuel, beforeClock = s.clock, beforeQuotes = JSON.stringify(s.quotes);
-  const available = C.available(s, who); equal(available.length, 2, 'two topics for ' + who);
+  const available = C.available(s, who); equal(available.length, ['nao','priya','lam'].includes(who) ? 3 : 2, 'base topics and dispatch topic for ' + who);
   for (const t of available) {
     const result = C.read(s, who, t.id); check(result && result.text && t.fact && t.kind, 'read authored topic ' + t.id);
     const heard = s.neighbours.facts[t.id]; check(C.read(s, who, t.id), 'topic can be revisited'); equal(s.neighbours.facts[t.id], heard, 'first hearing time retained');

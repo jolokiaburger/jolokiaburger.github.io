@@ -62,10 +62,12 @@
   function chooseEnding(s,id) { const b=s.breakwater;if(!b||b.chapter!==3||s.ended||s.docked!=='market'||b.steps.includes('supper')||!own(endings,id)||id==='kitchen'&&!b.notes.includes('journal'))return false;b.ending=id;return true; }
   function setRoute(s,id) { if(!s.breakwater||s.ended||!s.docked||!R.canRoute(s,id))return false;s.breakwater.route=id;M.log(s,'Expedition route: '+R.routes[id].name+'.');return true; }
   function target(s) { const b=s.breakwater;if(!b)return 'market';if(b.chapter===1)return !b.menu?'market':!b.steps.includes('packed')?'bar':!b.steps.includes('trim')?'yard':null;if(!b.crew&&!b.steps.includes('supper'))return 'market';if(b.chapter===2)return !b.steps.includes('sample')?'tea-island':!b.steps.includes('pages')?'coast-pages':!b.steps.includes('station')?'coast-station':null;return 'market'; }
-  function nextStatus(s) { if(!s.breakwater)return 'No expedition is active';if(!s.ended)return 'Finish this night first';if(s.breakwater.steps.includes('supper'))return 'This adventure is complete';if(s.breakwater.night>=99)return 'The expedition night limit has been reached';return ''; }
+  function nextStatus(s) { if(!s.breakwater)return 'No expedition is active';if(!s.ended)return 'Finish this night first';if(s.breakwater.night>=99)return 'The continuing-night limit has been reached';return ''; }
   function nextNight(s) {
     if(nextStatus(s))return null;const b=copy(s.breakwater),fee=s.docked?0:Math.min(20,s.credits),n=M.create(s.seed);
-    b.night++;if(ready(s))b.chapter++;b.catches=[];n.breakwater=b;n.credits=s.credits-fee;n.gold=copy(s.gold);n.fuel=s.docked?s.fuel:Math.max(3,s.fuel);n.flags=copy(s.flags);
+    b.night++;if(ready(s)&&b.chapter<3)b.chapter++;b.catches=[];n.breakwater=b;n.credits=s.credits-fee;n.gold=copy(s.gold);n.fuel=s.docked?s.fuel:Math.max(3,s.fuel);n.flags=copy(s.flags);
+    if(s.supperPermit)n.supperPermit=s.supperPermit;
+    if(s.crateMystery){n.crateMystery=copy(s.crateMystery);n.crateMystery.carriedChecks=Object.keys(n.crateMystery.evidence);n.crateMystery.started=1420;for(const id of Object.keys(n.crateMystery.evidence))n.crateMystery.evidence[id]=1420;if(n.crateMystery.recoveredAt!==null)n.crateMystery.recoveredAt=1420;if(n.crateMystery.finishedAt!==null)n.crateMystery.finishedAt=1420;}
     // Open sealed contracts keep their owned stock and one-time receipts. Their next-night windows renew.
     n.cargo=copy(s.cargo);n.letterJob=s.letterJob?copy(s.letterJob):undefined;n.reservation=s.reservation;
     n.finds=copy(s.finds);n.encounters=copy(s.encounters);n.waterMeetings=copy(s.waterMeetings);n.chats=copy(s.chats);n.visits=copy(s.visits);n.passages=copy(s.passages);

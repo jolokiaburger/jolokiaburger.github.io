@@ -1,6 +1,6 @@
 # Voyage neighbours, knowledge and recipes
 
-**Scope:** passenger trips, favours, learned recipes, authored topics and optional docking practice in Voyage 0.18. These systems share the existing quays and profile while keeping fare passengers, recipe packets and fish separate from freight capacity.
+**Scope:** passenger trips, favours, learned recipes, authored topics and optional docking practice in Voyage 0.19. These systems share the existing quays and profile while keeping fare passengers, recipe packets and fish separate from freight capacity.
 
 ## Passenger fares
 
@@ -45,7 +45,7 @@ Cooked or gifted catches leave the kept basket; they cannot be released, sold or
 
 ## Conversation contract
 
-[Voyage conversations](voyage/conversations.js) supplies two topics for each of fourteen neighbours: 28 topics with complete player replies and NPC responses. Topics appear inside the relevant person view and never open automatically.
+[Voyage conversations](voyage/conversations.js) supplies two base topics for each of fourteen neighbours; the dispatch investigation adds three more, for 31 topics with complete player replies and NPC responses. Topics appear inside the relevant person view and never open automatically.
 
 Reading/replying is free and pauses sailing. State stores first-heard times and selected replies; profile memory stores learned topic/recipe IDs. Older learning is identified without inventing a current hearing time. Notebook categories separate harbour rules/outlooks, history/rumours and recipes/science.
 
@@ -88,3 +88,5 @@ The optional `neighbours` voyage/profile records preserve version 1. Validation 
 ## Validation
 
 Run the neighbour, leisure, UI and base suites in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md). Required cases include direct/tea routes, closures, both bell interpretations, ingredient drafts, actual consumption, malformed saves and exact-dawn settlement. Manual checks cover full topic/reply readability, focus, luggage, practice feedback and phone layout.
+
+Dispatch evidence and its three additional topics are specified in [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md).

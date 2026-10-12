@@ -1,6 +1,6 @@
 # Beyond the Breakwater: expedition specification
 
-**Scope:** Voyage 0.18's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
+**Scope:** Voyage 0.19's optional Nao/Rin expedition, outer coast, route knowledge and continuing nights. The world extends east to 5100 × 1800 with eleven quays. The original nine quay IDs and coordinates remain fixed.
 
 ## Entry and chapter progression
 
@@ -61,7 +61,7 @@ Purchases and handovers each take five minutes and share the normal hold. Fuel/r
 
 Talks use full authored player choices and matching responses. They require the named character at the proper quay and record the selected reply. Reading is free and observes no remote scale. Route selection is made while moored, then previewed or pinned; shorter travel comes from real waypoint geometry.
 
-The travelling supper book and station kitchen are both complete narrative outcomes without cash awards or penalties. Letters acknowledge the menu, growers, Etsuko and selected future. The kitchen gives its rota to the crew; the book carries named methods onward.
+The travelling supper book and station kitchen complete the expedition without cash awards or penalties. They unlock playable supper evenings described in [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md). The report can continue into another harbour night while retaining completed chapter three and current resources. Letters acknowledge the menu, growers, Etsuko and selected future. The kitchen gives its rota to the crew; the book carries named methods onward.
 
 ## Water stops and fishing
 

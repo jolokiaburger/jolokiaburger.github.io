@@ -30,7 +30,7 @@ for (const [id, port] of [['market-lights','market'],['canal-lanterns','canal'],
   fs.writeFileSync(out + '/' + id + extension, bytes);
   console.log(id + ': ' + bytes.length + ' bytes; actual game scenery rendered.');
 }
-for (const charm of ['fish','cup','pennant','star','ticket','ribbon','bell','bowl','rope']) {
+for (const charm of ['fish','cup','pennant','star','ticket','ribbon','bell','bowl','rope','supper','lantern','dispatch']) {
   const r = boot(({saved,Pr}) => { const p=Pr.create();Pr.hydrate(p);p.charms=[charm];p.look.charm=charm;saved.set('neon-tides:voyage:profile:v1',JSON.stringify(p)); }, {canvasFactory: createCanvas, reduced: true});
   layout(r);r.frame(1000); fs.writeFileSync(out + '/tern-' + charm + '.png', r.nodes.get('sea').native.toBuffer('image/png'));
 }
@@ -51,4 +51,12 @@ for(const port of ['tea-island','coast-station']){
  r.expedition.chart();const chart=r.nodes.get('panel-content').children.flatMap(n=>[n,...n.children]).find(n=>n.className==='region-chart');assert.ok(chart.native);fs.writeFileSync(out+'/region-chart-'+port+'.png',chart.native.toBuffer('image/png'));
  layout(r,390,640);r.frame(1000);fs.writeFileSync(out+'/phone-'+port+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
 }
-console.log('Native Canvas photograph and decoration renders complete; browser layout remains untested.');
+for(const id of ['kitchen','office','sky']){
+ const r=boot(({state,moor,Lantern,M})=>{moor(Lantern.courses[id].quay);Lantern.start(state,id,'relaxed');M.depart(state);},{canvasFactory:createCanvas,reduced:true});layout(r);r.frame(1000);fs.writeFileSync(out+'/lantern-course-'+id+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+}
+for(const ending of ['counter','platform']){
+ const r=boot(({state,moor,Q})=>{moor('market');Q.start(state);for(const [id,d]of Object.entries(Q.evidence)){moor(d.quay);Q.inspect(state,id);}moor('metro');Q.recover(state);if(ending==='platform'){moor('market');Q.consent(state);}moor(Q.endings[ending].quay);Q.finish(state,ending);},{canvasFactory:createCanvas,reduced:true});layout(r);r.frame(1000);fs.writeFileSync(out+'/crate-supper-'+ending+'.png',r.nodes.get('sea').native.toBuffer('image/png'));
+}
+const supper=boot(({state,moor,B,S})=>{state.breakwater={...B.fresh(),chapter:3,menu:'herbs',tasting:'brew',steps:['packed','trim','sample','pages','station','home','supper'],notes:['journal'],ending:'kitchen',crew:false};moor('market');S.start(state,['rice','broth'],'station',[]);for(const id of S.required(state.supper.menu)){moor(S.ingredients[id].quay);S.buy(state,id);}moor('coast-station');S.serve(state,'rice');S.serve(state,'broth');},{canvasFactory:createCanvas,reduced:true});layout(supper);supper.frame(1000);fs.writeFileSync(out+'/station-hosted-supper.png',supper.nodes.get('sea').native.toBuffer('image/png'));
+const board=boot(({state,moor,B,S,D})=>{state.breakwater={...B.fresh(),chapter:3,menu:'herbs',tasting:'brew',steps:['packed','trim','sample','pages','station','home','supper'],notes:[],ending:'book',crew:false};moor('market');S.start(state,['rice','broth'],'route',['metro','yard']);D.save(state,[...D.supperTasks(state),{kind:'visit',id:'bar'}]);},{canvasFactory:createCanvas,reduced:true});board.expedition.chart();const routeChart=board.nodes.get('panel-content').children.flatMap(n=>[n,...n.children]).find(n=>n.className==='region-chart');assert.ok(routeChart.native);fs.writeFileSync(out+'/evening-itinerary-chart.png',routeChart.native.toBuffer('image/png'));
+console.log('Native Canvas photographs, decorations, courses and evening scenery rendered; browser layout remains untested.');

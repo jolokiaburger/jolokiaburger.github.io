@@ -51,14 +51,14 @@ export function boot(setup=()=>{},options={}) {
     requestAnimationFrame:fn=>{nextFrame=fn;},setTimeout:(fn,ms)=>{timers.set(++timerID,{fn,at:elapsed+ms});return timerID;},clearTimeout:id=>timers.delete(id),setInterval:()=>1,clearInterval(){},
     confirm:()=>confirmState.value,location:{href:''}
   });
-  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/travel-plan.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','voyage/breakwater-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/sea-boundary.js','voyage/harbour-art.js','voyage/coast-art.js']) {
+  for(const file of ['trade.js','market.js','voyage/world-map.js','voyage/regions.js','voyage/navigation.js','voyage/ports.js','voyage/model.js','voyage/leisure.js','voyage/neighbours.js','voyage/conversations.js','voyage/breakwater.js','voyage/supper-routes.js','voyage/sailing-challenges.js','voyage/harbour-mystery.js','voyage/travel-plan.js','voyage/route-board.js','voyage/profile.js','voyage/leisure-profile.js','voyage/neighbours-profile.js','voyage/breakwater-profile.js','voyage/evenings-profile.js','voyage/leisure-ui.js','voyage/neighbours-ui.js','voyage/breakwater-ui.js','voyage/evenings-ui.js','voyage/route-board-ui.js','halloween-radio.js','voyage/sound.js','voyage/camera.js','voyage/sea-boundary.js','voyage/harbour-art.js','voyage/coast-art.js','voyage/shoreline-art.js']) {
     vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
   }
-  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N,VoyageBreakwater:B,VoyageRegions:R}=context.window;
+  const {VoyageModel:M,VoyageWorld:W,VoyageProfile:Pr,VoyagePorts:P,VoyageLeisure:L,VoyageNeighbours:H,VoyageConversations:C,VoyageNavigation:N,VoyageBreakwater:B,VoyageRegions:R,VoyageSuppers:S,VoyageLanternRuns:Lantern,VoyageCrateMystery:Q,VoyageRouteBoard:D}=context.window;
   const state=M.create('ui-audit');
   if(!options.welcome)Object.assign(state.flags,{welcome:true,continuitySeen:true});
   const moor=id=>{const port=W.ports.find(p=>p.id===id);state.docked=id;state.ship={x:port.x,y:port.y,angle:0,speed:0};};
-  setup({state,M,P,Pr,L,H,C,N,B,R,saved,moor});
+  setup({state,M,P,Pr,L,H,C,N,B,R,S,Lantern,Q,D,saved,moor});
   saved.set(KEY,options.rawSave??JSON.stringify(state));
   vm.runInContext(fs.readFileSync(root+'voyage/voyage.js','utf8'),context,{filename:'voyage/voyage.js'});
   const find=(id,label)=>walk(nodes.get(id)).find(n=>n.textContent.startsWith(label));

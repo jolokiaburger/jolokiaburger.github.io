@@ -1,6 +1,6 @@
 # Voyage harbour pastimes and travel budgets
 
-**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.18. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
+**Scope:** optional fishing, kitchen shifts, photographs, cosmetics and individual-route estimates in Voyage 0.19. Entry points are Menu, Journal and the relevant People/Services controls. Activities open through explicit player choices.
 
 ## Fishing rules
 
@@ -52,7 +52,7 @@ Cargo trip budgets simulate collection, release waits, shared hold occupancy, pu
 | Starting fuel | Already aboard; its earlier purchase is excluded from estimated net cash |
 | Arrival estimate | Route estimate with modelled waits/actions; manual turns and detours need allowance |
 
-The two-order planner in [voyage/model.js](voyage/model.js) retains its distance estimate and conditional refuelling limitation. Route previews never guarantee a future gold quote.
+The active two-order comparison and route board use the same pump-aware simulation. The older [voyage/model.js](voyage/model.js) helper remains for legacy saved routes, which can be imported. Route previews never guarantee a future gold quote. Full itinerary and action-dependency contracts are in [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md).
 
 ## Presentation and implementation
 

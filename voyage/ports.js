@@ -260,3 +260,9 @@ const casual=P.casual;P.casual=function(s,id,n){
 for(const id of ['mei','priya'])P.characters[id].portrait='../assets/portraits/'+id+'-relaxed-harbour.webp';
 P.portrait=function(id,mood='relaxed'){return ['mei','priya'].includes(id)?'../assets/portraits/'+id+'-'+(['relaxed','thoughtful','pleased'].includes(mood)?mood:'relaxed')+'-harbour.webp':previous(id,mood);};
 })();
+
+/* Refined evening expressions; older portrait filenames remain available to Classic. */
+(function(){const P=window.VoyagePorts,previous=P.portrait,cast=['nao','rin','sora','aki','yumi','matte','kenji','lam'];
+for(const id of cast)P.characters[id].portrait='../assets/portraits/'+id+'-relaxed-evening.webp';
+P.portrait=function(id,mood='relaxed'){return cast.includes(id)?'../assets/portraits/'+id+'-'+(['relaxed','thoughtful','pleased'].includes(mood)?mood:'relaxed')+'-evening.webp':previous(id,mood);};
+})();
