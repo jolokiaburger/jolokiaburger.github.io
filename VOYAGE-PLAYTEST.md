@@ -1,6 +1,22 @@
-# Neon Tides Voyage · Playtest 0.16
+# Neon Tides Voyage · Playtest 0.17
 
 Open the main game link and choose **Voyage**, or open `voyage/index.html` directly. Choose **Classic** for the complete previous game (`classic.html`). Classic's HTML, scripts and asset paths remain at the same origin, and its original localStorage key is unchanged. Voyage saves under `neon-tides:voyage:v1`. Saves do not transfer between the different rule systems.
+
+## Beyond the Breakwater · 0.17
+
+Choose **People → Beyond the Breakwater** at Nao’s Night Market counter. The optional three-chapter adventure prepares the Tern, opens Aonami Tea Island and Shiosai Coastal Station, then brings Nao/Rin home for a chosen supper future. The original nine quay IDs/coordinates and all Classic assets/save keys remain unchanged.
+
+- Chapter one: choose Nao’s travelling menu, pack Mei’s rice (8 cr/6 min), and fit Rin’s weatherproof trim (free/10 min, 10% less fuel per distance). Finish the night and deliberately Continue the expedition.
+- Chapter two: invite Nao/Rin at the Market (free/5 min), taste with the Aonami growers (free/6 min), recover the waterproof recipe case (free/6 min) and restore the station cooker (free/8 min). Jun’s introduction opens a leaf-steamed tasting. Rin’s recovered last page opens the kitchen ending. Priya’s survey opens a shorter coast route. Signals/skiff tea and coastal fishing are optional stops.
+- Chapter three: companions remain aboard for the homeward crossing. Tie up at Nao’s counter, choose the kitchen or travelling book and share the supper (free/12 min). Follow-up letters remember the actual outcome.
+- Continue an unfinished chapter on another night if dawn arrives first. Purse, gold basis, tank, engine/racks/trim, named memories and sealed contracts persist. Contract windows renew; settled contracts never pay twice. Current-night reports exclude earlier receipts. Fare passengers take an overnight connection without payment; the coastal basket is shared with the overnight crew. Finishing at sea offers an explicit continuation with a tug fee of up to 20 cr and recovery to Landing 3 with at least 3 fuel.
+- Chart opens through its header button, People or Journal. Pin and preview named quays, choose surveyed/sheltered routes, or enlarge and pan the picture for detail. Three coastal stops have direct course controls. Outer quays open in chapter two; the locked coast explains its prerequisite. Both new quays have fuel, meals and gold scales; two sealed cargo requests lead home.
+
+Full terms, source files and save rules: [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md). Art prompts/refs/hashes: `tools/voyage-17-art-prompts.json`.
+
+Verification: **10,169** expedition assertions cover menus/endings, chapters, carryover, inventory, receipts, actual navigation on both routes, choice unlocks, fuel fitting, new contracts, malformed saves and action time limits. **458** total DOM integration checks exercise the invitation, full replies, chapter continuation, pins, locked regions, route selection, coastal images and fishing. Native Canvas inspection covers both quays, the region chart and a small camera view. These counts include individual navigation frames and do not represent independent play sessions.
+
+Manual browser/phone checks: play all three chapters with both menus/endings; continue an unfinished chapter after dawn; try carrying a paid case and an unfinished courier; compare the actual sheltered/inlet crossings and previewed fuel; inspect enlarged chart panning at 320/390 px and short landscape; visit both illustrated seats; catch/share coastal fish; reopen a mid-expedition save; finish at sea and check the explicit tug terms; check full-duration actions at dawn, focus/Back/Close and performance while planning fuel stops. Real-browser CSS, touch, Safari/iOS, listening and physical-device performance remain unverified. Browser access was declined earlier in this session.
 
 ## People across the water · 0.16
 

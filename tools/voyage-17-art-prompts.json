@@ -1,0 +1,48 @@
+{
+  "release": "Voyage 0.17 · Beyond the Breakwater",
+  "mode": "Built-in image generation",
+  "assets": [
+    {
+      "id": "aonami",
+      "file": "assets/scenes/aonami-dockside.webp",
+      "refs": [
+        "assets/portraits/nao-relaxed.webp",
+        "assets/scenes/nao-dockside.webp"
+      ],
+      "prompt": "Use case: illustration-story. Original Neon Tides JRPG browser-game optional arrival illustration, landscape 3:2. Reference 1 is Nao Mizuno's identity, reference 2 is the established ink and painted harbour style. Preserve Nao's adult face, brown tied hair, ivory short-sleeved shirt and faded red apron. Scene: Nao at the tea growers' small timber supper table on Aonami Tea Island, tasting tea-leaf rice in a ceramic bowl beside a warm kettle and a travelling recipe notebook. Fine varied ink, richly textured painted colour, subtle cross-hatching, believable adult features, natural hands, warm amber lanterns against a teal coastal sea. Waist-up foreground with her face readable, bowl and notebook, coastal tea terraces rising behind a modest wooden kitchen, small Tern ferry moored beyond, quiet night becoming dawn, hopeful food-and-adventure anime atmosphere. Only Nao is prominent. No copied franchise characters, no UI, lettering, logo or watermark. Warm and calm, original harbour world.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-5e2ed810-367a-4ab7-a0f3-042d98a1d04c.png",
+      "dimensions": [
+        1440,
+        960
+      ],
+      "quality": 86,
+      "source_dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 356146,
+      "sha256": "7baf30fa0d6464d7c3aac96b2e0ef6e0e25d2a10b421f478c37bab5cd69b1d4f"
+    },
+    {
+      "id": "shiosai",
+      "file": "assets/scenes/shiosai-dockside.webp",
+      "refs": [
+        "assets/portraits/rin-relaxed.webp",
+        "assets/scenes/nao-dockside.webp"
+      ],
+      "prompt": "Use case: illustration-story. Original Neon Tides JRPG browser-game optional arrival illustration, landscape 3:2. Reference 1 is Rin Starling's identity, reference 2 is the established ink and painted harbour style. Preserve Rin's adult face, short tousled black hair, olive worn work jacket and ivory shirt. Scene: Rin pauses beside a restored small cooker in Shiosai Coastal Station's old signal room, one hand beside an open weathered recipe-and-repair notebook, kettle and two ceramic tea cups on the workbench. A brass signal lamp and practical old maritime fittings are behind her, through the open window cool sea, rocky coastal silhouette and warm station lamps. Fine varied ink, richly textured painted colour, subtle cross-hatching, believable adult features, natural hands. Waist-up foreground, expressive readable face, tools carefully organised, amber working light against cool teal coast, night slowly clearing toward dawn. Only Rin. Hopeful food-and-adventure anime atmosphere, warm belonging and a personal homecoming. No copied franchise characters, no UI, lettering, logo or watermark.",
+      "source": "/workspace/scratch/d675acf748ac/generated_images/exec-f94ec820-f9f5-4efa-940d-d44edce5ee9b.png",
+      "dimensions": [
+        1440,
+        960
+      ],
+      "quality": 86,
+      "source_dimensions": [
+        1536,
+        1024
+      ],
+      "bytes": 343778,
+      "sha256": "bb6be8c822986c7391b194f2d607faf27fc732b3c19cba2a25c9d5f0564f8b2c"
+    }
+  ]
+}

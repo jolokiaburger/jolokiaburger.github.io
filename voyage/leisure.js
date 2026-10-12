@@ -8,9 +8,9 @@
     silver: {name: 'Silver sprat', colour: '#bad1cd', ports: ['bar', 'market', 'metro']},
     bream: {name: 'Lantern bream', colour: '#cfac78', ports: ['landing', 'pier', 'market']},
     carp: {name: 'Canal carp', colour: '#b18b73', ports: ['canal', 'bar']},
-    mackerel: {name: 'Blue mackerel', colour: '#799fb1', ports: ['yard', 'pier']},
+    mackerel: {name: 'Blue mackerel', colour: '#799fb1', ports: ['yard', 'pier','coast-station']},
     rockfish: {name: 'Reef rockfish', colour: '#af7e76', ports: ['island']},
-    moonfish: {name: 'Moonfin', colour: '#b3b4cf', ports: ['observatory', 'island']}
+    moonfish: {name: 'Moonfin', colour: '#b3b4cf', ports: ['observatory', 'island','tea-island']}
   };
   const dishes = {
     broth: {miso: 'Gentle miso', ginger: 'Ginger broth'},
