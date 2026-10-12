@@ -1,6 +1,6 @@
 # Voyage engineering quality register
 
-**Baseline:** Voyage 0.21. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
+**Baseline:** Voyage 0.22. **Scope:** gameplay correctness, financial reporting, save compatibility, authored dialogue and interface contracts. This register describes implemented safeguards and outstanding validation; release procedures are in [VOYAGE-PLAYTEST.md](VOYAGE-PLAYTEST.md).
 
 ## Implemented safeguards
 
@@ -70,3 +70,7 @@ Reject duplicate records, invalid choices, inherited identifiers, future timesta
 | Coastal route searches and enlarged chart | Additional geography increases navigation work; profile interaction latency on phones |
 
 Automated rule, simulated-navigation, mock DOM and mock-audio checks cover specific contracts. Native Canvas inspection covers drawing output. These are separate from browser/device certification. Keep the current loop and its compatibility guarantees verifiable when extending content.
+
+## Seasonal presentation isolation
+
+Halloween is an opt-in boolean preference stored separately from game, profile and audio settings. Native checkbox changes affect rendering only. Invalid settings default off; blocked writes report session-only persistence. Navigation geometry, resources and Classic storage remain unchanged. [tools/voyage-halloween-checks.mjs](tools/voyage-halloween-checks.mjs) covers preference handling, production controls and optional native artwork. Real-browser focus/layout and phone performance remain outstanding.

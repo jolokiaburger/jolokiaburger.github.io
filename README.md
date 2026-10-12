@@ -8,14 +8,16 @@ Neon Tides is a browser game about a night ferry, small trades and the people wh
 
 | Mode | Entry point | Current version | Experience |
 | --- | --- | --- | --- |
-| Voyage | [voyage/index.html](voyage/index.html) | 0.21 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
+| Voyage | [voyage/index.html](voyage/index.html) | 0.22 | Direct and assisted sailing, eleven quays, fourteen neighbours, gold and cargo trading, passenger trips, fishing, cooking and a continuing expedition |
 | Classic | [classic.html](classic.html) | 4.6.1 | Authored harbour scenes, three connected trading chapters and four investigation case files |
 
 [index.html](index.html) is the mode selector. Both modes use local browser saves with separate storage keys. The release version is independent of the save-format version. Existing saves remain supported by the current validators.
 
 Voyage's **Beyond the Breakwater** expedition starts at Nao's Night Market counter through **People → Beyond the Breakwater**. Preparation opens Aonami Tea Island and Shiosai Coastal Station; further conversations affect routes, recipes and the final supper. See [VOYAGE-BREAKWATER.md](VOYAGE-BREAKWATER.md) for the complete subsystem specification.
 
-Voyage 0.21 adds Jun’s tea-brewing table, three small recovery adventures, a nightly request board, changing currents and a gentle helm for precise approaches. Tea records and recovered histories remain in the captain’s notebook across nights. These activities deepen the existing eleven-quay map. See [VOYAGE-HARBOUR-CRAFT.md](VOYAGE-HARBOUR-CRAFT.md) for rules, access, costs and compatibility.
+Voyage 0.22 adds an optional **Menu → Halloween mode** checkbox: pumpkin-lit quays, friendly spirits, lavender water mist and a decorated ferry. The visual theme works independently of audio and preserves existing saves. See [VOYAGE-HALLOWEEN.md](VOYAGE-HALLOWEEN.md).
+
+Voyage 0.21 introduced Jun’s tea-brewing table, three small recovery adventures, a nightly request board, changing currents and a gentle helm for precise approaches. Tea records and recovered histories remain in the captain’s notebook across nights. These activities deepen the existing eleven-quay map. See [VOYAGE-HARBOUR-CRAFT.md](VOYAGE-HARBOUR-CRAFT.md) for rules, access, costs and compatibility.
 
 Voyage 0.20 introduced a shared harbour/coastal fishing minigame with borrowed lure and depth choices, fish-specific movements, tension management and optional relaxed assistance. Eight illustrated species pages include habitats, tackle hints, character field notes, food and tea pairings, and persistent largest-catch records. Existing supper evenings, lantern courses, the dispatch investigation and route board remain available. See [VOYAGE-FISHING.md](VOYAGE-FISHING.md) for the fishing specification and [VOYAGE-EVENINGS.md](VOYAGE-EVENINGS.md) for evening activities.
 
